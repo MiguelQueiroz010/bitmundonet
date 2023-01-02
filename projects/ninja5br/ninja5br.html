@@ -20,6 +20,17 @@
 ul.top-nav li {
    display: table-cell;
 }
+nav {
+  overflow: hidden;
+  background-color: rgb(255, 255, 255);
+  padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
+  transition: 0.4s; /* Adds a transition effect when the padding is decreased */
+  position:fixed; /* Sticky/fixed navbar */
+  width: 100%;
+  top: 0; /* At the top */
+  z-index: 99;
+  left: 0;
+}
         .anav {
         display: inline;
         padding: 8px;

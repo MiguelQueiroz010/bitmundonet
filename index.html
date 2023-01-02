@@ -31,6 +31,17 @@
         align-items: center;
         justify-content: center;
         }
+        nav {
+  overflow: hidden;
+  background-color: rgb(255, 255, 255);
+  padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
+  transition: 0.4s; /* Adds a transition effect when the padding is decreased */
+  position:fixed; /* Sticky/fixed navbar */
+  width: 100%;
+  top: 0; /* At the top */
+  z-index: 99;
+  left: 0;
+}
         .alignnav{
             display:inline;
             align-items: center;
@@ -64,6 +75,14 @@
         100% { color: black; }
         }
     </style>
+    <nav class="alignnav">
+        <ul>
+            <li class="alignnav"><a href="projetos.html">Projetos</a></li>&nbsp&nbsp&nbsp&nbsp
+            <li class="alignnav"><a href="library.html">Biblioteca</a></li>&nbsp&nbsp&nbsp&nbsp
+            <li class="alignnav"><a href="tools.html">Ferramentas</a></li>&nbsp&nbsp&nbsp&nbsp
+        </ul>             
+        </nav>
+        <br>
         <div class = "container">
             <img src="teste.gif" width="92">
             <div class ="_bit">Bit.</div>
@@ -71,13 +90,7 @@
             <h1 class="commontext">Network</h1>
         </div>
         <hr>   
-        <nav class="alignnav">
-        <ul>
-            <li class="alignnav"><a href="projetos.html">Projetos</a></li>&nbsp&nbsp&nbsp&nbsp
-            <li class="alignnav"><a href="library.html">Biblioteca</a></li>&nbsp&nbsp&nbsp&nbsp
-            <li class="alignnav"><a href="tools.html">Ferramentas</a></li>&nbsp&nbsp&nbsp&nbsp
-        </ul>             
-        </nav>
+        
         <br>
 </head>
 

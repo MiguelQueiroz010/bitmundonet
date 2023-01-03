@@ -1,26 +1,64 @@
 ﻿<!DOCTYPE html>
 <html>
+    <script>
+        function overlay_on() {
+          document.getElementById("overlay").style.display = "block";
+        }
+        
+        function overlay_off() {
+          document.getElementById("overlay").style.display = "none";
+        }
+        </script>
+    <div id="overlay">
+    <div style="
+    display: block;
+    color: red; 
+    background-color: green;
+    width: 2rem;
+    height: 2rem;
+    margin-top: 50px;
+  margin-left: 480px;
+    border-radius: 100%;
+    " onclick="overlay_off()">X</div>
+    
+    </div>
+    <style>
+    #overlay {
+        position: fixed; /* Sit on top of the page content */
+        display: none; /* Hidden by default */
+        width: 100%; /* Full width (cover the whole page) */
+        height: 100%; /* Full height (cover the whole page) */
+        opacity: 0;
+        animation: opacity .9s forwards;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgb(255, 255, 255); /* Black background with opacity */
+        z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+        cursor: pointer; /* Add a pointer on hover */
+        background-size: cover;
+    }
+
+    html{
+        color-scheme: light dark;    
+    }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=0.7">
 <head>
     <meta http-equip="Content-Type"
     content = "text/html; charset=utf-8">
     <title>Projetos e Lançamentos</title>
     <style>
-        @keyframes blink {
-        50% {
-          opacity: .8;
-        }
-        100% {
-          opacity: 1;
-        }
+        @keyframes opacity {
+        100%{opacity:1}
         }
         html{
             scroll-behavior: smooth;
         }
         .anav {
         display: inline;
-        padding: 8px;
-        background-color: #dddddd;
+        padding: 8px
         }
         ul {
         list-style-type: none;
@@ -43,28 +81,29 @@
         }
         td:hover img{
             margin: 0 auto;
-            transition: transform .5s; /* Animation */
+            transition: transform .5s ease; /* Animation */
             border-color: blue;
             border-style:inset;
-            animation: blink .9s infinite;
-            transform: scale(2); 
-        }
+            transform: scale(2);
+            backface-visibility: hidden;
+            
+        } 
         .container {
         display:flex;
         align-items: center;
         justify-content: center;
         }
         nav {
-  overflow: hidden;
-  background-color: rgb(255, 255, 255);
-  padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
-  transition: 0.4s; /* Adds a transition effect when the padding is decreased */
-  position:fixed; /* Sticky/fixed navbar */
-  width: 100%;
-  top: 0; /* At the top */
-  z-index: 99;
-  left: 0;
-}
+        overflow: hidden;
+        background-color: rgb(255, 255, 255);
+        padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
+        transition: 0.4s; /* Adds a transition effect when the padding is decreased */
+        position:fixed; /* Sticky/fixed navbar */
+        width: 100%;
+        top: 0; /* At the top */
+        z-index: 99;
+        left: 0;
+        }
         .alignnav{
             display:inline;
             align-items: center;
@@ -77,7 +116,7 @@
             text-align: center;
 
         }
-        .commontext {font-size:xx-large; color: black; font-style:normal;
+        .commontext {font-size:xx-large; font-style:normal;
         text-align: center}
     </style>
     <br>

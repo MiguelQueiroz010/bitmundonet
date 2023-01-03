@@ -1,5 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
+    <style>html{
+        color-scheme: light dark;    
+    }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=0.7">
 
 <head>
@@ -7,10 +11,18 @@
     content = "text/html; charset=utf-8">
     <title>Projetos e Lançamentos</title>
     <style>
+        ul.top-nav{    
+        display:table;
+        max-width:900px;
+        padding:0;
+        margin:0;
+        }
+        ul.top-nav li {
+        display: table-cell;
+        }
         a {
         display: inline;
-        padding: 8px;
-        background-color: #dddddd;
+        padding: 8px
         }
         ul {
         list-style-type: none;
@@ -31,6 +43,17 @@
         align-items: center;
         justify-content: center;
         }
+        nav {
+        overflow: hidden;
+        background-color: rgb(255, 255, 255);
+        padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
+        transition: 0.4s; /* Adds a transition effect when the padding is decreased */
+        position:fixed; /* Sticky/fixed navbar */
+        width: 100%;
+        top: 0; /* At the top */
+        z-index: 99;
+        left: 0;
+        }
         .alignnav{
             display:inline;
             align-items: center;
@@ -42,7 +65,7 @@
         .aligncenter{
             text-align: center
         }
-        .commontext {font-size:xx-large; color: black; font-style:normal;
+        .commontext {font-size:xx-large; font-style:normal;
         text-align: center}
     </style>
     <br>

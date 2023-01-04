@@ -5,11 +5,29 @@
     }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=0.7">
+
+    <script>
+        function show_hide() {
+            if(document.getElementById("project").style.display =="none"){
+                document.getElementById("project").style.display = "block";
+                document.getElementById("arrow_icon").style.transform = "scaleY(-1)";
+            }
+            else{
+                document.getElementById("project").style.display = "none";
+                document.getElementById("arrow_icon").style.transform = "scaleY(+1)";
+            }
+
+        }
+    </script>
 <head>
     <meta http-equip="Content-Type"
     content = "text/html; charset=utf-8">
     <title>Naruto Shippuden: Ultimate Ninja 5</title>
     <style>
+        @keyframes typing {
+        from { width: 0 }
+        to { width: 100%}
+        }
         img:hover{
             margin: 0 auto;
             transition: transform .5s; /* Animation */
@@ -49,7 +67,16 @@
         padding: 8px 16px;
         text-decoration: none;
         }
+        a {
+        color: #000;
+        padding: 8px 16px;
+        text-decoration: none;
+        }
         li a:hover {
+        background-color: #555;
+        color: white;
+        }
+        a:hover {
         background-color: #555;
         color: white;
         }
@@ -76,7 +103,14 @@
             text-align: center;
 
         }
+        .clicker {
+        outline:none;
+        cursor:pointer;
+        }
 
+        .hiddendiv{
+        display:none;
+        }
         .commontext {font-size:xx-large; color: black; font-style:normal;
         text-align: center}
     </style>
@@ -97,7 +131,15 @@
     <img class="center" src="media/poster.png">
     <h1 style="font-size:xx-large; color: rgb(250, 80, 1); font-style:normal;
     text-align: center;
-    text-shadow: 2px 2px purple">Naruto Shippuden: Ultimate Ninja 5 BR</h1>
+    text-shadow: 2px 2px purple;
+    overflow: hidden; /* Ensures the content is not revealed until the animation */
+  white-space:nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  animation: 
+    typing 3s steps(80, end),
+    blink-caret .5s step-end infinite;
+    
+    ">Naruto Shippuden: Ultimate Ninja 5 BR</h1>
     <div class="container">
         <p ><b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2.
 O jogo possui algumas pequenas e vastas diferenças de seu antecessor, o Ultimate Ninja 4... Suporte em Combate PvP, +Missões, Remoção do Modo Herói e a mais notável, a adição da história até o ponto de encontro com o Sasuke no anime e um extra...
@@ -105,9 +147,26 @@ Diferente dos outros jogos da série, este foi lançado apenas no <b>Japão</b> 
 </p>        
 </div>
     <hr>
-    <h1 style="font-size:xx-large; color: orange; font-style:normal;
-    text-align: center;
-    text-shadow: 2px 2px purple">Projeto de Tradução</h1>
+    <div class="clicker" onclick="show_hide()" tabindex="1">
+        <table style="margin: 0 auto;
+        table-layout: auto;
+        " cellspacing="0">
+<tr>
+    <td id="arrow_icon" style="width: 10%;"><img style="width:40%; height: 50%;
+    display: block;
+    margin: 0 auto;
+    padding-left: 325%;
+    " src="../../elements/down_arrow.png">
+    <td><h1 style="font-size:xx-large; color: orange; font-style:normal;
+        text-align: center;
+        margin: 0 auto;
+        text-shadow: 2px 2px purple">Projeto de Tradução</h1></td>
+    </td>
+</tr>
+        </table>
+    </div>
+    <div class="hiddendiv" id="project">
+    
 <p>
 <b>Este</b> projeto é especial, esse foi o meu segundo projeto, depois do <b>Genji</b>, esse era para ser o primeiro, só não foi por eu não ter conhecimento suficiente, algo que fui adquirindo aos poucos com ajuda de vários RomHackers, quero deixar agradecimenteo ao MummRaSTR, HNNEWGAMES, Gledson999.
 Meu primeiro desafio no jogo foi o DATA.CVM, que mais tarde resolvi usando a ferramenta ROFS CVM, mas logo após eu tive um formato que até hoje temos novas descobertas com ajuda da <text style = "color:red">Narutimatte Modding</text>, o <b>CCSF</b> (<b>C</b>yber <b>C</b>onnect <b>S</b>ystem <b>F</b>ile), mas o maior desafio que tive mesmo foi as texturas que não pareciam tão acessíveis, até eu encontrar a ferramenta para tal e modificar para funcionar com o fomato como PNG e não BMP(já que as texturas contêm transparência), nesse período de testes fiquei muito tempo testando diversas coisas até chegar a aprender o formato de Píxel, como é escrito e lido, assim com esse projeto eu pela primeira vez aprendi Formato de Pixel(Bpp, Resolução, Pixel Storage) e com isso segui em frente.
@@ -122,7 +181,7 @@ margin-right: auto" src="media/Parceria.png">
 <img style="display: block;
 margin-left: auto;
 margin-right: auto" src="media/Tradutores.png">
-<hr>
+</div>
 <h1 style="font-size:xx-large; color: rgb(224, 37, 37); font-style:normal;
     text-align: center;
     text-shadow: 2px 2px purple">Vídeo Tutorial de Aplicação do Patch

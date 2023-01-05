@@ -1,230 +1,232 @@
 ﻿<!DOCTYPE html>
 <html>
-    <style>html{
-        color-scheme: light dark;    
+  <style>
+    html {
+      color-scheme: light dark;
     }
-    </style>
-    <meta name="viewport" content="width=device-width, initial-scale=0.7">
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=0.7" />
 
-    <script>
-        function show_hide() {
-            if(document.getElementById("project").style.display =="none"){
-                document.getElementById("project").style.display = "block";
-                document.getElementById("arrow_icon").style.transform = "scaleY(-1)";
+  <script>
+    window.onmouseover = (e) => {
+      for (const node of document.getElementById(e.target.parentElement.id)
+        .childNodes) {
+            console.log(node.id);
+        if (node.id == "hidden") {
+          window.onclick = (e) => {
+            if (node.style.display == "none") {
+              node.style.display = "block";
+              document.getElementById(
+                e.target.parentElement.id
+              ).childNodes[1].style.transform = "scaleY(-1)";
+            } else {
+              node.style.display = "none";
+              document.getElementById(
+                e.target.parentElement.id
+              ).childNodes[1].style.transform = "scaleY(+1)";
             }
-            else{
-                document.getElementById("project").style.display = "none";
-                document.getElementById("arrow_icon").style.transform = "scaleY(+1)";
-            }
-
+          };
         }
-    </script>
-<head>
-    <meta http-equip="Content-Type"
-    content = "text/html; charset=utf-8">
+      }
+    };
+    function show_hide() {}
+  </script>
+  <head>
+    <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
     <title>Naruto Shippuden: Ultimate Ninja 5</title>
-    <style>
-        @keyframes typing {
-        from { width: 0 }
-        to { width: 100%}
-        }
-        img:hover{
-            margin: 0 auto;
-            transition: transform .5s; /* Animation */
-            transform: scale(1.1);
-        }
-        ul.top-nav{    
-        display:table;
-        max-width:900px;
-        padding:0;
-        margin:0;
-        }
-        ul.top-nav li {
-        display: table-cell;
-        }
-        nav {
-        overflow: hidden;
-        background-color: rgb(255, 255, 255);
-        padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
-        transition: 0.4s; /* Adds a transition effect when the padding is decreased */
-        position:fixed; /* Sticky/fixed navbar */
-        width: 100%;
-        top: 0; /* At the top */
-        z-index: 99;
-        left: 0;
-        }
-        .anav {
-        display: inline;
-        padding: 8px
-        }
-        ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        }
-        li a {
-        color: #000;
-        padding: 8px 16px;
-        text-decoration: none;
-        }
-        a {
-        color: #000;
-        padding: 8px 16px;
-        text-decoration: none;
-        }
-        li a:hover {
-        background-color: #555;
-        color: white;
-        }
-        a:hover {
-        background-color: #555;
-        color: white;
-        }
-        .container {
-        display:flex;
-        align-items: center;
-        justify-content: center;
-        }
-        .center {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%;
-        }
-        .alignnav{
-            display:inline;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            line-height: 150%;
-            letter-spacing: 1px
-        }
-        .aligncenter{
-            text-align: center;
-
-        }
-        .clicker {
-        outline:none;
-        cursor:pointer;
-        }
-
-        .hiddendiv{
-        display:none;
-        }
-        .commontext {font-size:xx-large; color: black; font-style:normal;
-        text-align: center}
-    </style>
-    <br>
+    <link rel="stylesheet" href="/projects/ninja5br/ninja5br.css" />
+    <br />
     <nav class="alignnav">
-        <ul>
-            <li class="alignnav"><a class="anav" href="../../index.html">Início</a></li>&nbsp&nbsp&nbsp&nbsp
-            <li class="alignnav"><a class="anav" href="../../projetos.html">Projetos</a></li>&nbsp&nbsp&nbsp&nbsp
-            <li class="alignnav"><a class="anav" href="../../library.html">Biblioteca</a></li>&nbsp&nbsp&nbsp&nbsp
-            <li class="alignnav"><a class="anav" href="../../tools.html">Ferramentas</a></li>&nbsp&nbsp&nbsp&nbsp
-        </ul>             
-        </nav>
-        <br>
-        <br>
-
-</head>
-<body>
-    <img class="center" src="media/poster.png">
-    <h1 style="font-size:xx-large; color: rgb(250, 80, 1); font-style:normal;
-    text-align: center;
-    text-shadow: 2px 2px purple;
-    overflow: hidden; /* Ensures the content is not revealed until the animation */
-  white-space:nowrap; /* Keeps the content on a single line */
-  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
-  animation: 
-    typing 3s steps(80, end),
-    blink-caret .5s step-end infinite;
-    
-    ">Naruto Shippuden: Ultimate Ninja 5 BR</h1>
-    <div class="container">
-        <p ><b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2.
-O jogo possui algumas pequenas e vastas diferenças de seu antecessor, o Ultimate Ninja 4... Suporte em Combate PvP, +Missões, Remoção do Modo Herói e a mais notável, a adição da história até o ponto de encontro com o Sasuke no anime e um extra...
-Diferente dos outros jogos da série, este foi lançado apenas no <b>Japão</b> e na <b>Europa</b>.
-</p>        
-</div>
-    <hr>
-    <div class="clicker" onclick="show_hide()" tabindex="1">
-        <table style="margin: 0 auto;
-        table-layout: auto;
-        " cellspacing="0">
-<tr>
-    <td id="arrow_icon" style="width: 10%;"><img style="width:40%; height: 50%;
-    display: none;
-    margin: 0 auto;
-    padding-left: 325%;
-    " src="../../elements/down_arrow.png">
-    <td><h1 style="font-size:xx-large; color: orange; font-style:normal;
-        text-align: center;
-        margin: 0 auto;
-        text-shadow: 2px 2px purple">Projeto de Tradução</h1></td>
-    </td>
-</tr>
-        </table>
+      <ul>
+        <li class="alignnav">
+          <a class="anav" href="../../index.html">Início</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+        <li class="alignnav">
+          <a class="anav" href="../../projetos.html">Projetos</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+        <li class="alignnav">
+          <a class="anav" href="../../library.html">Biblioteca</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+        <li class="alignnav">
+          <a class="anav" href="../../tools.html">Ferramentas</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+      </ul>
+    </nav>
+    <br />
+    <br />
+  </head>
+  <body>
+    <div id="head">
+      <img class="center" src="media/poster.png" />
+      <h1
+        style="
+          font-size: xx-large;
+          color: rgb(250, 80, 1);
+          font-style: normal;
+          text-align: center;
+          text-shadow: 2px 2px purple;
+          overflow: hidden; /* Ensures the content is not revealed until the animation */
+          white-space: nowrap; /* Keeps the content on a single line */
+          margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+          animation: typing 3s steps(80, end),
+            blink-caret 0.5s step-end infinite;
+        "
+      >
+        Naruto Shippuden: Ultimate Ninja 5 BR
+      </h1>
+      <div class="container">
+        <p>
+          <b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate
+          Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2. O
+          jogo possui algumas pequenas e vastas diferenças de seu antecessor, o
+          Ultimate Ninja 4... Suporte em Combate PvP, +Missões, Remoção do Modo
+          Herói e a mais notável, a adição da história até o ponto de encontro
+          com o Sasuke no anime e um extra... Diferente dos outros jogos da
+          série, este foi lançado apenas no <b>Japão</b> e na <b>Europa</b>.
+        </p>
+      </div>
     </div>
-    <div class="hiddendiv" id="project">
-    
-<p>
-<b>Este</b> projeto é especial, esse foi o meu segundo projeto, depois do <b>Genji</b>, esse era para ser o primeiro, só não foi por eu não ter conhecimento suficiente, algo que fui adquirindo aos poucos com ajuda de vários RomHackers, quero deixar agradecimenteo ao MummRaSTR, HNNEWGAMES, Gledson999.
-Meu primeiro desafio no jogo foi o DATA.CVM, que mais tarde resolvi usando a ferramenta ROFS CVM, mas logo após eu tive um formato que até hoje temos novas descobertas com ajuda da <text style = "color:red">Narutimatte Modding</text>, o <b>CCSF</b> (<b>C</b>yber <b>C</b>onnect <b>S</b>ystem <b>F</b>ile), mas o maior desafio que tive mesmo foi as texturas que não pareciam tão acessíveis, até eu encontrar a ferramenta para tal e modificar para funcionar com o fomato como PNG e não BMP(já que as texturas contêm transparência), nesse período de testes fiquei muito tempo testando diversas coisas até chegar a aprender o formato de Píxel, como é escrito e lido, assim com esse projeto eu pela primeira vez aprendi Formato de Pixel(Bpp, Resolução, Pixel Storage) e com isso segui em frente.
-<br>
-<br>
-<b>Ao ver que o <b>Meloolavio </b> tinha um projeto de dublagem do jogo na época, decidi mergir com ele minha ideia e ele aceitou... O que deu origem a uma parceria incrível para mim até hoje!(2019)</b></size>
-</p>
-<br>
-<img style="display: block;
-margin-left: auto;
-margin-right: auto" src="media/Parceria.png">
-<img style="display: block;
-margin-left: auto;
-margin-right: auto" src="media/Tradutores.png">
-</div>
-<h1 style="font-size:xx-large; color: rgb(224, 37, 37); font-style:normal;
-    text-align: center;
-    text-shadow: 2px 2px purple">Vídeo Tutorial de Aplicação do Patch
-</h1>
-<iframe style="display: block;
-margin-left: auto;
-margin-right: auto" width="420" height="315"
-src="https://www.youtube.com/embed/ek5h8MtG6Co">
-</iframe>
-<hr>
-<h2 style="color: rgb(48, 14, 196); font-style:normal;
-text-align: center;
-text-shadow: 1px 1px red">
-    Progresso Atual
-</h2>
-<p style="text-align: center;"><b>Texturas</b>: 100%<br>
-    <b>Menus</b>: 100%<br>
-    <b>Textos dos Movies</b>: 100%<br>
-    <b>Textos e Falas</b>: 100%<br>
-    <b>Revisão</b>: 100%
-</p>
-<hr>
-<h3 style="color: black; font-style:normal;
-text-align: center;
-text-shadow: 1px 1px yellow">
-    Patch de Tradução
-</h3>
-<img style="display: block;
-margin-left: auto;
-margin-right: auto" src="media/icon.png">
-<p style="text-align: center;">
-    <b>Versão do Patch de Tradução</b>: 7.0<br>
-    <b>Tipo de Patch</b>: XDELTA<br>
-    <b>Versão do Jogo</b>: PAL - SLES_556.05<br>
-    <br>
-    <a href="http://www.mediafire.com/file/rvgs1l0hie8q99p/7.0_PATCH_NSUN5BR.rar/file">Patch</a>
-    <br><br>
-    <a href="http://www.mediafire.com/file/k2uuz2rpta89e89/YFIX_7.0_PATCH_NSUN5BR.rar/file">Patch (Com Seletor NTSC)</a>
 
-</p>
-</body>
-<footer>
-    <hr>
-    <p class="aligncenter"><b>&circledR; Bit.Mundo</b> 2023 - Desenvolvido por Bit.Raiden</p>
-</footer>
+    <hr />
+
+    <div id="project_details">
+      <img
+        id="arrow_icon"
+        class="clicker"
+        onclick="show_hide()"
+        src="../../elements/down_arrow.png"
+      />
+      <h1>Projeto de Tradução</h1>
+      <div class="hiddendiv" id="hidden">
+        <p>
+          <b>Este</b> projeto é especial, esse foi o meu segundo projeto, depois
+          do <b>Genji</b>, esse era para ser o primeiro, só não foi por eu não
+          ter conhecimento suficiente, algo que fui adquirindo aos poucos com
+          ajuda de vários RomHackers, quero deixar agradecimenteo ao MummRaSTR,
+          HNNEWGAMES, Gledson999. Meu primeiro desafio no jogo foi o DATA.CVM,
+          que mais tarde resolvi usando a ferramenta ROFS CVM, mas logo após eu
+          tive um formato que até hoje temos novas descobertas com ajuda da
+          <text style="color: red">Narutimatte Modding</text>, o
+          <b>CCSF</b> (<b>C</b>yber <b>C</b>onnect <b>S</b>ystem <b>F</b>ile),
+          mas o maior desafio que tive mesmo foi as texturas que não pareciam
+          tão acessíveis, até eu encontrar a ferramenta para tal e modificar
+          para funcionar com o fomato como PNG e não BMP(já que as texturas
+          contêm transparência), nesse período de testes fiquei muito tempo
+          testando diversas coisas até chegar a aprender o formato de Píxel,
+          como é escrito e lido, assim com esse projeto eu pela primeira vez
+          aprendi Formato de Pixel(Bpp, Resolução, Pixel Storage) e com isso
+          segui em frente.
+          <br />
+          <br />
+          Ao ver que o <b>Meloolavio </b> tinha um projeto de dublagem do jogo
+          na época, decidi mergir com ele minha ideia e ele aceitou... O que deu
+          origem a uma parceria incrível para mim até hoje!(2019)
+        </p>
+        <br />
+        <img
+          style="display: block; margin-left: auto; margin-right: auto"
+          src="media/Parceria.png"
+        />
+        <img
+          style="display: block; margin-left: auto; margin-right: auto"
+          src="media/Tradutores.png"
+        />
+      </div>
+    </div>
+
+    <div id="patch_tutorial">
+      <img
+        id="arrow_icon"
+        class="clicker"
+        onclick="show_hide()"
+        src="../../elements/down_arrow.png"
+      />
+      <h1
+        style="
+          font-size: xx-large;
+          color: rgb(224, 37, 37);
+          font-style: normal;
+          text-align: center;
+          text-shadow: 2px 2px purple;
+        "
+      >
+        Vídeo Tutorial de Aplicação do Patch
+      </h1>
+      <div class="hiddendiv" id="hidden">
+        <iframe
+          style="display: block; margin-left: auto; margin-right: auto"
+          width="420"
+          height="315"
+          src="https://www.youtube.com/embed/ek5h8MtG6Co"
+        >
+        </iframe>
+      </div>
+    </div>
+
+    <hr />
+
+    <div id="progress">
+      <h2
+        style="
+          color: rgb(48, 14, 196);
+          font-style: normal;
+          text-align: center;
+          text-shadow: 1px 1px red;
+        "
+      >
+        Progresso Atual
+      </h2>
+      <p style="text-align: center">
+        <b>Texturas</b>: 100%<br />
+        <b>Menus</b>: 100%<br />
+        <b>Textos dos Movies</b>: 100%<br />
+        <b>Textos e Falas</b>: 100%<br />
+        <b>Revisão</b>: 100%
+      </p>
+    </div>
+
+    <hr />
+
+    <div id="patch_download">
+      <h3
+        style="
+          color: black;
+          font-style: normal;
+          text-align: center;
+          text-shadow: 1px 1px yellow;
+        "
+      >
+        Patch de Tradução
+      </h3>
+      <img
+        style="display: block; margin-left: auto; margin-right: auto"
+        src="media/icon.png"
+      />
+      <p style="text-align: center">
+        <b>Versão do Patch de Tradução</b>: 7.0<br />
+        <b>Tipo de Patch</b>: XDELTA<br />
+        <b>Versão do Jogo</b>: PAL - SLES_556.05<br />
+        <br />
+        <a
+          href="http://www.mediafire.com/file/rvgs1l0hie8q99p/7.0_PATCH_NSUN5BR.rar/file"
+          >Patch</a
+        >
+        <br /><br />
+        <a
+          href="http://www.mediafire.com/file/k2uuz2rpta89e89/YFIX_7.0_PATCH_NSUN5BR.rar/file"
+          >Patch (Com Seletor NTSC)</a
+        >
+      </p>
+    </div>
+  </body>
+  <footer>
+    <hr />
+    <p class="aligncenter">
+      <b>&circledR; Bit.Mundo</b> 2023 - Desenvolvido por Bit.Raiden
+    </p>
+  </footer>
 </html>

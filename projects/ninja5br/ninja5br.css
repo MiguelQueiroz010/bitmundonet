@@ -1,111 +1,115 @@
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+img:hover {
+  margin: 0 auto;
+  transition: transform 0.5s; /* Animation */
+  transform: scale(1.1);
+}
+ul.top-nav {
+  display: table;
+  max-width: 900px;
+  padding: 0;
+  margin: 0;
+}
+ul.top-nav li {
+  display: table-cell;
+}
+nav {
+  overflow: hidden;
+  background-color: rgb(255, 255, 255);
+  padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
+  transition: 0.4s; /* Adds a transition effect when the padding is decreased */
+  position: fixed; /* Sticky/fixed navbar */
+  width: 100%;
+  top: 0; /* At the top */
+  z-index: 99;
+  left: 0;
+}
+.anav {
+  display: inline;
+  padding: 8px;
+}
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+li a {
+  color: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+a {
+  color: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+li a:hover {
+  background-color: #555;
+  color: white;
+}
+a:hover {
+  background-color: #555;
+  color: white;
+}
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+.alignnav {
+  display: inline;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 150%;
+  letter-spacing: 1px;
+}
+.aligncenter {
+  text-align: center;
+}
 
-      @keyframes typing {
-        from {
-          width: 0;
-        }
-        to {
-          width: 100%;
-        }
-      }
-      img:hover {
-        margin: 0 auto;
-        transition: transform 0.5s; /* Animation */
-        transform: scale(1.1);
-      }
-      ul.top-nav {
-        display: table;
-        max-width: 900px;
-        padding: 0;
-        margin: 0;
-      }
-      ul.top-nav li {
-        display: table-cell;
-      }
-      nav {
-        overflow: hidden;
-        background-color: rgb(255, 255, 255);
-        padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
-        transition: 0.4s; /* Adds a transition effect when the padding is decreased */
-        position: fixed; /* Sticky/fixed navbar */
-        width: 100%;
-        top: 0; /* At the top */
-        z-index: 99;
-        left: 0;
-      }
-      .anav {
-        display: inline;
-        padding: 8px;
-      }
-      ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-      li a {
-        color: #000;
-        padding: 8px 16px;
-        text-decoration: none;
-      }
-      a {
-        color: #000;
-        padding: 8px 16px;
-        text-decoration: none;
-      }
-      li a:hover {
-        background-color: #555;
-        color: white;
-      }
-      a:hover {
-        background-color: #555;
-        color: white;
-      }
-      .container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .center {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%;
-      }
-      .alignnav {
-        display: inline;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        line-height: 150%;
-        letter-spacing: 1px;
-      }
-      .aligncenter {
-        text-align: center;
-      }
-      .clicker {
-        outline: none;
-        cursor: pointer;
-        width:25px;
-      }
-.hidden_folder{
-    display: inline;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 150%;
-    letter-spacing: 1px;
+.hidden_folder {
+  display: block;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 150%;
 }
-.hidden_folder h1{
-    display: inline;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+.hidden_folder #hide_folder {
+  cursor: pointer;
+  width: 18px;
 }
-      .hiddendiv {
-        display: none;
-      }
-      .commontext {
-        font-size: xx-large;
-        color: black;
-        font-style: normal;
-        text-align: center;
-      }
+.hidden_folder h1 {
+  display: inline;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: x-large;
+  text-shadow: 0px 0px 75px #fff;
+  background: -webkit-linear-gradient(rgb(145, 28, 106), rgb(230, 164, 21));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+}
+.hiddendiv {
+  display: none;
+}
+.commontext {
+  font-size: xx-large;
+  color: black;
+  font-style: normal;
+  text-align: center;
+}

@@ -8,12 +8,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.7" />
 
   <script>
-    window.onmouseover = (e) => {
-      for (const node of document.getElementById(e.target.parentElement.id)
-        .childNodes) {
-            console.log(node.id);
-        if (node.id == "hidden") {
-          window.onclick = (e) => {
+    window.onclick = (e) => {
+      if (e.target.id == "hide_folder") {
+        for (const node of document.getElementById(e.target.parentElement.id)
+          .childNodes) {
+          console.log(node.id);
+          if (node.id == "hidden") {
             if (node.style.display == "none") {
               node.style.display = "block";
               document.getElementById(
@@ -25,7 +25,7 @@
                 e.target.parentElement.id
               ).childNodes[1].style.transform = "scaleY(+1)";
             }
-          };
+          }
         }
       }
     };
@@ -92,9 +92,9 @@
 
     <hr />
 
-    <div id="project_details">
+    <div id="project_details" class="hidden_folder">
       <img
-        id="arrow_icon"
+        id="hide_folder"
         class="clicker"
         src="../../elements/down_arrow.png"
       />
@@ -135,24 +135,14 @@
         />
       </div>
     </div>
-
-    <div id="patch_tutorial">
+    <br />
+    <div id="patch_tutorial" class="hidden_folder">
       <img
-        id="arrow_icon"
+        id="hide_folder"
         class="clicker"
         src="../../elements/down_arrow.png"
       />
-      <h1
-        style="
-          font-size: xx-large;
-          color: rgb(224, 37, 37);
-          font-style: normal;
-          text-align: center;
-          text-shadow: 2px 2px purple;
-        "
-      >
-        Vídeo Tutorial de Aplicação do Patch
-      </h1>
+      <h1>Tutorial de Aplicação</h1>
       <div class="hiddendiv" id="hidden">
         <iframe
           style="display: block; margin-left: auto; margin-right: auto"
@@ -163,10 +153,8 @@
         </iframe>
       </div>
     </div>
-
-    <hr />
-
-    <div id="progress">
+    <br />
+    <div id="progress" style="display: none">
       <h2
         style="
           color: rgb(48, 14, 196);
@@ -185,39 +173,34 @@
         <b>Revisão</b>: 100%
       </p>
     </div>
-
-    <hr />
-
-    <div id="patch_download">
-      <h3
-        style="
-          color: black;
-          font-style: normal;
-          text-align: center;
-          text-shadow: 1px 1px yellow;
-        "
-      >
-        Patch de Tradução
-      </h3>
+    <div id="download" class="hidden_folder">
       <img
-        style="display: block; margin-left: auto; margin-right: auto"
-        src="media/icon.png"
+        id="hide_folder"
+        class="clicker"
+        src="../../elements/down_arrow.png"
       />
-      <p style="text-align: center">
-        <b>Versão do Patch de Tradução</b>: 7.0<br />
-        <b>Tipo de Patch</b>: XDELTA<br />
-        <b>Versão do Jogo</b>: PAL - SLES_556.05<br />
-        <br />
-        <a
-          href="http://www.mediafire.com/file/rvgs1l0hie8q99p/7.0_PATCH_NSUN5BR.rar/file"
-          >Patch</a
-        >
-        <br /><br />
-        <a
-          href="http://www.mediafire.com/file/k2uuz2rpta89e89/YFIX_7.0_PATCH_NSUN5BR.rar/file"
-          >Patch (Com Seletor NTSC)</a
-        >
-      </p>
+      <h1>Patch de Tradução</h1>
+      <div class="hiddendiv" id="hidden">
+        <img
+          style="display: block; margin-left: auto; margin-right: auto"
+          src="media/icon.png"
+        />
+        <p style="text-align: center">
+          <b>Versão do Patch de Tradução</b>: 7.0<br />
+          <b>Tipo de Patch</b>: XDELTA<br />
+          <b>Versão do Jogo</b>: PAL - SLES_556.05<br />
+          <br />
+          <a
+            href="http://www.mediafire.com/file/rvgs1l0hie8q99p/7.0_PATCH_NSUN5BR.rar/file"
+            >Patch</a
+          >
+          <br /><br />
+          <a
+            href="http://www.mediafire.com/file/k2uuz2rpta89e89/YFIX_7.0_PATCH_NSUN5BR.rar/file"
+            >Patch (Com Seletor NTSC)</a
+          >
+        </p>
+      </div>
     </div>
   </body>
   <footer>

@@ -86,7 +86,7 @@
         cursor: pointer;
         width:25px;
       }
-#project_details{
+.hidden_folder{
     display: inline;
     align-items: center;
     justify-content: center;
@@ -94,7 +94,7 @@
     line-height: 150%;
     letter-spacing: 1px;
 }
-#project_details h1{
+.hidden_folder h1{
     display: inline;
     align-items: center;
     justify-content: center;

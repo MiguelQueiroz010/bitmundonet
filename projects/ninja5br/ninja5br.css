@@ -47,6 +47,7 @@ li a {
 }
 a {
   color: #000;
+  background-color: white;
   padding: 8px 16px;
   text-decoration: none;
 }

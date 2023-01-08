@@ -1,0 +1,88 @@
+
+      @keyframes opacity {
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes typing {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      .anav {
+        color: rgb(255, 255, 255);
+  background-color: rgb(78, 78, 78);
+        display: inline;
+        padding: 8px;
+      }
+      ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+      li a {
+        color: rgb(255, 255, 255);
+        padding: 8px 16px;
+        text-decoration: none;
+      }
+      li a:hover {
+        background-color: rgb(0, 0, 0);
+        color: white;
+      }
+      table {
+        margin: 0 auto;
+      }
+      td:hover img {
+        margin: 0 auto;
+        transition: transform 0.5s ease; /* Animation */
+        border-color: blue;
+        border-style: inset;
+        transform: scale(2);
+        backface-visibility: hidden;
+      }
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      nav {
+        overflow: hidden;
+        background-color: rgb(78, 78, 78);
+        padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
+        transition: 0.4s; /* Adds a transition effect when the padding is decreased */
+        position: fixed; /* Sticky/fixed navbar */
+        width: 100%;
+        top: 0; /* At the top */
+        z-index: 99;
+        left: 0;
+      }
+      h1 {
+        overflow: hidden; /* Ensures the content is not revealed until the animation */
+        border-bottom: 0.1em solid orange;
+        white-space: nowrap; /* Keeps the content on a single line */
+        margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+        animation: typing 2s steps(80, end), blink-caret 0.5s step-end infinite;
+      }
+      .alignnav {
+        display: inline;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 150%;
+        letter-spacing: 1px;
+      }
+      .aligncenter {
+        text-align: center;
+      }
+      .commontext {
+        font-size: xx-large;
+        font-style: normal;
+        text-align: center;
+      }
+ 

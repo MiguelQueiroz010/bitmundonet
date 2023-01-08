@@ -8,27 +8,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.7" />
 
   <script>
-    window.onclick = (e) => {
-      if (e.target.id == "hide_folder") {
-        for (const node of document.getElementById(e.target.parentElement.id)
-          .childNodes) {
-          console.log(node.id);
-          if (node.id == "hidden") {
-            if (node.style.display == "none") {
-              node.style.display = "block";
-              document.getElementById(
-                e.target.parentElement.id
-              ).childNodes[1].style.transform = "scaleY(-1)";
-            } else {
-              node.style.display = "none";
-              document.getElementById(
-                e.target.parentElement.id
-              ).childNodes[1].style.transform = "scaleY(+1)";
-            }
-          }
+    function pause_play(){
+      const video =document.getElementById("myVideo");
+      if(video.paused==true)
+        video.play();
+      else
+        video.pause();
+      }
+    function folder(e) {
+      if (e.id == "hide_folder") {
+        console.log(e.id);
+        const node = e.parentElement.querySelector("#hidden");
+        if (node.className == "hiddendiv") {
+          node.className = "showdiv";
+          e.children[1].style.transform = "scaleY(-1)";
+        } else {
+          node.className = "hiddendiv";
+          e.children[1].style.transform = "scaleY(+1)";
         }
       }
-    };
+    }
   </script>
   <head>
     <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
@@ -58,8 +57,18 @@
     <br />
     <br />
   </head>
+
   <body>
-    <div id="head">
+    
+
+    <div id="head" onclick="pause_play()">
+      <video id="myVideo" preload="auto" autoplay="true" loop="loop"
+      volume="10">
+      <source src="media/intro.mp4" type="video/mp4">
+        <!-- The video -->
+    
+    Sorry, your browser does not support HTML5 video.
+  </video>
       <img class="center" src="media/poster.png" />
       <h1
         style="
@@ -67,7 +76,7 @@
           color: rgb(250, 80, 1);
           font-style: normal;
           text-align: center;
-          text-shadow: 2px 2px 2px purple,2px 2px 2px green;
+          text-shadow: 2px 2px 2px purple, 2px 2px 2px green;
           overflow: hidden; /* Ensures the content is not revealed until the animation */
           white-space: nowrap; /* Keeps the content on a single line */
           margin: 0 auto; /* Gives that scrolling effect as the typing happens */
@@ -78,6 +87,7 @@
         Naruto Shippuden: Ultimate Ninja 5 BR
       </h1>
       <div class="container">
+       
         <p>
           <b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate
           Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2. O
@@ -89,15 +99,18 @@
         </p>
       </div>
     </div>
+<div id="body">
 
-    <hr />
-
+    <br />
     <div id="project_details" class="hidden_folder">
-      <img
-        id="hide_folder"
-        src="../../elements/down_arrow.png"
-      />
+
+      <picture id="hide_folder" onclick="folder(this)">
+<source srcset="../../elements/down_arrow.png"
+media="(prefers-color-scheme: dark)">
+<img id="hide_folder" src="../../elements/light_down_arrow.png">
+</picture>
       <h1>Projeto de Tradução</h1>
+      <br />
       <div class="hiddendiv" id="hidden">
         <p>
           <b>Este</b> projeto é especial, esse foi o meu segundo projeto, depois
@@ -128,6 +141,7 @@
           style="display: block; margin-left: auto; margin-right: auto"
           src="media/Parceria.png"
         />
+        <br /><br />
         <img
           style="display: block; margin-left: auto; margin-right: auto"
           src="media/Tradutores.png"
@@ -135,12 +149,15 @@
       </div>
     </div>
     <br />
+    <br />
     <div id="patch_tutorial" class="hidden_folder">
-      <img
-        id="hide_folder"
-        src="../../elements/down_arrow.png"
-      />
+      <picture id="hide_folder" onclick="folder(this)">
+        <source srcset="../../elements/down_arrow.png"
+        media="(prefers-color-scheme: dark)">
+        <img id="hide_folder" src="../../elements/light_down_arrow.png">
+        </picture>
       <h1>Tutorial de Aplicação</h1>
+      <br />
       <div class="hiddendiv" id="hidden">
         <iframe
           style="display: block; margin-left: auto; margin-right: auto"
@@ -151,7 +168,7 @@
         </iframe>
       </div>
     </div>
-    <br />
+    <br /><br />
     <div id="progress" style="display: none">
       <h2
         style="
@@ -172,11 +189,13 @@
       </p>
     </div>
     <div id="download" class="hidden_folder">
-      <img
-        id="hide_folder"
-        src="../../elements/down_arrow.png"
-      />
+      <picture id="hide_folder" onclick="folder(this)">
+        <source srcset="../../elements/down_arrow.png"
+        media="(prefers-color-scheme: dark)">
+        <img id="hide_folder" src="../../elements/light_down_arrow.png">
+        </picture>
       <h1>Patch de Tradução</h1>
+      <br />
       <div class="hiddendiv" id="hidden">
         <img
           style="display: block; margin-left: auto; margin-right: auto"
@@ -199,9 +218,10 @@
         </p>
       </div>
     </div>
+  </div>
   </body>
   <footer>
-    <hr />
+    
     <p class="aligncenter">
       <b>&circledR; Bit.Mundo</b> 2023 - Desenvolvido por Bit.Raiden
     </p>

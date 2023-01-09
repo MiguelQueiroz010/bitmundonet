@@ -6,7 +6,11 @@
     width: 100%;
   }
 }
-
+@keyframes opacity {
+  to{
+      opacity: 1;
+  }
+  }
 .container{
   align-items: center;
   justify-content: center;
@@ -18,12 +22,50 @@ text-shadow: 1px 2px .8em rgb(0, 0, 0);
 font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 #head{
-  display: block;
+  display: inline;
   z-index: 1;
 position: sticky;
 }
+#head img{
+  width:50%;
+    border-radius: 1em;
+  opacity:50%;
+}
+h1 {
+  overflow: hidden;
+  text-align: center;
+}
+#title{
+  text-size-adjust: 58%;
+}
+
+#title:before,
+#title:after {
+  background-color: rgb(192, 70, 14);
+  content: "";
+  display: inline-block;
+  height: 2px;
+  position: relative;
+  vertical-align: middle;
+  width: 25%;
+}
+
+#title:before {
+  right: 1em;
+  margin-left: -50%;
+}
+
+#title:after {
+  left: 1em;
+  margin-right: -50%;
+}
+#head:hover img{
+  opacity:100%;
+}
 #body p{
   padding:1em 2em 1em 2em;
+  margin: auto;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
 #body{
@@ -39,20 +81,63 @@ position: sticky;
   z-index: 1;
   position: relative;
 }
+.folder a{
+  color: black;
+  background-color: rgb(221, 221, 221);
+}
+
+.folder {
+
+display: inline-block;
+  margin: 0 auto;
+  margin-top: 10px;
+  position: relative;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  width: 70% auto;
+  background-color: rgba(116, 116, 0, 0.871);
+  border-radius: 0 6px 6px 6px;
+  box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.59);
+}
+
+.folder:before {
+  display: inline-block;
+  content: './RomHacking';
+  padding-left: 10px;
+  width: 50%;
+  height: 12px;
+font-family:'Times New Roman', Times, serif;
+  border-radius: 20px 20px 0 0;
+  background-color: rgba(116, 116, 0, 0.871);
+  position: absolute;
+  text-align: left;
+  top: -12px;
+  left: 0px;
+}
+
 footer{
   margin: 0;
-  padding: 1em 0 1em 0 ;
+  padding: 0;
   bottom: 0;
   right: 0;
   left: 0;
   top:0;
-  background-color: rgba(0, 0, 0, 0);
+  border-radius: 5em;
   z-index: 1;
   position: relative;
 }
+#head img{
+  width:50%;
+    border-radius: 1em;
+  opacity:50%;
+}
+#head:hover img{
+  opacity:100%;
+}
 #myVideo {
   overflow: hidden;
-  position: fixed;
+  position: absolute;
   display: block;
   filter:blur(8px);
   width: 100%; 
@@ -113,12 +198,14 @@ a:hover {
 }
 .container {
   display: flex;
-  float:right;
+  align-items: center;
+  justify-content: center;
 }
 .center {
-  display:flex;
-  float:left;
-
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
 }
 img:focus {
   margin: 0 auto;
@@ -137,20 +224,20 @@ img:focus {
   text-align: center;
 }
 .hidden_folder {
-  display: inline;
+  display: inline-block;
   margin: 0 auto;
   align-items: center;
   justify-content: center;
   text-align: center;
-  line-height: 110%;
+  line-height: 160%;
 }
 #hide_folder:hover img{
   background-color: rgba(255, 166, 0, 0.486);
 }
 .hidden_folder:hover{
-  background-color: rgba(141, 8, 74, 0.986);
-
+  background-color: rgba(41, 216, 25, 0.39);
   border-radius: 4em;
+
 }
 .hidden_folder:hover h1{
   color: rgb(0, 0, 0);

@@ -8,6 +8,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.7" />
 
   <script>
+
+    
     function pause_play() {
       const video = document.getElementById("myVideo");
 
@@ -81,7 +83,6 @@
           id="myVideo"
           preload="auto"
           autoplay="true"
-          loop="loop"
           onloadstart="this.volume=0.1"
         >
           <source src="media/intro.mp4" type="video/mp4" />
@@ -92,60 +93,121 @@
         <img class="center" src="media/poster.png" />
       </div>
     </div>
+
     <br />
-    <h1
-      id="title"
-      style="
-        padding: 0 10px;
-        font-size: xx-large;
-        color: rgb(241, 163, 46);
-        font-style: normal;
-        text-align: center;
-        -webkit-text-stroke: 0.01em;
-        -webkit-text-stroke-color: rgb(0, 0, 0);
-        text-shadow: 2px 2px 1px rgb(128, 0, 0),
-          4px 2px 0.2em rgba(0, 0, 0, 0.63);
-        overflow: hidden; /* Ensures the content is not revealed until the animation */
-      "
-    >
-      Naruto Shippuden: Ultimate Ninja 5 BR
-    </h1>
-    <p
-      style="
-        padding: 1em 2em 1em 2em;
-        margin: auto;
-        text-align: center;
-        font-weight: bolder;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      "
-    >
-      <b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate
-      Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2. O jogo
-      possui algumas pequenas e vastas diferenças de seu antecessor, o Ultimate
-      Ninja 4... Suporte em Combate PvP, +Missões, Remoção do Modo Herói e a
-      mais notável, a adição da história até o ponto de encontro com o Sasuke no
-      anime e um extra... Diferente dos outros jogos da série, este foi lançado
-      apenas no <b>Japão</b> e na <b>Europa</b>.
-    </p>
+    <div id="head_description">
+      <h1
+        id="title"
+        style="
+          padding: 0 10px;
+          color: rgb(241, 163, 46);
+          font-style: normal;
+          text-align: center;
+          -webkit-text-stroke: 0.01em;
+          -webkit-text-stroke-color: rgb(0, 0, 0);
+          text-shadow: 2px 2px 1px rgb(128, 0, 0),
+            4px 2px 0.2em rgba(0, 0, 0, 0.63);
+          overflow: hidden; /* Ensures the content is not revealed until the animation */
+        "
+      >Naruto Shippuden: Ultimate Ninja 5 BR
+      </h1>
+      <p
+        style="
+          padding: 1em 2em 1em 2em;
+          margin: auto;
+          text-align: center;
+          font-weight: bolder;
+          font-size: 20px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        "
+      >
+        <b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate
+        Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2. O
+        jogo possui algumas pequenas e vastas diferenças de seu antecessor, o
+        Ultimate Ninja 4... Suporte em Combate PvP, +Missões, Remoção do Modo
+        Herói e a mais notável, a adição da história até o ponto de encontro com
+        o Sasuke no anime e um extra... Diferente dos outros jogos da série,
+        este foi lançado apenas no <b>Japão</b> e na <b>Europa</b>.
+      </p>
+    </div>
 
     <div id="body">
 
-      <img
-        style="
-          display: block;
-          margin-left: auto;
-          margin-right: auto;
-          padding: auto;
-        "
-        src="media/Parceria.png"
-      />
-      <br /><br />
-      <img
-        style="display: block; margin-left: auto; margin-right: auto"
-        src="media/Tradutores.png"
-      />
+<!-- Slideshow container -->
+
+<br>
+      <div
+        id="gallery" data-fit="cover" data-autohide="a11"
+      >
+      <div class="slideshow-container">
+        <script type="text/javascript" src="/scripts/gallery.js"></script> 
+        <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script> 
+      
+        <!-- Full-width images with number and caption text -->
+        <div class="mySlides fade first">
+          <a
+          data-description="
+          Um novo idioma!
+          "
+          style="width:100%" class="spotlight" href="media/gallery/language.bmp">
+            <img alt="Menu de Linguagem" style="width:100%" src="media/gallery/language.bmp">
+            </a>
+        </div>
+      
+        <div class="mySlides fade">
+          <a
+          data-description="
+          Carregando...
+          "
+          class="spotlight" href="media/gallery/loading.bmp">
+            <img alt="Tela de Carregamento" src="media/gallery/loading.bmp">
+            </a>
+        </div>
+        <div class="mySlides fade">
+          <a
+          data-description="
+          Menu da tela de início.
+          "
+          class="spotlight" href="media/gallery/menu.bmp">
+            <img alt="Menu Inicial" src="media/gallery/menu.bmp">
+            </a>
+        </div>
+        <div class="mySlides fade">
+          <a
+          data-description="
+          Menu da primeira versão da tradução.
+          "
+          style="background-size:cover;" class="spotlight" href="https://media3.giphy.com/media/5ySes65c5e2jKx7EjI/giphy.gif?cid=790b761127a6e031bf492cc0bb909bf0e3ae66976f1c34be&rid=giphy.gif">
+            <img style="background-size:cover;" alt="Menu V1" src="https://media3.giphy.com/media/5ySes65c5e2jKx7EjI/giphy.gif?cid=790b761127a6e031bf492cc0bb909bf0e3ae66976f1c34be&rid=giphy.gif">
+            </a>
+        </div>
+        
+        <div class="mySlides fade">
+          <a
+          data-description="
+          Devidos créditos aos tradutores/romhackers!
+          "
+          class="spotlight" href="media/gallery/credits.bmp">
+            <img alt="Créditos" src="media/gallery/credits.bmp">
+            </a>
+        </div>
+
+        <!-- Next and previous buttons -->
+        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+        <a class="next" onclick="plusSlides(1)">&#10095;</a>
+      </div>
+      <!-- The dots/circles -->
+
+    </div>
+    <div style="text-align:center">
+      <span class="dot active" onclick="currentSlide(1)"></span>
+      <span class="dot" onclick="currentSlide(2)"></span>
+      <span class="dot" onclick="currentSlide(3)"></span>
+      <span class="dot" onclick="currentSlide(4)"></span>
+      <span class="dot" onclick="currentSlide(5)"></span>
+    </div>
       <br />
-      <p>
+      <p style="font-size: 20px;">
         <b>Este</b> projeto é especial, esse foi o meu segundo projeto, depois
         do <b>Genji</b>, esse era para ser o primeiro, só não foi por eu não ter
         conhecimento suficiente, algo que fui adquirindo aos poucos com ajuda de
@@ -169,8 +231,6 @@
         origem a uma parceria incrível para mim até hoje!(2019)
       </p>
       <br />
-
-      <br />
       <div class="folder">
         <br />
         <div id="patch_tutorial" class="hidden_folder">
@@ -184,15 +244,10 @@
           <h1>Tutorial (Aplicação)</h1>
           <br />
           <div class="hiddendiv" id="hidden">
-            <iframe
-              style="display: block; margin-left: auto; margin-right: auto"
-              width="420"
-              height="315"
-              src="https://www.youtube.com/embed/ek5h8MtG6Co"
-            >
-            </iframe>
+            <iframe  width="560" height="315" src="https://www.youtube.com/embed/ek5h8MtG6Co" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
         </div>
+        <br />
         <br />
         <div id="progress" style="display: none">
           <h2
@@ -247,9 +302,31 @@
         </div>
         <br />
       </div>
+      <br><br>
+      <h1
+        id="title"
+        style="
+          padding: 0 10px;
+          color: rgb(197, 13, 0);
+          font-style: normal;
+          text-align: center;
+          font-size: 24px;
+          -webkit-text-stroke: 0.01em;
+          -webkit-text-stroke-color: rgb(0, 0, 0);
+          text-shadow: 2px 2px 1px rgb(238, 184, 36),
+            4px 2px 0.2em rgba(59, 189, 19, 0.63);
+          overflow: hidden; /* Ensures the content is not revealed until the animation */
+        "
+      >Revisão em Andamento...
+      </h1>
+      <p>
+        Uma nova versão deste projeto está sendo desenvolvida(o). (2023)
+      </p>
+      <br>
     </div>
   </body>
   <footer>
+    <hr />
     <p class="aligncenter">
       <b>&circledR; Bit.Mundo</b> 2023 - Desenvolvido por Bit.Raiden
     </p>

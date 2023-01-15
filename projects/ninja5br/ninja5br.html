@@ -6,6 +6,7 @@
     }
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=0.7" />
+  <script type="text/javascript" src="/scripts/swiped-events.js"></script>
 
   <script>
 
@@ -13,8 +14,8 @@
     function pause_play() {
       const video = document.getElementById("myVideo");
 
-      if (video.paused == true) video.play();
-      else video.pause();
+      if (video.paused !== true) video.pause();
+      else video.play();
     }
     function folder(e) {
       if (e.id == "hide_folder") {
@@ -29,10 +30,12 @@
         }
       }
     }
+
+    
   </script>
   <head>
     <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
-    <title>Naruto Shippuden: Ultimate Ninja 5</title>
+    <title>Naruto Shippuden: Ultimate Ninja 5 BR</title>
     <link
       rel="stylesheet"
       href="ninja5br.css"
@@ -69,6 +72,7 @@
   </head>
 
   <body>
+    
     <div id="head" onclick="pause_play()">
       <div
         class="container"
@@ -90,45 +94,53 @@
 
           Sorry, your browser does not support HTML5 video.
         </video>
-        <img class="center" src="media/poster.png" />
-      </div>
-    </div>
+        <table>
 
-    <br />
-    <div id="head_description">
-      <h1
+          <td style="min-width: fit-content;
+          height: 512px;
+          ">
+          <img class="center" src="/projects/ninja5br/media/poster.png">
+          <h1
         id="title"
         style="
           padding: 0 10px;
           color: rgb(241, 163, 46);
           font-style: normal;
           text-align: center;
-          -webkit-text-stroke: 0.01em;
           -webkit-text-stroke-color: rgb(0, 0, 0);
           text-shadow: 2px 2px 1px rgb(128, 0, 0),
             4px 2px 0.2em rgba(0, 0, 0, 0.63);
           overflow: hidden; /* Ensures the content is not revealed until the animation */
         "
-      >Naruto Shippuden: Ultimate Ninja 5 BR
+      >Naruto Shippuden: Ultimate Ninja 5 Versão Brasileira
       </h1>
       <p
-        style="
-          padding: 1em 2em 1em 2em;
-          margin: auto;
-          text-align: center;
-          font-weight: bolder;
-          font-size: 20px;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        "
-      >
-        <b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate
-        Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2. O
-        jogo possui algumas pequenas e vastas diferenças de seu antecessor, o
-        Ultimate Ninja 4... Suporte em Combate PvP, +Missões, Remoção do Modo
-        Herói e a mais notável, a adição da história até o ponto de encontro com
-        o Sasuke no anime e um extra... Diferente dos outros jogos da série,
-        este foi lançado apenas no <b>Japão</b> e na <b>Europa</b>.
-      </p>
+      style="
+        padding: 1em 2em 1em 2em;
+        margin: auto;
+        text-align: center;
+        font-weight: bolder;
+        font-size: 20px auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      "
+    >
+      <b>Esse</b> é o quinto jogo da série Narutimate Ninja (Naruto Ultimate
+      Ninja) lançado para o Playstation®2 pela Bandai e a CyberConnect2. O
+      jogo possui algumas pequenas e vastas diferenças de seu antecessor, o
+      Ultimate Ninja 4... Suporte em Combate PvP, +Missões, Remoção do Modo
+      Herói e a mais notável, a adição da história até o ponto de encontro com
+      o Sasuke no anime e um extra... Diferente dos outros jogos da série,
+      este foi lançado apenas no <b>Japão</b> e na <b>Europa</b>.
+    </p>
+  </td>
+  </table>
+      </div>
+    </div>
+
+    <br />
+    <div id="head_description">
+      
+     
     </div>
 
     <div id="body">
@@ -139,10 +151,11 @@
       <div
         id="gallery" data-fit="cover" data-autohide="a11"
       >
-      <div class="slideshow-container">
-        <script type="text/javascript" src="/scripts/gallery.js"></script> 
-        <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script> 
-      
+      <script type="text/javascript" src="/scripts/gallery.js"></script> 
+      <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script> 
+
+      <div id="gallery_container" class="slideshow-container">
+        
         <!-- Full-width images with number and caption text -->
         <div class="mySlides fade first">
           <a

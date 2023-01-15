@@ -15,8 +15,7 @@ to{
   align-items: center;
   justify-content: center;
   text-align: center;
-  line-height: 150%;
-margin: 1em;
+
 color: white;
 text-shadow: 1px 2px .8em rgb(0, 0, 0);
 font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
@@ -24,19 +23,19 @@ font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 #head{
   display: inline;
   z-index: 1;
-position: sticky;
+position: relative;
 }
 #head img{
   width:50%;
     border-radius: 1em;
-  opacity:50%;
+  opacity:7%;
 }
 h1 {
   overflow: hidden;
   text-align: center;
 }
 #title{
-  font-size:48px;
+  font-size:48px auto;
 }
 
 
@@ -105,7 +104,6 @@ footer{
   overflow: hidden;
   position: absolute;
   display: block;
-  filter:blur(8px);
   width: 100%; 
   height: 100%;
   object-fit:cover;

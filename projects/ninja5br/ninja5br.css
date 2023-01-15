@@ -28,14 +28,11 @@ position: relative;
 #head img{
   width:50%;
     border-radius: 1em;
-  opacity:7%;
+  opacity:5%;
 }
 h1 {
   overflow: hidden;
   text-align: center;
-}
-#title{
-  font-size:48px auto;
 }
 
 

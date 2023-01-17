@@ -47,7 +47,10 @@
   .aligncenter {
     text-align: center;
   }
-
+  .anav {
+    display: inline;
+    padding: 8px;
+  }
 
   ul.top-nav {
     display: table;

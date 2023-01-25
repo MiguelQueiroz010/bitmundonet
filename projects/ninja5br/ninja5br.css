@@ -195,6 +195,9 @@ a:hover {
 .hidden_folder:hover h2 {
   color: rgb(79, 33, 206);
 }
+.hidden_folder:hover #changelog_title{
+ color:red; 
+}
 #gallery {
   background-color: rgba(0, 0, 0, 0.418);
   justify-content: center;

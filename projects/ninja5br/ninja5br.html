@@ -137,11 +137,32 @@
       <!-- Slideshow container -->
 
       <br />
-      <h1
-      id="subtitle"
-      ><h2>Sobre</h2>
-        
-      </h1>
+      <h2 id="under">Sobre o Projeto</h2>
+      <p style="font-size: 20px">
+        <b>Este</b> projeto é especial, esse foi o meu segundo projeto, depois
+        do <b>Genji</b>, esse era para ser o primeiro, só não foi por eu não ter
+        conhecimento suficiente, algo que fui adquirindo aos poucos com ajuda de
+        vários RomHackers, quero deixar agradecimenteo ao MummRaSTR, HNNEWGAMES,
+        Gledson999. Meu primeiro desafio no jogo foi o DATA.CVM, que mais tarde
+        resolvi usando a ferramenta ROFS CVM, mas logo após eu tive um formato
+        que até hoje temos novas descobertas com ajuda da
+        <text style="color: red">Narutimatte Modding</text>, o
+        <b>CCSF</b> (<b>C</b>yber <b>C</b>onnect <b>S</b>ystem <b>F</b>ile), mas
+        o maior desafio que tive mesmo foi as texturas que não pareciam tão
+        acessíveis, até eu encontrar a ferramenta para tal e modificar para
+        funcionar com o fomato como PNG e não BMP(já que as texturas contêm
+        transparência), nesse período de testes fiquei muito tempo testando
+        diversas coisas até chegar a aprender o formato de Píxel, como é escrito
+        e lido, assim com esse projeto eu pela primeira vez aprendi Formato de
+        Pixel(Bpp, Resolução, Pixel Storage) e com isso segui em frente.
+        <br />
+        <br />
+        Ao ver que o <b>Meloolavio </b> tinha um projeto de dublagem do jogo na
+        época, decidi mergir com ele minha ideia e ele aceitou... O que deu
+        origem a uma parceria incrível para mim até hoje!(2019)
+      </p>
+      <br />
+      <h2 id="under">Imagens</h2>
       <div id="gallery" data-fit="cover" data-autohide="a11">
         <script type="text/javascript" src="/scripts/gallery.js"></script>
         <script
@@ -232,31 +253,23 @@
         <span class="dot" onclick="currentSlide(4)"></span>
         <span class="dot" onclick="currentSlide(5)"></span>
       </div>
-      <br />
-      <p style="font-size: 20px">
-        <b>Este</b> projeto é especial, esse foi o meu segundo projeto, depois
-        do <b>Genji</b>, esse era para ser o primeiro, só não foi por eu não ter
-        conhecimento suficiente, algo que fui adquirindo aos poucos com ajuda de
-        vários RomHackers, quero deixar agradecimenteo ao MummRaSTR, HNNEWGAMES,
-        Gledson999. Meu primeiro desafio no jogo foi o DATA.CVM, que mais tarde
-        resolvi usando a ferramenta ROFS CVM, mas logo após eu tive um formato
-        que até hoje temos novas descobertas com ajuda da
-        <text style="color: red">Narutimatte Modding</text>, o
-        <b>CCSF</b> (<b>C</b>yber <b>C</b>onnect <b>S</b>ystem <b>F</b>ile), mas
-        o maior desafio que tive mesmo foi as texturas que não pareciam tão
-        acessíveis, até eu encontrar a ferramenta para tal e modificar para
-        funcionar com o fomato como PNG e não BMP(já que as texturas contêm
-        transparência), nesse período de testes fiquei muito tempo testando
-        diversas coisas até chegar a aprender o formato de Píxel, como é escrito
-        e lido, assim com esse projeto eu pela primeira vez aprendi Formato de
-        Pixel(Bpp, Resolução, Pixel Storage) e com isso segui em frente.
-        <br />
-        <br />
-        Ao ver que o <b>Meloolavio </b> tinha um projeto de dublagem do jogo na
-        época, decidi mergir com ele minha ideia e ele aceitou... O que deu
-        origem a uma parceria incrível para mim até hoje!(2019)
-      </p>
-      <br />
+      <div id="progress">
+        <h2 id="under">Progresso Atual</h2>
+        <p style="text-align: center;
+        font-family:Arial, Helvetica, sans-serif;
+        ">
+          <b>Texturas</b>: 100%<br />
+          <b>Menus</b>: 100%<br />
+          <b>Textos dos Movies</b>: 100%<br />
+          <b>Textos e Falas</b>: 100%<br />
+          <b>Revisão (2019)</b>: 100% <br /><br />
+          
+          <b>Revisão (2023)</b>: 0% 
+        </p>
+      </div>
+      <div>
+        <h2 id="under">Diretório do Projeto</h2>
+      </div>
       <div class="folder">
         <br />
         <div id="patch_tutorial" class="hidden_folder">
@@ -283,25 +296,6 @@
         </div>
         <br />
 
-        <div id="progress" style="display: none">
-          <h2
-            style="
-              color: rgb(48, 14, 196);
-              font-style: normal;
-              text-align: center;
-              text-shadow: 1px 1px red;
-            "
-          >
-            Progresso Atual
-          </h2>
-          <p style="text-align: center">
-            <b>Texturas</b>: 100%<br />
-            <b>Menus</b>: 100%<br />
-            <b>Textos dos Movies</b>: 100%<br />
-            <b>Textos e Falas</b>: 100%<br />
-            <b>Revisão</b>: 100%
-          </p>
-        </div>
         <div id="download" class="hidden_folder">
           <picture id="hide_folder" onclick="folder(this)">
             <source
@@ -316,6 +310,35 @@
           </picture>
           <h1>Patch (Download)</h1>
           <br />
+          <div class="showdiv" id="hidden">
+            <div id="v7.0" class="hidden_folder"></div>
+            <picture id="hide_folder" onclick="folder(this)">
+              <source
+                srcset="../../elements/down_arrow.png"
+                media="(prefers-color-scheme: dark)"
+              />
+              <img
+                id="hide_folder"
+                style="transform: scaleY(-1)"
+                src="../../elements/light_down_arrow.png"
+              />
+            </picture>
+            <h2>Changelog</h2>
+            <br />
+            <div class="showdiv" id="hidden">
+              <p style="text-align: center">
+              <h3>Versão 7.0:</h3>
+              *Guy para Gai;<br />
+              *Hyuga para Hyuuga(Nomes na Vitória);<br />
+              *Correções em diálogos;<br />
+              *Etc...<br />
+              <h3>REV_2023:</h3>
+              *Legendas em Ultimates (+);<br />
+              *Espaço de Memória Adicional (+);<br />
+              *Mergido com o UN5+ Mod (+);<br />
+            </p>
+            </div>
+          </div>
           <div class="showdiv" id="hidden">
             <div id="v7.0" class="hidden_folder"></div>
             <picture id="hide_folder" onclick="folder(this)">
@@ -377,7 +400,7 @@
       Revisão em Andamento...
     </h1>
     <p style="text-align: center">
-      Uma nova versão deste projeto está sendo desenvolvida(o). (2023)
+      Uma nova versão de revisão deste projeto está sendo desenvolvida(o). (2023)
     </p>
     <br />
   </body>

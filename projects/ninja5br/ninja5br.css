@@ -44,13 +44,19 @@ h1 {
   -webkit-text-stroke-color: rgb(0, 0, 0);
   text-shadow: 2px 2px 1px rgb(128, 0, 0), 4px 2px 0.2em rgba(0, 0, 0, 0.63);
 }
-h2{
+#under{
   padding: 0 10px;
+  text-align: center;
   display: inline-block;
   font-style: normal;
   text-align: left;
   -webkit-text-stroke-color: rgb(0, 0, 0);
-  border-bottom: 4px solid rgba(134, 0, 74, 0.521);
+  border-bottom: 4px;
+  border-style: solid;
+  border-top: 0;
+  border-left: 0;
+  border-right:0;
+  border-image: linear-gradient(to right, darkblue, darkorchid) 1;
   padding: 0 10px;
 }
 #head:hover img {

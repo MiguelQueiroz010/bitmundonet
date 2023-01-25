@@ -7,45 +7,62 @@
   }
 }
 @keyframes opacity {
-to{
+  to {
     opacity: 1;
+  }
 }
-}
-.container{
+.container {
   align-items: center;
   justify-content: center;
   text-align: center;
 
-color: white;
-text-shadow: 1px 2px .8em rgb(0, 0, 0);
-font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: white;
+  text-shadow: 1px 2px 0.8em rgb(0, 0, 0);
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
-#head{
+#head {
   display: inline;
   z-index: 1;
-position: relative;
+  position: relative;
 }
-#head img{
-  width:50%;
-    border-radius: 1em;
-  opacity:5%;
+#head img {
+  width: 50%;
+  border-radius: 1em;
+  opacity: 5%;
 }
 h1 {
   overflow: hidden;
   text-align: center;
 }
-
-
-#head:hover img{
-  opacity:100%;
+#subtitle {
+  padding: 0 10px;
+  color: rgb(241, 163, 46);
+  border-bottom: 4px solid rgba(0, 0, 0, 0.178);
+  font-style: normal;
+  text-align: center;
+  display: inline;
+  -webkit-text-stroke-color: rgb(0, 0, 0);
+  text-shadow: 2px 2px 1px rgb(128, 0, 0), 4px 2px 0.2em rgba(0, 0, 0, 0.63);
 }
-p{
-  padding:1em 2em 1em 2em;
+h2{
+  padding: 0 10px;
+  display: inline-block;
+  font-style: normal;
+  text-align: left;
+  -webkit-text-stroke-color: rgb(0, 0, 0);
+  border-bottom: 4px solid rgba(134, 0, 74, 0.521);
+  padding: 0 10px;
+}
+#head:hover img {
+  opacity: 100%;
+}
+p {
+  padding: 1em 2em 1em 2em;
   margin: auto;
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
 
-#body{
+#body {
   align-items: center;
   justify-content: center;
   text-size-adjust: auto;
@@ -53,13 +70,13 @@ p{
   bottom: 0;
   right: 0;
   left: 0;
-  top:0;
+  top: 0;
   position: fixed;
   z-index: 1;
   position: relative;
 }
 .folder {
-display: inline-block;
+  display: inline-block;
   margin: 0 auto;
   margin-top: 10px;
   position: relative;
@@ -74,11 +91,11 @@ display: inline-block;
 
 .folder:before {
   display: inline-block;
-  content: './RomHacking';
+  content: "./RomHacking";
   padding-left: 10px;
   width: 50%;
   height: 12px;
-font-family:'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
   border-radius: 20px 20px 0 0;
   background-color: #ccca60a2;
   position: absolute;
@@ -86,13 +103,13 @@ font-family:'Times New Roman', Times, serif;
   top: -12px;
   left: 0px;
 }
-footer{
+footer {
   margin: 0;
   padding: 0;
   bottom: 0;
   right: 0;
   left: 0;
-  top:0;
+  top: 0;
   border-radius: 5em;
   z-index: 1;
   position: relative;
@@ -101,12 +118,12 @@ footer{
   overflow: hidden;
   position: absolute;
   display: block;
-  width: 100%; 
+  width: 100%;
   height: 100%;
-  object-fit:cover;
+  object-fit: cover;
   bottom: 0;
   right: 0;
-  top:0;
+  top: 0;
   z-index: -1;
 }
 li a {
@@ -159,21 +176,18 @@ a:hover {
   text-align: center;
   line-height: 160%;
 }
-#hide_folder:hover img{
+#hide_folder:hover img {
   background-color: rgba(255, 166, 0, 0.486);
 }
-.hidden_folder:hover{
+.hidden_folder:hover {
   background-color: rgba(41, 216, 25, 0.39);
   border-radius: 4em;
-
 }
-.hidden_folder:hover h1{
+.hidden_folder:hover h1 {
   color: rgb(0, 0, 0);
-  
 }
-.hidden_folder:hover h2{
+.hidden_folder:hover h2 {
   color: rgb(79, 33, 206);
-  
 }
 #gallery {
   background-color: rgba(0, 0, 0, 0.418);
@@ -186,16 +200,24 @@ a:hover {
 }
 
 @keyframes glow {
-  0% {background-color: ffffff56;}
-  25% {background-color: orange;}
-  50% {background-color: orange;}
-  100%{background-color: ffffff56;}
+  0% {
+    background-color: ffffff56;
+  }
+  25% {
+    background-color: orange;
+  }
+  50% {
+    background-color: orange;
+  }
+  100% {
+    background-color: ffffff56;
+  }
 }
-.hidden_folder #hide_folder{
+.hidden_folder #hide_folder {
   cursor: pointer;
   width: 18px;
 }
-.hidden_folder #show_folder{
+.hidden_folder #show_folder {
   cursor: pointer;
   width: 18px;
   translate: scaleY(-1);
@@ -208,12 +230,15 @@ a:hover {
   text-align: center;
   font-size: xx-large;
   line-height: 150%;
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  color:rgb(0, 0, 0);
-  background: linear-gradient(0deg,rgba(145, 28, 106, 0.445) 10%, rgba(255, 183, 29, 0.356)70%);
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: rgb(0, 0, 0);
+  background: linear-gradient(
+    0deg,
+    rgba(145, 28, 106, 0.445) 10%,
+    rgba(255, 183, 29, 0.356) 70%
+  );
   -webkit-background-clip: text;
   -webkit-text-stroke: 3px transparent;
-  
 }
 .hidden_folder h2 {
   background-color: orange;
@@ -222,18 +247,20 @@ a:hover {
   justify-content: center;
   text-align: center;
   font-size: x-large;
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  color:rgb(0, 0, 0);
-  background: linear-gradient(0deg,rgba(145, 28, 106, 0.445) 10%, rgba(255, 183, 29, 0.356)70%);
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: rgb(0, 0, 0);
+  background: linear-gradient(
+    0deg,
+    rgba(145, 28, 106, 0.445) 10%,
+    rgba(255, 183, 29, 0.356) 70%
+  );
   -webkit-background-clip: text;
   -webkit-text-stroke: 3px transparent;
-  
 }
 .hiddendiv {
   display: none;
 }
-.showdiv
-{
+.showdiv {
   border-radius: 4em;
   background-color: rgba(255, 255, 255, 0.342);
   display: block;
@@ -245,11 +272,11 @@ a:hover {
   text-align: center;
 }
 
-
-
 /*GALLERY SLIDESHOW*/
 
-* {box-sizing:border-box}
+* {
+  box-sizing: border-box;
+}
 
 /* Slideshow container */
 .slideshow-container {
@@ -267,13 +294,13 @@ a:hover {
   margin: auto;
 }
 .first {
-  display:flex;
+  display: flex;
   margin: auto;
-
 }
 
 /* Next & previous buttons */
-.prev, .next {
+.prev,
+.next {
   cursor: pointer;
   position: absolute;
   top: 50%;
@@ -295,8 +322,9 @@ a:hover {
 }
 
 /* On hover, add a black background color with a little bit see-through */
-.prev:hover, .next:hover {
-  background-color: rgba(0,0,0,0.8);
+.prev:hover,
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 /* Caption text */
@@ -331,7 +359,8 @@ a:hover {
   transition: background-color 0.6s ease;
 }
 
-.active, .dot:hover{
+.active,
+.dot:hover {
   background-color: #5c0564;
 }
 
@@ -342,6 +371,10 @@ a:hover {
 }
 
 @keyframes fade {
-  from {opacity: .4}
-  to {opacity: 1}
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
 }

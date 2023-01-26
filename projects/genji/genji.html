@@ -1,0 +1,420 @@
+﻿<!DOCTYPE html>
+<html>
+  <style>
+    html {
+      color-scheme: light dark;
+    }
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=0.7" />
+  <script>
+    function pause_play() {
+      const video = document.getElementById("myVideo");
+
+      if (video.paused !== true) video.pause();
+      else video.play();
+    }
+    function folder(e) {
+      if (e.id == "hide_folder") {
+        console.log(e.id);
+        const node = e.parentElement.querySelector("#hidden");
+        if (node.className == "hiddendiv") {
+          node.className = "showdiv";
+          e.children[1].style.transform = "scaleY(-1)";
+        } else {
+          node.className = "hiddendiv";
+          e.children[1].style.transform = "scaleY(+1)";
+        }
+      }
+    }
+  </script>
+  <head>
+    <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
+    <title>Genji Dawn of the Samurai</title>
+    <link rel="stylesheet" href="/css/navigator.css" />
+
+    <link
+      rel="stylesheet"
+      href="genji.css"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="stylesheet"
+      href="dark_genji.css"
+      media="(prefers-color-scheme: dark)"
+    />
+    <br />
+    <nav class="alignnav">
+      <ul>
+        <li class="alignnav">
+          <a class="anav" href="../../index.html">Início</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+        <li class="alignnav">
+          <a class="anav" href="../../projetos.html">Projetos</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+        <li class="alignnav">
+          <a class="anav" href="../../library.html">Biblioteca</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+        <li class="alignnav">
+          <a class="anav" href="../../tools.html">Ferramentas</a>
+        </li>
+        &nbsp&nbsp&nbsp&nbsp
+      </ul>
+    </nav>
+    <br />
+    <br />
+  </head>
+
+  <body>
+    <div id="head" onclick="pause_play()">
+      <div
+        class="container"
+        style="
+          position: relative;
+          background-color: rgba(0, 0, 0, 0.5);
+          padding: 2em;
+          margin: 0 auto;
+        "
+      >
+        <video
+          id="myVideo"
+          preload="auto"
+          autoplay="true"
+          onloadstart="this.volume=0.1"
+        >
+          <source src="media/intro.mp4" type="video/mp4" />
+          <!-- The video -->
+
+          Sorry, your browser does not support HTML5 video.
+        </video>
+        <table>
+          <td style="min-width: fit-content; height: 512px">
+            <img class="center" src="/projects/genji/media/poster.jpg" />
+            <h1
+              id="title"
+              style="
+                padding: 0 10px;
+                color: rgb(34, 25, 155);
+                font-style: normal;
+                text-align: center;
+                -webkit-text-stroke-color: rgb(0, 0, 0) ;
+                text-shadow: 2px 2px 8px rgb(255, 255, 255),
+                1px 1px 4px rgb(230, 188, 3),
+                  4px 2px 0.2em rgba(0, 0, 0, 0.911);
+                overflow: hidden; /* Ensures the content is not revealed until the animation */
+              "
+            >
+              Genji Alvorecer dos Samurais
+            </h1>
+            <p
+              style="
+                padding: 1em 2em 1em 2em;
+                margin: auto;
+                text-align: center;
+                font-weight: bolder;
+                font-size: 20px auto;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              "
+            >
+              <b>O</b> jogo se baseia na história do "Conto de Heiki" (Heiki
+              Monogatari), e apresenta uma história vivida no tempo dos samurai
+              e dos clâs em guerra por poder e domínio sobre a capital de
+              Kyoto(Heian). O jogo foi lançado pela <b>Game Republic</b> e faz
+              sucesso por suas mecânicas misturadas, demonstrando ser um
+              hack-n-slash com mecânicas de <b>RPG</b>.
+            </p>
+          </td>
+        </table>
+      </div>
+    </div>
+
+    <br />
+
+    <div id="body">
+      <!-- Slideshow container -->
+
+      <br />
+      <h2 id="under">Sobre o Projeto</h2>
+      <p style="font-size: 20px">
+        Iniciado em um monte de pesquisas binárias e esforços para aprender
+        RomHacking, o Projeto tomou rumo após eu descobrir como funcionava um
+        container de arquivos e sua estrutura, para ser mais específico, o
+        DATA.DAT e o EDATA.DAT. (Isso deu meu primeiro passo no RomHacking) Ao
+        mesmo tempo descobri que o Jeimisson também estava com um projeto, então
+        concordamos em mergir...
+      </p>
+      <br />
+      <h2 id="under">Imagens</h2>
+      <div id="gallery" data-fit="cover" data-autohide="a11">
+        <script type="text/javascript" src="/scripts/gallery.js"></script>
+        <script
+          type="text/javascript"
+          src="/scripts/spotlight.bundle.js"
+        ></script>
+
+        <div id="gallery_container" class="slideshow-container">
+          <!-- Full-width images with number and caption text -->
+          <div class="mySlides fade first">
+            <a
+              data-description="
+          Menu principal do jogo.
+          "
+              style="width: 100%"
+              class="spotlight"
+              href="media/gallery/pic2.png"
+            >
+              <img
+                alt="Menu Inicial"
+                style="width: 100%"
+                src="media/gallery/pic2.png"
+              />
+            </a>
+          </div>
+
+          <div class="mySlides fade">
+            <a
+              data-description="
+          Mais do menu principal do jogo.
+          "
+              class="spotlight"
+              href="media/gallery/pic3.png"
+            >
+              <img alt="Menu Inicial 2" src="media/gallery/pic3.png" />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          Menu de opções do jogo.
+          "
+              class="spotlight"
+              href="media/gallery/pic4.png"
+            >
+              <img alt="Opções" src="media/gallery/pic4.png" />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          Kyoto(Heian).
+          "
+              class="spotlight"
+              href="media/gallery/pic5.png"
+            >
+              <img alt="Capítulo 1" src="media/gallery/pic5.png" />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          
+          "
+              class="spotlight"
+              href="media/gallery/pic6.png"
+            >
+              <img alt="Diálogos Traduzidos" src="media/gallery/pic6.png" />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          
+          "
+              class="spotlight"
+              href="media/gallery/pic10.gif"
+            >
+              <img alt="Diálogos Traduzidos 2" src="media/gallery/pic10.gif" />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          
+          "
+              class="spotlight"
+              href="media/gallery/pic11.gif"
+            >
+              <img alt="Classes de Combos" src="media/gallery/pic11.gif" />
+            </a>
+          </div>
+          <!-- Next and previous buttons -->
+          <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+          <a class="next" onclick="plusSlides(1)">&#10095;</a>
+        </div>
+        <!-- The dots/circles -->
+      </div>
+      <div style="text-align: center">
+        <span class="dot active" onclick="currentSlide(1)"></span>
+        <span class="dot" onclick="currentSlide(2)"></span>
+        <span class="dot" onclick="currentSlide(3)"></span>
+        <span class="dot" onclick="currentSlide(4)"></span>
+        <span class="dot" onclick="currentSlide(5)"></span>
+        <span class="dot" onclick="currentSlide(6)"></span>
+        <span class="dot" onclick="currentSlide(7)"></span>
+      </div>
+      <div id="progress">
+        <h2 id="under">Progresso Atual</h2>
+        <p
+          style="text-align: center; font-family: Arial, Helvetica, sans-serif"
+        >
+          <b>Texturas</b>: 100%<br />
+          <b>Menus</b>: 100%<br />
+          <b>Textos dos Movies</b>: 100%<br />
+          <b>Textos e Falas</b>: 100%<br />
+
+          <b>Revisão ( Natal 2021)</b>: 100%
+        </p>
+      </div>
+      <div>
+        <h2 id="under">Diretório do Projeto</h2>
+      </div>
+      <div class="folder">
+        <br />
+        <div id="patch_tutorial" class="hidden_folder">
+          <picture id="hide_folder" onclick="folder(this)">
+            <source
+              srcset="../../elements/down_arrow.png"
+              media="(prefers-color-scheme: dark)"
+            />
+            <img id="hide_folder" src="../../elements/light_down_arrow.png" />
+          </picture>
+          <h1>Tutorial (Aplicação)</h1>
+          <br />
+          <div class="hiddendiv" id="hidden">
+            <iframe
+              width="560"
+              height="315"
+              src="https://www.youtube.com/embed/RS9tYKapXIw"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+        <br />
+
+        <div id="download" class="hidden_folder">
+          <picture id="hide_folder" onclick="folder(this)">
+            <source
+              srcset="../../elements/down_arrow.png"
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              id="hide_folder"
+              style="transform: scaleY(-1)"
+              src="../../elements/light_down_arrow.png"
+            />
+          </picture>
+          <h1>Patch (Download)</h1>
+          <br />
+          <div class="showdiv" id="hidden">
+            <div id="changelog">
+            <picture id="hide_folder" onclick="folder(this)">
+              <source
+                srcset="../../elements/down_arrow.png"
+                media="(prefers-color-scheme: dark)"
+              />
+              <img
+                id="hide_folder"
+                style="transform: scaleY(-1)"
+                src="../../elements/light_down_arrow.png"
+              />
+            </picture>
+            <h2 id="changelog_title">Changelog</h2>
+            <br />
+            <div class="showdiv" id="hidden">
+              <p style="text-align: center">
+                <h3>Versão Europeia 5.2 (Old):</h3>
+                *Primeira versão lançada;
+              <h3>REV_Natal_2021:</h3>
+              *Correção da Fonte, melhoria dos acentos<br />
+*Tradução dos créditos<br />
+*Correção em Texturas<br />
+*Revisão completa(re-tradução) de praticamente<br />todos os textos e diálogos<br />
+            </p><br />
+            </div>
+            </div>
+            <div id="old_ver" class="showdiv" id="hidden">
+              <div id="old_ver" class="hidden_folder"></div>
+              <picture id="hide_folder" onclick="folder(this)">
+                <source
+                  srcset="../../elements/down_arrow.png"
+                  media="(prefers-color-scheme: dark)"
+                />
+                <img
+                  id="hide_folder"
+                  src="../../elements/light_down_arrow.png"
+                />
+              </picture>
+              <h2>Versão Europeia 5.2 (Old)</h2>
+              <br />
+              <div class="hiddendiv" id="hidden">
+                <br />
+                <img
+                  style="display: block; margin-left: auto; margin-right: auto"
+                  src=""
+                /><br />
+                  <b>Tipo de Patch</b>: XDELTA<br />
+                  <b>Versão do Jogo</b>: PAL - SCES_533.28 DVD9/DL<br />
+                  <br />
+                  <a
+                    target="”_blank”"
+                    href="https://www.mediafire.com/file/wikkakpj8v3pr1d/GENJI_PATCH.rar/file"
+                    >Patch</a
+                  ><br /><br />
+              </div>
+            </div>
+            <div id="rev_natal" class="showdiv" id="hidden">
+              <div id="rev_natal_2021" class="hidden_folder"></div>
+              <picture id="hide_folder" onclick="folder(this)">
+                <source
+                  srcset="../../elements/down_arrow.png"
+                  media="(prefers-color-scheme: dark)"
+                />
+                <img
+                  id="hide_folder"
+                  style="transform: scaleY(-1)"
+                  src="../../elements/light_down_arrow.png"
+                />
+              </picture>
+              <h2>REV_Natal_2021</h2>
+              <br />
+              <div class="showdiv" id="hidden">
+                <br />
+                <img
+                  style="display: block; margin-left: auto; margin-right: auto"
+                  src="media/icon.png"
+                /><br />
+                  <b>Tipo de Patch</b>: RPT (RAIDEN PATCHER)<br />
+                  <b>Versão do Jogo</b>: NTSC - SCUS_974.71<br />
+                  <br />
+                  <a
+                    target="”_blank”"
+                    href="https://www.mediafire.com/file/pnq9eiluqqkqjge/GENJIBR2021PATCH.rar/file"
+                    >Patch</a
+                  ><br /><br />
+                  <a
+                    target="”_blank”"
+                    href="https://www.mediafire.com/file/dwd7icjp5fw807f/Genji_Wallpaper_BR.rar/file"
+                    >Wallpaper (MultiRES)</a
+                  >
+                  <br /><br />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br />
+    </div>
+    <br />
+  </body>
+  <footer>
+    <hr />
+    <p class="aligncenter">
+      <b>&circledR; Bit.Mundo</b> 2023 - Desenvolvido por Bit.Raiden
+    </p>
+  </footer>
+</html>

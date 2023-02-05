@@ -132,25 +132,7 @@ footer {
   top: 0;
   z-index: -1;
 }
-li a {
-  color: #000;
-  padding: 8px 16px;
-  text-decoration: none;
-}
-a {
-  color: #000;
-  background-color: rgba(255, 255, 255, 0.411);
-  padding: 8px 16px;
-  text-decoration: none;
-}
-li a:hover {
-  background-color: #555;
-  color: white;
-}
-a:hover {
-  background-color: #555;
-  color: white;
-}
+
 .container {
   display: flex;
   align-items: center;
@@ -163,14 +145,7 @@ a:hover {
   width: 50%;
 }
 
-.alignnav {
-  display: inline;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  line-height: 150%;
-  letter-spacing: 1px;
-}
+
 .aligncenter {
   text-align: center;
 }

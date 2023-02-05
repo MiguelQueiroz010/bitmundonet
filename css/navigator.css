@@ -8,16 +8,15 @@
     padding: 0;
   }
   li a {
-    color: #000;
+    color: #ffffff;
     padding: 8px 16px;
     text-decoration: none;
-    background-color: rgb(238, 249, 255);
-    border-radius: 10%;
-    border-color: rgb(144, 174, 255);
-    border-style:inset;
+    text-transform: uppercase;
+    text-size-adjust: fit-content;
+    background-color: rgb(109, 0, 0);
   }
   li a:hover {
-    background-color: #555;
+    background-color: #0400ff;
     color: white;
   }
   .container {
@@ -25,29 +24,21 @@
     align-items: center;
     justify-content: center;
   }
-  nav {
-    overflow: hidden;
-    background-color: rgb(255, 255, 255);
-    padding: 6px 4px; /* Large padding which will shrink on scroll (using JS) */
-    transition: 0.4s; /* Adds a transition effect when the padding is decreased */
-    position: fixed; /* Sticky/fixed navbar */
-    width: 100%;
-    top: 0; /* At the top */
-    z-index: 99;
-    left: 0;
-  }
   .alignnav {
     display: inline;
     align-items: center;
     justify-content: center;
     text-align: center;
-    line-height: 150%;
-    letter-spacing: 1px;
+    line-height: 200%;
+    letter-spacing: 2px;
   }
   .aligncenter {
     text-align: center;
   }
+
   .anav {
+    top:0;
+    left: 0;
     display: inline;
     padding: 8px;
   }
@@ -61,4 +52,22 @@
   ul.top-nav li {
     display: table-cell;
   }
-  
+  #old_banner{
+    display: none;
+  }
+  #banner{
+    display: inline;
+    align-items: center;
+    justify-content: center;
+  }
+  #navbar{
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    background-color: rgb(109, 0, 0);
+    width: 100%;
+    top:0;
+    left: 0;
+    z-index: 99;
+    transition: top 0.3s; /* Transition effect when sliding down (and up) */
+  }

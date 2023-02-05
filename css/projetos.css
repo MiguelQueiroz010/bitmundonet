@@ -43,8 +43,20 @@
         text-align: center;
       }
       .commontext {
+        display: inline;
+        font-stretch: ultra-expanded;
+        border-style: solid;
+        border-left: 0;
+        border-top: 0;
+        border-right: 0;
+        border-image: radial-gradient( rgb(16, 133, 0) 90%,rgb(255, 255, 255) 30%) 1;
+        border-bottom: 4px solid rgb(0, 0, 0);
         font-size: xx-large;
         font-style: normal;
-        text-align: center;
+      }
+      p {
+        margin-left: 20px;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        font-size: large;
       }
  

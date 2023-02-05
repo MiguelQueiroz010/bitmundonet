@@ -35,7 +35,9 @@
   .aligncenter {
     text-align: center;
   }
-
+body{
+  margin:0;
+}
   .anav {
     top:0;
     left: 0;

@@ -16,7 +16,7 @@ li a {
 }
 li a:hover {
   background-color: #0400ff;
-  color: white;
+  color: rgb(32, 240, 84);
 }
 .container {
   display: flex;
@@ -28,7 +28,7 @@ li a:hover {
   align-items: center;
   justify-content: center;
   text-align: center;
-  line-height: 120%;
+  line-height: 2em;
   letter-spacing: 2px;
 }
 .aligncenter {

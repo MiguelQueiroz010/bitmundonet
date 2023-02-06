@@ -11,6 +11,7 @@
     opacity: 1;
   }
 }
+
 .container {
   align-items: center;
   justify-content: center;
@@ -81,6 +82,19 @@ p {
   z-index: 1;
   position: relative;
 }
+.folder a {
+  color: #ffffff;
+  padding: 8px 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-size-adjust: fit-content;
+  background-color: rgb(102, 46, 46);
+}
+.folder a:hover {
+  background-color: #0400ff;
+  color: rgb(5, 226, 178);
+  animation: 0.8s infinite alternate opacity_blink;
+}
 .folder {
   display: inline-block;
   margin: 0 auto;
@@ -90,12 +104,14 @@ p {
   padding-right: 10px;
   padding-bottom: 10px;
   width: 70% auto;
-  background-color: #ccca60a2;
+  background-color: #b6283b93;
+  color: #000;
   border-radius: 0 6px 6px 6px;
   box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.59);
 }
 
 .folder:before {
+  text-shadow: none;
   display: inline-block;
   content: "./RomHacking";
   padding-left: 10px;
@@ -103,7 +119,7 @@ p {
   height: 12px;
   font-family: "Times New Roman", Times, serif;
   border-radius: 20px 20px 0 0;
-  background-color: #ccca60a2;
+  background-color: #b6283b93;
   position: absolute;
   text-align: left;
   top: -12px;
@@ -145,12 +161,12 @@ footer {
   width: 50%;
 }
 
-
 .aligncenter {
   text-align: center;
 }
 .hidden_folder {
   display: inline-block;
+  text-shadow: none;
   margin: 0 auto;
   align-items: center;
   justify-content: center;
@@ -158,10 +174,10 @@ footer {
   line-height: 160%;
 }
 #hide_folder:hover img {
-  background-color: rgba(255, 166, 0, 0.486);
+  background-color: rgba(240, 161, 16, 0.836);
 }
 .hidden_folder:hover {
-  background-color: rgba(41, 216, 25, 0.39);
+  background-color: rgba(216, 149, 25, 0.39);
   border-radius: 4em;
 }
 .hidden_folder:hover h1 {
@@ -202,6 +218,7 @@ footer {
   width: 18px;
 }
 .hidden_folder #show_folder {
+  
   cursor: pointer;
   width: 18px;
   translate: scaleY(-1);
@@ -225,6 +242,7 @@ footer {
   -webkit-text-stroke: 3px transparent;
 }
 .hidden_folder h2 {
+
   background-color: orange;
   display: inline;
   align-items: center;
@@ -291,7 +309,7 @@ footer {
   width: auto;
   margin-top: -22px;
   padding: 16px;
-  color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
   font-weight: bold;
   font-size: 18px;
   transition: 0.6s ease;

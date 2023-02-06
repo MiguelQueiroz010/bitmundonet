@@ -82,20 +82,23 @@ p {
   position: relative;
 }
 .folder {
+  text-shadow: none;
   display: inline-block;
   margin: 0 auto;
   margin-top: 10px;
+  color: #000;
   position: relative;
   padding-left: 10px;
   padding-right: 10px;
   padding-bottom: 10px;
   width: 70% auto;
-  background-color: #ccca60a2;
+  background-color: #df950ce1;
   border-radius: 0 6px 6px 6px;
   box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.59);
 }
 
 .folder:before {
+  text-shadow: none;
   display: inline-block;
   content: "./RomHacking";
   padding-left: 10px;
@@ -103,7 +106,7 @@ p {
   height: 12px;
   font-family: "Times New Roman", Times, serif;
   border-radius: 20px 20px 0 0;
-  background-color: #ccca60a2;
+  background-color: #df950ce1;
   position: absolute;
   text-align: left;
   top: -12px;
@@ -145,7 +148,19 @@ footer {
   width: 50%;
 }
 
-
+.folder a {
+  color: #ffffff;
+  padding: 8px 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-size-adjust: fit-content;
+  background-color: rgb(102, 46, 46);
+}
+.folder a:hover {
+  background-color: #0400ff;
+  color: rgb(5, 226, 178);
+  animation: 0.8s infinite alternate opacity_blink;
+}
 .aligncenter {
   text-align: center;
 }
@@ -161,7 +176,7 @@ footer {
   background-color: rgba(255, 166, 0, 0.486);
 }
 .hidden_folder:hover {
-  background-color: rgba(41, 216, 25, 0.39);
+  background-color: rgba(235, 212, 9, 0.856);
   border-radius: 4em;
 }
 .hidden_folder:hover h1 {
@@ -174,6 +189,8 @@ footer {
  color:red; 
 }
 #gallery {
+  text-shadow: none;
+  color: #ffffff;
   background-color: rgba(0, 0, 0, 0.418);
   justify-content: center;
   align-items: center;
@@ -287,7 +304,7 @@ footer {
   width: auto;
   margin-top: -22px;
   padding: 16px;
-  color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
   font-weight: bold;
   font-size: 18px;
   transition: 0.6s ease;

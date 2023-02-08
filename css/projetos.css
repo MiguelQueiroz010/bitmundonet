@@ -16,20 +16,25 @@
         scroll-behavior: smooth;
       }
       table {
-        margin: 0 auto;
+        margin-left:5%;
+        margin-right:auto;
       }
       td:hover img {
         margin: 0 auto;
         transition: transform 0.5s ease; /* Animation */
-        border-color: blue;
-        border-style: inset;
-        transform: scale(2);
+        transform: scale(1.1);
         backface-visibility: hidden;
       }
       .container {
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow-x:auto;
+        overflow-y:auto;
+        border-radius: 4%;
+      }
+      .container img{
+        overflow:auto;
       }
       h1 {
         overflow: hidden; /* Ensures the content is not revealed until the animation */
@@ -59,4 +64,12 @@
         font-family: Verdana, Geneva, Tahoma, sans-serif;
         font-size: large;
       }
- 
+
+      #PS2{
+background-color: rgba(222, 245, 255, 0.747);
+
+      }
+      #PS1{
+        background-color: rgba(255, 121, 59, 0.493);
+        
+              }

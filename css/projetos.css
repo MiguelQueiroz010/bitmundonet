@@ -15,10 +15,6 @@
       html {
         scroll-behavior: smooth;
       }
-      table {
-        margin-left:5%;
-        margin-right:auto;
-      }
       td:hover img {
         margin: 0 auto;
         transition: transform 0.5s ease; /* Animation */
@@ -32,9 +28,6 @@
         overflow-x:auto;
         overflow-y:auto;
         border-radius: 4%;
-      }
-      .container img{
-        overflow:auto;
       }
       h1 {
         overflow: hidden; /* Ensures the content is not revealed until the animation */
@@ -64,12 +57,27 @@
         font-family: Verdana, Geneva, Tahoma, sans-serif;
         font-size: large;
       }
-
+#cape{
+  display: flex;
+   align-items: center;
+        justify-content: center;
+        overflow-x:auto;
+        overflow-y:auto;
+}
       #PS2{
 background-color: rgba(222, 245, 255, 0.747);
+display: flex;
+   align-items: center;
+        justify-content: center;
+        overflow-x:auto;
+        overflow-y:auto;
 
       }
       #PS1{
         background-color: rgba(255, 121, 59, 0.493);
-        
+        display: flex;
+   align-items: center;
+        justify-content: center;
+        overflow-x:auto;
+        overflow-y:auto;
               }

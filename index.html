@@ -27,8 +27,11 @@
     <link rel="manifest" href="/fav//site.webmanifest" />
     <link rel="stylesheet" href="/css/navigator.css" />
     <script type="text/javascript" src="/scripts/navbar.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561"
-     crossorigin="anonymous"></script>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561"
+      crossorigin="anonymous"
+    ></script>
     <style>
       ._bit {
         font-size: xx-large;
@@ -88,7 +91,14 @@
         font-family: Verdana, Geneva, Tahoma, sans-serif;
         font-size: large;
       }
-
+      #gallery {
+  background-color: rgba(0, 0, 0, 0.418);
+  justify-content: center;
+  align-items: center;
+}
+#gallery img {
+  width: 100% !important;
+}
       @keyframes color-blue {
         0% {
           color: black;
@@ -117,6 +127,111 @@
           color: black;
         }
       }
+      * {
+  box-sizing: border-box;
+}
+
+/* Slideshow container */
+.slideshow-container {
+  max-width: 1000px;
+  border-color: #000;
+  position: relative;
+  display: flex;
+  margin: auto;
+}
+
+/* Hide the images by default */
+.mySlides {
+  display: none;
+  width: max-content;
+  margin: auto;
+}
+.first {
+  display: flex;
+  margin: auto;
+}
+
+/* Next & previous buttons */
+.prev,
+.next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  margin-top: -22px;
+  padding: 16px;
+  color: rgb(255, 255, 255);
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover,
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Caption text */
+.text {
+  color: #f2f2f2;
+  font-size: 20px;
+  padding: 8px 12px;
+  position: absolute;
+  bottom: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Number text (1/3 etc) */
+.numbertext {
+  color: #ffffff;
+  font-size: 16px;
+  padding: 16px 26px;
+  position: absolute;
+  top: 0;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active,
+.dot:hover {
+  background-color: #5c0564;
+}
+
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
       article img {
         width: 100%;
       }
@@ -149,7 +264,6 @@
   </head>
 
   <body>
-    
     <div id="month_contents">
       <article>
         <div>
@@ -163,95 +277,165 @@
         <br />
         <p>
           Progresso Geral da Revisão:
-          <p><br /><br />
+          <br /><br />
           <strong>[TEXTOS CCS]</strong><br />
-            *Terminados todos os CLCT[Missões Principais] 10/03/23<br />
-            *Terminados IRAI[Petições] 1-4 11/03/23<br />
-            *Terminados IRAI[Petições] 5-15 12/03/23<br />
-            *Terminados IRAI[Petições] 16-20 13/03/23<br />
-            *Terminados SKILL[HABILIDADES] 0-4 14/03/23<br />
-            *Terminados STFDATA[CÉDITOS] 16/03/23<br />
-            *Iniciada revisão de PUPPET[CUTSCENES]!<br />
-            <br />
-            *Correções em andamento...<br />
-            <br />
-            Chambers of Darkness = Câmaras das Trevas<br />
-            <br />
-            <strong>[TEXTURAS]</strong><br />
-            -MODOS:<br />
-*Extraídas texturas em PNG[Necessário suporte a PNG com Transparência de Meio Alfa(128)]<br />
-<br />
--CMN<br />
-*Revisado GAUGE/Load_B<br />
-<br />
--ADV:<br />
-*Nada ainda...<br />
-<br />
--BATALHA[BATTLEGAUGE/CHARSEL]<br />
-*Nada ainda...<br />
-<br />
--MENU DE SELEÇÃO DE MODO[MODESEL]<br />
-*Nada inda...<br />
-<br />
--Extras<br />
-*Nada ainda...<br />
-            <br />
-            <strong>[ELF/MWO3]</strong><br />
-            *Completo, faltam pequenos detalhes.... 
-            <br /><br />
-            <strong>[Extras]</strong><br />
-            Feito:
-            <br /> 
-            *Legendas em Ultimates<br>
-            <br />
-            Em andamento:
-            <br />
-            *Legendas em Vitórias [Combates]<br />
-            *Sombras Melhoradas nas Legendas
-            </p>
-            <br />
+          *Terminados STFDATA[CÉDITOS] 16/03/23<br />
+          *Implantado STFDATA[CRÉDITOS] em CCS 19/03/23<br />
+          *Corrigido STFDATA[CRÉDITOS] em CCS 20/03/23<br />
+          *Iniciada revisão de PUPPET[CUTSCENES]!<br />
+          <br />
+          *Correções em andamento...<br />
+          <br />
+          Chambers of Darkness = Câmaras das Trevas<br />
+          <br />
+          <strong>[TEXTURAS]</strong><br />
+          -MODOS:<br />
+          *Extraídas texturas em PNG[Necessário suporte a PNG com Transparência
+          de Meio Alfa(128)]<br />
+          *Terminada Re-Tradução e Adaptação: 19/03/23 <br />
+          ///MUDANÇAS\\\ <br />
+          //"Manto da Kyuubi" para "Chakra da Kyuubi"\\<br />
+          //"Modo Super Choji" para "Modo Borboleta"\\<br />
+        </p>
+          <div id="gallery" data-fit="cover" data-autohide="a11">
+            <script type="text/javascript" src="scripts/gallery.js"></script>
+            <script
+              type="text/javascript"
+              src="scripts/spotlight.bundle.js"
+            ></script>
+    
+            <div id="gallery_container" class="slideshow-container">
+              <!-- Full-width images with number and caption text -->
+              <div class="mySlides fade first">
+                <a
+                  data-description="
+                  'Manto da Kyuubi' para 'Chakra da Kyuubi'
+              "
+                  style="width: 100%"
+                  class="spotlight"
+                  href="/projects/ninja5br/media/progress/mode2nrv.png"
+                >
+                  <img
+                    alt="Naruto Clássico"
+                    style="width: 100%"
+                    src="/projects/ninja5br/media/progress/mode2nrv.png"
+                  />
+                </a>
+              </div>
+              <div class="mySlides fade">
+                <a
+                  data-description="
+                  'Manto da Kyuubi' para 'Chakra da Kyuubi'
+              "
+                  style="width: 100%"
+                  class="spotlight"
+                  href="/projects/ninja5br/media/progress/mode2nwv.png"
+                >
+                  <img
+                    alt="Naruto Shippuden"
+                    style="width: 100%"
+                    src="/projects/ninja5br/media/progress/mode2nwv.png"
+                  />
+                </a>
+              </div>
+              <div class="mySlides fade">
+                <a
+                  data-description="
+                  'Modo Super Choji' para 'Modo Borboleta'
+              "
+                  class="spotlight"
+                  href="/projects/ninja5br/media/progress/mode2tov.png"
+                >
+                  <img alt="Choji" src="/projects/ninja5br/media/progress/mode2tov.png" />
+                </a>
+              </div>
+    
+              <!-- Next and previous buttons -->
+              <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+              <a class="next" onclick="plusSlides(1)">&#10095;</a>
+            </div>
+            <!-- The dots/circles -->
+          </div>
+        <p>
+
+          <br />
+          -CMN<br />
+          *Revisado GAUGE/Load_B<br />
+          *Implantado o GAUGE[Necessita correção de campo de Corte]<br>
+          <br />
+          -ADV:<br />
+          [EVENT]<br />
+          *Terminados todos os CLCT[Missões Principais] 10/03/23<br />
+          *Terminados IRAI[Petições] 1-4 11/03/23<br />
+          *Terminados IRAI[Petições] 5-15 12/03/23<br />
+          *Terminados IRAI[Petições] 16-20 13/03/23<br />
+          *Terminados SKILL[HABILIDADES] 0-4 14/03/23<br />
+          <br />
+          -BATALHA[BATTLEGAUGE/CHARSEL]<br />
+          *Nada ainda...<br />
+          <br />
+          -MENU DE SELEÇÃO DE MODO[MODESEL]<br />
+          *Nada inda...<br />
+          <br />
+          -Extras<br />
+          *Nada ainda...<br />
+          <br />
+          <strong>[ELF/MWO3]</strong><br />
+          *Completo, faltam pequenos detalhes....<br>
+          *Corrigido Ultimate Zabuza "Jutsu Dragão de Água", erro de Ponteiro 19/03/23
+          <br /><br />
+          <strong>[Extras]</strong><br />
+          Feito:
+          <br />
+          *Legendas em Ultimates<br />
+          <br />
+          Em andamento:
+          <br />
+          *Legendas em Vitórias [Combates]<br />
+          *Sombras Melhoradas nas Legendas
+          <br />
         </p>
         <div id="Legendas_progress">
-        <div class="aligncenter">
-          <br /><br /><br />
-          <p>
-            <strong>Atualmente</strong>, tenho legendado vários Jutsus Supremos
-            e o progresso encontra-se em algo em torno de <br />
-            99%, agora só falta uma revisão e conferência de qualidade.<br /><br />
-          </p>
+          <div class="aligncenter">
+            <br /><br /><br />
+            <p>
+              <strong>Atualmente</strong>, tenho legendado vários Jutsus
+              Supremos e o progresso encontra-se em algo em torno de <br />
+              99%, agora só falta uma revisão e conferência de qualidade.<br /><br />
+            </p>
 
-          <h2>Haku: Espelhos de Cristal de Gelo</h2>
-          <br /><br />
-          <iframe
-            style="position: relative; overflow: hidden; width: 100%"
-            width="640"
-            height="480"
-            src="https://www.youtube.com/embed/aHp-G34WTUk"
-            title="Espelhos de Cristal de Gelo"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-          ></iframe>
-          <br />
-          <img src="media/progresso_legendas_hex.PNG" />
-          <br />
+            <h2>Haku: Espelhos de Cristal de Gelo</h2>
+            <br /><br />
+            <iframe
+              style="position: relative; overflow: hidden; width: 100%"
+              width="640"
+              height="480"
+              src="https://www.youtube.com/embed/aHp-G34WTUk"
+              title="Espelhos de Cristal de Gelo"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+            <br />
+            <img src="media/progresso_legendas_hex.PNG" />
+            <br />
 
-          <p id="description">
-            <strong>As</strong> legendas são feitas usando um formato
-            desenvolvido por mim, a partir de legendas do formato do Youtube
-            <strong>SBV</strong>, <br />
-            que facilita as conversões de <strong>texto e tempo</strong>.
-          </p>
+            <p id="description">
+              <strong>As</strong> legendas são feitas usando um formato
+              desenvolvido por mim, a partir de legendas do formato do Youtube
+              <strong>SBV</strong>, <br />
+              que facilita as conversões de <strong>texto e tempo</strong>.
+            </p>
 
-          <br /><br />
-          <img style="width: 70%" src="media/progresso_legendas.PNG" />
-          <br />
-          <p>
-            <strong>Subtitle Edit</strong> é um ótimo programa para gerar
-            legendas a partir de um vídeo, e suporta vários formatos!
-          </p>
+            <br /><br />
+            <img style="width: 70%" src="media/progresso_legendas.PNG" />
+            <br />
+            <p>
+              <strong>Subtitle Edit</strong> é um ótimo programa para gerar
+              legendas a partir de um vídeo, e suporta vários formatos!
+            </p>
+          </div>
         </div>
-      </div>
       </article>
     </div>
   </body>

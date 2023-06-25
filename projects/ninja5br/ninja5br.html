@@ -282,6 +282,23 @@
         <h2 id="under">Diretório do Projeto</h2>
       </div>
       <div class="folder">
+        <br>
+        <div id="detalhes" class="hidden_folder">
+          <picture id="hide_folder" onclick="folder(this)">
+            <source
+              srcset="../../elements/down_arrow.png"
+              media="(prefers-color-scheme: dark)"
+            />
+            <img id="hide_folder" src="../../elements/light_down_arrow.png" />
+          </picture>
+          <h1>Detalhes</h1>
+          <br />
+          <div style="width: 100vh;" class="hiddendiv" id="hidden">
+            <iframe
+            style="height: 180vh;" frameborder="0" width="100%" height="100%" src="/projects/ninja5br/detalhes.html">
+            </iframe>
+          </div>
+        </div>
         <br />
         <div id="patch_tutorial" class="hidden_folder">
           <picture id="hide_folder" onclick="folder(this)">
@@ -305,6 +322,7 @@
             ></iframe>
           </div>
         </div>
+        
         <br />
 
         <div id="download" class="hidden_folder">
@@ -336,17 +354,14 @@
             <h2 id="changelog_title">Changelog</h2>
             <br />
             <div class="showdiv" id="hidden">
-              <p style="text-align: center">
-              <h3>Versão 7.0:</h3>
-              *Guy para Gai;<br />
-              *Hyuga para Hyuuga(Nomes na Vitória);<br />
-              *Correções em diálogos;<br />
-              *Etc...<br />
-              <h3>REV_2023:</h3>
-              *Legendas em Ultimates (+);<br />
-              *Espaço de Memória Adicional (+);<br />
-              *Mergido com o UN5+ Mod (+);<br />
-            </p>
+              <iframe
+    src="./progresso.txt"
+    frameBorder="0"
+    style="width: 90%; border-radius: 2em;"
+    scrolling="auto"
+    height="100%"
+    width="100%">
+</iframe>
             </div>
              <div class="showdiv" id="hidden">
             <div id="v7.0" class="hidden_folder"></div>

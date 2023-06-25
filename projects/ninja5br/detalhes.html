@@ -1,0 +1,314 @@
+<meta content='width=device-width, initial-scale=1.0' name='viewport'>
+<style>
+
+    .hidden_folder #hide_folder {
+      cursor: grab;
+      width: 18px;
+    }
+    .hidden_folder #show_folder {
+      
+      cursor: grab;
+      width: 18px;
+      translate: scaleY(-1);
+    }
+    .hidden_folder h1 {
+      background-color: orange;
+      display: inline;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: xx-large;
+      font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+      color: rgb(0, 0, 0);
+      background: linear-gradient(
+        0deg,
+        rgba(145, 28, 106, 0.445) 10%,
+        rgba(255, 183, 29, 0.356) 70%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-stroke: 3px transparent;
+    }
+    .hidden_folder h1 {
+      background-color: rgb(255, 255, 255);
+      display: inline;
+      font-size: x-large;
+      font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+      color: rgb(0, 0, 0);
+    }
+    #arrow{
+      background-color: #ffffff7e;
+      border-radius: 1em;
+    }
+    .hiddendiv {
+      display: none;
+    }
+    .showdiv {
+      border-radius: 4em;
+      background-color: rgba(3, 0, 32, 0.589);
+      display: block;
+    }
+    ._bit {
+      font-size: xx-large;
+      color: black;
+      font-style: initial;
+      text-align: center;
+      animation: color-green 1s infinite;
+    }
+    ._world {
+      font-size: xx-large;
+      color: black;
+      font-style: initial;
+      text-align: center;
+      animation: color-blue 1s infinite;
+    }
+    .commontext {
+      font-size: xx-large;
+      font-style: italic;
+      text-align: center;
+    }
+    article {
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    article h2 {
+      display: inline;
+      font-family: "Times New Roman";
+      font-size: x-large;
+      font-stretch: ultra-expanded;
+      border-style: solid;
+      border-left: 0;
+      border-top: 0;
+      border-right: 0;
+      border-image: radial-gradient(rgb(29, 89, 253) 90%, rgb(10, 20, 80) 30%)
+        1;
+      border-bottom: 4px solid rgb(0, 0, 0);
+    }
+    article h3 {
+      display: block;
+      font-family: "Arial Narrow";
+      font-size: xx-large;
+      font-stretch: ultra-expanded;
+      border-style: solid;
+      border-left: 0;
+      border-top: 0;
+      border-right: 0;
+      border-image: radial-gradient(rgb(80, 1, 1), rgb(255, 222, 37)) 1;
+      border-bottom: 4px solid rgb(255, 19, 19);
+    }
+    article p {
+      padding-left: 20px;
+      padding-right: 20px;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      font-size: large;
+    }
+    p {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      font-size: large;
+    }
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      width: 50%;
+    }
+    
+    .aligncenter {
+      text-align: center;
+    }
+    .hidden_folder {
+      text-shadow: none;
+      display: block;
+    }
+    .hidden_folder:hover {
+      background-color: rgba(255, 228, 177, 0.089);
+      border-radius: 4em;
+    }
+    #gallery {
+      background-color: rgba(0, 0, 0, 0.418);
+      justify-content: center;
+      align-items: center;
+    }
+    #gallery img {
+      width: 100% !important;
+    }
+          @keyframes color-blue {
+            0% {
+              color: black;
+            }
+            25% {
+              color: blue;
+            }
+            50% {
+              color: blue;
+            }
+            100% {
+              color: black;
+            }
+          }
+          @keyframes color-green {
+            0% {
+              color: black;
+            }
+            25% {
+              color: green;
+            }
+            50% {
+              color: green;
+            }
+            100% {
+              color: black;
+            }
+          }
+          * {
+      box-sizing: border-box;
+    }
+    
+    /* Slideshow container */
+    .slideshow-container {
+      max-width: 1000px;
+      border-color: #000;
+      position: relative;
+      display: flex;
+      margin: auto;
+    }
+    
+    /* Hide the images by default */
+    .mySlides {
+      display: none;
+      width: max-content;
+      margin: auto;
+    }
+    .first {
+      display: flex;
+      margin: auto;
+    }
+    
+    /* Next & previous buttons */
+    .prev,
+    .next {
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      width: auto;
+      margin-top: -22px;
+      padding: 16px;
+      color: rgb(255, 255, 255);
+      font-weight: bold;
+      font-size: 18px;
+      transition: 0.6s ease;
+      border-radius: 0 3px 3px 0;
+      user-select: none;
+    }
+    
+    /* Position the "next button" to the right */
+    .next {
+      right: 0;
+      border-radius: 3px 0 0 3px;
+    }
+    
+    /* On hover, add a black background color with a little bit see-through */
+    .prev:hover,
+    .next:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+    
+    /* Caption text */
+    .text {
+      color: #f2f2f2;
+      font-size: 20px;
+      padding: 8px 12px;
+      position: absolute;
+      bottom: 8px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    /* Number text (1/3 etc) */
+    .numbertext {
+      color: #ffffff;
+      font-size: 16px;
+      padding: 16px 26px;
+      position: absolute;
+      top: 0;
+    }
+    body, html
+            {
+                color: #ffffff;
+                margin: 0; padding: 0; height: 100%; overflow: hidden;
+            }
+    /* The dots/bullets/indicators */
+    .dot {
+      cursor: pointer;
+      height: 15px;
+      width: 15px;
+      margin: 0 2px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+      transition: background-color 0.6s ease;
+    }
+    
+    .active,
+    .dot:hover {
+      background-color: #5c0564;
+    }
+    .hidden_folder:hover h1 {
+      color: rgb(0, 0, 0);
+    }
+    /* Fading animation */
+    .fade {
+      animation-name: fade;
+      animation-duration: 1.5s;
+    }
+    @keyframes fade {
+      from {
+        opacity: 0.4;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    
+          
+        </style>
+
+<article>
+<div class="aligncenter">
+    <br /><br /><br />
+    <h2>Sasori: Performance de 100 Marionetes</h2>
+    <br /><br />
+    <iframe
+      style="position: relative; overflow: hidden;"
+      width="640"
+      height="480"
+      src="https://www.youtube.com/embed/WLUm6IQYGR4"
+      title="Performance de 100 Marionetes"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+    ></iframe>
+    <br />
+    <img style="width: 70%" src="/media/progresso_legendas_hex.PNG" />
+    <br />
+
+    <p id="description">
+      <strong>As</strong> legendas são feitas usando um formato
+      desenvolvido por mim, a partir de legendas do formato do Youtube
+      <strong>SBV</strong>, <br />
+      que facilita as conversões de <strong>texto e tempo</strong>.
+    </p>
+
+    <br /><br />
+    <img style="width: 70%" src="/media/progresso_legendas.PNG" />
+    <br />
+    <p>
+      <strong>Subtitle Edit</strong> é um ótimo programa para gerar
+      legendas a partir de um vídeo, e suporta vários formatos!
+    </p>
+  </div>
+</article>

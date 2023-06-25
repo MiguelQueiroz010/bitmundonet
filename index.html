@@ -1,8 +1,6 @@
 ﻿<!DOCTYPE html>
 <html>
-  <style></style>
   <meta name="viewport" content="width=device-width, initial-scale=0.7" />
-
   <head>
     <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
     <title>Bit.Mundo Net</title>
@@ -33,65 +31,135 @@
       crossorigin="anonymous"
     ></script>
     <style>
-      ._bit {
-        font-size: xx-large;
-        color: black;
-        font-style: initial;
-        text-align: center;
-        animation: color-green 1s infinite;
-      }
-      ._world {
-        font-size: xx-large;
-        color: black;
-        font-style: initial;
-        text-align: center;
-        animation: color-blue 1s infinite;
-      }
-      .commontext {
-        font-size: xx-large;
-        font-style: italic;
-        text-align: center;
-      }
-      article {
-        padding-left: 5px;
-        padding-right: 5px;
-      }
-      article h2 {
-        display: inline;
-        font-family: "Times New Roman";
-        font-size: x-large;
-        font-stretch: ultra-expanded;
-        border-style: solid;
-        border-left: 0;
-        border-top: 0;
-        border-right: 0;
-        border-image: radial-gradient(rgb(29, 89, 253) 90%, rgb(10, 20, 80) 30%)
-          1;
-        border-bottom: 4px solid rgb(0, 0, 0);
-      }
-      article h3 {
-        display: block;
-        font-family: "Arial Narrow";
-        font-size: xx-large;
-        font-stretch: ultra-expanded;
-        border-style: solid;
-        border-left: 0;
-        border-top: 0;
-        border-right: 0;
-        border-image: radial-gradient(rgb(80, 1, 1), rgb(255, 222, 37)) 1;
-        border-bottom: 4px solid rgb(255, 19, 19);
-      }
-      article p {
-        padding-left: 20px;
-        padding-right: 20px;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: large;
-      }
-      p {
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: large;
-      }
-      #gallery {
+
+.hidden_folder #hide_folder {
+  cursor: grab;
+  width: 18px;
+}
+.hidden_folder #show_folder {
+  
+  cursor: grab;
+  width: 18px;
+  translate: scaleY(-1);
+}
+.hidden_folder h1 {
+  background-color: orange;
+  display: inline;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: xx-large;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: rgb(0, 0, 0);
+  background: linear-gradient(
+    0deg,
+    rgba(145, 28, 106, 0.445) 10%,
+    rgba(255, 183, 29, 0.356) 70%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-stroke: 3px transparent;
+}
+.hidden_folder h1 {
+  background-color: rgb(255, 255, 255);
+  display: inline;
+  font-size: x-large;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: rgb(0, 0, 0);
+}
+#arrow{
+  background-color: #ffffff7e;
+  border-radius: 1em;
+}
+.hiddendiv {
+  display: none;
+}
+.showdiv {
+  border-radius: 4em;
+  background-color: rgba(3, 0, 32, 0.589);
+  display: block;
+}
+._bit {
+  font-size: xx-large;
+  color: black;
+  font-style: initial;
+  text-align: center;
+  animation: color-green 1s infinite;
+}
+._world {
+  font-size: xx-large;
+  color: black;
+  font-style: initial;
+  text-align: center;
+  animation: color-blue 1s infinite;
+}
+.commontext {
+  font-size: xx-large;
+  font-style: italic;
+  text-align: center;
+}
+article {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+article h2 {
+  display: inline;
+  font-family: "Times New Roman";
+  font-size: x-large;
+  font-stretch: ultra-expanded;
+  border-style: solid;
+  border-left: 0;
+  border-top: 0;
+  border-right: 0;
+  border-image: radial-gradient(rgb(29, 89, 253) 90%, rgb(10, 20, 80) 30%)
+    1;
+  border-bottom: 4px solid rgb(0, 0, 0);
+}
+article h3 {
+  display: block;
+  font-family: "Arial Narrow";
+  font-size: xx-large;
+  font-stretch: ultra-expanded;
+  border-style: solid;
+  border-left: 0;
+  border-top: 0;
+  border-right: 0;
+  border-image: radial-gradient(rgb(80, 1, 1), rgb(255, 222, 37)) 1;
+  border-bottom: 4px solid rgb(255, 19, 19);
+}
+article p {
+  padding-left: 20px;
+  padding-right: 20px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: large;
+}
+p {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: large;
+}
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.aligncenter {
+  text-align: center;
+}
+.hidden_folder {
+  text-shadow: none;
+  display: block;
+}
+.hidden_folder:hover {
+  background-color: rgba(255, 228, 177, 0.089);
+  border-radius: 4em;
+}
+#gallery {
   background-color: rgba(0, 0, 0, 0.418);
   justify-content: center;
   align-items: center;
@@ -216,13 +284,14 @@
 .dot:hover {
   background-color: #5c0564;
 }
-
+.hidden_folder:hover h1 {
+  color: rgb(0, 0, 0);
+}
 /* Fading animation */
 .fade {
   animation-name: fade;
   animation-duration: 1.5s;
 }
-
 @keyframes fade {
   from {
     opacity: 0.4;
@@ -232,11 +301,30 @@
   }
 }
 
-      article img {
-        width: 100%;
-      }
+      
     </style>
-
+<script>
+   function folder(e) {
+    console.log(e.id);
+      if (e.id == "hide_folder") {
+        console.log(e.children);
+        const node = e.parentElement.querySelector("#hidden");
+        var arrow = e.querySelector("#arrow");
+        if(node!=null){
+        if (node.className == "hiddendiv") {
+          node.className = "showdiv";
+          arrow.children[0].innerHTML = "Ocultar";
+          arrow.children[1].children[1].style.transform = "scaleY(-1)";
+        } 
+        else {
+          node.className = "hiddendiv";
+          arrow.children[0].innerHTML = "Mostrar";
+          arrow.children[1].children[1].style.transform = "scaleY(1)";
+        }
+      }
+      }
+    }
+</script>
     <div id="navbar">
       <img id="banner" src="media/bitmundo_banner.png" width="100%" />
 
@@ -264,188 +352,54 @@
   </head>
 
   <body>
+    <div id="site_description">
+<p class="aligncenter">
+  Site de conteúdos de romhacking, modificações e projetos de tradução/modificação
+  <br>em diversos jogos e consoles, antigos e novos.
+  <br>
+  <br>Sinta-se livre para explorar o conteúdo, veja abaixo os destaques.
+</p>
+
+    </div>
+
     <div id="month_contents">
       <article>
-        <div>
+        
+        <h3>Destaques</h3>
+
+        <!--Ultimate Ninja 5+ Folder-->
+        <div id="hide_folder" style="cursor: grab;"  onselectstart="return false" class="hidden_folder" onclick="folder(this)">
           <img
-            style="float: left; width: fit-content"
-            src="projects/ninja5br/media/icon.png"
+            src="projects/ninja5br/media/icon.png" style="float: left;"
           />
           <br /><br />
-          <h3 style="display: inline" ;>Revisão Ultimate Ninja 5 2023</h3>
+          <h3 style="display: inline;" ;>Revisão Ultimate Ninja 5 2023</h3>
+          <br />
+          <p>
+            A revisão se encontra em estágio final.
+          </p>
+          <div id="arrow" style="float: right; margin-right:2em;
+          padding:4px;">
+            <h1 style="padding-right:4px;">Mostrar</h1> 
+            <picture id="hide_folder" onclick="folder(this)">
+              <source
+                srcset="../../elements/down_arrow.png"
+                media="(prefers-color-scheme: dark)"
+              />
+              <img id="hide_folder" src="../../elements/light_down_arrow.png" />
+            </picture>
+
+          </div>
+          <br><br>
+          <br />
+          <div class="hiddendiv" id="hidden">
+            <iframe
+            style="height: 290vh;" frameborder="0" width="100%" height="100%" src="/projects/ninja5br/detalhes.html">
+            </iframe>
+          </div>
         </div>
         <br />
-        <p>
-          Progresso Geral da Revisão:
-          <br /><br />
-          <strong>[TEXTOS CCS]</strong><br />
-          *Terminados STFDATA[CÉDITOS] 16/03/23<br />
-          *Implantado STFDATA[CRÉDITOS] em CCS 19/03/23<br />
-          *Corrigido STFDATA[CRÉDITOS] em CCS 20/03/23<br />
-          *Iniciada revisão de PUPPET[CUTSCENES]!<br />
-          *Terminados textos PUPPET[CUTSCENES] 02/04/23<br />
-*Implantado PUPPET[CUTSCENES] 02/04/23<br />
-          <br />
-          *Correções em andamento...<br />
-          <br />
-          Chambers of Darkness = Câmaras das Trevas<br />
-          <br />
-          <strong>[TEXTURAS]</strong><br />
-          -MODOS:<br />
-          *Extraídas texturas em PNG[Necessário suporte a PNG com Transparência
-          de Meio Alfa(128)]<br />
-          *Terminada Re-Tradução e Adaptação: 19/03/23 <br />
-          ///MUDANÇAS\\\ <br />
-          //"Manto da Kyuubi" para "Chakra da Kyuubi"\\<br />
-          //"Modo Super Choji" para "Modo Borboleta"\\<br />
-        </p>
-          <div id="gallery" data-fit="cover" data-autohide="a11">
-            <script type="text/javascript" src="scripts/gallery.js"></script>
-            <script
-              type="text/javascript"
-              src="scripts/spotlight.bundle.js"
-            ></script>
-    
-            <div id="gallery_container" class="slideshow-container">
-              <!-- Full-width images with number and caption text -->
-              <div class="mySlides fade first">
-                <a
-                  data-description="
-                  'Manto da Kyuubi' para 'Chakra da Kyuubi'
-              "
-                  style="width: 100%"
-                  class="spotlight"
-                  href="/projects/ninja5br/media/progress/mode2nrv.png"
-                >
-                  <img
-                    alt="Naruto Clássico"
-                    style="width: 100%"
-                    src="/projects/ninja5br/media/progress/mode2nrv.png"
-                  />
-                </a>
-              </div>
-              <div class="mySlides fade">
-                <a
-                  data-description="
-                  'Manto da Kyuubi' para 'Chakra da Kyuubi'
-              "
-                  style="width: 100%"
-                  class="spotlight"
-                  href="/projects/ninja5br/media/progress/mode2nwv.png"
-                >
-                  <img
-                    alt="Naruto Shippuden"
-                    style="width: 100%"
-                    src="/projects/ninja5br/media/progress/mode2nwv.png"
-                  />
-                </a>
-              </div>
-              <div class="mySlides fade">
-                <a
-                  data-description="
-                  'Modo Super Choji' para 'Modo Borboleta'
-              "
-                  class="spotlight"
-                  href="/projects/ninja5br/media/progress/mode2tov.png"
-                >
-                  <img alt="Choji" src="/projects/ninja5br/media/progress/mode2tov.png" />
-                </a>
-              </div>
-    
-              <!-- Next and previous buttons -->
-              <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-              <a class="next" onclick="plusSlides(1)">&#10095;</a>
-            </div>
-            <!-- The dots/circles -->
-          </div>
-        <p>
 
-          <br />
-          -CMN<br />
-          *Revisado GAUGE/Load_B<br />
-          *Implantado o GAUGE[Necessita correção de campo de Corte]<br>
-          <br />
-          -ADV:<br />
-          *Terminados todos os CLCT[Missões Principais] 10/03/23<br />
-          *Terminados IRAI[Petições] 1-4 11/03/23<br />
-          *Terminados IRAI[Petições] 5-15 12/03/23<br />
-          *Terminados IRAI[Petições] 16-20 13/03/23<br />
-          *Terminados SKILL[HABILIDADES] 0-4 14/03/23<br />
-          *Corrigidos CCS TOWN_11-13 19/03/23<br />
-          *Iniciadas texturas, MAP 21/03/23<br />
-          *MAPA traduzido/Implantado 21/03/23<br />
-          *Desafio dos 100 Homens traduzido/Implantado 21/03/23<br />
-          *Traduzido/Implantado ADVSTATUS 22/03/23<br />
-          *Traduzido ADV SBOOK,SKILL,PRAC,COMBO,LEBEL E DOLL01 24/03/23<br />
-          *Todo o resto implantado 28/03/23<br />
-          <br />
-          -BATALHA[BATTLEGAUGE/CHARSEL]<br />
-          *Tudo traduzido 28/03/23<br />
-*Carece correção...<br />
-          <br />
-          -MENU DE SELEÇÃO DE MODO[MODESEL]<br />
-          *Tudo traduzido 28/03/23<br />
-*Carece correção...<br />
-          <br />
-          -Extras<br />
-          *Nada ainda...<br />
-          <br />
-          <strong>[ELF/MWO3]</strong><br />
-          *Completo, faltam pequenos detalhes....<br>
-          *Corrigido Ultimate Zabuza "Jutsu Dragão de Água", erro de Ponteiro 19/03/23
-          <br /><br />
-          <strong>[Extras]</strong><br />
-          Feito:
-          <br />
-          *Legendas em Ultimates<br />
-          <br />
-          Em andamento:
-          <br />
-          *Legendas em Vitórias [Combates]<br />
-          *Sombras Melhoradas nas Legendas
-          <br />
-        </p>
-        <div id="Legendas_progress">
-          <div class="aligncenter">
-            <br /><br /><br />
-            <p>
-              <strong>Atualmente</strong>, tenho legendado vários Jutsus
-              Supremos e o progresso encontra-se em algo em torno de <br />
-              99%, agora só falta uma revisão e conferência de qualidade.<br /><br />
-            </p>
-
-            <h2>Sasori: Performance de 100 Marionetes</h2>
-            <br /><br />
-            <iframe
-              style="position: relative; overflow: hidden; width: 100%"
-              width="640"
-              height="480"
-              src="https://www.youtube.com/embed/WLUm6IQYGR4"
-              title="Performance de 100 Marionetes"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-            ></iframe>
-            <br />
-            <img src="media/progresso_legendas_hex.PNG" />
-            <br />
-
-            <p id="description">
-              <strong>As</strong> legendas são feitas usando um formato
-              desenvolvido por mim, a partir de legendas do formato do Youtube
-              <strong>SBV</strong>, <br />
-              que facilita as conversões de <strong>texto e tempo</strong>.
-            </p>
-
-            <br /><br />
-            <img style="width: 70%" src="media/progresso_legendas.PNG" />
-            <br />
-            <p>
-              <strong>Subtitle Edit</strong> é um ótimo programa para gerar
-              legendas a partir de um vídeo, e suporta vários formatos!
-            </p>
-          </div>
-        </div>
       </article>
     </div>
   </body>

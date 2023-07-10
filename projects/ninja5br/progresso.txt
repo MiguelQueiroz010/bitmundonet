@@ -57,11 +57,10 @@ Chambers of Darkness = Câmaras das Trevas
 *Carece correção...
 
 -Extras
-*Nada ainda...
+*[BATALHA] (ZMATH3US) Choji "Donburi Throw/Arremesso Donburi", Câmera e EECODE
 *[Coleção] Recorte no ícone de "Novo"
 
 [ELF/MWO3]
-*Completo, faltam pequenos detalhes...
 *Corrigido Ultimate Zabuza "Jutsu Dragão de Água", erro de Ponteiro 19/03/23
 *Traduzido detalhes de opções (Combate/Praticar)
 [Extra Hit Counter = Contra-Ataque Extra ]
@@ -75,12 +74,14 @@ Chambers of Darkness = Câmaras das Trevas
 *Dazzling Battle ... Traduzir
 *Ranking Duelo Ardente ("segundos" para "Ninjas")
 *Senhora Ninja da Folha -> Kunoichi da Folha
+*BUG Puppet Sai/Shikamaru ("sem nenhum problema")
+*Folhas para Páginas
 
 MISSÕES
 --------
 
 DIÁRIO DO VIAJANTE[CLCT00] -
-CAIXINHA DE MÚSICA[CLCT01] -
+CAIXINHA DE MÚSICA[CLCT01] - OK
 BONECOS DE MADEIRA[CLCT02] -
 
 LUTADOR [IRAI01] -OK
@@ -90,6 +91,7 @@ PAIS ADOTIVOS [IRAI04] -OK
 SHIZUNE ERVAS [IRAI05] -OK
 LEE [IRAI06] -OK
 LUTADOR 2 [IRAI07] -OK
+NEJI E TENTEN [IRAI10] - OK
 HINATA [IRAI11] -OK
 
 [SKILL01] -

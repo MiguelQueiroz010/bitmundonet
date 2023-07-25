@@ -2,9 +2,9 @@
 
 
 *Textos MWO3/ELF: 100%
-*Textos CCS: 100% [USAR DA VERSÃO ANTIGA REVISANDO]
-*Filmes PSS: 100% [Legendar textos IMBUTIDOS!]
-*Texturas: 100% [USAR DA VERSÃO ANTIGA REVISANDO]
+*Textos CCS: 100%
+*Filmes PSS: 100%
+*Texturas: 100%
 *Extras: 90%
 
 [TEXTOS CCS]
@@ -14,13 +14,13 @@
 *Iniciada revisão de PUPPET[CUTSCENES]!
 *Terminados textos PUPPET[CUTSCENES] 02/04/23
 *Implantado PUPPET[CUTSCENES] 02/04/23
-!PUPPET 3210 [ERRO LIVE PT8, CORTE DE FALA]
+!PUPPET 3210 [ERRO LIVE PT8, CORTE DE FALA] [...]
 
 Chambers of Darkness = Câmaras das Trevas
 
 -MODOS:
 *Extraídas texturas em PNG[Necessário suporte a PNG com Transparência de Meio Alfa(128)]
-*Terminada Re-Tradução e Adaptação:    19/03/23
+*Terminada Re-Tradução e Adaptação: 19/03/23
  ///MUDANÇAS\\\
  //"Manto da Kyuubi" para "Chakra da Kyuubi"\\
  //"Modo Super Choji" para "Modo Borboleta"\\
@@ -69,22 +69,21 @@ Chambers of Darkness = Câmaras das Trevas
 *Corrigidas 6 Ocorrências erro: "<BRANCO>" para "<WHITE>" [GRAVE] 04/05/23
 *BUG CRÍTICO [ESCRITA NA MEMÓRIA TEXTBRA] Corrigido 10/06/23 [ZMATH3US]
 
-*Yamato Wood Clone -> Traduzir
+*Yamato Wood Clone -> Traduzir 25/07/23
+*Dazzling Battle ... Traduzir 25/07/23
+*Senhora Ninja da Folha -> Kunoichi da Folha 24/07/23
+*Folhas para Páginas 25/07/23
+*Registros -> Recordes 25/07/23
+
 *BUG texto vendedor "Tchau" Vazio -> Conferir no Original
-*Sasuke... (Sasuke-kun!) Texto reutilizado "Reunião com Sasuke 2" ELF
-*Dazzling Battle ... Traduzir
-*Ranking Duelo Ardente ("segundos" para "Ninjas")
-*Senhora Ninja da Folha -> Kunoichi da Folha
-*BUG Puppet Sai/Shikamaru ("sem nenhum problema")
-*Folhas para Páginas
-*Registros -> Recordes
+*INICIADA REVISÃO FINAL PARA LEGENDAS NOS ULTIMATES! 25/07/23
 
 MISSÕES
 --------
 
 DIÁRIO DO VIAJANTE[CLCT00] - OK
 CAIXINHA DE MÚSICA[CLCT01] - OK
-BONECOS DE MADEIRA[CLCT02] -
+BONECOS DE MADEIRA[CLCT02] - OK
 
 LUTADOR [IRAI01] -OK
 NETO PERDIDO [IRAI02] -OK

@@ -49,14 +49,15 @@ Chambers of Darkness = Câmaras das Trevas
 *Todo o resto implantado 28/03/23
 *Traduzido "The End" da Missão Especial [Edinho] 23/07/23
 *Iniciada Correção em Nomes de Mapa do ADV!! 28/07/23
+*Corrigidas as Caixas de Textura dos Nomes de Mapa do ADV! [ZMATH3US-> Offset de Ponteiros] 29/07/23
 
 -BATALHA[BATTLEGAUGE/CHARSEL]
 *Tudo traduzido 28/03/23
-*Carece correção...
+*Iniciada Correção em Nomes de Mapa!! 29/07/23
+*Corrigidas as Caixas de Textura dos Nomes de Mapa! [ZMATH3US-> Offset de Ponteiros] 29/07/23
 
 -MENU DE SELEÇÃO DE MODO[MODESEL]
 *Tudo traduzido 28/03/23
-*Carece correção...
 
 -Extras
 *[BATALHA] (ZMATH3US) Choji "Donburi Throw/Arremesso Donburi", Câmera e EECODE
@@ -76,7 +77,7 @@ Chambers of Darkness = Câmaras das Trevas
 *Folhas para Páginas 25/07/23
 *Registros -> Recordes 25/07/23
 
-*BUG texto vendedor "Tchau" Vazio -> Conferir no Original
+*BUG texto vendedor "Tchau"//"Homem Silencioso" Vazio -> Conferir no Original Corrigido 30/07/23
 *INICIADA REVISÃO FINAL PARA LEGENDAS NOS ULTIMATES! 25/07/23
 {
 Naruto Shipp: [Relação Imutável]

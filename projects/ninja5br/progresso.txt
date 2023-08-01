@@ -5,7 +5,7 @@
 *Textos CCS: 100%
 *Filmes PSS: 100%
 *Texturas: 100%
-*Extras: 90%
+*Extras: 99%
 
 [TEXTOS CCS]
 *Terminados STFDATA[CÉDITOS] 16/03/23
@@ -50,6 +50,7 @@ Chambers of Darkness = Câmaras das Trevas
 *Traduzido "The End" da Missão Especial [Edinho] 23/07/23
 *Iniciada Correção em Nomes de Mapa do ADV!! 28/07/23
 *Corrigidas as Caixas de Textura dos Nomes de Mapa do ADV! [ZMATH3US-> Offset de Ponteiros] 29/07/23
+*Corrigidas Falas de Npcs "TOWN"/ "Vigia" para "Guarda" 01/08/23 
 
 -BATALHA[BATTLEGAUGE/CHARSEL]
 *Tudo traduzido 28/03/23
@@ -78,29 +79,7 @@ Chambers of Darkness = Câmaras das Trevas
 *Registros -> Recordes 25/07/23
 
 *BUG texto vendedor "Tchau"//"Homem Silencioso" Vazio -> Conferir no Original Corrigido 30/07/23
-*INICIADA REVISÃO FINAL PARA LEGENDAS NOS ULTIMATES! 25/07/23
-{
-Naruto Shipp: [Relação Imutável]
-Sai [T]
-Neji Shipp/Neji : [Revisar "Golpe" para "Palma"] [T]
-Tenten Shipp: [Pedaço de Ferro Gigante]
-Guy[T]
-Shikamaru [T]
-Choji [X]
-Asuma [T]
-Shino Shipp[T]
-Hinata Shipp[T]
-Gaara Kzk[T]
-Temari Shipp[F][T]		
-Chiyo [F T]
-ITACHI [T]
-Deidara["Exploda" F]
-Sasori [F "Aglomerado de Areia de Ferro"->Cor]
-Jiraiya [F]
-Naruto [F]	
-1 Hokage [Cor]
-Tirar FBS de Todos
-}
+
 
 MISSÕES
 --------

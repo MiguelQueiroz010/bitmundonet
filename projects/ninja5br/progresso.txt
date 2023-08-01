@@ -77,9 +77,8 @@ Chambers of Darkness = Câmaras das Trevas
 *Senhora Ninja da Folha -> Kunoichi da Folha 24/07/23
 *Folhas para Páginas 25/07/23
 *Registros -> Recordes 25/07/23
-
 *BUG texto vendedor "Tchau"//"Homem Silencioso" Vazio -> Conferir no Original Corrigido 30/07/23
-
+*Corrigido Shizune "Combo com Lâmina" -> "Arte Ninja: Névoa Venenosa" 01/08/23
 
 MISSÕES
 --------

@@ -6,6 +6,6 @@ Alundra 2 - Progresso de Tradução
 *Font external Loader TIM format [denim] 01/08/2021
 *Font loader by denim, implement/fix by Bit.Raiden 18/08/2023 [2 Anos DEPOIS!]
 
-*Project started! 
+*Project iniciado! -> 20/08/23 
 
 

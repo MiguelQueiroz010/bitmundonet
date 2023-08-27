@@ -23,3 +23,7 @@ Alundra 2 - Progresso de Tradução
 *Navio [Viagens] - OK 21/08/2023
 *Pierre - OK 21/08/2023
 
+*Bug Alundra 2 TextEditor Encoding Fixed 27/08/23
+*Teste de textos 27/08/23
+
+

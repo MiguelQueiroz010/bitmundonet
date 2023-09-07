@@ -56,7 +56,7 @@
     border-image: linear-gradient(to right, rgb(184, 184, 184), rgb(235, 216, 48)) 1;
     padding: 0 10px;
   }
-  #head:hover img {
+  #cape:hover {
     opacity: 100%;
   }
   p {
@@ -141,7 +141,7 @@
 
     z-index: -1;
   }
-  #ing{width: 50%;
+  #cape{width: 50%;
     border-radius: 1em;
     opacity: 5%;}
   #backWall {

@@ -56,11 +56,36 @@
     ></script>
     <link rel="stylesheet" href="sbbfbb.css" />
     <script type="text/javascript" src="/scripts/navbar.js"></script>
-
+<style>
+  #hovertext_a:hover{
+  height: 2.4em;
+  background-color: #0400ff;
+  color: rgb(255, 255, 255);
+  filter: grayscale(90%);
+  border-bottom: 2px solid rgb(255, 255, 255);
+}
+</style>
     <div id="navbar">
-      <img id="banner" src="/media/bitmundo_banner.png" width="100%" />
+      <div id="head">
+        <div
+          class="container"
+          style="
+            position: relative;
+            padding: 0em;
+            margin: 0 auto;
+          "
+        >
+        <img oncontextmenu="return false" id="backWall" style=" height: 512px" src="/media/banner_animatedbits.gif">
+          <table>
+            <td style="min-width: 100%; ">
+              <img oncontextmenu="return false" id="ing" class="center" src="/media/bitmundo_logo.png" />
+            </td>
+          </table>
+        </div>
+      </div>
+    
 
-      <nav class="alignnav">
+      <nav class="alignnav" onmousedown="return false" onselectstart="return false">
         <div id="old_banner" class="container">
           <img src="teste.gif" width="92" />
           <div class="_bit">Bit.</div>
@@ -69,13 +94,14 @@
         </div>
         <div id="banner">
           <ul>
-            <li class="alignnav"><a href="/index.html">Início</a></li>
-
-            <li class="alignnav"><a href="/projetos.html">Projetos</a></li>
-
-            <li class="alignnav"><a href="/library.html">Biblioteca</a></li>
-
-            <li class="alignnav"><a href="/tools.html">Ferramentas</a></li>
+            <li class="alignnav_floaty"><a id="dummy"></a></li>
+            <li class="alignnav_floaty"><a id="hoverimage_a" href="/index.html"><img oncontextmenu="return false" onselectstart="return false" style="width: 26px; margin: -6px 0 -4px 0 ;" src="/media/home_icon.png" /></a></li>
+            <li class="alignnav"><a id="hovertext_a" href="/projetos.html"><img oncontextmenu="return false" style="height: 32px;" src="/media/projects_icon.png" /> Projetos</a></li>
+            <li class="alignnav"><a id="hovertext_a" href="/library.html"><img oncontextmenu="return false" style="height: 32px;" src="/media/library_icon.png" /> Biblioteca</a></li>
+            <li class="alignnav"><a id="hovertext_a" href="/tools.html"><img oncontextmenu="return false" style="height: 32px;" src="/media/tools_icon.png" /> Ferramentas</a></li>
+            <li class="alignnav_floaty_r"><a id="hoverimage_a" href="https://www.youtube.com/c/@BitRaiden" target="_blank"><img oncontextmenu="return false" onselectstart="return false" style="width: 26px; margin: -6px 0 -4px 0 ;" src="/media/yt_icon.png" /></a></li>
+            <li class="alignnav_floaty_r"><a id="hoverimage_a" href="https://discord.gg/kSMXzvntdZ" target="_blank"><img oncontextmenu="return false" onselectstart="return false" style="width: 26px; margin: -6px 0 -4px 0 ;" src="/media/discord_icon.png" /></a></li>
+            <li class="alignnav_floaty_r"><a id="dummy_r"></a></li>
           </ul>
         </div>
       </nav>
@@ -106,7 +132,7 @@
         </video>
         <table>
           <td style="min-width: fit-content; height: 512px">
-            <img class="center" src="/projects/ps2/sbbfbb/media/Capa.jpg" />
+            <img id="cape" class="center" src="/projects/ps2/sbbfbb/media/Capa.jpg" />
             <h1
               id="title"
               style="

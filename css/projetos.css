@@ -15,7 +15,7 @@
       html {
         scroll-behavior: smooth;
       }
-      td:hover img {
+      #td:hover img {
         margin: 0 auto;
         transition: transform 0.5s ease; /* Animation */
         transform: scale(1.1);
@@ -25,8 +25,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow-x:auto;
-        overflow-y:auto;
+    
         border-radius: 4%;
       }
       h1 {

@@ -68,8 +68,8 @@ background-color: rgba(222, 245, 255, 0.747);
 display: flex;
    align-items: center;
         justify-content: center;
-        overflow-x:auto;
-        overflow-y:auto;
+        overflow-x:scroll;
+        overflow-y:scroll;
 
       }
       #PS1{
@@ -77,6 +77,6 @@ display: flex;
         display: flex;
    align-items: center;
         justify-content: center;
-        overflow-x:auto;
-        overflow-y:auto;
+        overflow-x:scroll;
+        overflow-y:scroll;
               }

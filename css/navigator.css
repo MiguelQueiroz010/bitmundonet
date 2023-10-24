@@ -210,6 +210,19 @@ body {
   }
 }
 
+/* SCROLLBAR*/
+html::-webkit-scrollbar {
+  width: 12px;
+}
+html::-webkit-scrollbar-track {
+  background: rgba(103, 103, 103, 0);        /* color of the tracking area */
+}
+html::-webkit-scrollbar-thumb {
+  background-color: rgb(46, 224, 18);   /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: 3px solid rgb(0, 0, 0);  /* creates padding around scroll thumb */
+}
+
 /*MOBILE CASES*/
 @media screen and (max-width: 990px) {
   #nav a {

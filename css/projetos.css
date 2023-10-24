@@ -18,7 +18,14 @@
   to {
   }
 }
-
+@keyframes scrollx{
+  from{
+    transform: translateX(0px);
+  }
+  to{
+    transform: translateX(-1000px);
+  }
+}
 html {
   scroll-behavior: smooth;
 }
@@ -53,16 +60,34 @@ footer {
   align-items: center;
   justify-content: center;
   overflow-x:scroll;
-
+  
 }
 
+/* SCROLLBAR*/
+#projectsSelector::-webkit-scrollbar {
+  width: 10px;
+  
+}
+#projectsSelector::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0);      /* color of the tracking area */
+}
+#projectsSelector::-webkit-scrollbar-thumb {
+  background-color: rgb(19, 19, 255);    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: 3px solid rgb(0, 0, 0);  /* creates padding around scroll thumb */
+}
 #project_details {
   text-decoration: none;
   color: antiquewhite;
-}
 
+}
+#projtable tr{
+
+ /*animation: scrollx 25s 0.5s linear infinite;*/
+}
 #container {
   position: relative;
+  
 }
 #image {
   display: block;
@@ -131,3 +156,4 @@ footer {
   position: absolute;
   text-align: center;
 }
+

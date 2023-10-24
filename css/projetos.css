@@ -1,82 +1,133 @@
-
-      @keyframes opacity {
-        100% {
-          opacity: 1;
-        }
-      }
-      @keyframes typing {
-        from {
-          width: 0;
-        }
-        to {
-          width: 100%;
-        }
-      }
-      html {
-        scroll-behavior: smooth;
-      }
-      #td:hover img {
-        margin: 0 auto;
-        transition: transform 0.5s ease; /* Animation */
-        transform: scale(1.1);
-        backface-visibility: hidden;
-      }
-      .container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    
-        border-radius: 4%;
-      }
-      h1 {
-        overflow: hidden; /* Ensures the content is not revealed until the animation */
-        border-bottom-right-radius: 150%;
-        border-bottom-left-radius: 150%;
-        white-space: nowrap; /* Keeps the content on a single line */
-        margin: 0 auto; /* Gives that scrolling effect as the typing happens */
-        /*animation: typing 2s steps(80, end), blink-caret 0.5s step-end infinite;*/
-      }
-      .aligncenter {
-        text-align: center;
-      }
-      .commontext {
-        display: inline;
-        font-stretch: ultra-expanded;
-        border-style: solid;
-        border-left: 0;
-        border-top: 0;
-        border-right: 0;
-        border-image: radial-gradient( rgb(16, 133, 0) 90%,rgb(10, 20, 80) 30%) 1;
-        border-bottom: 4px solid rgb(0, 0, 0);
-        font-size: xx-large;
-        font-style: normal;
-      }
-      p {
-        margin-left: 20px;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: large;
-      }
-#cape{
-  display: flex;
-   align-items: center;
-        justify-content: center;
-        overflow-x:auto;
-        overflow-y:auto;
+@keyframes opacity {
+  100% {
+    opacity: 1;
+  }
 }
-      #PS2{
-background-color: rgba(222, 245, 255, 0.747);
-display: flex;
-   align-items: center;
-        justify-content: center;
-        overflow-x:scroll;
-        overflow-y:scroll;
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes border {
+  from {
+    border: none;
+  }
+  to {
+  }
+}
 
-      }
-      #PS1{
-        background-color: rgba(255, 121, 59, 0.493);
-        display: flex;
-   align-items: center;
-        justify-content: center;
-        overflow-x:scroll;
-        overflow-y:scroll;
-              }
+html {
+  scroll-behavior: smooth;
+}
+footer {
+  display: none;
+}
+
+/*TEXT CLASSES/IDS*/
+#msgBaloon p {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 16px;
+  color: #a5a5a5;
+}
+#msgBaloon {
+  position: fixed;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.397);
+  width: 100%;
+  z-index: 9;
+}
+#msgBaloon > hr {
+  margin-top: 0;
+  height: 2px;
+  background-color: rgb(10, 20, 80);
+  border: none;
+}
+
+/*STYLES*/
+
+#projectsSelector {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  overflow-x:scroll;
+
+}
+
+#project_details {
+  text-decoration: none;
+  color: antiquewhite;
+}
+
+#container {
+  position: relative;
+}
+#image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+#image img{
+  width: 480px;
+  height: 640px;
+}
+#overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+  transform: scale(0);
+  height: 0;
+  background: rgba(0, 0, 0, 0.397);
+  transition: 0.2s ease-in-out;
+}
+#container:hover #overlay {
+  transform: scale(100%);
+  height: 100%;
+}
+#container:hover #image{
+  filter: blur(8px);
+
+}
+#overlay a{
+  width: 100%;
+  height: 100%;
+  text-shadow: #000000 90px;
+}
+
+#overlay a img{
+  width: 70%;
+  margin: 10% 0 0 18%;
+  position: absolute;
+  text-align: center;
+  -webkit-text-stroke: 64px #ff0202;
+}
+#overlay a h1{
+  width: 100%;
+  margin: 50% 0 0 0;
+  
+  position: absolute;
+  text-align: center;
+  font-size: 28px;
+}
+#overlay a p{
+  width: 70%;
+  margin: 60% 0 0 18%;
+  font-size: 20px;
+  color: rgb(255, 255, 255);
+  position: absolute;
+  text-align: center;
+  line-height: 1.5em;
+}
+#overlay ul{
+  margin: 100% 0 0 0;
+  list-style: none;
+  font-size: 20px;
+  color: rgb(255, 255, 255);
+  position: absolute;
+  text-align: center;
+}

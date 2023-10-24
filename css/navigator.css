@@ -210,7 +210,7 @@ body {
   }
 }
 
-
+/*MOBILE CASES*/
 @media screen and (max-width: 990px) {
   #nav a {
     font: 0px verdana;
@@ -262,6 +262,7 @@ html {
   background-color: rgb(10, 20, 80);
 }
 
+/*ANIMATION FRAMES*/
 @keyframes opacity_blink {
   from {
     opacity: 50%;

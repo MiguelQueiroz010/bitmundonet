@@ -2,6 +2,7 @@
 <html>
   <link rel="stylesheet" href="/css/navigator.css" />
   <meta name="viewport" content="width=device-width, initial-scale=0.7" />
+
   <head>
     <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
     <title>Projetos e Lançamentos</title>
@@ -30,6 +31,7 @@
       crossorigin="anonymous"
     ></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
+
     <div id="navbar">
       <div id="head">
         <div
@@ -133,7 +135,9 @@
               <tr>
                 <td>
                   <a href="/projects/ninja5br/ninja5br.html"
-                    ><img width="100%" src="/projects/ninja5br/media/iconv9.png"
+                    ><img
+                      width="100%"
+                      src="/projects/ninja5br/media/iconv9.png"
                   /></a>
                 </td>
               </tr>
@@ -149,11 +153,12 @@
               <!-- #endregion -->
 
               <!-- #region Notes/Disclaimer-->
-              <tr style="bottom: 0 ">
+              <tr style="bottom: 0">
                 <td>
                   <hr />
                   <p class="aligncenter">
-                    <b>&circledR; Bit.Mundo</b> 2023 <br>Desenvolvido por Bit.Raiden
+                    <b>&circledR; Bit.Mundo</b> 2023 <br />Desenvolvido por
+                    Bit.Raiden
                   </p>
                 </td>
               </tr>
@@ -271,104 +276,153 @@
         </div>
       </nav>
     </div>
+
     <br />
-    <div style="text-align: center">
-      <h1 class="commontext">Projetos e Lançamentos</h1>
-    </div>
   </head>
+
   <body>
-    <p class="aligncenter">
-      Veja os projetos e lançamentos de traduções e modificações.
-      <br />Clique em um dos ícones para entrar na página do projeto!
-    </p>
-    <div id="cape">
-      <img
-        src="/media/ps1_logo.png"
-        alt="PS1LOGO"
-        width="150"
-        height="150"
-        style="
-          margin-left: 16px;
-          align-items: center;
-          justify-content: center;
-          background-color: rgba(255, 121, 59, 0.493);
-        "
-      />
+    <!--#region BalãoSuspenso-->
+    <div id="msgBaloon">
+      <hr />
+      <p class="aligncenter">
+        RomHacking Project - Muito Além de Uma Tradução!
+      </p>
     </div>
-    <div class="container" id="PS1">
-      <table>
+    <!-- #endregion -->
+
+    <!-- #region Projetos/Estilizados-->
+    <div id="projectsSelector">
+      <table id="projtable">
         <tr>
-          <td id="td">
-            <a href="projects/psx/alundra2/alundra2.html"
-              ><img
-                src="projects/psx/alundra2/media/capa.jpg"
-                alt="Alundra2 BR"
-                width="150"
-                height="200"
-            /></a>
+        <!--Alundra 2-->
+          <td> 
+            <div id="container">
+              <div id="image">
+                <img src="/projects/psx/alundra2/media/capa.jpg" alt="" />
+              </div>
+
+              <div id="overlay">
+                <a id="project_details" href="/projects/psx/alundra2/alundra2.html">
+                  <img src="/projects/psx/alundra2/media/icon.png">
+                  <h1 style="color: rgb(223, 226, 127); 
+                  -webkit-text-stroke: 1px #9a9a9a;
+                  font-size: 24px;
+                  ">
+                  Alundra 2: A New Legend Begins</h1>
+                  <p style="font-size: 18px;">Projeto em desenvolvimento...
+                  </p>
+                </a>
+              </div>
+            </div>
+          </td>
+
+          <!--Genji-->
+          <td> 
+            <div id="container">
+              <div id="image">
+                <img src="/projects/genji/media/poster.jpg" alt="" />
+              </div>
+
+              <div id="overlay">
+                <a id="project_details" href="/projects/genji/genji.html">
+                  <img src="/projects/genji/media/icon.png">
+                  <h1 style="color: rgb(10, 10, 181); 
+                  -webkit-text-stroke: 1px #ffffff;
+                  ">
+                  Genji: Dawn of The Samurai</h1>
+                  <p>Versão Traduzida e Revisada do Jogo.
+                  </p>
+                </a>
+              </div>
+            </div>
+          </td>
+
+          <!--Naruto Un5+ BR-->
+          <td>
+            <div id="container">
+              <div id="image">
+                <img src="/projects/ninja5br/media/poster.png" alt="" />
+              </div>
+
+              <div id="overlay">
+                <a id="project_details" href="/projects/ninja5br/ninja5br.html">
+                  <img src="/projects/ninja5br/media/iconv9.png">
+                  <h1 style="color: rgb(207, 130, 6); 
+                  -webkit-text-stroke: 1px #ffffff;">
+                  Ultimate Ninja 5+ BR</h1>
+                  <p>Versão Traduzida e Revisada do Jogo.
+                    <br>
+                    <br>
+                    <br>
+                    <strong>REV2023 V9</strong><br>
+                    +-------------------------+<br>
+                    <ul>
+                      <li><strong>*NOVO*</strong> Legendas em Ultimates</li>
+                      <li><strong>*NOVO*</strong> Modo de Vídeo NTSC 640x480</li>
+                      <li><strong>*NOVO*</strong> Opção 'Sem Suporte'</li>
+                      <li></li>
+                    </ul>
+
+                  </p>
+                </a>
+              </div>
+            </div>
+          </td>
+
+          <!--Bob Esponja BFBB-->
+          <td>
+            <div id="container">
+              <div id="image">
+                <img src="/projects/ps2/sbbfbb/media/Capa.jpg" alt="" />
+              </div>
+
+              <div id="overlay">
+                <a id="project_details" href="/projects/ps2/sbbfbb/sbbfbb.html">
+                  <img src="/projects/ps2/sbbfbb/media/Icon.png">
+                  <h1 style="color: rgb(207, 207, 6); 
+                  -webkit-text-stroke: 1px #ffffff;">
+                  Batalha pela Fenda do Biquíni</h1>
+                  <p>Versão Traduzida do Jogo.
+                    <br>
+                    <br>
+                    <br>
+
+                  </p>
+                </a>
+              </div>
+            </div>
+          </td>
+
+          <!--Naruto UN3-->
+          <td>
+            <div id="container">
+              <div id="image">
+                <img src="/projects/ps2/ninja3br/media/Capa.jpg" alt="" />
+              </div>
+
+              <div id="overlay">
+                <a id="project_details" href="/projects/ps2/ninja3br/ninja3br.html">
+                  <img src="/projects/ps2/ninja3br/media/Icon.png">
+                  <h1 style="color: rgb(207, 113, 6); 
+                  -webkit-text-stroke: 1px #ffffff;">
+                  Ultimate Ninja 3 BR</h1>
+                  <p>Projeto em desenvolvimento...
+                    <br>
+                    <br>
+                    <br>
+                    <strong>Projeto:</strong> Andyson<br>
+                  </p>
+                </a>
+              </div>
+            </div>
           </td>
         </tr>
       </table>
     </div>
-    <br />
-    <div id="cape">
-      <img
-        src="/media/ps2_logo.png"
-        alt="ps2logo"
-        width="250"
-        height="80"
-        style="
-          margin-left: 16px;
-          align-items: center;
-          justify-content: center;
-          background-color: rgba(222, 245, 255, 0.747);
-          padding: 2%;
-        "
-      />
-    </div>
-    <div class="container" id="PS2">
-      <table>
-        <tr>
-          <td id="td">
-            <a href="projects/ps2/ninja3br/ninja3br.html"
-              ><img
-                src="projects/ps2/ninja3br/media/Capa.jpg"
-                alt="Ninja 3 BR"
-                width="150"
-                height="200"
-            /></a>
-          </td>
-          <td id="td">
-            <a href="projects/ps2/sbbfbb/sbbfbb.html"
-              ><img
-                src="projects/ps2/sbbfbb/media/Capa.jpg"
-                alt="Spongebob BR"
-                width="150"
-                height="200"
-            /></a>
-          </td>
-          <td id="td">
-            <a href="projects/ninja5br/ninja5br.html"
-              ><img
-                src="projects/ninja5br/media/poster.png"
-                alt="Ninja 5 BR"
-                width="150"
-                height="200"
-            /></a>
-          </td>
-          <td id="td">
-            <a href="projects/genji/genji.html"
-              ><img
-                src="projects/genji/media/poster.jpg"
-                alt="Genji BR"
-                width="150"
-                height="200"
-            /></a>
-          </td>
-        </tr>
-      </table>
-    </div>
+
+    <!-- #endregion -->
   </body>
+
   <footer>
     <hr />
     <p class="aligncenter">

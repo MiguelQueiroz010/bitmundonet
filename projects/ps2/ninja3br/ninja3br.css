@@ -29,7 +29,7 @@
 #cape {
   width: 50%;
   border-radius: 1em;
-  opacity: 5%;
+  /*opacity: 5%;*/
 }
 h1 {
   overflow: hidden;

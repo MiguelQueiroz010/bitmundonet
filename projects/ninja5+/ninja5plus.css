@@ -29,7 +29,7 @@
 #cape {
   width: 50%;
   border-radius: 1em;
-  opacity: 5%;
+  /*opacity: 5%;*/
 }
 h1 {
   overflow: hidden;
@@ -60,9 +60,9 @@ h1 {
   border-image: linear-gradient(to right, darkblue, darkorchid) 1;
   padding: 0 10px;
 }
-#cape:hover {
+/*#cape:hover {
   opacity: 100%;
-}
+}*/
 p {
   padding: 1em 2em 1em 2em;
   margin: auto;

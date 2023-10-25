@@ -24,13 +24,14 @@ function dropdown() {
     document.body.style.overflow="auto";
     document.getElementById("dropdown").style.animationName="slide_out";
     document.getElementById("dropdown").style.animationDuration="0.45s";
+    document.getElementById("mobile_logo").style.display ="block";
   }
   else {
     document.getElementById("mobile_dropdown").style.position = "fixed";
    document.body.style.overflow="hidden";
    document.getElementById("dropdown").style.animationName="slide_in";
    document.getElementById("dropdown").style.animationDuration="0.45s";
-   
+   document.getElementById("mobile_logo").style.display ="none";
   }
 
 

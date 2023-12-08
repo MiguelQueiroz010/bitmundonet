@@ -414,7 +414,7 @@
         <br />
       </p>
       <br />
-      <div id="gal_imgs" style="display: none">
+      <div id="gal_imgs">
         <h2 id="under">Imagens</h2>
         <div id="gallery" data-fit="cover" data-autohide="a11">
           <script type="text/javascript" src="/scripts/gallery.js"></script>
@@ -428,20 +428,51 @@
             <div class="mySlides fade first">
               <a
                 data-description="
-          Um novo idioma!
+          Iniciar jogo!
           "
                 style="width: 100%"
                 class="spotlight"
-                href="media/gallery/language.bmp"
+                href="media/menu1.png"
               >
                 <img
-                  alt="Menu de Linguagem"
+                  alt="Menu Inicial"
                   style="width: 100%"
-                  src="media/gallery/language.bmp"
+                  src="media/menu1.png"
                 />
               </a>
             </div>
-
+            <div class="mySlides fade">
+              <a
+                data-description="
+          Iniciar jogo!
+          "
+                style="width: 100%"
+                class="spotlight"
+                href="media/menu2.png"
+              >
+                <img
+                  alt="Menu Inicial"
+                  style="width: 100%"
+                  src="media/menu2.png"
+                />
+              </a>
+            </div>
+            <div class="mySlides fade">
+              <a
+                data-description="
+          Produção!
+          "
+                style="width: 100%"
+                class="spotlight"
+                href="media/contrail.png"
+              >
+                <img
+                  alt="Tela Inicial"
+                  style="width: 100%"
+                  src="media/contrail.png"
+                />
+              </a>
+            </div>
             <!-- Next and previous buttons -->
             <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
             <a class="next" onclick="plusSlides(1)">&#10095;</a>
@@ -450,6 +481,8 @@
         </div>
         <div style="text-align: center">
           <span class="dot active" onclick="currentSlide(1)"></span>
+          <span class="dot inactive" onclick="currentSlide(2)"></span>
+          <span class="dot inactive" onclick="currentSlide(3)"></span>
         </div>
       </div>
       <div id="credits">
@@ -459,6 +492,7 @@
         >
           <b>Denim</b> - Ferramenta para Des/Compressão, Função TIMFEL<br />(TIM
           FONT EXTERNAL LOADER)<br />
+          <b>MummRa</b> - Ferramenta GGTool para Edição de Texturas (Multi-Paletas adicionado)<br />
           <b>Bit.Raiden</b> - Projeto e RomHacking Geral, TIMFEL fix<br />
         </p>
       </div>
@@ -467,17 +501,17 @@
         <p
           style="text-align: center; font-family: Arial, Helvetica, sans-serif"
         >
-          <b>Texturas</b>: 1%<br />
-          <b>Menus</b>: 0%<br />
+          <b>Texturas</b>: 10%<br />
+          <b>Menus</b>: 10%<br />
           <b>Textos dos Movies</b>: 10%<br />
-          <b>Textos e Falas</b>: 0%<br />
-          <b>Revisão</b>: 0% <br /><br />
+          <b>Textos e Falas</b>: 5%<br />
+          <b>Revisão</b>: 2% <br /><br />
         </p>
       </div>
       <div>
         <h2 id="under">Diretório do Projeto</h2>
       </div>
-      <div class="folder">
+      <div class="folder" >
         <br />
         <div id="patch_tutorial" class="hidden_folder">
           <picture id="hide_folder" onclick="folder(this)">

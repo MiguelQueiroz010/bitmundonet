@@ -7,6 +7,7 @@ Alundra 2 - Progresso de Tradução
 *Font loader by denim, implement/fix by Bit.Raiden 18/08/2023 [2 Anos DEPOIS!]
 
 *Project iniciado! -> 20/08/23 
+*Verdadeira Fonte Encontrada e Formato descoberto (denim & MummRA) -> 11/2023
 
 [Tradução de Textos Planos]
 -----------------------------------
@@ -25,5 +26,15 @@ Alundra 2 - Progresso de Tradução
 
 *Bug Alundra 2 TextEditor Encoding Fixed 27/08/23
 *Teste de textos 27/08/23
+
+...
+
+*Diálogos Iniciais - OK 11/2023
+
+[Tradução de Texturas]
+------------------------------------
+
+*Menu Inicial - OK 08/12/2023
+*Contrail - COR ERRADA 08/12/2023
 
 

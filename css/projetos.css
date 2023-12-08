@@ -1,5 +1,8 @@
 @keyframes opacity {
-  100% {
+  from{
+opacity: 0;
+  }
+  to{
     opacity: 1;
   }
 }
@@ -82,12 +85,11 @@ footer {
 
 }
 #projtable tr{
-
- /*animation: scrollx 25s 0.5s linear infinite;*/
+ /*animation: scrollx 4ms ease-in-out;
+ animation-timeline: view();*/
 }
 #container {
   position: relative;
-  
 }
 #image {
   display: block;
@@ -109,10 +111,12 @@ footer {
   height: 0;
   background: rgba(0, 0, 0, 0.397);
   transition: 0.2s ease-in-out;
+  
 }
 #container:hover #overlay {
   transform: scale(100%);
   height: 100%;
+  
 }
 #container:hover #image{
   filter: blur(8px);

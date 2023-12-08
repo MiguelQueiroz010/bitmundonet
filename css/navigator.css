@@ -188,6 +188,7 @@ body {
   
   transform: translateX(-100%);
   animation-fill-mode: forwards;
+
 }
 
 #close {

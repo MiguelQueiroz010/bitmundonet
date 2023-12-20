@@ -30,11 +30,19 @@ Alundra 2 - Progresso de Tradução
 ...
 
 *Diálogos Iniciais - OK 11/2023
+*Adição de Acento 'Â' na Fonte 19/12/23
+
+*PASTAS 'HI e HA' Completas 20/12/23
+*PASTAS 'AW e BU' Completas 20/12/23
+
+*PASTAS 'CG e DI' Iniciadas 20/12/23
+*PASTAS 'FA e FB' 
 
 [Tradução de Texturas]
 ------------------------------------
 
 *Menu Inicial - OK 08/12/2023
+*Menu de Itens - OK 09/12/2023
 *Contrail - COR ERRADA 08/12/2023
-
+*Créditos -
 

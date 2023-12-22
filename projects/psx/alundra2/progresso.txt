@@ -33,10 +33,18 @@ Alundra 2 - Progresso de Tradução
 *Adição de Acento 'Â' na Fonte 19/12/23
 
 *PASTAS 'HI e HA' Completas 20/12/23
+-Revisar "Crianças da Coroa" para "Filhos da Coroa"
 *PASTAS 'AW e BU' Completas 20/12/23
-
+-Revisar "Crianças da Coroa" para "Filhos da Coroa"
 *PASTAS 'CG e DI' Completas 21/12/23 [Gwaba e DarkIsle/Dragonia]
-*PASTAS 'FA e FB e FC' Iniciar 22/12/23
+-Revisar "Crianças da Coroa" para "Filhos da Coroa"
+
+*PASTAS 'FA e FB e FC' Completo 22/12/23
+*PASTAS 'FM e GY' Completo 22/12/23
+*PASTAS 'KI e ND' Completo 22/12/23
+*PASTAS 'OO, over e PA' Completo 22/12/23
+
+*PASTAS 'PB, PC e PD' Iniciar 23/12/23
 
 [Tradução de Texturas]
 ------------------------------------

@@ -44,7 +44,9 @@ Alundra 2 - Progresso de Tradução
 *PASTAS 'KI e ND' Completo 22/12/23
 *PASTAS 'OO, over e PA' Completo 22/12/23
 
-*PASTAS 'PB, PC e PD' Iniciar 23/12/23
+*PASTAS 'PB, PC e PD' Completo 23/12/23
+-Revisar texto de pc002! Possível erro na quebra %s...
+*PASTAS 'PM' Metade... 23/12/23
 
 [Tradução de Texturas]
 ------------------------------------

@@ -46,7 +46,21 @@ Alundra 2 - Progresso de Tradução
 
 *PASTAS 'PB, PC e PD' Completo 23/12/23
 -Revisar texto de pc002! Possível erro na quebra %s...
-*PASTAS 'PM' Metade... 23/12/23
+*PASTAS 'PM' Completo 24/12/23
+*PASTAS 'PZ e RE' Completas 24/12/23
+*PASTAS 'SE, SH, SN e ST' Completas 24/12/23
+*PASTAS 'TA, TB e UD' Completas 24/12/23
+-ud018 implementar manual(Botões) / Corrigido removido caractere '>' 25/12/2023
+*PASTAS FINAIS 'YA, YO e YK' Iniciadas 24/12/23
+*PASTAS FINAIS 'YA, YO e YK' Completas 25/12/23
+
+*Procura de mais textos e textos de Sistema 25/12/2023
+-Encontrados em PACK0.PAK
+-Compasso para Bússola!! - Feito
+-Ticket para Ingresso!! - Feito
+
+*Correção de Tamanhos de Linha dos Diálogos Iniciada 27/12/23
+
 
 [Tradução de Texturas]
 ------------------------------------
@@ -54,5 +68,5 @@ Alundra 2 - Progresso de Tradução
 *Menu Inicial - OK 08/12/2023
 *Menu de Itens - OK 09/12/2023
 *Contrail - COR ERRADA 08/12/2023
-*Créditos -
+*Créditos
 

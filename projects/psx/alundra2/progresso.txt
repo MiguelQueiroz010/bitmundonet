@@ -59,8 +59,10 @@ Alundra 2 - Progresso de Tradução
 -Compasso para Bússola!! - Feito
 -Ticket para Ingresso!! - Feito
 
-*Correção de Tamanhos de Linha dos Diálogos Iniciada 27/12/23
+*Correção de Tamanhos de Linha dos Diálogos Completo 30/12/23
+-Possível Erro cg018/Mapa de Gwaba - Corrigido 31/12/23 [Problema de Arquivo errado: 11.txt!]
 
+*Finalizados Textos de Sistema 31/12/23
 
 [Tradução de Texturas]
 ------------------------------------

@@ -63,12 +63,16 @@ Alundra 2 - Progresso de Tradução
 -Possível Erro cg018/Mapa de Gwaba - Corrigido 31/12/23 [Problema de Arquivo errado: 11.txt!]
 
 *Finalizados Textos de Sistema 31/12/23
+LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
+
+[2024]
+*Corrigidos erros em texturas do "Atalho"/Menu 01/01/24
 
 [Tradução de Texturas]
 ------------------------------------
 
 *Menu Inicial - OK 08/12/2023
 *Menu de Itens - OK 09/12/2023
-*Contrail - COR ERRADA 08/12/2023
-*Créditos
+*Contrail - COR ERRADA, corrigido 08/12/2023
+*Créditos  
 

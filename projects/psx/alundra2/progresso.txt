@@ -9,6 +9,12 @@ Alundra 2 - Progresso de Tradução
 *Project iniciado! -> 20/08/23 
 *Verdadeira Fonte Encontrada e Formato descoberto (denim & MummRA) -> 11/2023
 
+*Erro na Cena: Milena 3:Final - CORRIGIDO 30/03/24
+CONTINUAÇÃO DA REVISÃO - 30/03/24
+
+*Edição e Revisão - 31/03/24
+Primeira Implementação - 31/03/24 02h50 AM
+
 [Tradução de Textos Planos]
 -----------------------------------
 
@@ -65,6 +71,9 @@ Alundra 2 - Progresso de Tradução
 *Finalizados Textos de Sistema 31/12/23
 LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
 
+*Revisão de Textos de Sistema - 31/03/24
+*"Key" para Traduzir
+
 [2024]
 *Corrigidos erros em texturas do "Atalho"/Menu 01/01/24
 
@@ -74,5 +83,5 @@ LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
 *Menu Inicial - OK 08/12/2023
 *Menu de Itens - OK 09/12/2023
 *Contrail - COR ERRADA, corrigido 08/12/2023
-*Créditos  
+*Créditos, Corrigido  
 

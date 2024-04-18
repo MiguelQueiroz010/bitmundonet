@@ -31,6 +31,9 @@ a {
   text-size-adjust: fit-content;
   background-color: rgb(95, 88, 88);
 }
+.hidden_folder iframe{
+  background-color: rgba(0, 0, 0, 0.808);
+}
 #mobile_dropdown {
   display: none;
 }

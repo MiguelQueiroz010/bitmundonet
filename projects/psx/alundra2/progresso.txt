@@ -15,6 +15,11 @@ CONTINUAÇÃO DA REVISÃO - 30/03/24
 *Edição e Revisão - 31/03/24
 Primeira Implementação - 31/03/24 02h50 AM
 
+*Correção da Fonte - 26/04/24  01h53 AM
+Adicionado acento 'ô';
+Adicionado acento 'ó';
+Adicionado acento 'Í';
+
 [Tradução de Textos Planos]
 -----------------------------------
 
@@ -76,6 +81,8 @@ LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
 
 [2024]
 *Corrigidos erros em texturas do "Atalho"/Menu 01/01/24
+*Corrigido "Key" traduzido 19/04/24
+*Corrigidos Textos de 'Zach Olho Morto', traduzidos 19/04/24
 
 [Tradução de Texturas]
 ------------------------------------

@@ -100,20 +100,20 @@ footer {
   width: 480px;
   height: 640px;
 }
-#overlay {
+.overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   width: 100%;
   overflow: hidden;
-  transform: scale(0);
+  
   height: 0;
   background: rgba(0, 0, 0, 0.397);
   transition: 0.2s ease-in-out;
-  
+  transform: scale(0);
 }
-#container:hover #overlay {
+#container:hover .overlay {
   transform: scale(100%);
   height: 100%;
   
@@ -122,20 +122,20 @@ footer {
   filter: blur(8px);
 
 }
-#overlay a{
+.overlay a{
   width: 100%;
   height: 100%;
   text-shadow: #000000 90px;
 }
 
-#overlay a img{
+.overlay a img{
   width: 70%;
   margin: 10% 0 0 18%;
   position: absolute;
   text-align: center;
   -webkit-text-stroke: 64px #ff0202;
 }
-#overlay a h1{
+.overlay a h1{
   width: 100%;
   margin: 50% 0 0 0;
   
@@ -143,7 +143,7 @@ footer {
   text-align: center;
   font-size: 28px;
 }
-#overlay a p{
+.overlay a p{
   width: 70%;
   margin: 60% 0 0 18%;
   font-size: 20px;
@@ -152,12 +152,12 @@ footer {
   text-align: center;
   line-height: 1.5em;
 }
-#overlay ul{
-  margin: 100% 0 0 0;
+.overlay ul{
+  margin: 100% 0 0 18%;
   list-style: none;
   font-size: 20px;
   color: rgb(255, 255, 255);
   position: absolute;
-  text-align: center;
+
 }
 

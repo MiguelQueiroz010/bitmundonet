@@ -20,6 +20,8 @@ Adicionado acento 'ô';
 Adicionado acento 'ó';
 Adicionado acento 'Í';
 
+*Tradução da textura "Prize (Contador de Prêmio)": 'Zach Olho Morto' 27/04/24 14h20
+
 [Tradução de Textos Planos]
 -----------------------------------
 

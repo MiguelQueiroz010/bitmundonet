@@ -94,3 +94,152 @@ LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
 *Contrail - COR ERRADA, corrigido 08/12/2023
 *Créditos, Corrigido  
 
+
+*PORT PARA VERSÃO MASHINKA NO NAZO - FEITO, 12/06/2024
+
+[Legendas nas Cutscenes]
+------------------------------------
+
+[Intro - Aeronave de Mephisto]
+(VCASTNUMBER - [NOME AUTOIMPOSTO] PROGRESSREPORT_DATETIME)
+
+#102 - [Zeppo e os 3 Piratas INTRO] Feito 15/06/24,19:30
+104 - [Flint vs Zeppo]
+105 - [Flint vs Zeppo Final]
+106 - [Paraquedas para todos?]
+#107 - [MOBIDIQUE A BALEIA MECÂNICA... Brincadeira, nada a ver kkkkk]
+
+[Vila Paco]
+108 - [Intro e Prunewell]
+110 - [Apresentando Alexia!]
+
+[Aeronave Destruída]
+115 - [Apresentando Mephisto!]
+116 - [Mephisto, o mago]
+117 - [Um gato tem 7 vidas, um androide apenas uma]
+
+[Vila Paco]
+119 - [O bombardeio - O Tanque Boi]
+
+[Toroledo]
+121 - [Os 3 Piratas Covardes]
+123 - [Um touro muito louco, strike?]
+124 - [Flint vs Touro-Monstro]
+125 - [Flint vs Touro-Monstro, vitória]
+
+[Barragem da Chave]
+130 - [O Ritual da Felicidade]
+136 - [Dona Aranha]
+#137 - [Dona Aranha descendo o Elevador, vitória de Flint]
+
+[Puerto Medusa]
+139 - [O pirata, a informação e a cachaça]
+140 - [É nisso que dá ser cachaceiro]
+141 - [O Show da Axelya]
+142 - [Acabou o Show e o Disfarce, Flint]
+#146 - [Crocodilo-Cogumelo]
+#147 - [Era uma vez um Crocodilo]
+148 - [Flint e Belgar]
+152 - [Milena e os Relatórios]
+154 - [Os Filhos da Coroa]
+
+[Em direção ao Navio Afundado]
+155 - [Mephisto leva Alexia Refém]
+240 - [O que é aquilo?!]
+640 - [O que é aquilo?! 2]
+740 - [O que é aquilo?! 3]
+
+[Navio Afundado]
+#156 - [O Terrível Tubarão]
+#157 - [Tubarão Assassino]
+158 - [A História de Flint, Radcliffe e Naomi]
+558 - [A História de Flint, Radcliffe e Naomi, final]
+
+[Baleia Mecânica]
+160 - [Apresentando a ameaça submarina]
+189 - [Apresentando a ameaça submarina 2]
+#161 - [O Coração do Monstro]
+162 - [Volte para a superfície Flint!]
+
+[Ruínas da Gaivota]
+#168 - [O Chefão da Relíquia]
+#169 - [O Chefão cai]
+
+[Ruínas do Paraíso]
+#171 - [O Chefão da Relíquia]
+#172 - [O Chefão cai]
+
+[Em direção a Varuna]
+178 - [A Baleia Mecânica]
+
+[Saindo da Barragem da Chave]
+#180 - [Uma vista do horizonte]
+
+[Dragonia, a Torre Final]
+185 - [Tigrão!!]
+186 - [Tigre escaldado]
+187 - [O Dragão Ancestral]
+
+[Varuna]
+197 - [O boneco de madeira e o Barão Ganancioso]
+201 - [A Lâmpada de Lumiere é minha!]
+202 - [Você vai se casar comigo!]
+204 - [Os Tesouros Escondidos de Varuna 1]
+208 - [Trato é trato]
+271 - [Revelado o Segredo]
+218 - [Mephisto, o mais ancestral]
+618 - [Barão bom de Corte?]
+219 - [O Fim da Ganância]
+221 - [Precisa de uma carona?]
+
+222 - [Apresentando a Chave Estelar]
+223 - [Apresentando a Chave Estelar 2]
+
+[Chave Estelar]
+224 - [Zeppo?]
+225 - [Tá quente!]
+226 - [Processo de Ejeção]
+227 - [Mephisto e seu Plano]
+250 - [Mephisto tem muitas pernas!]
+589 - [Mephisto tem muitas pernas! 2]
+228 - [Mephisto, forma final]
+229 - [Mephisto morre]
+
+231 - [Essa aeronave vai explodir!]
+631 - [Essa aeronave vai explodir! 2]
+731 - [Essa aeronave vai explodir! 3]	
+232 - [Um voo Apaixonado]
+
+[Créditos e Outros]
+270 - [Abertura do Jogo]
+
+272 - [A Baleia cospe todo mundo]
+#273 - [A Baleia afunda]
+
+274 - [MINIGAME DAS TOURADAS]
+275 - [MINIGAME DAS TOURADAS]
+276 - [MINIGAME DAS TOURADAS]
+277 - [MINIGAME DAS TOURADAS]
+278 - [MINIGAME DAS TOURADAS]
+
+
+#280 - [USADO PARA TEXTURA: Créditos]
+#281 - [USADO PARA TEXTURA: Créditos]
+#282 - [USADO PARA TEXTURA: Créditos]
+#283 - [USADO PARA TEXTURA: Créditos]
+#284 - [USADO PARA TEXTURA: Créditos]
+#285 - [USADO PARA TEXTURA: Créditos]
+#286 - [USADO PARA TEXTURA: Créditos]
+#287 - [USADO PARA TEXTURA: Créditos]
+#288 - [USADO PARA TEXTURA: Créditos]
+#289 - [USADO PARA TEXTURA: Créditos]
+#290 - [USADO PARA TEXTURA: Créditos]
+#291 - [USADO PARA TEXTURA: Créditos]
+#292 - [USADO PARA TEXTURA: Créditos]
+#293 - [USADO PARA TEXTURA: Créditos]
+#294 - [USADO PARA TEXTURA: Créditos]
+#295 - [USADO PARA TEXTURA: Créditos]
+#296 - [USADO PARA TEXTURA: Créditos] 
+#297 - [USADO PARA TEXTURA: Créditos]
+
+#999 - [VCAST DE TESTE - NÃO USADO]

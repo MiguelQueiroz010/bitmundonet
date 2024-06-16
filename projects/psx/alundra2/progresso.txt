@@ -99,14 +99,14 @@ LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
 
 [Legendas nas Cutscenes]
 ------------------------------------
-
-[Intro - Aeronave de Mephisto]
 (VCASTNUMBER - [NOME AUTOIMPOSTO] PROGRESSREPORT_DATETIME)
 
-#102 - [Zeppo e os 3 Piratas INTRO] Feito 15/06/24,19:30
-104 - [Flint vs Zeppo]
-105 - [Flint vs Zeppo Final]
-106 - [Paraquedas para todos?]
+[Intro - Aeronave de Mephisto]
+
+#102 7 e 10 - [Zeppo e os 3 Piratas INTRO] Feito 15/06/24,19:30
+#104 17 - [Flint vs Zeppo]
+#105 20 - [Flint vs Zeppo Final]
+#106 25 e 27 - [Paraquedas para todos?]
 #107 - [MOBIDIQUE A BALEIA MECÂNICA... Brincadeira, nada a ver kkkkk]
 
 [Vila Paco]

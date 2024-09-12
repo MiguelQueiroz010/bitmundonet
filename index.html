@@ -55,7 +55,7 @@
         text-shadow: none;
         clear: left;
         cursor: grab;
-        text-align: center;
+        text-align: left;
         align-items: center;
       }
       .hidden_folder img {
@@ -183,6 +183,10 @@
 
       * {
         box-sizing: border-box;
+      }
+      #thumbtable tr{
+border-radius: 20% ;
+border-style: solid;
       }
     </style>
 
@@ -483,6 +487,15 @@
           onclick="folder(this)"
         >
           <img src="projects/ninja5br/media/iconv9.png" />
+          
+          <table id="thumbtable">
+            <tr>
+              <th><img width="256px" src="projects/ninja5br/media/iconv9.png" /></th>
+              <th><img width="256px" src="projects/ninja5br/media/iconv9.png" /></th>
+              <th><img width="256px" src="projects/ninja5br/media/iconv9.png" /></th>
+            </tr>
+          </table>
+          
           <div id="desc_project">
             <h3 style="display: inline" ;>
               Lançamento! Ultimate Ninja 5 v9 Rev 2023
@@ -492,6 +505,7 @@
               Finalmente foi lançada a revisão com muitas melhorias e novos
               recursos.
             </p>
+            
           </div>
           <div id="arrow" style="float: right; margin-right: 2em; padding: 4px">
             <h1

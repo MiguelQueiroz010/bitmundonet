@@ -93,7 +93,7 @@ LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
 *Menu de Itens - OK 09/12/2023
 *Contrail - COR ERRADA, corrigido 08/12/2023
 *Créditos, Corrigido  
-*Menu inicial da Versão NAZO  
+*Menu inicial da Versão NAZO, corrigido  
 
 *PORT PARA VERSÃO MASHINKA NO NAZO - FEITO, 12/06/2024
 

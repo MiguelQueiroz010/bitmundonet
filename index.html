@@ -49,20 +49,34 @@
     <style>
       #desc_project {
         clear: left;
+        padding: 5px;
+        border: 2px solid rgb(129, 129, 129);
+        border-radius: 10px;
+      }
+      article table{
+        clear: left;
+        text-align: left;
+        align-items: center;
+        
+        padding: 6px;
       }
       .hidden_folder {
-        display: block;
+        display: inline-block;
         text-shadow: none;
         clear: left;
         cursor: grab;
         text-align: left;
         align-items: center;
+        width: 80%;
+        padding: 5px;
+        
       }
       .hidden_folder img {
         margin-left: auto;
         margin-right: auto;
         text-align: center;
         align-items: center;
+        width: 90%;
       }
       .hidden_folder:hover {
         background-color: rgba(255, 228, 177, 0.089);
@@ -72,8 +86,9 @@
         height: 2.4em;
         background-color: #0400ff;
         color: rgb(255, 255, 255);
-        filter: grayscale(90%);
+        
         border-bottom: 2px solid rgb(255, 255, 255);
+        
       }
       .hidden_folder #hide_folder {
         cursor: grab;
@@ -155,6 +170,7 @@
         border-right: 0;
         border-image: radial-gradient(rgb(80, 1, 1), rgb(255, 222, 37)) 1;
         border-bottom: 4px solid rgb(255, 19, 19);
+        
       }
       article p {
         padding-left: 20px;
@@ -477,7 +493,9 @@ border-style: solid;
     <div id="month_contents">
       <article>
         <h3>Destaques</h3>
-
+        <table>
+          <tr>
+            <td>
         <!--Ultimate Ninja 5+ Folder-->
         <div
           onclick="location.href='projects/ninja5br/ninja5br.html';"
@@ -526,7 +544,8 @@ border-style: solid;
           <br />
         </div>
         <br /><br />
-
+      </td>
+        <td>
         <!--Alundra 2 Folder-->
         <div
           onclick="location.href='projects/psx/alundra2/alundra2.html';"
@@ -572,7 +591,10 @@ border-style: solid;
           <br />
         </div>
         <br />
-
+      </td>
+      </tr>
+      <tr>
+        <td>
         <!--SpongeBob Battle for Bikini Bottom Folder-->
         <div
           onclick="location.href='projects/ps2/sbbfbb/sbbfbb.html';"
@@ -618,6 +640,9 @@ border-style: solid;
           <br />
         </div>
         <br />
+      </td>
+      </tr>
+      </table>
       </article>
     </div>
   </body>
@@ -626,7 +651,7 @@ border-style: solid;
   <footer>
     <hr />
     <p class="aligncenter">
-      <b>&circledR; Bit.Mundo</b> 2023 - Desenvolvido por Bit.Raiden
+      <b>&circledR; Bit.Mundo</b> 2025 - Desenvolvido por Bit.Raiden
     </p>
   </footer>
 </html>

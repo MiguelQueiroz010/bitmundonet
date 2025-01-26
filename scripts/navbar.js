@@ -11,7 +11,7 @@ function scrollFunction() {
     document.getElementById("navbar").style.position = "fixed";
     document.getElementById("head").style.display = "none";
   }
-  if (window.scrollY <= minH) {
+  if (window.scrollY <= minH / 2) {
     document.getElementById("navbar").style.position = "relative";
     document.getElementById("head").style.display = "inline";
 

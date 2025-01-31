@@ -54,7 +54,7 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561"
       crossorigin="anonymous"
     ></script>
-    <link rel="stylesheet" href="sbbfbb.css" />
+    <link rel="stylesheet" href="sbcfkk.css" />
     <script type="text/javascript" src="/scripts/navbar.js"></script>
 <style>
   #hovertext_a:hover{
@@ -108,6 +108,20 @@
 
       <div id="dropdown">
         <table>
+          <div
+              id="mobile_close"
+              onclick="dropdown()"
+              style="
+                width: 8%;
+                font-size: larger;
+                margin-left: auto;
+                margin-right: 20px;
+                border-radius: 100%;
+                background-color: rgb(41, 27, 236);
+              "
+            >
+              <div style="font-size: larger; color: rgb(60, 236, 16)">>></div>
+            </div>
           <tr id="MenuTitle">
             <td height="100px">
               &#160;&#160;&#160;
@@ -336,8 +350,9 @@
           preload="auto"
           autoplay="true"
           onloadstart="this.volume=0.1"
+          onloadstart="30";
         >
-          <source src="media/Intro.mp4" type="video/mp4" />
+          <source src="media/intro.mp4" type="video/mp4" />
           <!-- The video -->
 
           Sorry, your browser does not support HTML5 video.
@@ -426,37 +441,11 @@
             text-decoration-color: initial;
             font-size: 12pt;
           "
-          ><strong style="font-weight: bold">O</strong> projeto foi iniciado
-          em&nbsp;<strong style="font-weight: bold">meados de 2021</strong> por
-          mim ao eu perceber que os tipos de arquivo e estruturas tinham uma
-          ferramenta chamada&nbsp;<strong style="font-weight: bold"
-            >Industrial Park (IgorSeaBra4)</strong
-          >
-          e uma enorme comunidade de modders dos jogos HeavyIron.<br />
-          <strong style="font-weight: bold">O</strong> primeiro passo foi editar
-          a&nbsp;<strong style="font-weight: bold">fonte</strong> do jogo e
-          adicionar acentos do nosso idioma, logo ap&oacute;s eu tive de adaptar
-          a ferramenta (c&oacute;digo aberto por sinal) para responder &agrave;
-          codifica&ccedil;&atilde;o de texto comum que usamos ao inv&eacute;s da
-          ASCII americana sem compatibilidade com acentos.<br />
-          <strong style="font-weight: bold">Ap&oacute;s&nbsp;</strong>adaptar a
-          ferramenta para responder a minha demanda com acentos, comecei a
-          edi&ccedil;&atilde;o de texturas simult&acirc;neamente, e tive que
-          desenvolver algumas estrat&eacute;gias para lidar com a
-          gera&ccedil;&atilde;o de texturas id&ecirc;nticas &agrave;s originais
-          em se tratar de MipMap TXD RenderWare.<br />&nbsp;<br /><strong
-            style="font-weight: bold"
-            >Muitas&nbsp;</strong
-          >adapta&ccedil;&otilde;es foram feitas na ferramenta do Igor, a mais
-          not&aacute;vel a se dizer que fiz, foi um recurso que cria Eventos de
-          lan&ccedil;amento de texto na tela a partir de certos recursos do
-          pr&oacute;prio jogo numa cena e, usando os Timers, consegui
-          desenvolver uma fun&ccedil;&atilde;o que adaptasse legendas para as
-          cenas do jogo, uma dica dada por um membro da comunidade&nbsp;<strong
-            style="font-weight: bold"
-            >HeavyIron Modding</strong
-          >.</span
-        >
+          ><strong>Este</strong> projeto se iniciou em meados de 2022 quando desenvolvi(Bit.Raiden) ferramentas,
+          para manipular com os textos e texturas do jogo.<br>
+          <strong>Na</strong> época encontrei os formatos e rapidamente resolvi preparar as ferramentas,
+          hoje com as mesmas atualizadas dei início à tradução do jogo.
+          </span>
       </p>
       <br />
       <h2 id="under">Imagens</h2>
@@ -476,12 +465,12 @@
           "
               style="width: 100%"
               class="spotlight"
-              href="media/galeria/menu.jpg"
+              href="media/gal/img1.png"
             >
               <img
-                alt="Tela Inicial"
+                alt="Copyrights"
                 style="width: 100%"
-                src="media/galeria/menu.jpg"
+                src="media/gal/img1.png"
               />
             </a>
           </div>
@@ -489,44 +478,44 @@
           <div class="mySlides fade">
             <a
               data-description="
-          Menu traduzido!
+          Jogo salvo!
           "
               class="spotlight"
-              href="media/galeria/menu2.jpg"
+              href="media/gal/img2.png"
+            >
+              <img
+                alt="Carregar Jogo"
+                src="media/gal/img2.png"
+              />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          Menu Inicial
+          "
+              class="spotlight"
+              href="media/gal/img4.png"
             >
               <img
                 alt="Menu"
-                src="media/galeria/menu2.jpg"
+                src="media/gal/img4.png"
               />
             </a>
           </div>
           <div class="mySlides fade">
             <a
               data-description="
-          Checkpoint!
-          "
-              class="spotlight"
-              href="media/galeria/checkp.jpg"
-            >
-              <img
-                alt="Ponto de Controle"
-                src="media/galeria/checkp.jpg"
-              />
-            </a>
-          </div>
-          <div class="mySlides fade">
-            <a
-              data-description="
-          Legendas nas Cutscenes, adicionado!
+          Tela Inicial
           "
               style="background-size: cover"
               class="spotlight"
-              href="media/galeria/cuts2.jpg"
+              href="media/gal/img3.png"
             >
               <img
                 style="background-size: cover"
-                alt="Lula Molusco"
-                src="media/galeria/cuts2.jpg"
+                alt="Tela Inicial do Jogo"
+                src="media/gal/img3.png"
               />
             </a>
           </div>
@@ -534,14 +523,14 @@
           <div class="mySlides fade">
             <a
               data-description="
-          Diálogos do jogo traduzidos.
+          Apresentações de nível do jogo traduzidos.
           "
               class="spotlight"
-              href="media/galeria/dialog1.jpg"
+              href="media/gal/img5.png"
             >
               <img
-                alt="Diálogos"
-                src="media/galeria/dialog1.jpg"
+                alt="Carregando Nível"
+                src="media/gal/img5.png"
               />
             </a>
           </div>
@@ -560,181 +549,12 @@
         <span class="dot" onclick="currentSlide(5)"></span>
       </div>
       <div id="credits">
-        <p
-          style="text-align: center; font-family: Arial, Helvetica, sans-serif"
-        >
-        <br
-        style="
-          color: rgb(68, 68, 68);
-          font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-          font-size: 13.76px;
-          font-style: normal;
-          font-variant-ligatures: normal;
-          font-variant-caps: normal;
-          font-weight: 400;
-          letter-spacing: normal;
-          orphans: 2;
-          text-align: -webkit-center;
-          text-indent: 0px;
-          text-transform: none;
-          widows: 2;
-          word-spacing: 0px;
-          -webkit-text-stroke-width: 0px;
-          white-space: normal;
-          color: rgb(248, 248, 248);
-          text-decoration-thickness: initial;
-          text-decoration-style: initial;
-          text-decoration-color: initial;
-        "
-      /><br
-        style="
-          color: rgb(68, 68, 68);
-          font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-          font-size: 13.76px;
-          font-style: normal;
-          font-variant-ligatures: normal;
-          font-variant-caps: normal;
-          font-weight: 400;
-          letter-spacing: normal;
-          orphans: 2;
-          text-align: -webkit-center;
-          text-indent: 0px;
-          text-transform: none;
-          widows: 2;
-          word-spacing: 0px;
-          -webkit-text-stroke-width: 0px;
-          white-space: normal;
-          color: rgb(248, 248, 248);
-          text-decoration-thickness: initial;
-          text-decoration-style: initial;
-          text-decoration-color: initial;
-        "
-      /><br
-        style="
-          color: rgb(68, 68, 68);
-          font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-          font-size: 13.76px;
-          font-style: normal;
-          font-variant-ligatures: normal;
-          font-variant-caps: normal;
-          font-weight: 400;
-          letter-spacing: normal;
-          orphans: 2;
-          text-align: -webkit-center;
-          text-indent: 0px;
-          text-transform: none;
-          widows: 2;
-          word-spacing: 0px;
-          -webkit-text-stroke-width: 0px;
-          white-space: normal;
-         color: rgb(248, 248, 248);
-          text-decoration-thickness: initial;
-          text-decoration-style: initial;
-          text-decoration-color: initial;
-        "
-      /><span
-        class="bbc_size"
-        style="
-          line-height: 1.4em;
-          color: rgb(68, 68, 68);
-          font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-          font-style: normal;
-          font-variant-ligatures: normal;
-          font-variant-caps: normal;
-          font-weight: 400;
-          letter-spacing: normal;
-          orphans: 2;
-          text-align: -webkit-center;
-          text-indent: 0px;
-          text-transform: none;
-          widows: 2;
-          word-spacing: 0px;
-          -webkit-text-stroke-width: 0px;
-          white-space: normal;
-          color: rgb(248, 248, 248);
-          text-decoration-thickness: initial;
-          text-decoration-style: initial;
-          text-decoration-color: initial;
-          font-size: 12pt;
-        "
-        ><strong style="font-weight: bold">O que foi feito:</strong
-        ><br /><br />*Legendas em Cutscenes (n&atilde;o tinha no original)<br />*Texturas
-        traduzidas<br />*Textos e falas traduzidas<br /><br /><strong
-          style="font-weight: bold"
-          >Lembre-se, esse projeto &eacute; poss&iacute;vel gra&ccedil;as a
-          Deus e &agrave;s seguintes pessoas:</strong
-        ><br /><br />*Bit.Raiden (RomHacking e Tradu&ccedil;&atilde;o
-        geral)<br />*igorseabra4 (IndustrialPark - ArchiveEditor)<br /><br />*denim
-        e MummRa(STR) (L&oacute;gica de Compress&atilde;o da tela inicial)<br />*Luke,
-        denim, e demais(Ajuda com ASM, limitador de caracteres)<br /><br />*rubinho146
-        (Asset de Texto do Reidratado)<br />*OAlex (Revis&atilde;o InGame)<br /><br /><a
-          href="https://discord.gg/h6Z9kGbttk"
-          class="bbc_link"
-          target="_blank"
-          style="
-            color: rgb(3, 169, 244);
-            text-decoration: none;
-            font-weight: bold;
-          "
-          >*Comunidade Heavy Iron Modding[Discord]</a
-        ><br /><br /><strong style="font-weight: bold"
-          >Ferramentas Utilizadas:</strong
-        ><br /><br />-Adobe Photoshop CS6<br />-Sony CDVD Generator e CDVD
-        IML2ISO<br />-ArchiveEditor (IP)<br />-Pcsx2 1.0(Testes)<br />-Pcsx2
-        1.6 Debugger(ASM Disasm)<br />-MagicTXD<br />-HxD Hex Editor<br />-UtraIso(Testes)<br />-TMPG
-        Enc(M2V Mpeg video encoding)<br />-PSS Plex(Pss encoding)<br />-Editor
-        de V&iacute;deo(Legendas dos PSS)</span
-      ><br
-        style="
-          color: rgb(68, 68, 68);
-          font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-          font-size: 13.76px;
-          font-style: normal;
-          font-variant-ligatures: normal;
-          font-variant-caps: normal;
-          font-weight: 400;
-          letter-spacing: normal;
-          orphans: 2;
-          text-align: -webkit-center;
-          text-indent: 0px;
-          text-transform: none;
-          widows: 2;
-          word-spacing: 0px;
-          -webkit-text-stroke-width: 0px;
-          white-space: normal;
-         color: rgb(248, 248, 248);
-          text-decoration-thickness: initial;
-          text-decoration-style: initial;
-          text-decoration-color: initial;
-        "
-      /><span
-        style="
-          color: rgb(68, 68, 68);
-          font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-          font-size: 13.76px;
-          font-style: normal;
-          font-variant-ligatures: normal;
-          font-variant-caps: normal;
-          font-weight: 400;
-          letter-spacing: normal;
-          orphans: 2;
-          text-align: -webkit-center;
-          text-indent: 0px;
-          text-transform: none;
-          widows: 2;
-          word-spacing: 0px;
-          -webkit-text-stroke-width: 0px;
-          white-space: normal;
-          color: rgb(248, 248, 248);
-          text-decoration-thickness: initial;
-          text-decoration-style: initial;
-          text-decoration-color: initial;
-          display: inline !important;
-          float: none;
-        "
-        >-Visual Studio Community 2019(Edi&ccedil;&atilde;o do ArchiveEditor,
-        adi&ccedil;&atilde;o de fun&ccedil;&otilde;es) - C-sharp</span
-      >
+        <h2 id="under">Créditos</h2>
+        <p style="text-align: center;
+        font-family:Arial, Helvetica, sans-serif;
+        ">
+          <b>Bit.Raiden</b> - RomHacking/Ferramentas, Tradutor e Revisador<br />
+          <b>WilliamVaz</b> - Revisador<br />
         </p>
       </div>
       <div id="progress">
@@ -742,11 +562,11 @@
         <p
           style="text-align: center; font-family: Arial, Helvetica, sans-serif"
         >
-          <b>Texturas</b>: 100%<br />
-          <b>Menus</b>: 100%<br />
-          <b>Cutscenes:</b>: 100%<br />
-          <b>Diálogos</b>: 100%<br />
-          <b>Revisão</b>: 99%
+          <b>Texturas</b>: 80%<br />
+          <b>Menus</b>: 70%<br />
+          <b>Cutscenes:</b>: 90%<br />
+          <b>Diálogos</b>: 77%<br />
+          <b>Revisão</b>: 1%
         </p>
       </div>
       <div>
@@ -754,7 +574,7 @@
       </div>
       <div class="folder">
         <br />
-        <div id="patch_tutorial" class="hidden_folder">
+        <div id="patch_tutorial" style="display: none;" class="hidden_folder">
           <picture id="hide_folder" onclick="folder(this)">
             <source
               srcset="/elements/down_arrow.png"
@@ -839,17 +659,11 @@
                     margin-left: auto;
                     margin-right: auto;
                   "
-                  src="media/Icon.png"
+                  src="media/logo.png"
                 />
                 <p style="text-align: center">
-                  <b>Tipo de Patch</b>: XDELTA<br />
-                  <b>Versão do Jogo</b>: NTSC - SLUS_206.80<br />
-                  <br />
-                <a
-                  target="”_blank”"
-                  href="https://www.mediafire.com/file/x2cyh5iclfbwmqv/Patch_BOBBPFB.rar/file"
-                  >Patch</a
-                >
+                  <b>Tipo de Patch</b>: RAIDEN PATCHER (RPT)<br />
+                  <b>Versão do Jogo</b>: NTSC - SLUS_213.91<br />
                 </p>
               </div>
             </div>

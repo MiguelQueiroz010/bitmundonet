@@ -1,0 +1,54 @@
+Bob Esponja: Criatura do Siri Cascudo
+
+--------------------------
+Progresso de Tradução:
+
+12/08/2021 - UNSWLIZZLE ORDER DISCOVERED (BIT.RAIDEN)
+28/09/2021 - CRIADA FERRAMENTA BLITZSTRINGER (BIT.RAIDEN)
+31/12/2022 - ATUALIZADA FERRAMENTA BLITZSTRINGER, PRONTA PARA USO DE TRADUÇÃO
+12/2024 - TRADUZIDOS TODOS OS TEXTOS DE FASE/NÍVEIS
+
+
+Resident = Menu e outros - Feito [Corrigidos botões]
+{
+
+Save Place = Local de Salvar
+
+Personagens:
+
+Starfishman = Homem Estrela do Mar
+
+
+Ataques especiais:
+
+Bob:
+
+Dash Attack = Ataque de Investida
+Sand Slap = Tapa Rápido
+Sponge Lunge = Estocada Esponja
+
+Patrick:
+
+Bluster Puff = Sopro Voraz
+Sprint = Arrancada
+Turbo Twist = Torção Turbo
+Ground Slam = Pancada Terrestre
+Super Charge = Super Carga
+Blow = Sopro
+
+Plankton:
+
+Stomp = Pisoteio
+Shrinkifier = Desintegrador
+Roar = Grito
+}
+
+Capas devem ser editadas e reduzidas para 8bpp 256 cores e salvas em BMP sem compressão.
+[OPTIPIX]
+
+	Níveis:
+
+#Nível 1 - Sonhando com Diesel: Capa do Nível: Concluída!
+#TODAS AS CAPAS DE NÍVEIS TRADUZIDOS
+
+26/12/2022 - LOGOTIPO TRADUZIDA E READAPTADA

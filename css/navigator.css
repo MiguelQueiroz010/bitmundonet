@@ -1,4 +1,4 @@
-a {
+#navbar a {
   display: inline-flex;
   font: 20px verdana;
 }
@@ -193,7 +193,9 @@ body {
   animation-fill-mode: forwards;
 
 }
-
+#mobile_close{
+  display: none;
+}
 #close {
   display: none;
   width: 40px;
@@ -266,12 +268,17 @@ html::-webkit-scrollbar-thumb {
   #dropdown a:hover {
     background-color: #209610;
   }
+  #dropdown{
+    width:100%;
+  }
   #mobile_dropdown {
-    
     display: block;
     z-index: 99;
     margin-left: 10px;
     margin-top: 38px;
+  }
+  #mobile_close{
+    display: block;
   }
 }
 html {

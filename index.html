@@ -41,107 +41,200 @@
     <link rel="manifest" href="/fav//site.webmanifest" />
     <link rel="stylesheet" href="/css/navigator.css" />
     <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script type="text/javascript" src="/scripts/index.js"></script>
+
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561"
       crossorigin="anonymous"
     ></script>
     <style>
-      #desc_project {
-        clear: left;
-        padding: 5px;
-        border: 2px solid rgb(129, 129, 129);
-        border-radius: 10px;
-      }
-      article table{
-        clear: left;
-        text-align: left;
-        align-items: center;
-        
-        padding: 6px;
-      }
-      .hidden_folder {
-        display: inline-block;
-        text-shadow: none;
-        clear: left;
-        cursor: grab;
-        text-align: left;
-        align-items: center;
-        width: 80%;
-        padding: 5px;
-        
-      }
-      .hidden_folder img {
-        margin-left: auto;
-        margin-right: auto;
-        text-align: center;
-        align-items: center;
-        width: 90%;
-      }
-      .hidden_folder:hover {
-        background-color: rgba(255, 228, 177, 0.089);
-        border-radius: 4em;
-      }
-      #hovertext_a:hover {
-        height: 2.4em;
-        background-color: #0400ff;
-        color: rgb(255, 255, 255);
-        
-        border-bottom: 2px solid rgb(255, 255, 255);
-        
-      }
-      .hidden_folder #hide_folder {
-        cursor: grab;
-        width: 18px;
-      }
-      .hidden_folder #show_folder {
-        cursor: grab;
-        width: 18px;
-        translate: scaleY(-1);
-      }
-      .hidden_folder h1 {
-        background-color: orange;
-        display: inline;
-        align-items: center;
+      #gallery {
+        background-color: rgba(0, 0, 0, 0.418);
         justify-content: center;
-        text-align: center;
-        font-size: xx-large;
-        font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
-          sans-serif;
-        color: rgb(0, 0, 0);
-        background: linear-gradient(
-          0deg,
-          rgba(145, 28, 106, 0.445) 10%,
-          rgba(255, 183, 29, 0.356) 70%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-stroke: 3px transparent;
+        align-items: center;
+        width: 100% !important;
       }
-      .hidden_folder h1 {
-        background-color: rgb(255, 255, 255);
-        display: inline;
-        font-size: x-large;
-        font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
-          sans-serif;
-        color: rgb(0, 0, 0);
+      #gallery img {
+        width: 100% !important;
       }
-      #arrow {
-        background-color: #ffffff7e;
-        border-radius: 1em;
+
+      @keyframes glow {
+        0% {
+          background-color: ffffff56;
+        }
+        25% {
+          background-color: orange;
+        }
+        50% {
+          background-color: orange;
+        }
+        100% {
+          background-color: ffffff56;
+        }
       }
-      .hiddendiv {
+
+      /*GALLERY SLIDESHOW*/
+
+      * {
+        box-sizing: border-box;
+      }
+
+      /* Slideshow container */
+      .slideshow-container {
+        max-width: 1000px;
+        border-color: #000;
+        position: relative;
+        display: flex;
+        margin: auto;
+      }
+
+      /* Hide the images by default */
+      .mySlides {
         display: none;
+        width: max-content;
+        margin: auto;
       }
-      .showdiv {
-        border-radius: 4em;
-        background-color: rgba(3, 0, 32, 0.589);
-        display: block;
+      .first {
+        display: flex;
+        margin: auto;
       }
-      .commontext {
-        font-size: xx-large;
-        font-style: italic;
+
+      .legenda {
+        cursor: pointer;
+        position: static;
+        display: inline-block;
+        width: auto;
+        padding: 16px;
+        color: rgb(255, 255, 255);
+        background-color: #bbb;
+        font-weight: bold;
+        font-size: 18px;
+        transition: 0.6s ease;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+      }
+      .legenda p {
+        font-size: 16px;
+        color: #000;
+        text-shadow: none;
+      }
+      /* Next & previous buttons */
+      .prev,
+      .next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        margin-top: -22px;
+        padding: 16px;
+        color: rgb(255, 255, 255);
+        font-weight: bold;
+        font-size: 18px;
+        transition: 0.6s ease;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+      }
+
+      /* Position the "next button" to the right */
+      .next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+      }
+
+      /* On hover, add a black background color with a little bit see-through */
+      .prev:hover,
+      .next:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+      }
+
+      /* Caption text */
+      .text {
+        color: #f2f2f2;
+        font-size: 20px;
+        padding: 8px 12px;
+        position: absolute;
+        bottom: 8px;
+        width: 100%;
         text-align: center;
       }
+
+      /* Number text (1/3 etc) */
+      .numbertext {
+        color: #ffffff;
+        font-size: 16px;
+        padding: 16px 26px;
+        position: absolute;
+        top: 0;
+      }
+
+      /* The dots/bullets/indicators */
+      .dot {
+        cursor: pointer;
+        height: 15px;
+        width: 15px;
+        margin: 0 2px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        transition: background-color 0.6s ease;
+      }
+
+      .active,
+      .dot:hover {
+        background-color: rgb(255, 0, 0);
+      }
+
+      /* Fading animation */
+      .fade {
+        animation-name: fade;
+        animation-duration: 1.5s;
+      }
+      /*PROGRESS BAR*/
+      #progress_num {
+        font-size: large;
+        text-shadow: none;
+        text-decoration: underline;
+        text-align: center;
+        text-anchor: middle;
+        margin-left: 50%;
+        color: #000;
+      }
+      .progress {
+        height: 15px;
+        background-color: #777;
+        position: relative;
+        border-radius: 5px;
+      }
+
+      .progress .progress-bar {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #f8ea6e;
+        animation: progress-animation 6s normal;
+        border-radius: 5px;
+      }
+      :root {
+        --pbar_centage: 100%;
+      }
+      @keyframes progress-animation {
+        0% {
+          width: 0%;
+        }
+        100% {
+          width: var(--pbar_centage);
+        }
+      }
+      @keyframes fade {
+        from {
+          opacity: 0.4;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
       article {
         padding-left: 5px;
         padding-right: 5px;
@@ -159,7 +252,8 @@
           1;
         border-bottom: 4px solid rgb(0, 0, 0);
       }
-      article h3 {
+      article h3,
+      h1 {
         display: block;
         font-family: "Arial Narrow";
         font-size: xx-large;
@@ -170,13 +264,6 @@
         border-right: 0;
         border-image: radial-gradient(rgb(80, 1, 1), rgb(255, 222, 37)) 1;
         border-bottom: 4px solid rgb(255, 19, 19);
-        
-      }
-      article p {
-        padding-left: 20px;
-        padding-right: 20px;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: large;
       }
       p {
         font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -200,9 +287,21 @@
       * {
         box-sizing: border-box;
       }
-      #thumbtable tr{
-border-radius: 20% ;
-border-style: solid;
+      #thumbtable tr {
+        border-radius: 20%;
+        border-style: solid;
+      }
+
+      @media screen and (max-width: 990px) {
+        .legenda {
+          display: none;
+        }
+        #legenda_ovl {
+          display: none;
+        }
+        #legenda_ovlstaff {
+          display: none;
+        }
       }
     </style>
 
@@ -268,16 +367,31 @@ border-style: solid;
           <!-- #region DropDownMenu-->
 
           <div id="dropdown">
+            <div
+              id="mobile_close"
+              onclick="dropdown()"
+              style="
+                width: 8%;
+                font-size: larger;
+                margin-left: auto;
+                margin-right: 20px;
+                border-radius: 100%;
+                background-color: rgb(41, 27, 236);
+              "
+            >
+              <div style="font-size: larger; color: rgb(60, 236, 16)">>></div>
+            </div>
             <table>
               <tr id="MenuTitle">
                 <td height="100px">
                   &#160;&#160;&#160;
                   <img
-                  style="width: 65%;"
-                  class="centerBANNER"
-                  oncontextmenu="return false"
-                  src="media/mobile_bitmundo_banner.png"
-                /></td>
+                    style="width: 65%"
+                    class="centerBANNER"
+                    oncontextmenu="return false"
+                    src="media/mobile_bitmundo_banner.png"
+                  />
+                </td>
               </tr>
               <!--#region Links-->
               <tr>
@@ -354,11 +468,12 @@ border-style: solid;
               <!-- #endregion -->
 
               <!-- #region Notes/Disclaimer-->
-              <tr style="bottom: 0 ">
+              <tr style="bottom: 0">
                 <td>
                   <hr />
                   <p class="aligncenter">
-                    <b>&circledR; Bit.Mundo</b> 2023 <br>Desenvolvido por Bit.Raiden
+                    <b>&circledR; Bit.Mundo</b> 2023 <br />Desenvolvido por
+                    Bit.Raiden
                   </p>
                 </td>
               </tr>
@@ -493,162 +608,561 @@ border-style: solid;
     <div id="month_contents">
       <article>
         <h3>Destaques</h3>
-        <table>
+        <div id="gallery" data-fit="cover" data-autohide="a11">
+          <script type="text/javascript" src="/scripts/gallery.js"></script>
+          <script
+            type="text/javascript"
+            src="/scripts/spotlight.bundle.js"
+          ></script>
 
-          <tr>
-            <td>
-            <!--SpongeBob Battle for Bikini Bottom Folder-->
-            <div
-              onclick="location.href='projects/ps2/sbbfbb/sbbfbb.html';"
-              id="hide_folder"
-              onselectstart="return false"
-              class="hidden_folder"
-              onclick="folder(this)"
-            >
-              <img src="projects/ps2/sbbfbb/media/Icon.png" />
-              <table id="thumbtable">
-                <tr>
-                  <th><img width="256px" src="projects/ps2/sbbfbb/media/galeria/menu.jpg" /></th>
-                  <th><img width="256px" src="projects/ps2/sbbfbb/media/galeria/menu3.jpg" /></th>
-                  <th><img width="256px" src="projects/ps2/sbbfbb/media/galeria/checkp.jpg" /></th>
-                </tr>
-              </table>
-    
-              <div id="desc_project">
-                <h3 style="display: inline" ;>
-                  Bob Esponja Batalha pela Fenda do Biquíni
-                </h3>
-                <br />
-                <p>
-                  Confira como ficou a conclusão desse projeto, baixe e experimente!
-                </p>
-              </div>
-              <div id="arrow" style="float: right; margin-right: 2em; padding: 4px">
-                <h1
-                  style="padding-right: 8px; padding-left: 8px"
-                  onclick="location.href='projects/psx/alundra2/alundra2.html';"
-                >
-                  Ver mais
-                </h1>
-                <picture style="display: none" id="hide_folder">
-                  <source
-                    srcset="../../elements/down_arrow.png"
-                    media="(prefers-color-scheme: dark)"
-                  />
-                  <img id="hide_folder" src="../../elements/light_down_arrow.png" />
-                </picture>
-              </div>
-              <br /><br />
-              <br />
+          <div id="gallery_container" class="slideshow-container">
+            <!-- Full-width images with number and caption text -->
+            <div class="mySlides fade first">
+              <a style="width: 100%" href="projects/ninja5br/ninja5br.html">
+                <img
+                  alt="Naruto Shippuden Ultimate Ninja 5+ BR"
+                  style="width: 100%; height: 100%"
+                  oncontextmenu="return false"
+                  src="projects/ninja5br/media/poster.png"
+                />
+              </a>
+
+              <a
+                style="text-decoration: none"
+                href="projects/ninja5br/ninja5br.html"
+                id="legenda_ovl"
+              >
+                <div class="legenda">
+                  <h1 style="color: rgb(185, 156, 255)">
+                    Naruto Shippuden Ultimate Ninja 5+ BR
+                  </h1>
+                  <p>
+                    <br />
+                    *Texturas: 100%<br />
+                    *Menus: 100%<br />
+                    *Textos dos Movies: 100%<br />
+                    *Textos e Falas: 100%<br />
+                    *Revisão (2019): 100%<br />
+                    <br /><br />
+                    *Revisão (2023): 100%<br />
+                  </p>
+                  <h1
+                    style="
+                      font-size: large;
+                      color: rgb(0, 0, 0);
+                      text-shadow: none;
+                      border: none;
+                      text-align: center;
+                    "
+                  >
+                    Changelog detalhado:
+                  </h1>
+                  <iframe
+                    src="projects/ninja5br/progresso.txt"
+                    frameborder="0"
+                    style="
+                      width: 90%;
+                      border-radius: 2em;
+                      background-color: #000000;
+                      align-items: center;
+                    "
+                    scrolling="auto"
+                    width="100%"
+                  ></iframe>
+                  <br /><br /><br />
+                  <p
+                    style="
+                      text-align: center;
+                      text-decoration: underline;
+                      font-size: larger;
+                      color: blue;
+                      font-family: Garamond, Baskerville, serif;
+                    "
+                  >
+                    Envolvidos no Projeto
+                  </p>
+                  <div id="legenda_ovlstaff" style="width: 80%">
+                    <table>
+                      <tr>
+                        <td>
+                          <a
+                            href="https://www.youtube.com/c/@BitRaiden"
+                            target="_blank"
+                          >
+                            <img
+                            style="border-radius: 100%;"
+                              oncontextmenu="return false"
+                              src="https://yt3.googleusercontent.com/K6s7MepdAlpLvI-Z4E4Wn_RrD4jEft5s5SqJF39-vHTm3j_rFJhMllyEzEDiQTvtPQszikPBsA=s160-c-k-c0x00ffffff-no-rj"
+                            />
+                          </a>
+                        </td>
+                        <td>
+                          <a
+                            href="https://www.youtube.com/@zMath3usMSF"
+                            target="_blank"
+                          >
+                            <img
+                            style="border-radius: 100%;"
+                              oncontextmenu="return false"
+                              src="https://yt3.googleusercontent.com/UQ5WG9BctdWFdtzjXqoBLeuQ40-FhPW67M4rHIBhJbPginduzuHoCV5QdpW0zGD2_oqHhKA-tQ=s160-c-k-c0x00ffffff-no-rj"
+                            />
+                          </a>
+                        </td>
+                        <td>
+                          <a
+                            href="https://www.youtube.com/@NarutimateModdingOfficial"
+                            target="_blank"
+                          >
+                            <img
+                            style="border-radius: 100%;"
+                              oncontextmenu="return false"
+                              src="https://yt3.googleusercontent.com/d2Wu_wT3ffXBR5ZuDzie-ntxMKtMIVQHIUNVxXZL2jBfOCh7eje_1CCleB-0hPyfw0iyUZB0hA=s160-c-k-c0x00ffffff-no-rj"
+                            />
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </a>
             </div>
-            <br />
-          </td>
-          </tr>
+            <div class="mySlides fade">
+              <a style="width: 100%" href="projects/ps2/sbcfkk/sbcfkk.html">
+                <img
+                  alt="Bob Esponja Criatura do Siri Cascudo"
+                  style="width: 100%; height: 100%"
+                  oncontextmenu="return false"
+                  src="projects/ps2/sbcfkk/media/capa.jpg"
+                />
+              </a>
 
-          <tr>
+              <a
+                style="text-decoration: none"
+                href="projects/ps2/sbcfkk/sbcfkk.html"
+                id="legenda_ovl"
+              >
+                <div class="legenda">
+                  <h1 style="color: rgb(215, 243, 56)">
+                    Bob Esponja Criatura do Siri Cascudo
+                  </h1>
+                  <p>
+                    Projeto em Andamento...<br />
+                    <br />
+                    *Textos: 90%<br />
+                    *Texturas: 80%<br />
+                    *Menus: 99%<br />
+                    *Cenas: 50%<br />
+                  </p>
+                  <h1
+                    style="
+                      font-size: large;
+                      color: rgb(0, 0, 0);
+                      text-shadow: none;
+                      border: none;
+                      text-align: center;
+                    "
+                  >
+                    Changelog detalhado:
+                  </h1>
+                  <iframe
+                    src="projects/ps2/sbbfbb/progresso.txt"
+                    frameborder="0"
+                    style="
+                      width: 90%;
+                      border-radius: 2em;
+                      background-color: #000000;
+                      align-items: center;
+                    "
+                    scrolling="auto"
+                    width="100%"
+                  ></iframe>
+                  <br /><br /><br />
+                  <div class="progress">
+                    <div id="pbc" pcounter="77%" class="progress-bar"></div>
+                  </div>
+                  <h2 id="progress_num" style="border: none"></h2>
+                  <br /><br /><br />
+                  <p
+                    style="
+                      text-align: center;
+                      text-decoration: underline;
+                      font-size: larger;
+                      color: blue;
+                      font-family: Garamond, Baskerville, serif;
+                    "
+                  >
+                    Envolvidos no Projeto
+                  </p>
+                  <div id="legenda_ovlstaff" style="width: 20%">
+                    <a
+                      href="https://www.youtube.com/c/@BitRaiden"
+                      target="_blank"
+                    >
+                      <img
+                        oncontextmenu="return false"
+                        src="media/Logotipo redondo.png"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="mySlides fade">
+              <a style="width: 100%" href="projects/psx/alundra2/alundra2.html">
+                <img
+                  alt="Naruto Shippuden Ultimate Ninja 5+ BR"
+                  style="width: 100%; height: 100%"
+                  oncontextmenu="return false"
+                  src="projects/psx/alundra2/media/capa.jpg"
+                />
+              </a>
 
-            <td>
-        <!--Ultimate Ninja 5+ Folder-->
-        <div
-          onclick="location.href='projects/ninja5br/ninja5br.html';"
-          id="hide_folder"
-          onselectstart="return false"
-          class="hidden_folder"
-          onclick="folder(this)"
-        >
-          <img src="projects/ninja5br/media/iconv9.png" />
-          
-          <table id="thumbtable">
+              <a
+                style="text-decoration: none"
+                href="projects/psx/alundra2/alundra2.html"
+                id="legenda_ovl"
+              >
+                <div class="legenda">
+                  <h1 style="color: rgb(185, 156, 255)">
+                    Alundra 2 Uma Nova Lenda Começa
+                  </h1>
+                  <p>
+                    <br />
+                    *Texturas: 100%<br />
+                    *Menus: 100%<br />
+                    *Textos das Cutscenes: 100%<br />
+                    *Textos e Falas: 100%<br />
+                    *Revisão: 30%<br />
+                  </p>
+                  <h1
+                    style="
+                      font-size: large;
+                      color: rgb(0, 0, 0);
+                      text-shadow: none;
+                      border: none;
+                      text-align: center;"
+                  >
+                    Changelog detalhado:
+                  </h1>
+                  <iframe
+                    src="projects/psx/alundra2/progresso.txt"
+                    frameborder="0"
+                    style="
+                      width: 90%;
+                      border-radius: 2em;
+                      background-color: #000000;
+                      align-items: center;
+                    "
+                    scrolling="auto"
+                    width="100%"
+                  ></iframe>
+                  <br /><br /><br />
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- The dots/circles -->
+        </div>
+        <div style="text-align: center; background-color: #bbbbbb57">
+          <span class="dot active" onclick="currentSlide(1)"></span>
+          <span class="dot inactive" onclick="currentSlide(2)"></span>
+          <span class="dot inactive" onclick="currentSlide(3)"></span>
+        </div>
+        <div style="display: none" id="Selector">
+          <table
+            class="slide"
+            cellpadding="0"
+            cellspacing="0"
+            id="destaques_slidetb"
+          >
             <tr>
-              <th><img width="256px" src="projects/ninja5br/media/gallery/menu.bmp" /></th>
-              <th><img width="256px" src="projects/ninja5br/media/gallery/movie.bmp" /></th>
-              <th><img width="256px" src="projects/ninja5br/media/gallery/menu_2.bmp" /></th>
+              <!--SLIDESHOW-->
+              <td>
+                <!--SpongeBob Creature from the Krusty Krab-->
+                <div
+                  onclick="location.href='projects/ps2/sbcfkk/sbcfkk.html';"
+                  id="hide_folder"
+                  onselectstart="return false"
+                  class="hidden_folder"
+                  onclick="folder(this)"
+                >
+                  <img src="projects/ps2/sbcfkk/media/logo.png" />
+                  <table id="thumbtable">
+                    <tr>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ps2/sbbfbb/media/galeria/menu.jpg"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ps2/sbbfbb/media/galeria/menu3.jpg"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ps2/sbbfbb/media/galeria/checkp.jpg"
+                        />
+                      </th>
+                    </tr>
+                  </table>
+
+                  <div id="desc_project">
+                    <h3 style="display: inline" ;>
+                      Bob Esponja Criatura do Siri Cascudo
+                    </h3>
+                    <br />
+                    <p>
+                      Projeto em andamento, confira os detalhes e saiba mais!
+                    </p>
+                  </div>
+                  <div
+                    id="arrow"
+                    style="float: right; margin-right: 2em; padding: 4px"
+                  >
+                    <h1
+                      style="padding-right: 8px; padding-left: 8px"
+                      onclick="location.href='projects/psx/alundra2/alundra2.html';"
+                    >
+                      Ver mais
+                    </h1>
+                    <picture style="display: none" id="hide_folder">
+                      <source
+                        srcset="../../elements/down_arrow.png"
+                        media="(prefers-color-scheme: dark)"
+                      />
+                      <img
+                        id="hide_folder"
+                        src="../../elements/light_down_arrow.png"
+                      />
+                    </picture>
+                  </div>
+                  <br /><br />
+                  <br />
+                </div>
+                <br />
+              </td>
+
+              <td>
+                <!--Ultimate Ninja 5+ Folder-->
+                <div
+                  onclick="location.href='projects/ninja5br/ninja5br.html';"
+                  id="hide_folder"
+                  onselectstart="return false"
+                  class="hidden_folder"
+                  onclick="folder(this)"
+                >
+                  <img src="projects/ninja5br/media/iconv9.png" />
+
+                  <table id="thumbtable">
+                    <tr>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ninja5br/media/gallery/menu.bmp"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ninja5br/media/gallery/movie.bmp"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ninja5br/media/gallery/menu_2.bmp"
+                        />
+                      </th>
+                    </tr>
+                  </table>
+
+                  <div id="desc_project">
+                    <h3 style="display: inline" ;>
+                      Lançamento! Ultimate Ninja 5 v9 Rev 2023
+                    </h3>
+                    <br />
+                    <p>
+                      Finalmente foi lançada a revisão com muitas melhorias e
+                      novos recursos.
+                    </p>
+                  </div>
+                  <div
+                    id="arrow"
+                    style="float: right; margin-right: 2em; padding: 4px"
+                  >
+                    <h1
+                      style="padding-right: 8px; padding-left: 8px"
+                      onclick="location.href='projects/ninja5br/ninja5br.html';"
+                    >
+                      Ver mais
+                    </h1>
+                    <picture style="display: none" id="hide_folder">
+                      <source
+                        srcset="../../elements/down_arrow.png"
+                        media="(prefers-color-scheme: dark)"
+                      />
+                      <img
+                        id="hide_folder"
+                        src="../../elements/light_down_arrow.png"
+                      />
+                    </picture>
+                  </div>
+                  <br /><br />
+                  <br />
+                </div>
+                <br /><br />
+              </td>
+
+              <td>
+                <!--Alundra 2 Folder-->
+                <div
+                  onclick="location.href='projects/psx/alundra2/alundra2.html';"
+                  id="hide_folder"
+                  onselectstart="return false"
+                  class="hidden_folder"
+                  onclick="folder(this)"
+                >
+                  <img width="50%" src="projects/psx/alundra2/media/icon.png" />
+
+                  <table id="thumbtable">
+                    <tr>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/psx/alundra2/media/menu1.png"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/psx/alundra2/media/menu2.png"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/psx/alundra2/media/contrail.png"
+                        />
+                      </th>
+                    </tr>
+                  </table>
+
+                  <br /><br />
+                  <div id="desc_project">
+                    <h3 style="display: inline" ;>
+                      Alundra 2 Versão Brasileira
+                    </h3>
+
+                    <p>
+                      Iniciado o projeto de tradução, confira o changelog e
+                      acompanhe!
+                    </p>
+                  </div>
+                  <div
+                    id="arrow"
+                    style="float: right; margin-right: 2em; padding: 4px"
+                  >
+                    <h1
+                      style="padding-right: 8px; padding-left: 8px"
+                      onclick="location.href='projects/psx/alundra2/alundra2.html';"
+                    >
+                      Ver mais
+                    </h1>
+                    <picture style="display: none" id="hide_folder">
+                      <source
+                        srcset="../../elements/down_arrow.png"
+                        media="(prefers-color-scheme: dark)"
+                      />
+                      <img
+                        id="hide_folder"
+                        src="../../elements/light_down_arrow.png"
+                      />
+                    </picture>
+                  </div>
+                  <br /><br />
+                  <br />
+                </div>
+                <br />
+              </td>
+
+              <td>
+                <!--SpongeBob Battle for Bikini Bottom Folder-->
+                <div
+                  onclick="location.href='projects/ps2/sbbfbb/sbbfbb.html';"
+                  id="hide_folder"
+                  onselectstart="return false"
+                  class="hidden_folder"
+                  onclick="folder(this)"
+                >
+                  <img src="projects/ps2/sbbfbb/media/Icon.png" />
+                  <table id="thumbtable">
+                    <tr>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ps2/sbbfbb/media/galeria/menu.jpg"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ps2/sbbfbb/media/galeria/menu3.jpg"
+                        />
+                      </th>
+                      <th>
+                        <img
+                          width="256px"
+                          src="projects/ps2/sbbfbb/media/galeria/checkp.jpg"
+                        />
+                      </th>
+                    </tr>
+                  </table>
+
+                  <div id="desc_project">
+                    <h3 style="display: inline" ;>
+                      Bob Esponja Batalha pela Fenda do Biquíni
+                    </h3>
+                    <br />
+                    <p>
+                      Confira como ficou a conclusão desse projeto, baixe e
+                      experimente!
+                    </p>
+                  </div>
+                  <div
+                    id="arrow"
+                    style="float: right; margin-right: 2em; padding: 4px"
+                  >
+                    <h1
+                      style="padding-right: 8px; padding-left: 8px"
+                      onclick="location.href='projects/psx/alundra2/alundra2.html';"
+                    >
+                      Ver mais
+                    </h1>
+                    <picture style="display: none" id="hide_folder">
+                      <source
+                        srcset="../../elements/down_arrow.png"
+                        media="(prefers-color-scheme: dark)"
+                      />
+                      <img
+                        id="hide_folder"
+                        src="../../elements/light_down_arrow.png"
+                      />
+                    </picture>
+                  </div>
+                  <br /><br />
+                  <br />
+                </div>
+                <br />
+              </td>
             </tr>
           </table>
-          
-          <div id="desc_project">
-            <h3 style="display: inline" ;>
-              Lançamento! Ultimate Ninja 5 v9 Rev 2023
-            </h3>
-            <br />
-            <p>
-              Finalmente foi lançada a revisão com muitas melhorias e novos
-              recursos.
-            </p>
-            
-          </div>
-          <div id="arrow" style="float: right; margin-right: 2em; padding: 4px">
-            <h1
-              style="padding-right: 8px; padding-left: 8px"
-              onclick="location.href='projects/ninja5br/ninja5br.html';"
-            >
-              Ver mais
-            </h1>
-            <picture style="display: none" id="hide_folder">
-              <source
-                srcset="../../elements/down_arrow.png"
-                media="(prefers-color-scheme: dark)"
-              />
-              <img id="hide_folder" src="../../elements/light_down_arrow.png" />
-            </picture>
-          </div>
-          <br /><br />
-          <br />
         </div>
-        <br /><br />
-      </td>
-
-        <td>
-        <!--Alundra 2 Folder-->
-        <div
-          onclick="location.href='projects/psx/alundra2/alundra2.html';"
-          id="hide_folder"
-          onselectstart="return false"
-          class="hidden_folder"
-          onclick="folder(this)"
-        >
-          <img width="50%" src="projects/psx/alundra2/media/icon.png" />
-
-          <table id="thumbtable">
-            <tr>
-              <th><img width="256px" src="projects/psx/alundra2/media/menu1.png" /></th>
-              <th><img width="256px" src="projects/psx/alundra2/media/menu2.png" /></th>
-              <th><img width="256px" src="projects/psx/alundra2/media/contrail.png" /></th>
-            </tr>
-          </table>
-
-          <br /><br />
-          <div id="desc_project">
-            <h3 style="display: inline" ;>Alundra 2 Versão Brasileira</h3>
-
-            <p>
-              Iniciado o projeto de tradução, confira o changelog e acompanhe!
-            </p>
-          </div>
-          <div id="arrow" style="float: right; margin-right: 2em; padding: 4px">
-            <h1
-              style="padding-right: 8px; padding-left: 8px"
-              onclick="location.href='projects/psx/alundra2/alundra2.html';"
-            >
-              Ver mais
-            </h1>
-            <picture style="display: none" id="hide_folder">
-              <source
-                srcset="../../elements/down_arrow.png"
-                media="(prefers-color-scheme: dark)"
-              />
-              <img id="hide_folder" src="../../elements/light_down_arrow.png" />
-            </picture>
-          </div>
-          <br /><br />
-          <br />
-        </div>
-        <br />
-      </td>
-
-      </tr>
-      
-      </table>
       </article>
     </div>
   </body>

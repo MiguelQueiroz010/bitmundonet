@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tools>
-<tool nome="UltraIso">
+<tool nome="UltraIso - TESTE">
 <description>ULTRAISO é uma ferramenta para
 manipulação de imagens do tipo ISO ou outras.
 Ele pode abrir, extrair, recompilar e recriar as
@@ -9,10 +9,10 @@ regravação, sendo conhecido muito também por
 sua compatibilidade com discos XBOX,PSX e PS2.</description>
 <version>1.0</version>
 <type>ISO/IMAGEM DE DISCO</type>
-<url>www.google.com.br</url>
-<icon>/tools/ultraiso.png</icon>
+<url>https://www.ultraiso.com/download.html</url>
+<icon>/media/tools/ultraiso.png</icon>
 </tool>
-<tool nome="UltraIso">
+<tool nome="UaltraIso - TESTE">
 <description>ULTRAISO é uma ferramenta para
 manipulação de imagens do tipo ISO ou outras.
 Ele pode abrir, extrair, recompilar e recriar as
@@ -21,7 +21,7 @@ regravação, sendo conhecido muito também por
 sua compatibilidade com discos XBOX,PSX e PS2.</description>
 <version>1.0</version>
 <type>ISO/IMAGEM DE DISCO</type>
-<url>www.google.com.br</url>
-<icon>/tools/ultraiso.png</icon>
+<url>https://www.ultraiso.com/download.html</url>
+<icon>/media/tools/ultraiso.png</icon>
 </tool>
 </tools>

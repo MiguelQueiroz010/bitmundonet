@@ -22,6 +22,6 @@ sua compatibilidade com discos XBOX,PSX e PS2.</description>
 <version>1.0</version>
 <type>ISO/IMAGEM DE DISCO</type>
 <url>https://www.ultraiso.com/download.html</url>
-<icon>/media/tools/ultraiso.png</icon>
+<icon>../../media/tools/ultraiso.png</icon>
 </tool>
 </tools>

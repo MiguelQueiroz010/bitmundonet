@@ -1,4 +1,4 @@
-var xmlDoc;
+var xmlDoc = null;
 
 function readXml(xmlFile) {
     if (typeof window.DOMParser != "undefined") {

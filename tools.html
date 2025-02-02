@@ -62,6 +62,7 @@
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <!--#endregion -->
     <!--#region NAVBAR LOADER  -->
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
     <div w3-include-html="/navbar.html"></div>
     <script>
       w3IncludeHTML();
@@ -90,7 +91,7 @@
                 padding: 0;
             }
             .alphabet-list li {
-                font-size: xx-large;
+                font-size: 30px;
                 font-family: Verdana, Geneva, Tahoma, sans-serif;
                 border-bottom: 4px solid rgb(255, 255, 255);
                 margin-bottom: 19px;
@@ -101,8 +102,15 @@
             }
             .alphabet-list li h2 {
                 margin-left: 120px;
-                margin-top: -40px;
+                margin-top: -35px;
                 position: relative; 
+                color: rgb(255, 255, 255);
+                -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+            }
+            .alphabet-list li h2:hover {
+                color: rgb(46, 43, 226);
             }
             #toolElement{
                 background-color: aqua;
@@ -121,6 +129,19 @@
             }
             #link a img{
                 position: inherit;
+            }
+            @media screen and (max-width: 990px) {
+              .alphabet-list li {
+                font-size: 20px;
+                font-family: Verdana, Geneva, Tahoma, sans-serif;
+                border-bottom: 4px solid rgb(255, 255, 255);
+                margin-bottom: 19px;
+            }
+            .alphabet-list li h2 {
+                margin-left: 120px;
+                margin-top: -20px;
+                position: relative; 
+            }
             }
         </style>
         

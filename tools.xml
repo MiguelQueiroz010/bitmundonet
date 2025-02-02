@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tools>
-<tool nome="UltraIso - TESTE">
+<tool nome="UltraIso">
 <description>ULTRAISO é uma ferramenta para
 manipulação de imagens do tipo ISO ou outras.
 Ele pode abrir, extrair, recompilar e recriar as
@@ -9,19 +9,48 @@ regravação, sendo conhecido muito também por
 sua compatibilidade com discos XBOX,PSX e PS2.</description>
 <version>1.0</version>
 <type>ISO/IMAGEM DE DISCO</type>
+<target>Imagens de Disco</target>
 <url>https://www.ultraiso.com/download.html</url>
 <icon>/media/tools/ultraiso.png</icon>
 </tool>
-<tool nome="UaltraIso - TESTE">
-<description>ULTRAISO é uma ferramenta para
-manipulação de imagens do tipo ISO ou outras.
-Ele pode abrir, extrair, recompilar e recriar as
-imagens facilmente, é muito útil até mesmo para
-regravação, sendo conhecido muito também por
-sua compatibilidade com discos XBOX,PSX e PS2.</description>
-<version>1.0</version>
-<type>ISO/IMAGEM DE DISCO</type>
-<url>https://www.ultraiso.com/download.html</url>
-<icon>/media/tools/ultraiso.png</icon>
+<tool nome="SCEIVag-Pack">
+<description>Ferramenta para manipulação de container de áudio VAG e binários da Sony(SCEI).
+
+A ferramenta em si foi feita para edição dos áudios do container "SNDDATA.BIN" do jogo Naruto Shippuden Ultimate Ninja 5, a estrutura base do arquivo foi documentada pelo THeus, do servidor do discord Naruto Classics: https://discord.gg/gWtneMgE.
+
+Todos os direitos do jogo são para a CyberConnect2 e BandaiNamco.
+</description>
+<version>Github Release</version>
+<type>BIN/AUDIO MANIPULATOR</type>
+<target>Naruto Shippuden: Ultimate Ninja [Series]</target>
+<url>https://github.com/MiguelQueiroz010/SCEIVag-Pack/releases/tag/Dev</url>
+<icon>/media/tools/sceivag.ico</icon>
+</tool>
+<tool nome="CCSF Asset Explorer">
+<description>Asset Explorer focused on Narutimatte series CCSF files from Cyber Connect 2.
+</description>
+<version>Github Release</version>
+<type>ASSET EDITOR</type>
+<target>Naruto Shippuden: Ultimate Ninja [Series]</target>
+<url>https://github.com/MiguelQueiroz010/CCSF-Asset-Explorer/releases</url>
+<icon>/media/tools/ccsf.ico</icon>
+</tool>
+<tool nome="Raiden Patcher X [Android]">
+<description>Ferramenta para aplicar e criar patches em ISOs no formato Playstationº2, mantendo a estrutura da Sony e gerando o formato UDF.
+</description>
+<version>Github Release</version>
+<type>APLICADOR DE MODIFICAÇÕES</type>
+<target>RPT [Raiden Patcher Patch]</target>
+<url>https://github.com/MiguelQueiroz010/Ferramentas/releases/tag/android</url>
+<icon>/media/tools/rp_icon.png</icon>
+</tool>
+<tool nome="Raiden Patcher X [Windows]">
+<description>Ferramenta para aplicar e criar patches em ISOs no formato Playstationº2, mantendo a estrutura da Sony e gerando o formato UDF.
+</description>
+<version>Github Release</version>
+<type>APLICADOR DE MODIFICAÇÕES</type>
+<target>RPT [Raiden Patcher Patch]</target>
+<url>https://github.com/MiguelQueiroz010/Ferramentas/releases/tag/windows</url>
+<icon>/media/tools/rp_icon.png</icon>
 </tool>
 </tools>

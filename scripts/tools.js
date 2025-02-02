@@ -31,6 +31,7 @@ function getTools(xmlDoc) {
         var toolImage = tool.getElementsByTagName("icon")[0].childNodes[0].nodeValue;
         var toolVersion = tool.getElementsByTagName("version")[0].childNodes[0].nodeValue;
         var toolType = tool.getElementsByTagName("type")[0].childNodes[0].nodeValue;
+        var toolTarget = tool.getElementsByTagName("target")[0].childNodes[0].nodeValue;
 
         toolArray.push({
             name: toolName,
@@ -38,7 +39,8 @@ function getTools(xmlDoc) {
             description: toolDescription,
             image: toolImage,
             version: toolVersion,
-            type: toolType
+            type: toolType,
+            target: toolTarget
         });
     }
 
@@ -61,6 +63,8 @@ function getTools(xmlDoc) {
             <p>${toolArray[i].description}
             <br><br>
             Tipo de Ferramenta: ${toolArray[i].type}
+            <br><br>
+            Alvo:<span style="color:red"> ${toolArray[i].target}</span>
             </p>
             <div id="link">
             <a href="${toolArray[i].link}" target="_blank">

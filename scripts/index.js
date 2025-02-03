@@ -53,6 +53,7 @@ function readXml(xmlFile) {
 
   getArticle(xmlDoc);
 }
+function getArticle(xmlDoc) {
   var articles = xmlDoc.getElementsByTagName("article");
   var container = document.getElementsByClassName("container")[0];
  console.log(articles);
@@ -62,19 +63,44 @@ function readXml(xmlFile) {
     if (article.getAttribute("selected") == "true") {
       var title = article.getElementsByTagName("title")[0].textContent;
       var image = article.getElementsByTagName("image")[0].textContent;
+      var imageElement = article.getElementsByTagName("image")[0];
+      var imageStyle = imageElement.getAttribute("style");
       var content = article.getElementsByTagName("content")[0].textContent;
       var author = article.getElementsByTagName("author")[0].textContent;
       var date = article.getElementsByTagName("date")[0].textContent;
 
       // Split content by new lines and wrap each line in a <p> tag
       var contentParagraphs = content.split('\n').map(line => `<p>${line}</p>`).join('');
+      contentParagraphs = contentParagraphs.replace(/\(color\s*=\s*"(.*?)"\)/g, '<span style="color:$1">');
+      contentParagraphs = contentParagraphs.replace("(/color)", '</span>');
+
+      contentParagraphs = contentParagraphs.replace("(strong)", '<strong>');
+      contentParagraphs = contentParagraphs.replace("(/strong)", '</strong>');
+
+      contentParagraphs = contentParagraphs.replace(/\(font-size\s*=\s*"(.*?)"\)/g, '<span style="font-size:$1">');
+      contentParagraphs = contentParagraphs.replace(/\(\/font-size\)/g, '</span>');
+
+      contentParagraphs = contentParagraphs.replace(/\(image\s*(.*?)\s*=\s*"(.*?)"\)(.*?)\(\/image\)/g, '<img $1="$2" src="$3" alt="Image" style="max-width: 100%; height: auto;">');
+
+      var align = article.getElementsByTagName("image")[0].getAttribute("align") || "left";
+
+      // Ensure images within content are in separate paragraphs and apply styles
+      contentParagraphs = contentParagraphs.replace(/\(image\s*(.*?)\s*=\s*"(.*?)"\)(.*?)\(\/image\)/g, '<p style="$1"><img src="$2" alt="Image" style="max-width: 100%; height: auto;"></p>');
+
+      // Convert plain text links to hyperlinks
+      contentParagraphs = contentParagraphs.replace(/<p>(.*?)<\/p>/g, (match, p1) => {
+        return `<p>${p1.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')}</p>`;
+      });
 
       var articleHTML = `
-        <div class="article" style="display: flex; align-items: center; font-family: Arial, sans-serif;">
-          <img src="${image}" alt="${title}" style="margin-right: 20px; width: 150px; height: auto;">
-          <div>
-        <h2 style="font-size: 24px; font-weight: bold;">${title}</h2>
-        ${contentParagraphs}
+        <div class="article" style="display: flex; align-items: center; font-family: Arial, sans-serif; border: 1px solid; border-image: linear-gradient(to right, red, yellow) 1; text-align: ${align};">
+          <img src="${image}" alt="${title}" style="margin-right: 20px; ${imageStyle}">
+          <div style="display: flex; flex-direction: column;">
+        <h2 style="
+        border-image: none;
+        border-color: blue;
+        font-size: 24px; font-weight: bold;">${title}</h2>
+        ${contentParagraphs.replace(/<p>/g, '<p style="margin: 5px 0;">')}
         <p style="font-size: 14px; color: gray;">Author: ${author}</p>
         <p style="font-size: 14px; color: gray;">Date: ${date}</p>
           </div>

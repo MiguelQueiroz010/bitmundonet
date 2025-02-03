@@ -23,7 +23,7 @@ Todos os direitos do jogo são para a CyberConnect2 e BandaiNamco.
 </description>
 <version>Github Release</version>
 <type>BIN/AUDIO MANIPULATOR</type>
-<credit>Bit.Raiden, ZMath3us</credit>
+<credit>Bit.Raiden, ZMath3usMSF</credit>
 <target>Naruto Shippuden: Ultimate Ninja [Series]</target>
 <url>https://github.com/MiguelQueiroz010/SCEIVag-Pack/releases/tag/Dev</url>
 <icon>/media/tools/sceivag.ico</icon>
@@ -104,8 +104,8 @@ Todos os direitos do jogo são para a CyberConnect2 e BandaiNamco.
 <version>Github Release</version>
 <type>ASSET EDITOR</type>
 <target>NARUTO SHIPPUDEN ULTIMATE NINJA 5</target>
-<credit>ZMath3us</credit>
-<url>https://github.com/zMath3usMSF/UN5EventEditor/releases/tag/Release</url>
+<credit>ZMath3usMSF</credit>
+<url>https://github.com/ZMath3usMSFMSF/UN5EventEditor/releases/tag/Release</url>
 <icon>/media/tools/ccsev.ico</icon>
 </tool>
 <tool nome="Ultimate Ninja 5 Script Event Editor">
@@ -113,9 +113,9 @@ Todos os direitos do jogo são para a CyberConnect2 e BandaiNamco.
 </description>
 <version>Github Release</version>
 <type>ASSET EDITOR</type>
-<credit>ZMath3us</credit>
+<credit>ZMath3usMSF</credit>
 <target>NARUTO SHIPPUDEN ULTIMATE NINJA 5</target>
-<url>https://github.com/zMath3usMSF/UN5EventScriptEditor</url>
+<url>https://github.com/ZMath3usMSFMSF/UN5EventScriptEditor</url>
 <icon>/media/tools/ccsev.ico</icon>
 </tool>
 <tool nome="Ultimate Ninja 5 ADVCONST Editor">
@@ -123,9 +123,9 @@ Todos os direitos do jogo são para a CyberConnect2 e BandaiNamco.
 </description>
 <version>Github Release</version>
 <type>ASSET EDITOR</type>
-<credit>ZMath3us</credit>
+<credit>ZMath3usMSF</credit>
 <target>NARUTO SHIPPUDEN ULTIMATE NINJA 5</target>
-<url>https://github.com/zMath3usMSF/UN5ADVCONSTEditor/releases/tag/Release</url>
+<url>https://github.com/ZMath3usMSFMSF/UN5ADVCONSTEditor/releases/tag/Release</url>
 <icon>/media/tools/ccsev2.ico</icon>
 </tool>
 <tool nome="Ultimate Ninja 5 Charac. Parameter Editor">
@@ -133,9 +133,9 @@ Todos os direitos do jogo são para a CyberConnect2 e BandaiNamco.
 </description>
 <version>Github Release</version>
 <type>ASSET EDITOR</type>
-<credit>ZMath3us</credit>
+<credit>ZMath3usMSF</credit>
 <target>NARUTO SHIPPUDEN ULTIMATE NINJA 5 [EUR-JAP]</target>
-<url>https://github.com/zMath3usMSF/UN5CharPrmEditor/releases/tag/Release</url>
+<url>https://github.com/ZMath3usMSFMSF/UN5CharPrmEditor/releases/tag/Release</url>
 <icon>/media/tools/ccsev.ico</icon>
 </tool>
 <tool nome="Kingdom Hearts Birth by Sleep Layout Editor">

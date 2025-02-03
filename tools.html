@@ -72,83 +72,80 @@
 
   <body>
     <br />
-    <div >
-        <div class="alphabet-list">
-            <ul id="alphabet-list">
-                
-            </ul>
-        </div>
+    <div>
+      <div class="alphabet-list">
+        <ul id="alphabet-list"></ul>
+      </div>
 
-        <style>
-            .alphabet-list {
-                position: relative;
-                top: 10px;
-                left: 20px;
-                width: 95%;
-            }
-            .alphabet-list ul {
-                list-style-type: none;
-                padding: 0;
-            }
-            .alphabet-list li {
-                font-size: 30px;
-                font-family: Verdana, Geneva, Tahoma, sans-serif;
-                border-bottom: 4px solid rgb(255, 255, 255);
-                margin-bottom: 19px;
-            }
-            .alphabet-list li img {
-                width: 64px;
-                position: absolute; 
-            }
-            .alphabet-list li h2 {
-                margin-left: 120px;
-                margin-top: -35px;
-                position: relative; 
-                color: rgb(255, 255, 255);
-                -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10 and IE 11 */
-  user-select: none; /* Standard syntax */
-            }
-            .alphabet-list li h2:hover {
-                color: rgb(46, 43, 226);
-            }
-            #toolElement{
-                background-color: aqua;
-                border-radius: 100%;
-                position:relative;
-            }
-            #hide_folder{
-                width: 20px;
-                margin-top: 28px;
-              margin-right: 40px;  
-            }
-            #link{
-                font-size: large;
-                text-align: center;
-                justify-content: center;
-            }
-            #link a img{
-                position: inherit;
-            }
-            @media screen and (max-width: 990px) {
-              .alphabet-list li {
-                font-size: 20px;
-                font-family: Verdana, Geneva, Tahoma, sans-serif;
-                border-bottom: 4px solid rgb(255, 255, 255);
-                margin-bottom: 19px;
-            }
-            .alphabet-list li h2 {
-                margin-left: 120px;
-                margin-top: -20px;
-                position: relative; 
-            }
-            }
-        </style>
-        
+      <style>
+        .alphabet-list {
+          position: relative;
+          top: 10px;
+          left: 20px;
+          width: 95%;
+        }
+        .alphabet-list ul {
+          list-style-type: none;
+          padding: 0;
+        }
+        .alphabet-list li {
+          font-size: 30px;
+          font-family: Verdana, Geneva, Tahoma, sans-serif;
+          border-bottom: 4px solid rgb(255, 255, 255);
+          margin-bottom: 19px;
+        }
+        .alphabet-list li img {
+          width: 64px;
+          position: absolute;
+        }
+        .alphabet-list li h2 {
+          margin-left: 120px;
+          margin-top: -35px;
+          position: relative;
+          color: rgb(255, 255, 255);
+          -webkit-user-select: none; /* Safari */
+          -ms-user-select: none; /* IE 10 and IE 11 */
+          user-select: none; /* Standard syntax */
+        }
+        .alphabet-list li h2:hover {
+          color: rgb(46, 43, 226);
+        }
+        #toolElement {
+          background-color: aqua;
+          border-radius: 100%;
+          position: relative;
+        }
+        #hide_folder {
+          width: 20px;
+          margin-top: 28px;
+          margin-right: 40px;
+        }
+        #link {
+          font-size: large;
+          text-align: center;
+          justify-content: center;
+        }
+        #link a img {
+          position: inherit;
+        }
+        @media screen and (max-width: 990px) {
+          .alphabet-list li {
+            font-size: 20px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            border-bottom: 4px solid rgb(255, 255, 255);
+            margin-bottom: 19px;
+          }
+          .alphabet-list li h2 {
+            margin-left: 120px;
+            margin-top: -20px;
+            position: relative;
+          }
+        }
+      </style>
     </div>
     <script type="text/javascript" src="/scripts/tools.js"></script>
     <script>
-        readXml("/tools.xml");
+      readXml("/tools.xml");
     </script>
   </body>
 

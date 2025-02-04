@@ -55,8 +55,7 @@ function readXml(xmlFile) {
 }
 function getArticle(xmlDoc) {
   var articles = xmlDoc.getElementsByTagName("article");
-  var container = document.getElementsByClassName("container")[0];
- console.log(articles);
+  var container = document.getElementById("cont");
   for (var i = 0; i < articles.length; i++) {
     var article = articles[i];
     
@@ -127,3 +126,21 @@ function getArticle(xmlDoc) {
   }
 
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+
+  const element = document.getElementById("bible");
+
+  if (element) {
+
+    const r = Math.floor(Math.random() * 256);
+
+    const g = Math.floor(Math.random() * 256);
+
+    const b = Math.floor(Math.random() * 256);
+
+    element.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.8)`;
+
+  }
+
+});

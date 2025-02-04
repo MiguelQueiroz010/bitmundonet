@@ -315,8 +315,9 @@
         .resp {
           margin-left: 30% !important;
         }
-        #articles {
-          width: 100% !important;
+        #cont {
+          display: inline;
+          width: 25% !important;
         }
         .container-right {
           display: none !important;
@@ -327,6 +328,16 @@
         }
         #discord {
           display: none;
+        }
+        #youtube-galleryM {
+        }
+        #youtube-gallery {
+          width: 360px !important;
+          overflow-x: hidden;
+        }
+        #month_contents {
+          text-align: center;
+          justify-content: center;
         }
       }
     </style>
@@ -397,6 +408,22 @@
                     oncontextmenu="return false"
                     src="projects/ninja5br/media/poster.png"
                   />
+                  <div
+                    style="
+                      position: absolute;
+                      bottom: 0;
+                      width: 100%;
+                      font-size: 25px;
+                      margin-top: 0;
+                      background-color: green;
+                      color: #ffd900;
+                  -webkit-text-stroke: 1px #000000c4;
+                  text-shadow: rgb(0, 0, 0) 2px 2px 2px;
+                  
+                    "
+                  >
+                    Tradução Completa
+                  </div>
                 </a>
 
                 <a
@@ -501,11 +528,27 @@
               <div class="mySlides fade">
                 <a style="width: 100%" href="projects/ps2/sbcfkk/sbcfkk.html">
                   <img
+                    style="filter: grayscale(100%)"
                     alt="Bob Esponja Criatura do Siri Cascudo"
                     style="width: 100%; height: 100%"
                     oncontextmenu="return false"
                     src="projects/ps2/sbcfkk/media/capa.jpg"
                   />
+                  <div
+                    style="
+                      position: absolute;
+                      bottom: 0;
+                      width: 100%;
+                      font-size: 25px;
+                      margin-top: 0;
+                      background-color: #ffffff;
+                      text-shadow: rgb(255, 255, 255) 2px 2px 2px;
+                      -webkit-text-stroke: 1px #001486c4;
+                      color: #000;
+                    "
+                  >
+                    Projeto em Andamento
+                  </div>
                 </a>
 
                 <a
@@ -590,6 +633,22 @@
                     oncontextmenu="return false"
                     src="projects/psx/alundra2/media/capa.jpg"
                   />
+                  <div
+                    style="
+                      position: absolute;
+                      bottom: 0;
+                      width: 100%;
+                      font-size: 25px;
+                      margin-top: 0;
+                      background-color: green;
+                      color: #ffd900;
+                  -webkit-text-stroke: 1px #000000c4;
+                  text-shadow: rgb(0, 0, 0) 2px 2px 2px;
+                  
+                    "
+                  >
+                    Tradução Completa
+                  </div>
                 </a>
 
                 <a
@@ -656,68 +715,69 @@
                 </div>
               </div>
             </td>
-            <td style="padding-left: 35px; vertical-align: top;">
-              <div style="text-align: center;">
-              <iframe
-                src="https://discord.com/widget?id=830475579336949770&theme=dark"
-                width="350"
-                height="500"
-                allowtransparency="true"
-                frameborder="0"
-                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-              ></iframe>
+            <td id="discord" style="padding-left: 35px; vertical-align: top">
+              <div style="text-align: center">
+                <iframe
+                  src="https://discord.com/widget?id=830475579336949770&theme=dark"
+                  width="350"
+                  height="500"
+                  allowtransparency="true"
+                  frameborder="0"
+                  sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+                ></iframe>
               </div>
               <div
-              id="bible"
-              style="
-                font-family: 'Georgia', serif;
-                font-size: 24px;
-                line-height: 1.8;
-                padding: 25px;
-                color: #000;
-                border: 2px solid #dddddd4f;
-                border-radius: 15px;
-                box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-                background-image: url('media/book.png');
-                background-size: cover;
-                background-repeat: no-repeat;
-                background-position: center;
-                width: 370px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8),
-                5px 10px 20px rgba(0, 0, 0, 0.8),
-                10px 20px 40px rgba(0, 0, 0, 0.8), 0 0 7px gold,
-                0 0 14px gold, 0 0 21px gold;
-                margin-top: 20px;
-              "
-              >
-              <script src="scripts/bible.js"></script>
-              </div>
-              <div id="clock" style="margin-top: 20px; text-align: center;">
-              <h2
+                id="bible"
                 style="
-                position: absolute;
-                margin-top: 10%;
-                padding-bottom: 10px;
+                  font-family: 'Georgia', serif;
+                  font-size: 24px;
+                  line-height: 1.8;
+                  padding: 25px;
+                  color: #000;
+                  border: 2px solid #dddddd4f;
+                  border-radius: 15px;
+                  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+                  background-image: url('media/book.png');
+                  background-size: cover;
+                  background-repeat: no-repeat;
+                  background-position: center;
+                  width: 370px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8),
+                    5px 10px 20px rgba(0, 0, 0, 0.8),
+                    10px 20px 40px rgba(0, 0, 0, 0.8), 0 0 7px gold,
+                    0 0 14px gold, 0 0 21px gold;
+                  margin-top: 20px;
                 "
               >
-                Horário Atual
-              </h2>
-              <iframe
-                style="position: relative"
-                src="https://free.timeanddate.com/clock/i9r33o75/n445/szw160/szh160/hoc09f/hbw0/hfc09f/cf100/hnce1ead6/hcw2/fan3/fas20/fdi64/mqc000/mql15/mqw4/mqd98/mhc000/mhl15/mhw4/mhd98/mmc000/mml10/mmw1/mmd98/hhs2/hms2"
-                frameborder="0"
-                width="160"
-                height="160"
-              ></iframe>
+                <script src="scripts/bible.js"></script>
+              </div>
+              <div id="clock" style="margin-top: 20px; text-align: center">
+                <h2
+                  style="
+                    position: absolute;
+                    margin-top: 10%;
+                    padding-bottom: 10px;
+                  "
+                >
+                  Horário Atual
+                </h2>
+                <iframe
+                  style="position: relative"
+                  src="https://free.timeanddate.com/clock/i9r33o75/n445/szw160/szh160/hoc09f/hbw0/hfc09f/cf100/hnce1ead6/hcw2/fan3/fas20/fdi64/mqc000/mql15/mqw4/mqd98/mhc000/mhl15/mhw4/mhd98/mmc000/mml10/mmw1/mmd98/hhs2/hms2"
+                  frameborder="0"
+                  width="160"
+                  height="160"
+                ></iframe>
               </div>
             </td>
           </tr>
+
           <tr>
-            <td>
+            <td id="youtube-galleryM">
               <!--SEÇÃO DE VÍDEOS DO YOUTUBE-->
               <h3>Vídeos do YouTube</h3>
               <div id="youtube-gallery" style="width: 1164px">

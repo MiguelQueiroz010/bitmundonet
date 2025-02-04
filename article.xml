@@ -11,7 +11,7 @@
 <title>Teste de Notícia</title>
 <author>Miguel A. Queiroz</author>
 <date>2013-01-01</date>
-<image style="width: 50%;">/media/progresso_legendas.PNG</image>
+<image style="width: 40%;">/media/progresso_legendas.PNG</image>
 <content>(font-size = "35px")A(/font-size) (color = "red")notícia(/color) é um gênero textual jornalístico. É um texto narrativo e informativo, ao relatar um fato e transmite informações sobre determinado tema. A função da notícia é informar fatos atuais e de interesse social.
 
 A notícia também visa ser objetiva e apresentar o fato de maneira rápida, contando o que realmente interessa para o leitor logo no início do texto.

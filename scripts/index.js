@@ -80,12 +80,12 @@ function getArticle(xmlDoc) {
       contentParagraphs = contentParagraphs.replace(/\(font-size\s*=\s*"(.*?)"\)/g, '<span style="font-size:$1">');
       contentParagraphs = contentParagraphs.replace(/\(\/font-size\)/g, '</span>');
 
-      contentParagraphs = contentParagraphs.replace(/\(image\s*(.*?)\s*=\s*"(.*?)"\)(.*?)\(\/image\)/g, '<img $1="$2" src="$3" alt="Image" style="max-width: 100%; height: auto;">');
+      contentParagraphs = contentParagraphs.replace(/\(image\s*(.*?)\s*=\s*"(.*?)"\)(.*?)\(\/image\)/g, '<img class="resp" $1="$2" src="$3" alt="Image" style="max-width: 100%; height: auto;">');
 
       var align = article.getElementsByTagName("image")[0].getAttribute("align") || "left";
 
       // Ensure images within content are in separate paragraphs and apply styles
-      contentParagraphs = contentParagraphs.replace(/\(image\s*(.*?)\s*=\s*"(.*?)"\)(.*?)\(\/image\)/g, '<p style="$1"><img src="$2" alt="Image" style="max-width: 100%; height: auto;"></p>');
+      contentParagraphs = contentParagraphs.replace(/\(image\s*(.*?)\s*=\s*"(.*?)"\)(.*?)\(\/image\)/g, '<p style="$1"><img class="resp" src="$2" alt="Image" style="max-width: 100%; height: auto;"></p>');
 
       // Convert plain text links to hyperlinks
       contentParagraphs = contentParagraphs.replace(/<p>(.*?)<\/p>/g, (match, p1) => {
@@ -94,20 +94,35 @@ function getArticle(xmlDoc) {
 
       var articleHTML = `
         <div class="article" style="display: flex; align-items: center; font-family: Arial, sans-serif; border: 1px solid; border-image: linear-gradient(to right, red, yellow) 1; text-align: ${align};">
-          <img src="${image}" alt="${title}" style="margin-right: 20px; ${imageStyle}">
+          <img id="titlemage" src="${image}" alt="${title}" style="margin-right: 20px; ${imageStyle}">
           <div style="display: flex; flex-direction: column;">
         <h2 style="
         border-image: none;
         border-color: blue;
         font-size: 24px; font-weight: bold;">${title}</h2>
         ${contentParagraphs.replace(/<p>/g, '<p style="margin: 5px 0;">')}
-        <p style="font-size: 14px; color: gray;">Author: ${author}</p>
-        <p style="font-size: 14px; color: gray;">Date: ${date}</p>
+        <p style="margin: 5px 0; font-size: 14px; color: gray;">Author: ${author}</p>
+        <p style="margin: 5px 0;font-size: 14px; color: gray;">Date: ${date}</p>
           </div>
         </div>
       `;
 
       container.innerHTML += articleHTML;
+
+      // Add responsive styles
+      var style = document.createElement('style');
+      style.innerHTML = `
+        @media (max-width: 600px) {
+          .article {
+        flex-direction: column;
+        text-align: center;
+          }
+          #titlemage {
+        width: 100% !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
     }
   }
 

@@ -92,7 +92,8 @@ function getArticle(xmlDoc) {
       });
 
       var articleHTML = `
-        <div class="article" style="display: flex; align-items: center; font-family: Arial, sans-serif; border: 1px solid; border-image: linear-gradient(to right, red, yellow) 1; text-align: ${align};">
+        <div class="article" style="display: flex; align-items: center; font-family: Arial, sans-serif;
+         text-align: ${align};">
           <img id="titlemage" src="${image}" alt="${title}" style="margin-right: 20px; ${imageStyle}">
           <div style="display: flex; flex-direction: column;">
         <h2 style="

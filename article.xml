@@ -1,11 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <articles>
-<article nome="Teste de Notícia">
+<article nome="Teste de Notícia" selected="true">
 <title>Teste de Notícia</title>
-<author>Author Name</author>
+<author>Miguel A. Queiroz</author>
 <date>2013-01-01</date>
-<image>/media/tools/bms.png</image>
-<content>Teste de conteúdo.</content>
+<image style="width: 40%;">/media/progresso_legendas.PNG</image>
+<content>(font-size = "35px")A(/font-size) (color = "red")notícia(/color) é um gênero textual jornalístico. É um texto narrativo e informativo, ao relatar um fato e transmite informações sobre determinado tema. A função da notícia é informar fatos atuais e de interesse social.
+
+A notícia também visa ser objetiva e apresentar o fato de maneira rápida, contando o que realmente interessa para o leitor logo no início do texto.
+(image style="margin-left:50%")/media/tools/bms.png(/image)
+https://www.youtube.com/watch?v=jp7sKMrbWX8
+O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
+</article>
+<article nome="Teste de Notícia 2asdas" selected="true">
+<title>Teste de Notícia</title>
+<author>Miguel A. Queiroz</author>
+<date>2013-01-01</date>
+<image style="width: 40%;">/media/progresso_legendas.PNG</image>
+<content>(font-size = "35px")A(/font-size) (color = "red")notícia(/color) é um gênero textual jornalístico. É um texto narrativo e informativo, ao relatar um fato e transmite informações sobre determinado tema. A função da notícia é informar fatos atuais e de interesse social.
+
+A notícia também visa ser objetiva e apresentar o fato de maneira rápida, contando o que realmente interessa para o leitor logo no início do texto.
+(image style="margin-left:50%")/media/tools/bms.png(/image)
+https://www.youtube.com/watch?v=jp7sKMrbWX8
+O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
+</article>
+<article nome="Teste de Notícia 2asdas" selected="true">
+<title>Teste de Notícia</title>
+<author>Miguel A. Queiroz</author>
+<date>2013-01-01</date>
+<image style="width: 40%;">/media/progresso_legendas.PNG</image>
+<content>(font-size = "35px")A(/font-size) (color = "red")notícia(/color) é um gênero textual jornalístico. É um texto narrativo e informativo, ao relatar um fato e transmite informações sobre determinado tema. A função da notícia é informar fatos atuais e de interesse social.
+
+A notícia também visa ser objetiva e apresentar o fato de maneira rápida, contando o que realmente interessa para o leitor logo no início do texto.
+(image style="margin-left:50%")/media/tools/bms.png(/image)
+https://www.youtube.com/watch?v=jp7sKMrbWX8
+O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
+</article>
+<article nome="Teste de Notícia 2asdas" selected="true">
+<title>Teste de Notícia</title>
+<author>Miguel A. Queiroz</author>
+<date>2013-01-01</date>
+<image style="width: 40%;">/media/progresso_legendas.PNG</image>
+<content>(font-size = "35px")A(/font-size) (color = "red")notícia(/color) é um gênero textual jornalístico. É um texto narrativo e informativo, ao relatar um fato e transmite informações sobre determinado tema. A função da notícia é informar fatos atuais e de interesse social.
+
+A notícia também visa ser objetiva e apresentar o fato de maneira rápida, contando o que realmente interessa para o leitor logo no início do texto.
+(image style="margin-left:50%")/media/tools/bms.png(/image)
+https://www.youtube.com/watch?v=jp7sKMrbWX8
+O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
 </article>
 <article nome="Teste de Notícia 2asdas" selected="true">
 <title>Teste de Notícia</title>

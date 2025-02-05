@@ -234,6 +234,10 @@ html::-webkit-scrollbar-thumb {
     font: 0px verdana;
     border-radius: 2em;
   }
+  .aligncenter {
+    text-align: center;
+    font-size: 12px;
+  }
   #navbar #head table {
     display: none;
   }
@@ -277,6 +281,9 @@ html::-webkit-scrollbar-thumb {
   }
   #mobile_close {
     display: block;
+  }
+  #youtube-galleryM {
+    display: inline;
   }
 }
 html {

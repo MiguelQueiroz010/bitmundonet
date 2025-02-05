@@ -85,6 +85,80 @@ quote[39]="Mas longe esteja de mim gloriar-me, senão na cruz de nosso Senhor Je
 
 quote[40]="Bendito o Deus e Pai de nosso Senhor Jesus Cristo, que nos tem abençoado com toda sorte de bênção espiritual nas regiões celestiais em Cristo.<br>(Efésios 1:3)"
 
+quote[41]="Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.<br>(João 3:16)"
+
+quote[42]="O Senhor é o meu pastor; nada me faltará. Deitar-me faz em verdes pastos, guia-me mansamente a águas tranquilas.<br>(Salmos 23:1-2)"
+
+quote[43]="Confia no Senhor de todo o teu coração, e não te estribes no teu próprio entendimento.<br>(Provérbios 3:5)"
+
+quote[44]="Porque eu bem sei os pensamentos que penso de vós, diz o Senhor; pensamentos de paz, e não de mal, para vos dar o fim que esperais.<br>(Jeremias 29:11)"
+
+quote[45]="Posso todas as coisas em Cristo que me fortalece.<br>(Filipenses 4:13)"
+
+quote[46]="E sabemos que todas as coisas contribuem juntamente para o bem daqueles que amam a Deus, daqueles que são chamados por seu decreto.<br>(Romanos 8:28)"
+
+quote[47]="Mas buscai primeiro o reino de Deus, e a sua justiça, e todas estas coisas vos serão acrescentadas.<br>(Mateus 6:33)"
+
+quote[48]="E Jesus, olhando para eles, disse-lhes: Aos homens é isso impossível, mas a Deus tudo é possível.<br>(Mateus 19:26)"
+
+quote[49]="Porque o salário do pecado é a morte, mas o dom gratuito de Deus é a vida eterna, por Cristo Jesus nosso Senhor.<br>(Romanos 6:23)"
+
+quote[50]="E não sede conformados com este mundo, mas sede transformados pela renovação do vosso entendimento, para que experimenteis qual seja a boa, agradável, e perfeita vontade de Deus.<br>(Romanos 12:2)"
+
+quote[51]="O Senhor é bom, uma fortaleza no dia da angústia, e conhece os que confiam nele.<br>(Naum 1:7)"
+
+quote[52]="E disse-me: A minha graça te basta, porque o meu poder se aperfeiçoa na fraqueza. De boa vontade, pois, me gloriarei nas minhas fraquezas, para que em mim habite o poder de Cristo.<br>(2 Coríntios 12:9)"
+
+quote[53]="Porque a palavra de Deus é viva e eficaz, e mais penetrante do que espada alguma de dois gumes, e penetra até à divisão da alma e do espírito, e das juntas e medulas, e é apta para discernir os pensamentos e intenções do coração.<br>(Hebreus 4:12)"
+
+quote[54]="E, se nós sabemos que nos ouve em tudo o que pedimos, sabemos que alcançamos as petições que lhe fizemos.<br>(1 João 5:15)"
+
+quote[55]="Mas o fruto do Espírito é: amor, gozo, paz, longanimidade, benignidade, bondade, fé, mansidão, temperança.<br>(Gálatas 5:22-23)"
+
+quote[56]="E disse-lhes: Ide por todo o mundo, pregai o evangelho a toda criatura.<br>(Marcos 16:15)"
+
+quote[57]="Porque todos pecaram e destituídos estão da glória de Deus.<br>(Romanos 3:23)"
+
+quote[58]="Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar os pecados, e nos purificar de toda a injustiça.<br>(1 João 1:9)"
+
+quote[59]="E disse-lhes: O que é impossível para os homens é possível para Deus.<br>(Lucas 18:27)"
+
+quote[60]="Porque a graça de Deus se há manifestado, trazendo salvação a todos os homens.<br>(Tito 2:11)"
+
+quote[61]="E não nos cansemos de fazer o bem, porque a seu tempo ceifaremos, se não houvermos desfalecido.<br>(Gálatas 6:9)"
+
+quote[62]="E o Senhor te guiará continuamente, e fartará a tua alma em lugares secos, e fortificará os teus ossos; e serás como um jardim regado, e como um manancial, cujas águas nunca faltam.<br>(Isaías 58:11)"
+
+quote[63]="E disse-me: Não temas, Daniel, porque desde o primeiro dia em que aplicaste o teu coração a compreender e a humilhar-te perante o teu Deus, são ouvidas as tuas palavras, e eu vim por causa das tuas palavras.<br>(Daniel 10:12)"
+
+quote[64]="E o Deus de paz esmagará em breve a Satanás debaixo dos vossos pés. A graça de nosso Senhor Jesus Cristo seja convosco.<br>(Romanos 16:20)"
+
+quote[65]="E o Senhor, é o Espírito; e onde está o Espírito do Senhor, aí há liberdade.<br>(2 Coríntios 3:17)"
+
+quote[66]="E disse-lhes: A seara é realmente grande, mas poucos são os ceifeiros; rogai, pois, ao Senhor da seara que mande ceifeiros para a sua seara.<br>(Lucas 10:2)"
+
+quote[67]="E disse-lhes: A minha paz vos dou; não vo-la dou como o mundo a dá. Não se turbe o vosso coração, nem se atemorize.<br>(João 14:27)"
+
+quote[68]="E disse-lhes: Eu sou o caminho, e a verdade e a vida; ninguém vem ao Pai, senão por mim.<br>(João 14:6)"
+
+quote[69]="E disse-lhes: Eu sou a luz do mundo; quem me segue não andará em trevas, mas terá a luz da vida.<br>(João 8:12)"
+
+quote[70]="E disse-lhes: Eu sou o pão da vida; aquele que vem a mim não terá fome; e quem crê em mim nunca terá sede.<br>(João 6:35)"
+
+quote[71]="E disse-lhes: Eu sou a videira verdadeira, e meu Pai é o lavrador.<br>(João 15:1)"
+
+quote[72]="E disse-lhes: Eu sou o bom pastor; o bom pastor dá a sua vida pelas ovelhas.<br>(João 10:11)"
+
+quote[73]="E disse-lhes: Eu sou a porta; se alguém entrar por mim, salvar-se-á, e entrará, e sairá, e achará pastagens.<br>(João 10:9)"
+
+quote[74]="E disse-lhes: Eu sou a ressurreição e a vida; quem crê em mim, ainda que esteja morto, viverá.<br>(João 11:25)"
+
+quote[75]="E disse-lhes: Eu sou o Alfa e o Ômega, o princípio e o fim, o primeiro e o derradeiro.<br>(Apocalipse 22:13)"
+
+quote[76]="E disse-lhes: Eu sou o Senhor, e não há outro; fora de mim não há Deus.<br>(Isaías 45:5)"
+
+quote[77]="E disse-lhes: Eu sou o Senhor, e não mudo; por isso vós, ó filhos de Jacó, não sois consumidos.<br>(Malaquias 3:6)"
+
 function rndnumber(){
 var randscript = -1
 while (randscript < 0 || randscript > howMany || isNaN(randscript)){

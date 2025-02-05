@@ -25,6 +25,7 @@ function dropdown() {
     document.getElementById("dropdown").style.animationName = "slide_out";
     document.getElementById("dropdown").style.animationDuration = "0.45s";
     document.getElementById("mobile_logo").style.display = "block";
+    document.getElementById("youtube-galleryM").style.display = "inline";
   }
   else {
     document.getElementById("mobile_dropdown").style.position = "relative";
@@ -34,6 +35,7 @@ function dropdown() {
     document.getElementById("dropdown").style.animationName = "slide_in";
     document.getElementById("dropdown").style.animationDuration = "0.45s";
     document.getElementById("mobile_logo").style.display = "none";
+    document.getElementById("youtube-galleryM").style.display = "none";
   }
 
 

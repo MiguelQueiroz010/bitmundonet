@@ -1,18 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <articles>
-<article nome="Teste de Notícia" selected="true">
-<title>Teste de Notícia</title>
-<author>Miguel A. Queiroz</author>
-<date>2013-01-01</date>
-<image style="width: 40%;">/media/test.gif</image>
-<content>(font-size = "35px")A(/font-size) (color = "red")notícia(/color) é um gênero textual jornalístico. É um texto narrativo e informativo, ao relatar um fato e transmite informações sobre determinado tema. A função da notícia é informar fatos atuais e de interesse social.
+<article nome="Legendas nos Jutsus Supremos" selected="true">
+<title>Por detrás das Legendas nos Jutsus Supremos</title>
+<author>Bit.Raiden</author>
+<date>10-02-2025</date>
+<image style="width: 40%; display: none"> </image>
+<content>(font-size = "23px")As(/font-size) (font-size = "23px")(color = "green")legendas nos Jutsus Supremos(/color)(/font-size) foi uma ideia que surgiu ao me lembrar de jogar o jogo (color = "red")Naruto Shippuden Ultimate Ninja Storm 4(color = "white"), que tem as legendas em cada Jutsu, a partir daí virou uma corrida passo a passo para alcançar esse sonho.
+(image style="width: 70%; margin-left:10%")/media/articles/unjutsu.gif(/image)
 
-A notícia também visa ser objetiva e apresentar o fato de maneira rápida, contando o que realmente interessa para o leitor logo no início do texto.
-(image style="margin-left:50%")/media/tools/bms.png(/image)
-https://www.youtube.com/watch?v=jp7sKMrbWX8
-O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
+
+1º Passo: Encontrar a função de escrita de texto na tela. {(color = "green")RenderString Function(color = "white")} - Novembro/2022;
+
+2º Passo: Encontrar espaço livre na memória para a quantidade de texto que seria armazenada, para o programa de legendas e para o timer; - Janeiro/2023
+
+3º Passo: 
+*Escrever o programa: identificar o Jutsu em execução;
+*Procurar na memória por esse identificador para delimitar o espaço de legendas existente; 
+*Ler o formato de legendas a partir do contador que se inicia na execução do Jutsu; 
+*No tempo de cada legenda rodar a função {(color = "green")RenderString()(color = "white")} com os argumentos de posição X e Y, tempo de disparo, tempo de duração;
+*Repetir tudo em uma função de loop dentro de cada (color = "red")UltimateJutsuPlay()(color = "white").
+Encerrado em Janeiro-Fevereiro/2023
+
+(image style="width: 80%; margin-left:7%")/media/progresso_legendas.PNG(/image)
+(font-size = "13px")Usando o programa (color = "red")SubtitleEdit(color = "white") e o (color = "red")Youtube(color = "white") com um vídeo de Todos os Ultimate Jutsu do jogo, gerei o maior arquivo de legendas que pude.(/font-size)
+
+https://youtu.be/_XU-g2pm86w : (color = "red")Teste de Legendas 2022(color = "white") {Não Listado até agora!}
+
+https://youtu.be/9It_bx8ZUO0 : (color = "purple")As 10 Marionetes de Chikamatsu(color = "white") {Vovó Chiyo}
+
+https://youtu.be/aHp-G34WTUk : (color = "blue")Espelhos de Cristal de Gelo(color = "white") {Haku}
+
+https://youtu.be/aqtGlSCzjFA : (color = "yellow")Enterro de Areia Gigante(color = "white") {Gaara_Clássico}
+
+https://youtu.be/WLUm6IQYGR4 : (color = "red")Performance de 100 Marionetes(color = "white") {Sasori Marionete}
+
+https://youtu.be/6-rXm32nOvw : (color = "red")Redemoinho de Fogo(color = "white") {Asuma}
+
+https://youtu.be/0DBppbLQ75Q : (color = "blue")Rasengan de (color = "red")Fogo(color = "white") {Jiraiya}
+
+Acompanhe o lançamento da Versão Revisada com Legendas nos Jutsus Supremos, acesse a página do projeto aqui no site mesmo!
+</content>
 </article>
-<article nome="Teste de Notícia 2asdas" selected="true">
+<article nome="Teste de Notícia 2asdas" selected="false">
 <title>Teste de Notícia</title>
 <author>Miguel A. Queiroz</author>
 <date>2013-01-01</date>
@@ -24,7 +53,7 @@ A notícia também visa ser objetiva e apresentar o fato de maneira rápida, con
 https://www.youtube.com/watch?v=jp7sKMrbWX8
 O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
 </article>
-<article nome="Teste de Notícia 2asdas" selected="true">
+<article nome="Teste de Notícia 2asdas" selected="false">
 <title>Teste de Notícia</title>
 <author>Miguel A. Queiroz</author>
 <date>2013-01-01</date>
@@ -36,7 +65,7 @@ A notícia também visa ser objetiva e apresentar o fato de maneira rápida, con
 https://www.youtube.com/watch?v=jp7sKMrbWX8
 O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
 </article>
-<article nome="Teste de Notícia 2asdas" selected="true">
+<article nome="Teste de Notícia 2asdas" selected="false">
 <title>Teste de Notícia</title>
 <author>Miguel A. Queiroz</author>
 <date>2013-01-01</date>
@@ -48,7 +77,7 @@ A notícia também visa ser objetiva e apresentar o fato de maneira rápida, con
 https://www.youtube.com/watch?v=jp7sKMrbWX8
 O autor de uma notícia tem como principal objetivo escrever um texto fluido, sem repetir informações. Sua função é contar de maneira clara e objetiva os pontos importantes sobre o assunto que está escrevendo.</content>
 </article>
-<article nome="Teste de Notícia 2asdas" selected="true">
+<article nome="Teste de Notícia 2asdas" selected="false">
 <title>Teste de Notícia</title>
 <author>Miguel A. Queiroz</author>
 <date>2013-01-01</date>

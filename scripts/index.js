@@ -101,8 +101,8 @@ function getArticle(xmlDoc) {
         border-color: blue;
         font-size: 24px; font-weight: bold;">${title}</h2>
         ${contentParagraphs.replace(/<p>/g, '<p style="margin: 5px 0;">')}
-        <p style="margin: 5px 0; font-size: 14px; color: gray;">Author: ${author}</p>
-        <p style="margin: 5px 0;font-size: 14px; color: gray;">Date: ${date}</p>
+        <p style="margin: 5px 0; font-size: 14px; color: gray;">Autor: ${author}</p>
+        <p style="margin: 5px 0;font-size: 14px; color: gray;">Data: ${date}</p>
           </div>
         </div>
       `;

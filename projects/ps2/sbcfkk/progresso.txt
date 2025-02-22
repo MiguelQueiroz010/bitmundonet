@@ -9,6 +9,7 @@ Progresso de Tradução:
    12/2024 - TRADUZIDOS TODOS OS TEXTOS DE FASE/NÍVEIS
    01/2025 - TEMPO DE REVISÃO
    02/2025 - REVISÃO
+22/02/2025 - Revisão [Live 1]
 
 
 Resident = Menu e outros - Feito [Corrigidos botões]
@@ -54,3 +55,5 @@ Capas devem ser editadas e reduzidas para 8bpp 256 cores e salvas em BMP sem com
 #TODAS AS CAPAS DE NÍVEIS TRADUZIDOS
 
 26/12/2022 - LOGOTIPO TRADUZIDA E READAPTADA
+
+

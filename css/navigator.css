@@ -2,6 +2,9 @@
   display: inline-flex;
   font: 20px verdana;
 }
+#text_hover{
+  display: none;
+}
 #pc_nav {
   height: 52px;
 }
@@ -56,7 +59,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4em;
+  
+}
+#hoverimage_a:hover #text_hover {
+  display: inline-block;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .container {
   display: flex;
@@ -70,7 +86,6 @@
   text-align: center;
   float: left;
   margin: 6px 0 0px 0;
-  position: relative;
   z-index: 5;
 }
 .alignnav_floaty_r {
@@ -79,7 +94,7 @@
   justify-content: center;
   text-align: center;
   float: right;
-  margin: 9px 0 0px 0;
+  margin: 6px 0 0px 0;
   position: relative;
   z-index: 5;
 }
@@ -261,7 +276,7 @@ html::-webkit-scrollbar-thumb {
     background-color: transparent;
   }
 
-  #hoverimage_a {
+  #about_box {
     display: none;
   }
   #pc_nav {

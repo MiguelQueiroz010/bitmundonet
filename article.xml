@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <articles>
+<article nome="newdesignandtools" selected="true">
+<title>✔ Novas ferramentas, nova cara...</title>
+<author>Bit.Raiden</author>
+<date>18-03-2025</date>
+<image style="width: 40%; display: none"> </image>
+<content>(font-size = "23px")(image style="width: 42px; padding-right:1%")/media/tools/sceivag.ico(/image)SCEI-VAG PACK TOOL(/font-size)
+
+Por ver a necessidade da Narutimatte Modding em adicionar áudios de personagens com mais liberdade,
+zMath3usMSF, fundador me contatou falando da demanda no algoritmo.
+
+*Refiz todo o código, refatorei os leitores e criei um algoritmo de recompilação que não existia;
+*Organizei melhor o design da ferramenta (por mais que ainda seja confuso);
+*Adicionei containers de propriedade para cada detalhe dos arquivos internos e setores;
+
+Isso é possível graças a:
+🖊 Desenvolvedores: Bit.Raiden e zMath3usMSF
+🛠 Demanda: Ultimate Ninja 6 [Narutimatte Modding]
+
+🔽 Faça o Download no link: https://github.com/MiguelQueiroz010/SCEIVag-Pack/releases/tag/NEW
+
+(image style="width: 70%; margin-left:10%")/media/articles/scei_vag_toolnewart.jpg(/image)
+
+Confira o que rola no projeto Ultimate Ninja 6 (fiquei sabendo que agora tem novidade quente!): 🚀💬
+
+🔴 Canal da Narutimatte Modding: https://www.youtube.com/@NarutimateModdingOfficial
+
+*KONAN PARA O JOGO!
+*E tem mais chegando...
+</content>
+</article>
 <article nome="Live" selected="true">
 <title>🎮 Live de Revisão, Tradução e Correção</title>
 <author>Bit.Raiden</author>

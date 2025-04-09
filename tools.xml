@@ -98,6 +98,16 @@ Todos os direitos do jogo são para a CyberConnect2 e BandaiNamco.
 <url>https://github.com/MiguelQueiroz010/NarutoChronicles-Tools/releases/tag/gama</url>
 <icon>/media/tools/chcrc2.ico</icon>
 </tool>
+<tool nome="CFC Digest Editor">
+<description>Ferramenta para manipulação dos arquivos de containers CFC.DIG.
+</description>
+<version>Github Release</version>
+<type>ASSET EDITOR</type>
+<target>NARUTO UZUMAKI CHRONICLES SERIES</target>
+<credit>Bit.Raiden e Theus</credit>
+<url>https://github.com/MiguelQueiroz010/CFC-Digest-Editor/releases/tag/re</url>
+<icon>/media/tools/cfc.ico</icon>
+</tool>
 <tool nome="Ultimate Ninja 5 Event Editor">
 <description>Ferramenta para editar os eventos do jogo a partir do arquivo EVENT.CCS dentro de ADV/ [data.cvm].
 </description>

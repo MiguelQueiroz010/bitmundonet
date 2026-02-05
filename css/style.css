@@ -273,11 +273,20 @@ h1, h2, h3, h4, .brand-font {
 }
 
 .slide-content-wrapper img {
-    /* FIX: object-fit: contain ensures the image is NEVER cropped. */
+    /* DEFAULT: object-fit: contain ensures the image is NEVER cropped (good for project screenshots) */
     width: 100%;
     height: 100%;
     object-fit: contain; 
-    background-color: #000; /* Backdrop for images that don't fill 16:9 */
+    background-color: #000; 
+}
+
+/* HERO SLIDESHOW OVERRIDE: Fill the area for a premium look */
+.hero-slideshow {
+    width: 100% !important; /* Home page gallery should be full width */
+}
+
+.hero-slideshow .slide-content-wrapper img {
+    object-fit: cover; /* Home page slides should fill the 16:9 box */
 }
 
 /* Navigation Buttons */
@@ -883,7 +892,7 @@ h1, h2, h3, h4, .brand-font {
     display: inline-block;
     transition: all 0.3s ease;
 }
-.active, .dot:hover {
+.dot.active, .dot:hover {
     background-color: var(--primary);
     box-shadow: 0 0 10px var(--primary);
     transform: scale(1.2);

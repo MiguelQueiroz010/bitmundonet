@@ -175,7 +175,7 @@ function switchLibraryView(mode, btn) {
     currentLibraryView = mode;
 
     // Update active class
-    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.lib-view-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
     renderLibrary();
@@ -188,6 +188,8 @@ function openModal(id) {
     const modal = document.getElementById("game-modal");
     const body = document.getElementById("modal-body");
 
+    // Clear and prepare
+    body.innerHTML = "";
     body.innerHTML = `
         <div class="wiki-header" style="margin-bottom: 2rem;">
             <h1 style="color: #fff; font-size: 2.5rem; margin-bottom: 0.5rem;">${game.title}</h1>

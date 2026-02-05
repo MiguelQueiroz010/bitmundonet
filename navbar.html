@@ -1,258 +1,224 @@
-<script type="text/javascript" src="/scripts/navbar.js"></script>
-<link rel="stylesheet" href="/css/navigator.css" />
+<!-- Linking the new main style -->
+<link rel="stylesheet" href="/css/style.css" />
+<style>
+/* Local Navbar specific overrides if needed, 
+   but ideally should be in style.css. 
+   Putting some layout specific here for the partial. */
+
+#navbar {
+    width: 100%;
+    z-index: 1000;
+    transition: top 0.3s;
+}
+
+#head {
+    width: 100%;
+    position: relative;
+    display: block;
+    overflow: hidden;
+}
+
+.banner-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    overflow: hidden;
+}
+
+#backWall {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+}
+
+.logo-overlay {
+    position: relative;
+    z-index: 2;
+    width: auto;
+    max-width: 80%;
+}
+
+.nav-bar-strip {
+    width: 100%;
+    background: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 2rem;
+    height: 70px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-main);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--primary);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+.nav-item img {
+    height: 24px;
+    width: auto;
+}
+
+/* Mobile Toggle */
+#mobile-toggle {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: white;
+}
+
+/* Dropdown Menu (Mobile) */
+#dropdown {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background: rgba(10, 11, 16, 0.95);
+    backdrop-filter: blur(15px);
+    transform: translateX(100%);
+    transition: transform 0.4s ease;
+    z-index: 999;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+/* Specific animations for JS to hook into */
+@keyframes slide_in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+@keyframes slide_out {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+#dropdown[style*="animationName: slide_in"] {
+    transform: translateX(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-links { display: none; }
+    #mobile-toggle { display: block; }
+    /* Mobile logo in navbar when scrolled or needed */
+    #mobile_logo { display: none; } 
+    
+    .banner-container { height: 250px; }
+}
+</style>
 
 <div id="navbar">
-  <div id="head">
-    <div
-      class="container"
-      style="position: relative; padding: 0em; margin: 0 auto"
-    >
-      <img
-        oncontextmenu="return false"
-        id="backWall"
-        style="height: 512px"
-        src="/media/banner_animatedbits.gif"
-      />
-      <table>
-        <td style="min-width: 100%">
-          <img
-            oncontextmenu="return false"
-            id="ing"
-            class="center"
-            src="/media/bitmundo_logo.png"
-          />
-        </td>
-      </table>
-    </div>
-  </div>
-
-  <nav class="alignnav" onmousedown="return false" onselectstart="return false">
-    <div id="old_banner" class="container">
-      <img src="/teste.gif" width="92" />
-      <div class="_bit">Bit.</div>
-      <div class="_world">Mundo&nbsp</div>
-      <h1 class="commontext">Network</h1>
-    </div>
-    <div id="banner">
-      <!-- #region DropDownMenu-->
-
-      <div id="dropdown">
-        <div
-          id="mobile_close"
-          onclick="dropdown()"
-          style="
-            width: 8%;
-            font-size: larger;
-            margin-left: auto;
-            margin-right: 20px;
-            border-radius: 100%;
-            background-color: rgb(41, 27, 236);
-          "
-        >
-          <div style="font-size: larger; color: rgb(60, 236, 16)">>></div>
+    <!-- Header / Banner Area -->
+    <div id="head">
+        <div class="banner-container">
+            <img id="backWall" src="/media/banner_animatedbits.gif" alt="Background Animation">
+            <img id="ing" class="logo-overlay animate-fade-in" src="/media/bitmundo_logo.png" alt="BitMundo Logo">
         </div>
-        <table>
-          <tr id="MenuTitle">
-            <td height="100px">
-              &#160;&#160;&#160;
-              <img
-                style="width: 65%"
-                class="centerBANNER"
-                oncontextmenu="return false"
-                src="/media/mobile_bitmundo_banner.png"
-              />
-            </td>
-          </tr>
-          <!--#region Links-->
-          <tr>
-            <td>
-              <hr />
-              <a href="/index.html"
-                ><img
-                  oncontextmenu="return false"
-                  onselectstart="return false"
-                  style="width: 32px; padding-left: 4px"
-                  src="/media/home_icon.png"
-                />&#160;Início</a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td width="12%">
-              <a href="/projetos.html"
-                ><img
-                  oncontextmenu="return false"
-                  style="height: 32px"
-                  src="/media/projects_icon.png"
-                />
-                &#160;Projetos</a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td width="12%">
-              <a href=" "
-                ><img
-                  oncontextmenu="return false"
-                  style="height: 32px"
-                  src="/media/library_icon.png"
-                />
-                &#160;Biblioteca</a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td width="12%">
-              <a href="/tools.html"
-                ><img
-                  oncontextmenu="return false"
-                  style="height: 32px"
-                  src="/media/tools_icon.png"
-                />
-                &#160;Ferramentas</a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td width="12%">
-              <a href="/about.html"
-                ><img
-                  oncontextmenu="return false"
-                  style="height: 32px"
-                  src="/media/info.png"
-                />
-                &#160;Saiba Mais</a
-              >
-            </td>
-          </tr>
-          <!-- #endregion -->
-          <tr id="space_line">
-            <td><hr /></td>
-          </tr>
-
-          <!-- #region Media Links-->
-          <tr>
-            <td>
-              <a href="/projects/ps2/ninja5br/ninja5br.html"
-                ><img
-                  width="100%"
-                  src="/projects/ps2/ninja5br/media/iconv9.png"
-              /></a>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="/projects/psx/alundra2/alundra2.html"
-                ><img width="100%" src="/projects/psx/alundra2/media/icon.png"
-              /></a>
-            </td>
-          </tr>
-          <!-- #endregion -->
-
-          <!-- #region Notes/Disclaimer-->
-          <tr style="bottom: 0">
-            <td>
-              <hr />
-              <p class="aligncenter">
-                <b>&circledR; Bit.Mundo</b> 2025 <br />Desenvolvido por
-                Bit.Raiden
-              </p>
-            </td>
-          </tr>
-          <!-- #endregion -->
-        </table>
-      </div>
-
-      <!--#endregion-->
-      <table cellpadding="0" cellspacing="0" id="nav" width="100%">
-        <tr id="pc_nav">
-          <td class="alignnav_floaty">
-            <a id="hoverimage_a" href="/index.html"
-              ><img
-                oncontextmenu="return false"
-                onselectstart="return false"
-                style="width: 26px; margin: -6px 0 -4px 0px"
-                src="/media/home_icon.png"
-            /></a>
-          </td>
-          <td width="20%">&#32;</td>
-          <td width="12%">
-            <a id="projects" href="/projetos.html"
-              ><img
-                oncontextmenu="return false"
-                style="height: 32px"
-                src="/media/projects_icon.png"
-              />
-              Projetos</a
-            >
-          </td>
-          <td width="12%">
-            <a id="library" href=" "
-              ><img
-                oncontextmenu="return false"
-                style="height: 32px"
-                src="/media/library_icon.png"
-              />
-              Biblioteca</a
-            >
-          </td>
-          <td width="12%">
-            <a id="tools" href="/tools.html"
-              ><img
-                oncontextmenu="return false"
-                style="height: 32px"
-                src="/media/tools_icon.png"
-              />
-              Ferramentas</a
-            >
-          </td>
-          
-          <td width="29%">&#32;</td>
-        </tr>
-        <tr id="mobile_nav">
-          <td>
-            <a id="mobile_dropdown" onclick="dropdown()"
-              ><img
-                oncontextmenu="return false"
-                style="height: 32px"
-                src="/media/projects_icon.png"
-            /></a>
-          </td>
-          <td
-            style="
-              margin-bottom: 18px;
-              text-align: center;
-              vertical-align: middle;
-            "
-            height="100%"
-            id="mobile_logo"
-          >
-            <img
-              class="centerBANNER"
-              oncontextmenu="return false"
-              src="/media/mobile_bitmundo_banner.png"
-            />
-          </td>
-        </tr>
-      </table>
-      <div id="about_box">
-      <a
-      id="hoverimage_a"
-        href="about.html"
-        style="
-          position: absolute;
-          right: 0;
-          top: 50%;
-          
-          transform: translateY(-50%);
-        ">
-        <img
-          oncontextmenu="return false"
-          onselectstart="return false"
-          style="width: 32px; height: 1.8em; margin: -2px 0 0 0; padding-right: 6px"
-          src="/media/info.png"/><span id="text_hover">Saiba Mais</span>
-        </a>
-      </div>
     </div>
-  </nav>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar-strip">
+        <!-- Brand / Mobile Logo (Visible on mobile or when scrolled) -->
+        <div class="brand-area" style="display: flex; align-items: center; gap: 10px;">
+           <img src="/teste.gif" style="height: 40px; width: auto;" alt="Icon">
+           <div style="font-family: 'Exo 2'; font-weight: bold; font-size: 1.2rem;">
+               <span style="color: var(--primary);">Bit.</span>Raiden
+           </div>
+        </div>
+
+        <!-- Desktop Links -->
+        <div class="nav-links" id="pc_nav">
+            <a href="/index.html" class="nav-item">
+                <img src="/media/home_icon.png" alt="Home"> Início
+            </a>
+            <a href="/projetos.html" class="nav-item" id="projects">
+                <img src="/media/projects_icon.png" alt="Projects"> Projetos
+            </a>
+            <a href="/library.html" class="nav-item" id="library">
+                <img src="/media/library_icon.png" alt="Library"> Biblioteca
+            </a>
+            <a href="/tools.html" class="nav-item" id="tools">
+                <img src="/media/tools_icon.png" alt="Tools"> Ferramentas
+            </a>
+            <a href="/about.html" class="nav-item" id="about_box">
+                <img src="/media/info.png" alt="Info"> Saiba Mais
+            </a>
+        </div>
+
+        <!-- Mobile Toggle Button -->
+        <div id="mobile-toggle" onclick="dropdown()">
+            <a id="mobile_dropdown">☰</a>
+        </div>
+    </nav>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="dropdown">
+         <div id="mobile_close" onclick="dropdown()" style="align-self: flex-end; font-size: 2rem; cursor: pointer;">&times;</div>
+         
+         <div style="text-align: center; margin-bottom: 2rem;" id="mobile_logo">
+             <img src="/media/mobile_bitmundo_banner.png" style="max-width: 200px; margin: 0 auto;">
+         </div>
+
+         <a href="/index.html" class="nav-item">
+            <img src="/media/home_icon.png"> Início
+        </a>
+        <a href="/projetos.html" class="nav-item">
+            <img src="/media/projects_icon.png"> Projetos
+        </a>
+        <a href="/library.html" class="nav-item">
+             <img src="/media/library_icon.png"> Biblioteca
+        </a>
+        <a href="/tools.html" class="nav-item">
+            <img src="/media/tools_icon.png"> Ferramentas
+        </a>
+        <a href="/about.html" class="nav-item">
+            <img src="/media/info.png"> Saiba Mais
+        </a>
+        
+        <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+             <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+                Bit.Mundo Network © 2026
+             </p>
+        </div>
+    </div>
 </div>
+
+<!-- Back to Top Button (Outside to ensure global stacking) -->
+<button id="back-to-top" class="back-to-top" title="Voltar ao Topo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+</button>
+
+<script type="text/javascript" src="/scripts/navbar.js"></script>

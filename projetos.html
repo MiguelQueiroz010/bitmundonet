@@ -1,407 +1,186 @@
 ﻿<!DOCTYPE html>
-<html>
-  <script type="text/javascript" src="/scripts/projects.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=0.7" />
-  <script src="https://www.w3schools.com/lib/w3data.js"></script>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetos - Bit.Raiden</title>
+    
+    <meta name="description" content="Catálogo de projetos de RomHacking e Tradução do Bit.Raiden." />
+    <meta name="keywords" content="projetos, romhacking, tradução, games, ps2, psx" />
+    <meta name="author" content="Bit.Raiden">
 
-  <meta
-    name="description"
-    content="Um site feito para armazenar conteúdo de romhacking e tradução de alguns jogos que a muito já foram esquecidos, mas não por mim. Seja bem vindo ao meu mundo!"
-  />
-  <meta
-    name="keywords"
-    content="raiden, bit.raiden, site, novo, tradução, br, Brasil, naruto, sasuke, jogo, game, playstation, ps, psx, ps2, mega drive, genesis, translate, project, projeto, versão brasileira, romhacking, hack, modificação, mod"
-  />
-  <meta name="robots" content="" />
-  <meta name="revisit-after" content="1 day" />
-  <meta name="language" content="Portuguese" />
-  <meta name="generator" content="N/A" />
-  <meta
-    property="og:image"
-    content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png"
-  />
-<meta name="google-adsense-account" content="ca-pub-6401015076542561">
-  <head>
-    <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
-    <title>Projetos e Lançamentos</title>
-    <link rel="stylesheet" href="css/projetos.css" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/fav//apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="/fav//favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="/fav//favicon-16x16.png"
-    />
-    <link rel="manifest" href="/fav//site.webmanifest" />
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561"
-      crossorigin="anonymous"
-    ></script>
-    <!--#region NAVBAR LOADER  -->
+    <!-- Open Graph -->
+    <meta property="og:image" content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png" />
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png" />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <!-- Scripts -->
+    <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561" crossorigin="anonymous"></script>
+    
+    <!-- Note: Removing legacy scripts/projects.js as it relied on table structures. 
+         Parallax/Scroll effects can be re-added via CSS if needed. -->
+</head>
+
+<body>
+    <!-- Navbar -->
     <div w3-include-html="/navbar.html"></div>
-    <script>
-      w3IncludeHTML();
-    </script>
-    <!--#endregion -->
+    <script>w3IncludeHTML();</script>
 
-    <br />
-  </head>
+    <main class="container">
+        <!-- Hero / Title -->
+        <div class="text-center mt-5 mb-3">
+             <h1 class="hero-title">Projetos & Lançamentos</h1>
+             <p class="hero-subtitle">Galeria completa de modificações e traduções.</p>
+        </div>
 
-  <body>
-    <!-- #region Projetos/Estilizados-->
-    <div id="projectsSelector">
-      <table id="projtable">
-        <tr>
-          <!--SSX3-->
-          <td style="order: 1;">
-            <div id="container">
-              <div style="filter: grayscale(100%)" id="image">
-                <img src="/projects/ps2/ssx3/media/capa.png" alt="" />
-                <div id="progresst">
-                  <h2>Tradução em Progresso</h2>
-                </div>
-              </div>
-
-              <div class="overlay">
-                <a id="project_details" href="/projects/ps2/ssx3/ssx3.html">
-                  <img src="/projects/ps2/ssx3/media/logo.png" />
-                  <h1
-                    style="
-                      color: rgb(6, 93, 207);
-                      -webkit-text-stroke: 1px #ffffff;
-                    "
-                  >
-                    SSX3
-                  </h1>
-                  <p>
-                    Em breve...
-                    <br />
-                    <br />
-                    <br />
-                  </p>
-                </a>
-              </div>
+        <!-- View Switcher -->
+        <div class="projects-header">
+            <div class="platform-count">Total de 8 projetos encontrados</div>
+            <div class="view-switcher">
+                <button class="view-btn active" id="grid-view" onclick="setProjectView('grid')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zM13 3h8v8h-8V3zm0 10h8v8h-8v-8z"/></svg> Grade
+                </button>
+                <button class="view-btn" id="list-view" onclick="setProjectView('list')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg> Lista
+                </button>
             </div>
-          </td>
+        </div>
 
-          <!--Bob Esponja CFKK-->
-          <td style="order: 1">
-            <div id="container">
-              <div style="filter: grayscale(100%)" id="image">
-                <img src="/projects/ps2/sbcfkk/media/capa.jpg" alt="" />
-                <div id="progresst">
-                  <h2>Tradução em Progresso</h2>
+        <div id="projects-container">
+            <!-- PlayStation 2 Section -->
+            <section class="platform-section">
+                <h2 class="platform-title">PlayStation 2</h2>
+                <div class="projects-grid">
+                    
+                    <!-- Bob Esponja BFBB -->
+                    <div class="project-card" onclick="location.href='/projects/ps2/sbbfbb/sbbfbb.html'">
+                        <span class="project-status status-complete">Completo</span>
+                        <img src="/projects/ps2/sbbfbb/media/Capa.jpg" alt="BFBB" class="project-image">
+                        <div class="project-overlay">
+                            <img src="/projects/ps2/sbbfbb/media/Icon.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">Batalha pela Fenda do Biquíni</h2>
+                                <p>Tradução Completa</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bob Esponja CFKK -->
+                    <div class="project-card" onclick="location.href='/projects/ps2/sbcfkk/sbcfkk.html'">
+                        <span class="project-status status-wip">Em Progresso</span>
+                        <img src="/projects/ps2/sbcfkk/media/capa.jpg" alt="Bob Esponja" class="project-image" style="filter: grayscale(100%);">
+                        <div class="project-overlay">
+                            <img src="/projects/ps2/sbcfkk/media/logo.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">Criatura do Siri Cascudo</h2>
+                                <p>Tradução em Breve...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Genji -->
+                    <div class="project-card" onclick="location.href='/projects/ps2/genji/genji.html'">
+                        <span class="project-status status-complete">Completo</span>
+                        <img src="/projects/ps2/genji/media/poster.jpg" alt="Genji" class="project-image">
+                        <div class="project-overlay">
+                            <img src="/projects/ps2/genji/media/icon.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">Genji</h2>
+                                <p>Dawn of The Samurai</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Naruto UN3 -->
+                    <div class="project-card" onclick="location.href='/projects/ps2/ninja3br/ninja3br.html'">
+                        <span class="project-status status-wip">Em Progresso</span>
+                        <img src="/projects/ps2/ninja3br/media/Capa.jpg" alt="Naruto 3" class="project-image" style="filter: grayscale(100%);">
+                        <div class="project-overlay">
+                            <img src="/projects/ps2/ninja3br/media/Icon.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">Ultimate Ninja 3 BR</h2>
+                                <p>Tradução em Breve...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Naruto UN5+ BR -->
+                    <div class="project-card" onclick="location.href='/projects/ps2/ninja5br/ninja5br.html'">
+                        <span class="project-status status-complete">Completo</span>
+                        <img src="/projects/ps2/ninja5br/media/poster.png" alt="Naruto BR" class="project-image">
+                        <div class="project-overlay">
+                            <img src="/projects/ps2/ninja5br/media/iconv9.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">Ultimate Ninja 5+ BR</h2>
+                                <p>Tradução Completa (Rev9)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Naruto UN5+ Mod -->
+                    <div class="project-card" onclick="location.href='/projects/ps2/ninja5+/ninja5plus.html'">
+                        <span class="project-status status-mod">Modificação</span>
+                        <img src="/projects/ps2/ninja5+/media/poster.jpg" alt="Naruto Mod" class="project-image">
+                        <div class="project-overlay">
+                            <img src="/projects/ps2/ninja5+/media/iconv9.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">Ultimate Ninja 5+ Mod</h2>
+                                <p>NTSC 60Hz & Fixes</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SSX3 -->
+                    <div class="project-card" onclick="location.href='/projects/ps2/ssx3/ssx3.html'">
+                        <span class="project-status status-wip">Em Progresso</span>
+                        <img src="/projects/ps2/ssx3/media/capa.png" alt="SSX3" class="project-image" style="filter: grayscale(100%);">
+                        <div class="project-overlay">
+                            <img src="/projects/ps2/ssx3/media/logo.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">SSX 3</h2>
+                                <p>Tradução em Breve...</p>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-              </div>
+            </section>
 
-              <div class="overlay">
-                <a id="project_details" href="/projects/ps2/sbcfkk/sbcfkk.html">
-                  <img src="/projects/ps2/sbcfkk/media/logo.png" />
-                  <h1
-                    style="
-                      color: rgb(207, 207, 6);
-                      -webkit-text-stroke: 1px #ffffff;
-                    "
-                  >
-                    Criatura do Siri Cascudo
-                  </h1>
-                  <p>
-                    Em breve...
-                    <br />
-                    <br />
-                    <br />
-                  </p>
-                </a>
-              </div>
-            </div>
-          </td>
-
-          <!--Naruto UN3-->
-          <td>
-            <div id="container">
-              <div style="filter: grayscale(100%)" id="image">
-                <img src="/projects/ps2/ninja3br/media/Capa.jpg" alt="" />
-                <div id="progresst">
-                  <h2>Tradução em Progresso</h2>
+            <!-- PlayStation Section -->
+            <section class="platform-section">
+                <h2 class="platform-title">PlayStation</h2>
+                <div class="projects-grid">
+                    <!-- Alundra 2 -->
+                    <div class="project-card" onclick="location.href='/projects/psx/alundra2/alundra2.html'">
+                        <span class="project-status status-complete">Completo</span>
+                        <img src="/projects/psx/alundra2/media/capa.jpg" alt="Alundra 2" class="project-image">
+                        <div class="project-overlay">
+                            <img src="/projects/psx/alundra2/media/icon.png" alt="Logo" class="project-logo">
+                            <div class="project-card-info">
+                                <h2 class="project-title">Alundra 2</h2>
+                                <p>Uma Nova Lenda Começa</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
+            </section>
+        </div>
 
-              <div class="overlay">
-                <a
-                  id="project_details"
-                  href="/projects/ps2/ninja3br/ninja3br.html"
-                >
-                  <img src="/projects/ps2/ninja3br/media/Icon.png" />
-                  <h1
-                    style="
-                      color: rgb(207, 113, 6);
-                      -webkit-text-stroke: 1px #ffffff;
-                    "
-                  >
-                    Ultimate Ninja 3 BR
-                  </h1>
-                  <p>
-                    Em breve...
-                    <br />
-                    <br />
-                    <br />
-                  </p>
-                </a>
-              </div>
-            </div>
-          </td>
+        <script type="text/javascript" src="/scripts/projects.js"></script>
+    </main>
 
-          <!--Alundra 2-->
-          <td>
-            <div id="container">
-              <div id="image">
-                <img src="/projects/psx/alundra2/media/capa.jpg" alt="" />
-                <div id="progresst" style="background-color: green">
-                  <h2
-                    style="
-                      color: #ffd900;
-                      -webkit-text-stroke: 1px #000000c4;
-                      text-shadow: rgb(0, 0, 0) 2px 2px 2px;
-                    "
-                  >
-                    Tradução Completa
-                  </h2>
-                </div>
-              </div>
-
-              <div class="overlay">
-                <a
-                  id="project_details"
-                  href="/projects/psx/alundra2/alundra2.html"
-                >
-                  <img src="/projects/psx/alundra2/media/icon.png" />
-                  <h1
-                    style="
-                      color: rgb(223, 226, 127);
-                      -webkit-text-stroke: 1px #9a9a9a;
-                      font-size: 24px;
-                    "
-                  >
-                    Alundra 2: A New Legend Begins
-                  </h1>
-                  <p style="font-size: 18px">Versão Traduzida do Jogo!</p>
-                </a>
-              </div>
-            </div>
-          </td>
-
-          <!--Genji-->
-          <td>
-            <div id="container">
-              <div id="image">
-                <img src="/projects/ps2/genji/media/poster.jpg" alt="" />
-                <div id="progresst" style="background-color: green">
-                  <h2
-                    style="
-                      color: #ffd900;
-                      -webkit-text-stroke: 1px #000000c4;
-                      text-shadow: rgb(0, 0, 0) 2px 2px 2px;
-                    "
-                  >
-                    Tradução Completa
-                  </h2>
-                </div>
-              </div>
-
-              <div class="overlay">
-                <a id="project_details" href="/projects/ps2/genji/genji.html">
-                  <img src="/projects/ps2/genji/media/icon.png" />
-                  <h1
-                    style="
-                      color: rgb(10, 10, 181);
-                      -webkit-text-stroke: 1px #ffffff;
-                    "
-                  >
-                    Genji: Dawn of The Samurai
-                  </h1>
-                  <p>Versão Traduzida e Revisada do Jogo.</p>
-                </a>
-              </div>
-            </div>
-          </td>
-
-          <!--Naruto Un5+ Mod-->
-          <td>
-            <div id="container">
-              <div id="image">
-                <img src="/projects/ps2/ninja5+/media/poster.jpg" alt="" />
-                <div id="progresst" style="background-color: rgb(128, 41, 0)">
-                  <h2
-                    style="
-                      color: #ffd900;
-                      -webkit-text-stroke: 1px #000000c4;
-                      text-shadow: rgb(0, 0, 0) 2px 2px 2px;
-                    "
-                  >
-                    Modificação de Jogo
-                  </h2>
-                </div>
-              </div>
-
-              <div class="overlay">
-                <a
-                  id="project_details"
-                  href="/projects/ps2/ninja5+/ninja5plus.html"
-                >
-                  <img src="/projects/ps2/ninja5+/media/iconv9.png" />
-                  <h1
-                    style="
-                      color: rgb(186, 35, 4);
-                      -webkit-text-stroke: 1px #ffffff;
-                      font-size: 24px;
-                    "
-                  >
-                    Ultimate Ninja 5+ Mod
-                  </h1>
-                  <p style="font-size: 18px">
-                    Modificação transformando o Modo de Vídeo em NTSC.
-                    <br />
-                    <br />
-                    <strong>REV2023 1.5</strong><br />
-                    +-------------------------+
-                  </p>
-                  <ul style="margin: 100% 0 0 0">
-                    <li><strong>*CORRIGIDO*</strong> Choji Donburi Throw</li>
-                    <li><strong>*CORRIGIDO*</strong> Arquivos corrompidos</li>
-                    <li><strong>*NOVO*</strong> Modo de Vídeo NTSC 640x480</li>
-
-                    <li></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-          </td>
-
-          <!--Naruto Un5+ BR-->
-          <td>
-            <div id="container">
-              <div id="image">
-                <img src="/projects/ps2/ninja5br/media/poster.png" alt="" />
-                <div id="progresst" style="background-color: green">
-                  <h2
-                    style="
-                      color: #ffd900;
-                      -webkit-text-stroke: 1px #000000c4;
-                      text-shadow: rgb(0, 0, 0) 2px 2px 2px;
-                    "
-                  >
-                    Tradução Completa
-                  </h2>
-                </div>
-              </div>
-
-              <div class="overlay">
-                <a
-                  id="project_details"
-                  href="/projects/ps2/ninja5br/ninja5br.html"
-                >
-                  <img src="/projects/ps2/ninja5br/media/iconv9.png" />
-                  <h1
-                    style="
-                      color: rgb(207, 130, 6);
-                      -webkit-text-stroke: 1px #ffffff;
-                    "
-                  >
-                    Ultimate Ninja 5+ BR
-                  </h1>
-                  <p>
-                    Versão Traduzida e Revisada do Jogo.
-                    <br />
-                    <br />
-                    <br />
-                    <strong>REV2023 V9</strong><br />
-                    +-------------------------+<br />
-                  </p>
-
-                  <ul style="margin: 100% 0 0 0">
-                    <li><strong>*NOVO*</strong> Legendas em Ultimates</li>
-                    <li><strong>*NOVO*</strong> Modo de Vídeo NTSC 640x480</li>
-                    <li><strong>*NOVO*</strong> Opção 'Sem Suporte'</li>
-                    <li></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-          </td>
-
-          <!--Bob Esponja BFBB-->
-          <td>
-            <div id="container">
-              <div id="image">
-                <img src="/projects/ps2/sbbfbb/media/Capa.jpg" alt="" />
-                <div id="progresst" style="background-color: green">
-                  <h2
-                    style="
-                      color: #ffd900;
-                      -webkit-text-stroke: 1px #000000c4;
-                      text-shadow: rgb(0, 0, 0) 2px 2px 2px;
-                    "
-                  >
-                    Tradução Completa
-                  </h2>
-                </div>
-              </div>
-
-              <div class="overlay">
-                <a id="project_details" href="/projects/ps2/sbbfbb/sbbfbb.html">
-                  <img src="/projects/ps2/sbbfbb/media/Icon.png" />
-                  <h1
-                    style="
-                      color: rgb(207, 207, 6);
-                      -webkit-text-stroke: 1px #ffffff;
-                    "
-                  >
-                    Batalha pela Fenda do Biquíni
-                  </h1>
-                  <p>
-                    Versão Traduzida do Jogo.
-                    <br />
-                    <br />
-                    <br />
-                  </p>
-                </a>
-              </div>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- #endregion -->
-    <br /><br /><br /><br />
-    <!--#region BalãoSuspenso-->
-    <div id="msgBaloon">
-      <hr />
-      <p class="aligncenter">
-        RomHacking Project - Muito Além de Uma Tradução!
-      </p>
-    </div>
-    <!-- #endregion -->
-  </body>
-
-  <footer>
+    <!-- Footer -->
     <footer>
-      <div w3-include-html="/footer.html"></div>
-      <script>
-        w3IncludeHTML();
-      </script>
+        <div w3-include-html="/footer.html"></div>
+        <script>w3IncludeHTML();</script>
     </footer>
-  </footer>
+</body>
 </html>

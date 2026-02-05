@@ -1,0 +1,87 @@
+FONT - FONTE DO JOGO ACENTOS - FOI
+BOOT - NOMES E OUTROS - FOI
+SUBT+TIMERS - FOI
+2CC37960 - SUBT DYNA ASSET ID
+DONE - ENDCONVS
+DONE - STOP TIMERS Grupo
+PLAY - RUN FIRST TIMER
+
+B1 - CHEFE ROBÕ SANDY POSEIDOMO - FOI
+B2 - CHEFE ROBÔ PATRICK PARQUE INDUSTRIAL - FOI
+B3 - CHEFE ROBÔ BOB ESPONJA BALDE DE LIXO - FOI
+BB - CENTRO DA FENDA DO BIQUÍNI - FOI
+BC - CAVERNA DO SEREIO - FOI
+DB - SONHO DO BOB ESPONJA - FOI
+GL - LAGOA GOO - FOI
+GY - CEMITÉRIO DO HOLANDÊS - FOI
+HB - VIZINHANÇA - FOI (Texturas 3 -10 HOP)
+JF - CAMPO DAS ÁGUAS VIVAS - FOI
+MN - MENU E OUTROS - FOI
+KF - FLORESTA DAS ALGAS - FOI
+RB - FENDA DA PEDRA - FOI
+SM - MONTANHA DE AREIA - FOI
+
+SP - SINGLE PLAYER[Apenas HOP(NÃO CONTA)]
+PG - PLAYGROUND - Feito (Textos)
+
+-Legendar os FMV - Feito
+
+HB - Feito - REV
+BB - Feito - REV
+BC - Feito - REV
+GL - Feito - REV
+JF - Feito - REV
+KF - Feito - REV
+DB - Feito - REV
+RB - Feito - REV
+GY - Feito - REV
+PG - Feito - REV
+SM - Feito - REV 
+MN - Feito - REV
+outofbounds - Feito REV
+checkpoint - Feito REV
+Sr. e Sra. - Feito REV
+Caixa de Lembrete pequena - Feito REV
+Acentos nos níveis de save - ASM
+Modelos GY e Robô Bob - NOP
+
+[Tempos de legendas]
+
+B101/1 - Ok
+/2 - Ok
+/3 - Ok
+/F - Ok
+B201/1 - Ok
+/2 - Ok
+/3 - Ok
+/F - Aceitável...
+B302/1 - Aceitável
+/F - Ok
+B303 - Ok
+BC05/1 - Ok
+/F - Ok 
+JF - Ok
+HB00 - Ok
+GY04/1 - Ok
+/F - Ok
+
+FLYTHROUGH----------
+
+JF-OK
+HB-OK
+BB-OK
+BC-OK
+GL-OK
+KF-OK
+DB-OK
+RB-OK
+GY-OK
+SM-OK
+
+---Corrigir:
+
+-Erros de assets de som não parando de tocar, ou tocando o asset errado //Pendente(Checksum?)
+-Ahoy - Alto aí - Feito REV
+-Bungee de Roupa íntima : Bungee - Conferir!!
+-Checkpoint - Ponto de Controle - Feito
+--------------------------

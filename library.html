@@ -1,0 +1,451 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - BitMundo</title>
+    
+    <meta name="description" content="Biblioteca completa de jogos traduzidos e informações técnicas." />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="https://www.w3schools.com/lib/w3data.js"></script>
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <style>
+        .lib-view-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .lib-view-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .lib-view-btn:hover, .lib-view-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            color: #fff;
+        }
+
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .game-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .game-cover {
+            width: 100%;
+            aspect-ratio: 16/9; /* Keep the grid consistent */
+            object-fit: contain; /* Prevent cropping */
+            background: rgba(0, 0, 0, 0.5); /* Fill empty spaces */
+            padding: 10px; /* Give some breathing room to the icon */
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .game-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: var(--highlight);
+        }
+
+        .game-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .platform-tag {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Detail Modal/Overlay */
+        .library-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(15px);
+            z-index: 10001; /* Above navbar */
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            max-width: 1200px; /* Slightly wider for wiki look */
+            margin: 2rem auto;
+            background: #0a0b10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+            color: var(--text-main);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100; /* Ensure it's on top */
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: var(--highlight);
+            transform: rotate(90deg);
+        }
+
+        .detail-tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #ccc; /* Lighter passive color */
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            color: var(--highlight);
+            border-bottom: 2px solid var(--highlight);
+            text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Bulletproof Selection */
+        .modal-content ::selection {
+            background: var(--highlight) !important;
+            color: #000 !important;
+            text-shadow: none;
+        }
+
+        /* Wiki-style Layout */
+        .wiki-container {
+            display: flex;
+            gap: 2.5rem;
+            flex-wrap: wrap; /* Wraps on mobile */
+        }
+
+        .wiki-main {
+            flex: 1;
+            min-width: 0; /* Critical flexbox fix for growing containers */
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .wiki-sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            background: rgba(10, 11, 16, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            align-self: flex-start;
+            position: relative;
+            z-index: 5;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Neon Border Animation for Sidebar */
+        .wiki-sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent, 
+                var(--primary), 
+                transparent, 
+                var(--highlight), 
+                transparent
+            );
+            animation: rotateNeon 6s linear infinite;
+            z-index: -1;
+        }
+
+        .wiki-sidebar::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            z-index: -1;
+        }
+
+        @keyframes rotateNeon {
+            100% { transform: rotate(360deg); }
+        }
+
+        .infobox-title {
+            text-align: center;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: #fff;
+            padding: 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .infobox-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .infobox-table th {
+            text-align: left;
+            padding: 0.5rem;
+            color: var(--highlight);
+            width: 40%;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .infobox-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+
+        /* Article Typography */
+        .wiki-article h2 {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: #fff; /* Solid white for headings */
+            font-size: 1.8rem;
+        }
+
+        .wiki-article p {
+            line-height: 1.9;
+            margin-bottom: 1.5rem;
+            text-align: justify;
+            color: #ffffff; /* pure white for maximum visibility */
+            font-size: 1.1rem;
+        }
+
+        .wiki-section {
+            margin-bottom: 3rem;
+            position: relative;
+            background: rgba(0, 0, 0, 0.6); /* Slightly darker for better text contrast */
+            padding: 2.5rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-wrap: break-word;
+            word-wrap: break-word; /* IE fallback */
+            overflow: hidden; /* Contains any floating/large content */
+        }
+
+        .wiki-section:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-left-color: var(--primary);
+        }
+
+        .category-header {
+            grid-column: 1 / -1;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: var(--highlight);
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Premium Wiki Details */
+        .wiki-article .wiki-section:first-child p:first-of-type::first-letter {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 4rem;
+            float: left;
+            margin-right: 0.8rem;
+            line-height: 0.8; /* Align with the top of the text */
+            margin-top: 0.15em; /* Nudge down for perfect centering */
+            color: var(--highlight);
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+        }
+
+        .article-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin: 1.5rem auto;
+            display: block;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .wiki-banner-wrapper {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .wiki-banner {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .wiki-banner-wrapper:hover .wiki-banner {
+            transform: scale(1.05);
+        }
+
+        /* Scanline effect */
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.1) 50%
+            ), linear-gradient(
+                90deg, 
+                rgba(255, 0, 0, 0.02), 
+                rgba(0, 255, 0, 0.01), 
+                rgba(0, 0, 255, 0.02)
+            );
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Custom Scrollbar */
+        #game-modal::-webkit-scrollbar {
+            width: 8px;
+        }
+        #game-modal::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        #game-modal::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div w3-include-html="/navbar.html"></div>
+    <script src="https://www.w3schools.com/lib/w3data.js"></script>
+    <script>w3IncludeHTML();</script>
+
+    <main class="container">
+        <div class="text-center mt-5 mb-5">
+            <h1 class="hero-title">Biblioteca de Jogos</h1>
+            <p class="hero-subtitle">História, Desenvolvimento e RomHacking.</p>
+        </div>
+
+        <div class="lib-view-controls">
+            <button class="lib-view-btn active" onclick="switchLibraryView('name', this)">Ordem Alfabética</button>
+            <button class="lib-view-btn" onclick="switchLibraryView('platform', this)">Por Console</button>
+            <button class="lib-view-btn" onclick="switchLibraryView('genre', this)">Por Gênero</button>
+        </div>
+
+        <div id="library-container" class="library-grid">
+            <!-- Games Loaded Dynamically -->
+            <div class="text-center" style="grid-column: 1/-1;">Carregando biblioteca...</div>
+        </div>
+    </main>
+
+    <!-- Modal for details -->
+    <div id="game-modal" class="library-modal">
+        <div class="modal-content glass-panel">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modal-body">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div w3-include-html="/footer.html"></div>
+    <script>w3IncludeHTML();</script>
+
+    <script src="/scripts/library.js"></script>
+</body>
+</html>

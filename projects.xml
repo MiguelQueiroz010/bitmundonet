@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<projects>
+    <!-- PlayStation 2 -->
+    <project id="sbbfbb">
+        <title>SpongeBob: Batalha pela Fenda do Biquíni</title>
+        <subtitle>Tradução Completa</subtitle>
+        <platform>PlayStation 2</platform>
+        <status>Completo</status>
+        <thumbnail>/projects/ps2/sbbfbb/media/Capa.jpg</thumbnail>
+        <logo>/projects/ps2/sbbfbb/media/Icon.png</logo>
+        <video>/projects/ps2/sbbfbb/media/Intro.mp4</video>
+        <cover>/projects/ps2/sbbfbb/media/Capa.jpg</cover>
+        <description><![CDATA[
+            SpongeBob SquarePants: Battle for Bikini Bottom é um jogo eletrônico publicado pela THQ em 2003. Baseado na série animada de mesmo nome, o jogo foi desenvolvido por Heavy Iron Studios, AWE Games e Vicarious Visions. Esta tradução traz o jogo totalmente para Português Brasileiro, incluindo texturas, textos e legendas inéditas para as cutscenes, adaptadas através de engenharia reversa na ferramenta Industrial Park.
+        ]]></description>
+        <gallery>
+            <gallery_item src="/projects/ps2/sbbfbb/media/galeria/menu.jpg" caption="Tela inicial traduzida" />
+            <gallery_item src="/projects/ps2/sbbfbb/media/galeria/menu2.jpg" caption="Menus do jogo" />
+            <gallery_item src="/projects/ps2/sbbfbb/media/galeria/checkp.jpg" caption="Pontos de controle" />
+            <gallery_item src="/projects/ps2/sbbfbb/media/galeria/cuts2.jpg" caption="Legendas nas cenas" />
+            <gallery_item src="/projects/ps2/sbbfbb/media/galeria/dialog1.jpg" caption="Diálogos traduzidos" />
+        </gallery>
+        <credits>
+            <credit_item name="Bit.Raiden">RomHacking e Tradução geral</credit_item>
+            <credit_item name="igorseabra4">IndustrialPark - ArchiveEditor</credit_item>
+            <credit_item name="denim/MummRa">Lógica de Compressão</credit_item>
+            <credit_item name="Luke/denim">Ajuda com ASM</credit_item>
+            <credit_item name="rubinho146">Asset de Texto</credit_item>
+            <credit_item name="OAlex">Revisão InGame</credit_item>
+        </credits>
+        <progress>
+            <global_progress>100%</global_progress>
+            <progress_item label="Texturas">100%</progress_item>
+            <progress_item label="Menus">100%</progress_item>
+            <progress_item label="Diálogos">100%</progress_item>
+        </progress>
+        <downloads>
+            <download_item version="Versão 1.0" type="ISO" region="NTSC" maintenance="true" url="" />
+        </downloads>
+        <meta_description>Tradução brasileira para SpongeBob Battle for Bikini Bottom PS2.</meta_description>
+        <meta_keywords>bob esponja, ps2, tradução</meta_keywords>
+    </project>
+
+    <project id="genji">
+        <title>Genji: Alvorecer dos Samurais</title>
+        <subtitle>Dawn of The Samurai - Tradução PT-BR</subtitle>
+        <platform>PlayStation 2</platform>
+        <status>Completo</status>
+        <thumbnail>/projects/ps2/genji/media/poster.jpg</thumbnail>
+        <logo>/projects/ps2/genji/media/icon.png</logo>
+        <video>/projects/ps2/genji/media/intro.mp4</video>
+        <cover>/projects/ps2/genji/media/poster.jpg</cover>
+        <description><![CDATA[
+            O jogo se baseia na história do "Conto de Heiki", apresentando uma jornada épica no tempo dos samurais em guerra por poder sobre Kyoto. O projeto tomou rumo após a descoberta da estrutura dos containers DATA.DAT e EDATA.DAT. Esta tradução completa abrange textos, texturas e falas, proporcionando uma experiência imersiva em português.
+        ]]></description>
+        <gallery>
+            <gallery_item src="/projects/ps2/genji/media/gallery/pic2.png" caption="Menu principal" />
+            <gallery_item src="/projects/ps2/genji/media/gallery/pic3.png" caption="Interface de jogo" />
+            <gallery_item src="/projects/ps2/genji/media/gallery/pic4.png" caption="Configurações traduzidas" />
+            <gallery_item src="/projects/ps2/genji/media/gallery/pic5.png" caption="Capítulo 1: Kyoto" />
+            <gallery_item src="/projects/ps2/genji/media/gallery/pic6.png" caption="Diálogos épicos" />
+            <gallery_item src="/projects/ps2/genji/media/gallery/pic10.gif" caption="Combates em PT-BR" />
+        </gallery>
+        <credits>
+            <credit_item name="Bit.Raiden">RomHacking Geral e Pós-Projeto</credit_item>
+            <credit_item name="HNNEWGAMES">Ponteiros</credit_item>
+            <credit_item name="Jeimisson">Textos</credit_item>
+            <credit_item name="WilliamVaz">Revisão [2021]</credit_item>
+        </credits>
+        <progress>
+            <global_progress>100%</global_progress>
+            <progress_item label="Texturas">100%</progress_item>
+            <progress_item label="Menus">100%</progress_item>
+            <progress_item label="Diálogos">100%</progress_item>
+        </progress>
+        <downloads>
+            <download_item version="REV_Natal_2021" type="ISO" region="NTSC" maintenance="true" url="" />
+        </downloads>
+        <meta_description>Tradução completa de Genji: Dawn of The Samurai para PS2.</meta_description>
+        <meta_keywords>genji, ps2, tradução, samurai</meta_keywords>
+    </project>
+
+    <project id="ninja5br">
+        <title>Naruto Shippuden: Ultimate Ninja 5+</title>
+        <platform>PlayStation 2</platform>
+        <status>Completo</status>
+        <thumbnail>/projects/ps2/ninja5br/media/poster.png</thumbnail>
+        <logo>/projects/ps2/ninja5br/media/iconv9.png</logo>
+        <subtitle>Versão Brasileira (Rev9)</subtitle>
+        <video>/projects/ps2/ninja5br/media/intro.mp4</video>
+        <cover>/projects/ps2/ninja5br/media/poster.png</cover>
+        <description><![CDATA[
+            Este projeto nasceu do aprendizado sobre o formato CCSF e texturas PNG com transparência. O quinto jogo da série Ultimate Ninja, totalmente traduzido e dublado. Esta versão "5+" traz melhorias significativas, correções de bugs originais e uma dublagem brasileira épica em parceria com Meloolavio e Edinho.
+        ]]></description>
+        <gallery>
+            <gallery_item src="/projects/ps2/ninja5br/media/gallery/language.bmp" caption="Seleção de idioma" />
+            <gallery_item src="/projects/ps2/ninja5br/media/gallery/loading.bmp" caption="Tela de loading" />
+            <gallery_item src="/projects/ps2/ninja5br/media/gallery/menu.bmp" caption="Menu traduzido" />
+            <gallery_item src="/projects/ps2/ninja5br/media/gallery/credits.bmp" caption="Créditos da tradução" />
+        </gallery>
+        <credits>
+            <credit_item name="Bit.Raiden">Projeto, RomHacking e Revisão</credit_item>
+            <credit_item name="Meloolavio">Textos e Dublagem</credit_item>
+            <credit_item name="Edinho">NPCs e Texturas</credit_item>
+            <credit_item name="ZMath3us">Narutimatte Modding tools</credit_item>
+            <credit_item name="Gledson999">Suporte Técnico</credit_item>
+        </credits>
+        <progress>
+            <global_progress>100%</global_progress>
+            <progress_item label="Texturas">100%</progress_item>
+            <progress_item label="Dublagem">100%</progress_item>
+            <progress_item label="Revisão 2023">100%</progress_item>
+        </progress>
+        <downloads>
+            <download_item version="Versão 9.0" type="ISO" region="NTSC" maintenance="true" url="" />
+        </downloads>
+        <meta_description>Tradução e Dublagem brasileira para Naruto Ultimate Ninja 5 PS2.</meta_description>
+        <meta_keywords>naruto, ps2, dublado, tradução</meta_keywords>
+    </project>
+
+    <project id="sbcfkk">
+        <title>SpongeBob: Criatura do Siri Cascudo</title>
+        <subtitle>Em Breve - Tradução em Progresso</subtitle>
+        <platform>PlayStation 2</platform>
+        <status>Em Progresso</status>
+        <thumbnail>/projects/ps2/sbcfkk/media/capa.jpg</thumbnail>
+        <logo>/projects/ps2/sbcfkk/media/logo.png</logo>
+        <video>/projects/ps2/sbcfkk/media/intro.mp4</video>
+        <cover>/projects/ps2/sbcfkk/media/capa.jpg</cover>
+        <description><![CDATA[
+            Creature from the Krusty Krab é uma aventura surreal pelos sonhos do Bob Esponja, Patrick e Plankton. O projeto iniciou em 2022 com o desenvolvimento de ferramentas próprias para manipular textos e texturas, garantindo total controle sobre a localização deste clássico da Blitz Games.
+        ]]></description>
+        <gallery>
+            <gallery_item src="/projects/ps2/sbcfkk/media/gal/img1.png" caption="Tela de direitos autorais" />
+            <gallery_item src="/projects/ps2/sbcfkk/media/gal/img2.png" caption="Sistema de save traduzido" />
+            <gallery_item src="/projects/ps2/sbcfkk/media/gal/img4.png" caption="Menu principal" />
+            <gallery_item src="/projects/ps2/sbcfkk/media/gal/img3.png" caption="Tela inicial" />
+            <gallery_item src="/projects/ps2/sbcfkk/media/gal/img5.png" caption="Apresentação de níveis" />
+        </gallery>
+        <credits>
+            <credit_item name="Bit.Raiden">Ferramentas e Tradução</credit_item>
+            <credit_item name="WilliamVaz">Revisão</credit_item>
+        </credits>
+        <progress>
+            <global_progress>75%</global_progress>
+            <progress_item label="Texturas">80%</progress_item>
+            <progress_item label="Menus">70%</progress_item>
+            <progress_item label="Diálogos">77%</progress_item>
+        </progress>
+        <downloads>
+            <download_item version="Versão 1.0" type="ISO" region="NTSC" maintenance="true" url="" />
+        </downloads>
+        <meta_description>Tradução em progresso para SpongeBob Creature from the Krusty Krab PS2.</meta_description>
+        <meta_keywords>bob esponja, ps2, tradução, cfkk</meta_keywords>
+    </project>
+
+    <project id="ninja3br">
+        <title>Naruto: Ultimate Ninja 3</title>
+        <subtitle>Em Breve - Tradução PT-BR</subtitle>
+        <platform>PlayStation 2</platform>
+        <status>Em Progresso</status>
+        <thumbnail>/projects/ps2/ninja3br/media/Capa.jpg</thumbnail>
+        <logo>/projects/ps2/ninja3br/media/Icon.png</logo>
+        <video>/projects/ps2/ninja3br/media/Intro.mp4</video>
+        <cover>/projects/ps2/ninja3br/media/Capa.jpg</cover>
+        <description><![CDATA[
+            O terceiro capítulo da série clássica de Naruto, com um modo RPG icônico e o torneio dos cristais. O projeto conta com a colaboração de Andyson, Bit.Raiden, zMath3us e WilliamVaz para trazer uma experiência expandida e fiel ao anime, com texturas gráficas totalmente localizadas.
+        ]]></description>
+        <gallery>
+            <gallery_item src="https://i.postimg.cc/zfQxCnvY/gsdx-20220710142821.png" caption="Menu de entrada" />
+            <gallery_item src="https://i.postimg.cc/bNWmK08C/gsdx-20220710143746.png" caption="Seleção de modos" />
+            <gallery_item src="https://i.postimg.cc/fLD28wZM/gsdx-20220710143844.png" caption="História dos Heróis" />
+            <gallery_item src="https://i.postimg.cc/ZRHfg1Kp/gsdx-20220710143915.png" caption="Combate Livre" />
+            <gallery_item src="https://i.postimg.cc/tgH2gXsF/gsdx-20220710144020.png" caption="Diálogos em progresso" />
+        </gallery>
+        <credits>
+            <credit_item name="Andyson">Projeto e Tradução</credit_item>
+            <credit_item name="Bit.Raiden">RomHacking e Revisão</credit_item>
+            <credit_item name="zMath3us">Suporte Técnico</credit_item>
+            <credit_item name="WilliamVaz">Revisão de Textos</credit_item>
+        </credits>
+        <progress>
+            <global_progress>83%</global_progress>
+            <progress_item label="Texturas">50%</progress_item>
+            <progress_item label="Modo Herói">100%</progress_item>
+            <progress_item label="Modo RPG">100%</progress_item>
+        </progress>
+        <downloads>
+            <download_item version="Versão 1.0" type="ISO" region="NTSC" maintenance="true" url="" />
+        </downloads>
+        <meta_description>Tradução em progresso para Naruto Ultimate Ninja 3 PS2.</meta_description>
+        <meta_keywords>naruto, un3, ps2, tradução</meta_keywords>
+    </project>
+
+    <project id="ninja5plus">
+        <title>Naruto Shippuden: Ultimate Ninja 5+ Mod</title>
+        <subtitle>NTSC 60Hz &amp; Fixes</subtitle>
+        <platform>PlayStation 2</platform>
+        <status>Modificação</status>
+        <thumbnail>/projects/ps2/ninja5+/media/poster.jpg</thumbnail>
+        <logo>/projects/ps2/ninja5+/media/iconv9.png</logo>
+        <video>/projects/ps2/ninja5+/media/intro.mp4</video>
+        <cover>/projects/ps2/ninja5+/media/poster.jpg</cover>
+        <description><![CDATA[
+            O objetivo desse mod é trazer o modo de vídeo NTSC para o jogo original lançado apenas em PAL, com correção de resolução de altura de 512 para 448. O resultado é uma fluidez que lembra os 60fps sem tela cortada. Inclui correções avançadas de bloom, blur e combos por zMath3us.
+        ]]></description>
+        <gallery>
+            <gallery_item src="/projects/ps2/ninja5+/media/gallery/language.bmp" caption="Novo menu de idiomas" />
+            <gallery_item src="/projects/ps2/ninja5+/media/gallery/loading.bmp" caption="Tela de carregamento modificada" />
+            <gallery_item src="/projects/ps2/ninja5+/media/gallery/menu.bmp" caption="Menu inicial" />
+            <gallery_item src="https://media3.giphy.com/media/5ySes65c5e2jKx7EjI/giphy.gif" caption="Demonstração do menu V1" />
+            <gallery_item src="/projects/ps2/ninja5+/media/gallery/credits.bmp" caption="Créditos aos desenvolvedores" />
+        </gallery>
+        <credits>
+            <credit_item name="Bit.Raiden">Projeto e RomHacking</credit_item>
+            <credit_item name="zMath3us">Correções Visuais e Combos</credit_item>
+        </credits>
+        <progress>
+            <global_progress>100%</global_progress>
+        </progress>
+        <downloads>
+            <download_item version="Versão 1.5 (2023)" type="ISO" region="NTSC" maintenance="true" url="" />
+        </downloads>
+        <meta_description>Modificação avançada para Naruto Ultimate Ninja 5 PS2.</meta_description>
+        <meta_keywords>naruto, un5, ps2, mod, ntsc</meta_keywords>
+    </project>
+
+    <project id="ssx3">
+        <title>SSX 3</title>
+        <subtitle>Em Breve - Tradução em Progresso</subtitle>
+        <platform>PlayStation 2</platform>
+        <status>Em Progresso</status>
+        <thumbnail>/projects/ps2/ssx3/media/capa.png</thumbnail>
+        <logo>/projects/ps2/ssx3/media/logo.png</logo>
+        <video>/projects/ps2/ssx3/media/intro.mp4</video>
+        <cover>/projects/ps2/ssx3/media/capa.png</cover>
+        <description><![CDATA[
+            Este projeto traz a tradução para o português do auge do snowboard radical da era PS2. Graças à multiferramenta universal de Archy e ao suporte técnico de Bit.Raiden para a localização de fontes, SSX 3 agora conta com caracteres compatíveis com o nosso idioma.
+        ]]></description>
+        <gallery>
+            <gallery_item src="/projects/ps2/ssx3/media/gal/title.png" caption="Tela inicial" />
+            <gallery_item src="/projects/ps2/ssx3/media/gal/menu.png" caption="Menu de opções" />
+            <gallery_item src="/projects/ps2/ssx3/media/gal/options.png" caption="Configurações traduzidas" />
+            <gallery_item src="/projects/ps2/ssx3/media/gal/riding.png" caption="Jogabilidade na neve" />
+            <gallery_item src="/projects/ps2/ssx3/media/gal/rider.png" caption="Estatísticas do corredor" />
+            <gallery_item src="/projects/ps2/ssx3/media/gal/charselect.png" caption="Seleção de personagens" />
+            <gallery_item src="/projects/ps2/ssx3/media/gal/event.png" caption="Escolha de evento" />
+            <gallery_item src="/projects/ps2/ssx3/media/gal/perfil.png" caption="Perfil detalhado" />
+        </gallery>
+        <credits>
+            <credit_item name="Wander">Líder do Projeto e Tradutor</credit_item>
+            <credit_item name="Bit.Raiden">Mecânicas de Texto e Ferramentas</credit_item>
+            <credit_item name="Archy">Multiferramenta Universal</credit_item>
+        </credits>
+        <progress>
+            <global_progress>70%</global_progress>
+            <progress_item label="Geral">70%</progress_item>
+        </progress>
+        <downloads>
+            <download_item version="Versão 1.0 Alpha" type="ISO" region="NTSC" maintenance="true" url="" />
+        </downloads>
+        <meta_description>Tradução em progresso para SSX 3 PS2.</meta_description>
+        <meta_keywords>ssx3, ps2, tradução, romhacking</meta_keywords>
+    </project>
+
+    <project id="alundra2">
+        <title>Alundra 2</title>
+        <subtitle>Uma Nova Lenda Começa</subtitle>
+        <platform>PlayStation</platform>
+        <status>Completo</status>
+        <thumbnail>/projects/psx/alundra2/media/capa.jpg</thumbnail>
+        <logo>/projects/psx/alundra2/media/icon.png</logo>
+        <video>/projects/psx/alundra2/media/intro.mp4</video>
+        <cover>/projects/psx/alundra2/media/capa.jpg</cover>
+        <description><![CDATA[
+            O jogo se passa numa história em meio a piratas e cavaleiros reais no Reino de Varuna, com uma soundtrack magnífica. A tradução superou grandes desafios de compressão nos arquivos originais do PS1. Hoje, Alundra 2 pode ser apreciado totalmente em português, desde os diálogos até os movies.
+        ]]></description>
+        <gallery>
+            <gallery_item src="/projects/psx/alundra2/media/menu1.png" caption="Menu de início" />
+            <gallery_item src="/projects/psx/alundra2/media/menu2.png" caption="Opções de jornada" />
+            <gallery_item src="/projects/psx/alundra2/media/contrail.png" caption="Tela de produção" />
+        </gallery>
+        <credits>
+            <credit_item name="Bit.Raiden">Projeto e RomHacking</credit_item>
+            <credit_item name="Denim">Compressão e TIMFEL</credit_item>
+            <credit_item name="MummRa">Edição de Texturas</credit_item>
+        </credits>
+        <progress>
+            <global_progress>94%</global_progress>
+            <progress_item label="Texturas">95%</progress_item>
+            <progress_item label="Menus">99%</progress_item>
+            <progress_item label="Falas">99%</progress_item>
+            <progress_item label="Revisão">90%</progress_item>
+        </progress>
+        <downloads>
+            <download_item version="Versão 1.0" type="BIN/CUE" maintenance="false" url="https://bitmundo.blog">
+                <changelog>Lançamento inicial da tradução completa. Correção de ponteiros e compressão TIM.</changelog>
+            </download_item>
+        </downloads>
+        <live_video>https://www.youtube.com/embed/ZSIWyYNmjK8</live_video>
+        <meta_description>Tradução completa para Alundra 2 PS1.</meta_description>
+        <meta_keywords>alundra 2, psx, tradução, romhacking</meta_keywords>
+    </project>
+</projects>

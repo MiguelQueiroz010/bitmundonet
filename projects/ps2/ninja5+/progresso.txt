@@ -1,0 +1,27 @@
+
+Versão do Patch: 3.0 REV1.5
+
+Changelog
+-------------
+Revisão 1.5 24/10/23:
+
+*Corrigido* Arquivos corrompidos - DATA.CVM (Gaara Cutscene Bug and other Cutscene/Loading Bugs)
+*Corrigido* Choji Donburi Throw - COMBO/ANIMAÇÃO (ZMath3us) 0x8d76b0
+
+GERAL
+~ Mudança de PAL para NTSC (Bit.Raiden)
+
+~ Correção no Efeito de Blur, overlay (zMath3usMSF)
+
+Batalha 2D
+~ Combos dos Personagens reajustados e Fixados (zMath3usMSF)
+
+~ Correção Parcial no Jutsu do Choji (zMath3usMSF) 
+
+~ Correções no Ultimate Jutsu: Aúdio (Bit.Raiden)
+
+~ Correções no Ultimate Jutsu 2: Tempo do Dano, Efeito de Overlay e outros (zMath3usMSF)
+
+~ Desativação do Bloom e Efeitos Blur no Ultimate Jutsu (zMath3usMSF)
+
+Não comercialize/Do not comercialize!

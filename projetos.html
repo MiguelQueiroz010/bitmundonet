@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetos - Bit.Raiden</title>
+    
+    <meta name="description" content="Catálogo de projetos de RomHacking e Tradução do Bit.Raiden." />
+    <meta name="keywords" content="projetos, romhacking, tradução, games, ps2, psx" />
+    <meta name="author" content="Bit.Raiden">
+
+    <!-- Open Graph -->
+    <meta property="og:image" content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png" />
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png" />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <!-- Scripts -->
+    <script src="https://www.w3schools.com/lib/w3data.js"></script>
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561" crossorigin="anonymous"></script>
+    
+    <!-- Note: Removing legacy scripts/projects.js as it relied on table structures. 
+         Parallax/Scroll effects can be re-added via CSS if needed. -->
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div w3-include-html="/navbar.html"></div>
+    <script>w3IncludeHTML();</script>
+
+    <main class="container">
+        <!-- Hero / Title -->
+        <div class="text-center mt-5 mb-3">
+             <h1 class="hero-title">Projetos & Lançamentos</h1>
+             <p class="hero-subtitle">Galeria completa de modificações e traduções.</p>
+        </div>
+
+        <!-- View Switcher -->
+        <div class="projects-header">
+            <div class="platform-count">Total de 8 projetos encontrados</div>
+            <div class="view-switcher">
+                <button class="view-btn active" id="grid-view" onclick="setProjectView('grid')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zM13 3h8v8h-8V3zm0 10h8v8h-8v-8z"/></svg> Grade
+                </button>
+                <button class="view-btn" id="list-view" onclick="setProjectView('list')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg> Lista
+                </button>
+            </div>
+        </div>
+
+        <div id="projects-container">
+            <div style="padding: 100px; text-align: center;">
+                <h2 style="color: grey;">Carregando projetos...</h2>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="/scripts/projects_loader.js"></script>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div w3-include-html="/footer.html"></div>
+        <script>w3IncludeHTML();</script>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,186 @@
+@keyframes opacity {
+  from{
+opacity: 0;
+  }
+  to{
+    opacity: 1;
+  }
+}
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes border {
+  from {
+    border: none;
+  }
+  to {
+  }
+}
+@keyframes scrollx{
+  from{
+    transform: translateX(0px);
+  }
+  to{
+    transform: translateX(-1000px);
+  }
+}
+html {
+  scroll-behavior: smooth;
+}
+footer {
+  display: none;
+}
+
+/*TEXT CLASSES/IDS*/
+#msgBaloon p {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 16px;
+  color: #a5a5a5;
+}
+#msgBaloon {
+  position: fixed;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.397);
+  width: 100%;
+  z-index: 9;
+}
+#msgBaloon > hr {
+  margin-top: 0;
+  height: 2px;
+  background-color: rgb(10, 20, 80);
+  border: none;
+}
+
+/*STYLES*/
+
+#progresst{
+  position: relative;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: rgba(255, 238, 4, 0.884);
+  z-index: 99;
+  height: 100%;
+}
+
+#progresst h2{
+  font-size: 25px;
+  margin-top: 0;
+  text-shadow: rgb(255, 255, 255) 2px 2px 2px;
+  -webkit-text-stroke: 1px #001486c4;
+  color: #000;
+}
+
+#projectsSelector {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  overflow-x:scroll;
+  
+}
+
+/* SCROLLBAR*/
+#projectsSelector::-webkit-scrollbar {
+  width: 10px;
+  
+}
+#projectsSelector::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0);      /* color of the tracking area */
+}
+#projectsSelector::-webkit-scrollbar-thumb {
+  background-color: rgb(19, 19, 255);    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: 3px solid rgb(0, 0, 0);  /* creates padding around scroll thumb */
+}
+#project_details {
+  text-decoration: none;
+  color: antiquewhite;
+
+}
+a {
+  display: inline-flex;
+  font: 20px verdana;
+}
+#projtable tr{
+ /*animation: scrollx 4ms ease-in-out;
+ animation-timeline: view();*/
+}
+#container {
+  position: relative;
+}
+#image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+#image img{
+  width: 480px;
+  height: 640px;
+}
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+  
+  height: 0;
+  background: rgba(0, 0, 0, 0.397);
+  transition: 0.2s ease-in-out;
+  transform: scale(0);
+}
+#container:hover .overlay {
+  transform: scale(100%);
+  height: 100%;
+  
+}
+#container:hover #image{
+  filter: blur(8px);
+
+}
+.overlay a{
+  width: 100%;
+  height: 100%;
+  text-shadow: #000000 90px;
+}
+
+.overlay a img{
+  width: 70%;
+  margin: 10% 0 0 18%;
+  position: absolute;
+  text-align: center;
+  -webkit-text-stroke: 64px #ff0202;
+}
+.overlay a h1{
+  width: 100%;
+  margin: 50% 0 0 0;
+  
+  position: absolute;
+  text-align: center;
+  font-size: 28px;
+}
+.overlay a p{
+  width: 70%;
+  margin: 60% 0 0 18%;
+  font-size: 20px;
+  color: rgb(255, 255, 255);
+  position: absolute;
+  text-align: center;
+  line-height: 1.5em;
+}
+.overlay ul{
+  margin: 100% 0 0 18%;
+  list-style: none;
+  font-size: 20px;
+  color: rgb(255, 255, 255);
+  position: absolute;
+
+}
+

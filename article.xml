@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<articles>
+<article nome="unbr" selected="true">
+<title>💥💥💥Série Ultimate Ninja Completa: Projeto de Tradução💥💥💥</title>
+<author>Bit.Raiden</author>
+<date>07-05-2025</date>
+<image style="width: 40%; display: none"> </image>
+<content>(font-size = "23px")Série Naruto: Ultimate Ninja - Versão Brasileira📝(/font-size)
+
+(image style="width: 80%; margin-left:7%")/media/articles/4.png(/image)
+
+✨ Estamos preparando um lançamento completo! ✨
+
+  Ultimate Ninja 1 - Tradutor: Bit.Raiden
+  Ultimate Ninja 2 - Tradutor: NarutoClassics
+  Ultimate Ninja 3 - Tradutor: Andyson
+  Ultimate Ninja 4 - Tradutor: Bit.Raiden
+
+Todos vão ter legendas nos Ultimates (Jutsus Supremos)!
+
+🐱‍🏍 Entre no nosso servidor do Discord e acompanhe:
+https://discord.com/invite/5TgrcyFJEb
+</content>
+</article>
+<article nome="un3" selected="true">
+<title>💥 Ultimate Ninja 3 - Tradução quase lá...</title>
+<author>Bit.Raiden</author>
+<date>27-04-2025</date>
+<image style="width: 40%; display: none"> </image>
+<content>(font-size = "23px")Naruto Ultimate Ninja 3+ BR (PS2) 📝(/font-size)
+
+✨ Estamos preparando um lançamento muito especial! ✨
+
+Um projeto muito esperado e cuidadosamente trabalhado na tradução pelo nosso querido (color = "red")Andyson(color = "white"), com algumas modificações minhas e o suporte de novas ferramentas para tornar tudo ainda melhor.
+Agora também trazendo Legendas nos Ultimates 🎮📝
+
+Falta beeem pouquinho para vocês colocarem as mãos nisso... Aguardem! 🚀🔥
+
+🎥 Confira uma prévia aqui: https://streamable.com/pbv84i
+</content>
+</article>
+<article nome="newdesignandtools" selected="true">
+<title>✔ Novas ferramentas, nova cara...</title>
+<author>Bit.Raiden</author>
+<date>18-03-2025</date>
+<image style="width: 40%; display: none"> </image>
+<content>(font-size = "23px")(image style="width: 42px; padding-right:1%")/media/tools/sceivag.ico(/image)SCEI-VAG PACK TOOL(/font-size)
+
+Por ver a necessidade da Narutimatte Modding em adicionar áudios de personagens com mais liberdade,
+zMath3usMSF, fundador me contatou falando da demanda no algoritmo.
+
+*Refiz todo o código, refatorei os leitores e criei um algoritmo de recompilação que não existia;
+*Organizei melhor o design da ferramenta (por mais que ainda seja confuso);
+*Adicionei containers de propriedade para cada detalhe dos arquivos internos e setores;
+
+Isso é possível graças a:
+🖊 Desenvolvedores: Bit.Raiden e zMath3usMSF
+🛠 Demanda: Ultimate Ninja 6 [Narutimatte Modding]
+
+🔽 Faça o Download no link: https://github.com/MiguelQueiroz010/SCEIVag-Pack/releases/tag/NEW
+
+(image style="width: 70%; margin-left:10%")/media/articles/scei_vag_toolnewart.jpg(/image)
+
+Confira o que rola no projeto Ultimate Ninja 6 (fiquei sabendo que agora tem novidade quente!): 🚀💬
+
+🔴 Canal da Narutimatte Modding: https://www.youtube.com/@NarutimateModdingOfficial
+
+*KONAN PARA O JOGO!
+*E tem mais chegando...
+</content>
+</article>
+<article nome="Live" selected="true">
+<title>🎮 Live de Revisão, Tradução e Correção</title>
+<author>Bit.Raiden</author>
+<date>22-02-2025</date>
+<image style="width: 40%; display: none"> </image>
+<content>(font-size = "23px")Bob Esponja: Creature from the Krusty Krab (PS2)! 📝(/font-size)
+
+Fala, galera! Hoje temos uma live especial onde vamos revisar, corrigir e aprimorar a tradução do jogo Bob Esponja: Creature from the Krusty Krab para PlayStation 2! 🧽🍔
+
+Esse projeto incrível está sendo trabalhado por:
+🖊 Tradutor: Bit.Raiden
+🛠 Romhacker: Bit.Raiden
+
+Se você curte games, tradução e quer acompanhar esse processo de perto, vem comigo! Vamos analisar cada detalhe, ajustar termos e garantir que tudo fique 100% fluído e fiel ao original.
+
+📅 Quando? Hoje às 16:30
+📍 Onde? YouTube
+
+Traga sua opinião, participe do chat e ajude a deixar essa tradução impecável! 🚀💬
+
+🔴 Link da live: https://www.youtube.com/watch?v=2cGYLClh1wE
+
+#Tradução #Live #BobEsponja #GameLocalization #Correção #PS2 #YouTube
+</content>
+</article>
+<article nome="Legendas nos Jutsus Supremos" selected="true">
+<title>Por detrás das Legendas nos Jutsus Supremos</title>
+<author>Bit.Raiden</author>
+<date>10-02-2025</date>
+<image style="width: 40%; display: none"> </image>
+<content>(font-size = "23px")As(/font-size) (font-size = "23px")(color = "green")legendas nos Jutsus Supremos(/color)(/font-size) foi uma ideia que surgiu ao me lembrar de jogar o jogo (color = "red")Naruto Shippuden Ultimate Ninja Storm 4(color = "white"), que tem as legendas em cada Jutsu, a partir daí virou uma corrida passo a passo para alcançar esse sonho.
+(image style="width: 70%; margin-left:10%")/media/articles/unjutsu.gif(/image)
+
+
+1º Passo: Encontrar a função de escrita de texto na tela. {(color = "green")RenderString Function(color = "white")} - Novembro/2022;
+
+2º Passo: Encontrar espaço livre na memória para a quantidade de texto que seria armazenada, para o programa de legendas e para o timer; - Janeiro/2023
+
+3º Passo: 
+*Escrever o programa: identificar o Jutsu em execução;
+*Procurar na memória por esse identificador para delimitar o espaço de legendas existente; 
+*Ler o formato de legendas a partir do contador que se inicia na execução do Jutsu; 
+*No tempo de cada legenda rodar a função {(color = "green")RenderString()(color = "white")} com os argumentos de posição X e Y, tempo de disparo, tempo de duração;
+*Repetir tudo em uma função de loop dentro de cada (color = "red")UltimateJutsuPlay()(color = "white").
+Encerrado em Janeiro-Fevereiro/2023
+
+(image style="width: 80%; margin-left:7%")/media/progresso_legendas.PNG(/image)
+(font-size = "13px")Usando o programa (color = "red")SubtitleEdit(color = "white") e o (color = "red")Youtube(color = "white") com um vídeo de Todos os Ultimate Jutsu do jogo, gerei o maior arquivo de legendas que pude.(/font-size)
+
+(color = "red")Teste de Legendas 2022(color = "white") {Não Listado até agora!}
+
+https://youtu.be/_XU-g2pm86w
+
+(color = "purple")As 10 Marionetes de Chikamatsu(color = "white") {Vovó Chiyo}
+
+https://youtu.be/9It_bx8ZUO0
+
+(color = "blue")Espelhos de Cristal de Gelo(color = "white") {Haku}
+
+https://youtu.be/aHp-G34WTUk
+
+(color = "yellow")Enterro de Areia Gigante(color = "white") {Gaara_Clássico}
+
+https://youtu.be/aqtGlSCzjFA
+
+(color = "red")Performance de 100 Marionetes(color = "white") {Sasori Marionete}
+
+https://youtu.be/WLUm6IQYGR4
+
+(color = "red")Redemoinho de Fogo(color = "white") {Asuma}
+
+https://youtu.be/6-rXm32nOvw 
+
+(color = "blue")Rasengan de (color = "red")Fogo(color = "white") {Jiraiya}
+
+https://youtu.be/0DBppbLQ75Q
+
+Acompanhe o lançamento da Versão Revisada com Legendas nos Jutsus Supremos, acesse a página do projeto aqui no site mesmo!
+</content>
+</article>
+</articles>

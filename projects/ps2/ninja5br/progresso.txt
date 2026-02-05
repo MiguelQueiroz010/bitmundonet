@@ -1,0 +1,110 @@
+[CHANGELOG - ULTIMATE NINJA 5+ BR REV 2023]
+
+-------------V9:
+
+[TEXTOS CCS]
+*Terminados STFDATA[CÉDITOS] 16/03/23
+*Implantado STFDATA[CRÉDITOS] em CCS 19/03/23
+*Corrigido STFDATA[CRÉDITOS] em CCS 20/03/23
+*Iniciada revisão de PUPPET[CUTSCENES]!
+*Terminados textos PUPPET[CUTSCENES] 02/04/23
+*Implantado PUPPET[CUTSCENES] 02/04/23
+!PUPPET 3210 [ERRO LIVE PT8, CORTE DE FALA] [...]
+
+Chambers of Darkness = Câmaras das Trevas
+
+-MODOS:
+*Extraídas texturas em PNG[Necessário suporte a PNG com Transparência de Meio Alfa(128)]
+*Terminada Re-Tradução e Adaptação: 19/03/23
+ ///MUDANÇAS\\\
+ //"Manto da Kyuubi" para "Chakra da Kyuubi"\\
+ //"Modo Super Choji" para "Modo Borboleta"\\
+
+-3EYE
+*Tudo pronto 19/04/23
+
+-CMN
+*Revisado GAUGE/Load_B
+*Implantado o GAUGE[Necessita correção de campo de Corte]
+*Corrigido "Voltar" xpanel 19/04/23
+
+-ADV:
+*Terminados todos os CLCT 10/03/23
+*Terminados IRAI 1-4 11/03/23
+*Terminados IRAI 5-15 12/03/23
+*Terminados IRAI 16-20 13/03/23
+*Terminados SKILL 0-4 14/03/23
+*Corrigidos CCS TOWN_11-13 19/03/23
+*Iniciadas texturas, MAP 21/03/23
+*MAPA traduzido/Implantado 21/03/23
+*Desafio dos 100 Homens traduzido/Implantado 21/03/23
+*Traduzido/Implantado ADVSTATUS 22/03/23
+*Traduzido ADV SBOOK,SKILL,PRAC,COMBO,LEBEL E DOLL01 24/03/23
+*Traduzido ADV MB01, RECORD, RESULT, IRAI, SHOP, EASY E TITLE[TODOS] 25/03/23
+*Todo o resto implantado 28/03/23
+*Traduzido "The End" da Missão Especial [Edinho] 23/07/23
+*Iniciada Correção em Nomes de Mapa do ADV!! 28/07/23
+*Corrigidas as Caixas de Textura dos Nomes de Mapa do ADV! [ZMATH3US-> Offset de Ponteiros] 29/07/23
+*Corrigidas Falas de Npcs "TOWN"/ "Vigia" para "Guarda" 01/08/23 
+
+-BATALHA[BATTLEGAUGE/CHARSEL]
+*Tudo traduzido 28/03/23
+*Iniciada Correção em Nomes de Mapa!! 29/07/23
+*Corrigidas as Caixas de Textura dos Nomes de Mapa! [ZMATH3US-> Offset de Ponteiros] 29/07/23
+
+-MENU DE SELEÇÃO DE MODO[MODESEL]
+*Tudo traduzido 28/03/23
+
+-Extras
+*[BATALHA] (ZMATH3US) Choji "Donburi Throw/Arremesso Donburi", Câmera e EECODE
+*[Coleção] Recorte no ícone de "Novo"
+
+[ELF/MWO3]
+*Corrigido Ultimate Zabuza "Jutsu Dragão de Água", erro de Ponteiro 19/03/23
+*Traduzido detalhes de opções (Combate/Praticar)
+[Extra Hit Counter = Contra-Ataque Extra ]
+*REMOVIDA A TELA DE SELEÇÃO DE IDIOMA 03/05/23
+*Corrigidas 6 Ocorrências erro: "<BRANCO>" para "<WHITE>" [GRAVE] 04/05/23
+*BUG CRÍTICO [ESCRITA NA MEMÓRIA TEXTBRA] Corrigido 10/06/23 [ZMATH3US]
+
+*Yamato Wood Clone -> Traduzir 25/07/23
+*Dazzling Battle ... Traduzir 25/07/23
+*Senhora Ninja da Folha -> Kunoichi da Folha 24/07/23
+*Folhas para Páginas 25/07/23
+*Registros -> Recordes 25/07/23
+*BUG texto vendedor "Tchau"//"Homem Silencioso" Vazio -> Conferir no Original Corrigido 30/07/23
+*Corrigido Shizune "Combo com Lâmina" -> "Arte Ninja: Névoa Venenosa" 01/08/23
+
+MISSÕES
+--------
+
+DIÁRIO DO VIAJANTE[CLCT00] - OK
+CAIXINHA DE MÚSICA[CLCT01] - OK
+BONECOS DE MADEIRA[CLCT02] - OK
+
+LUTADOR [IRAI01] -OK
+NETO PERDIDO [IRAI02] -OK
+JIRAIYA [IRAI03] -OK
+PAIS ADOTIVOS [IRAI04] -OK
+SHIZUNE ERVAS [IRAI05] -OK
+LEE [IRAI06] -OK
+LUTADOR 2 [IRAI07] -OK
+[IRAI8] -MISSÃO CANCELADA DO ACCEL2 
+GUY [IRAI9] -OK
+NEJI E TENTEN [IRAI10] - OK
+HINATA [IRAI11] -OK
+PROCURANDO NO ESCURO 1 [IRAI12] -OK
+CHOJI [IRAI13] - OK
+INO [IRAI14] - OK
+KIBA [IRAI15] - OK
+VIAGENS DA TSUNADE [IRAI16] - OK
+SHIKAMARU [IRAI17] - OK [TESTAR]
+CRISTAIS SUMIDOS [IRAI18] - OK
+TREINAMENTO DO KAKASHI [IRAI19] - OK
+DESARMANDO BOMBAS NA AREIA OCULTA [IRAI20] - OK
+
+INO [SKILL00] - OK
+SORVETE TSUNADE [SKILL01] - OK
+KAKASHI [SKILL02] -OK
+IRUKA[100 NINJAS] [SKILL03] - OK
+NEJI E HINATA [SKILL04] - OK

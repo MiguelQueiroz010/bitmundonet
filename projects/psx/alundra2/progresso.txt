@@ -1,0 +1,246 @@
+Alundra 2 - Progresso de Tradução
+------------------------------------
+
+-Iniciada análise em 02/08/23!
+
+*Font external Loader TIM format [denim] 01/08/2021
+*Font loader by denim, implement/fix by Bit.Raiden 18/08/2023 [2 Anos DEPOIS!]
+
+*Project iniciado! -> 20/08/23 
+*Verdadeira Fonte Encontrada e Formato descoberto (denim & MummRA) -> 11/2023
+
+*Erro na Cena: Milena 3:Final - CORRIGIDO 30/03/24
+CONTINUAÇÃO DA REVISÃO - 30/03/24
+
+*Edição e Revisão - 31/03/24
+Primeira Implementação - 31/03/24 02h50 AM
+
+*Correção da Fonte - 26/04/24  01h53 AM
+Adicionado acento 'ô';
+Adicionado acento 'ó';
+Adicionado acento 'Í';
+
+*Tradução da textura "Prize (Contador de Prêmio)": 'Zach Olho Morto' 27/04/24 14h20
+
+[Tradução de Textos Planos]
+-----------------------------------
+
+*Barão e Mephisto - OK 20/08/2023
+*Viagem a Puerto Medusa - OK 21/08/2023
+*Axelya e "George" - OK 21/08/2023
+*Axelya e "George" 2 - OK 21/08/2023
+*Barão e Mephisto [Ídolo de 3-Olhos] - OK 20/08/2023
+*Sequestro Alexia/Prisão de Flint - OK 21/08/2023
+*Caverna Subáquatica 1 - OK 21/08/2023
+*Tanque-Boi Final - OK 21/08/2023
+*Sistema 1 - OK 21/08/2023
+*Navio [Viagens] - OK 21/08/2023
+*Pierre - OK 21/08/2023
+
+*Bug Alundra 2 TextEditor Encoding Fixed 27/08/23
+*Teste de textos 27/08/23
+
+...
+
+*Diálogos Iniciais - OK 11/2023
+*Adição de Acento 'Â' na Fonte 19/12/23
+
+*PASTAS 'HI e HA' Completas 20/12/23
+-Revisar "Crianças da Coroa" para "Filhos da Coroa"
+*PASTAS 'AW e BU' Completas 20/12/23
+-Revisar "Crianças da Coroa" para "Filhos da Coroa"
+*PASTAS 'CG e DI' Completas 21/12/23 [Gwaba e DarkIsle/Dragonia]
+-Revisar "Crianças da Coroa" para "Filhos da Coroa"
+
+*PASTAS 'FA e FB e FC' Completo 22/12/23
+*PASTAS 'FM e GY' Completo 22/12/23
+*PASTAS 'KI e ND' Completo 22/12/23
+*PASTAS 'OO, over e PA' Completo 22/12/23
+
+*PASTAS 'PB, PC e PD' Completo 23/12/23
+-Revisar texto de pc002! Possível erro na quebra %s...
+*PASTAS 'PM' Completo 24/12/23
+*PASTAS 'PZ e RE' Completas 24/12/23
+*PASTAS 'SE, SH, SN e ST' Completas 24/12/23
+*PASTAS 'TA, TB e UD' Completas 24/12/23
+-ud018 implementar manual(Botões) / Corrigido removido caractere '>' 25/12/2023
+*PASTAS FINAIS 'YA, YO e YK' Iniciadas 24/12/23
+*PASTAS FINAIS 'YA, YO e YK' Completas 25/12/23
+
+*Procura de mais textos e textos de Sistema 25/12/2023
+-Encontrados em PACK0.PAK
+-Compasso para Bússola!! - Feito
+-Ticket para Ingresso!! - Feito
+
+*Correção de Tamanhos de Linha dos Diálogos Completo 30/12/23
+-Possível Erro cg018/Mapa de Gwaba - Corrigido 31/12/23 [Problema de Arquivo errado: 11.txt!]
+
+*Finalizados Textos de Sistema 31/12/23
+LANÇADA BETA EM 31/12/23, para revisão em grupos Discord!
+
+*Revisão de Textos de Sistema - 31/03/24
+*"Key" para Traduzir
+
+[2024]
+*Corrigidos erros em texturas do "Atalho"/Menu 01/01/24
+*Corrigido "Key" traduzido 19/04/24
+*Corrigidos Textos de 'Zach Olho Morto', traduzidos 19/04/24
+
+[Tradução de Texturas]
+------------------------------------
+
+*Menu Inicial - OK 08/12/2023
+*Menu de Itens - OK 09/12/2023
+*Contrail - COR ERRADA, corrigido 08/12/2023
+*Créditos, Corrigido  
+*Menu inicial da Versão NAZO, corrigido  
+
+*PORT PARA VERSÃO MASHINKA NO NAZO - FEITO, 12/06/2024
+
+[Legendas nas Cutscenes]
+------------------------------------
+(VCASTNUMBER - [NOME AUTOIMPOSTO] PROGRESSREPORT_DATETIME)
+
+[Intro - Aeronave de Mephisto]
+
+#102 7 e 10 - [Zeppo e os 3 Piratas INTRO] Feito 15/06/24,19:30
+#104 17 - [Flint vs Zeppo] Feito 16/06/24,02:30
+#105 20 - [Flint vs Zeppo Final] Feito 16/06/24,02:30
+#106 25 e 27 - [Paraquedas para todos?] Feito 16/06/24,02:30
+#107 - [MOBIDIQUE A BALEIA MECÂNICA... Brincadeira, nada a ver kkkkk]
+
+[Vila Paco]
+#108 36 e 40 - [Intro e Prunewell] Feito 17/06/24, 01:42
+#110 44 - [Apresentando Alexia!] Feito 17/06/24, 01:46
+
+[Aeronave Destruída]
+#115 47 - [Apresentando Mephisto!]
+#116 50 - [Mephisto, o mago]  [Revisar se o nome do gato é mesmo "Maraia"]
+#117 57 - [Um gato tem 7 vidas, um mutante não]
+
+[Vila Paco]
+#119 60 - [O bombardeio - O Tanque Boi]
+
+[Toroledo]
+#121 62 - [Os 3 Piratas Covardes]
+#123 69 - [Um touro muito louco, strike?]
+#124 - [Flint vs Touro-Monstro]
+#125 - [Flint vs Touro-Monstro, vitória]
+
+[Barragem da Chave]
+#130 76 - [O Ritual da Felicidade]
+#136 80 - [Dona Aranha]
+#137 - [Dona Aranha descendo o Elevador, vitória de Flint]
+
+[Puerto Medusa]
+#139 85 - [O pirata, a informação e a cachaça] - [NECESSITA CALIBRAR TIMINGS]
+#140 89 - [É nisso que dá ser cachaceiro]
+#141 93 - [O Show da Axelya]
+#142 95 - [Acabou o Show e o Disfarce, Flint]
+#146 - [Crocodilo-Cogumelo]
+#147 - [Era uma vez um Crocodilo]
+#148 104 - [Flint e Belgar]
+#152 106 - [Milena e os Relatórios]
+#154 112 - [Os Filhos da Coroa]
+
+116 e 109 dat?...
+
+[Em direção ao Navio Afundado]
+#155 123 e 126 - [Mephisto leva Alexia Refém]
+#240 264  - [O que é aquilo?!]
+#640 298 - [O que é aquilo?! 2]
+#740 301 - [O que é aquilo?! 3]
+
+[Navio Afundado]
+#156 - [O Terrível Tubarão]
+#157 - [Tubarão Assassino]
+#158 135 - [A História de Flint, Radcliffe e Naomi]
+#558 139 - [A História de Flint, Radcliffe e Naomi, final]
+
+[Baleia Mecânica]
+#160 142 - [Apresentando a ameaça submarina]
+#189 183 - [Apresentando a ameaça submarina 2]
+#161 - [O Coração do Monstro]
+#162 283 - [Volte para a superfície Flint!]
+
+[Ruínas da Gaivota]
+#168 - [O Chefão da Relíquia]
+#169 - [O Chefão cai]
+
+[Ruínas do Paraíso]
+#171 - [O Chefão da Relíquia]
+#172 - [O Chefão cai]
+
+[Em direção a Varuna]
+#178 162 e 166 - [A Baleia Mecânica]
+#272  - [A Baleia cospe todo mundo]
+
+[Saindo da Barragem da Chave]
+#180 - [Uma vista do horizonte]
+
+[Dragonia, a Torre Final]
+#185 176 - [Tigrão!!]
+#186 178 - [Tigre escaldado]
+#187 180  - [O Dragão Ancestral] - TIRION
+
+[Varuna]
+#197 188 - [O boneco de madeira e o Barão Ganancioso]
+#201 196 - [A Lâmpada de Lumiere é minha!]  55d2
+#202 199 e 203 - [Você vai se casar comigo!]
+#204 206 e 210 - [Os Tesouros Escondidos de Varuna 1]
+#208 213 - [Trato é trato]
+#271 - [Revelado o Segredo]
+#218 219 e 221 - [Mephisto, o mais ancestral]
+#618 219 e 221 - [Barão bom de Corte?]
+#219 - [O Fim da Ganância]
+#221 223,226 e 250 - [Precisa de uma carona?]
+
+#222 228 - [Apresentando a Chave Estelar]
+#223 232 e *235, *311, *313,*315 - [Apresentando a Chave Estelar 2]
+
+[Chave Estelar]
+#224 238 - [Zeppo?]
+#225 - [Tá quente!]
+#226 149 e 242 - [Processo de Ejeção]
+#227 244 - [Mephisto e seu Plano]
+#250 186 e 267 - [Mephisto tem muitas pernas!]
+#589  - [Mephisto tem muitas pernas! 2]
+#228 246 - [Mephisto, forma final]
+#229 248 - [Mephisto morre]
+
+#231 253,256 - [Essa aeronave vai explodir!]
+#631  - [Essa aeronave vai explodir! 2]
+#731  - [Essa aeronave vai explodir! 3]	
+#232 259 e 262 - [Um voo Apaixonado]
+
+[Créditos e Outros]
+270 269! - [Abertura do Jogo]
+#273 - [A Baleia afunda]
+
+#274 - [MINIGAME DAS TOURADAS]
+#275 - [MINIGAME DAS TOURADAS]
+#276 - [MINIGAME DAS TOURADAS]
+#277 - [MINIGAME DAS TOURADAS]
+#278 - [MINIGAME DAS TOURADAS]
+
+
+#280 - [USADO PARA TEXTURA: Créditos]
+#281 - [USADO PARA TEXTURA: Créditos]
+#282 - [USADO PARA TEXTURA: Créditos]
+#283 - [USADO PARA TEXTURA: Créditos]
+#284 - [USADO PARA TEXTURA: Créditos]
+#285 - [USADO PARA TEXTURA: Créditos]
+#286 - [USADO PARA TEXTURA: Créditos]
+#287 - [USADO PARA TEXTURA: Créditos]
+#288 - [USADO PARA TEXTURA: Créditos]
+#289 - [USADO PARA TEXTURA: Créditos]
+#290 - [USADO PARA TEXTURA: Créditos]
+#291 - [USADO PARA TEXTURA: Créditos]
+#292 - [USADO PARA TEXTURA: Créditos]
+#293 - [USADO PARA TEXTURA: Créditos]
+#294 - [USADO PARA TEXTURA: Créditos]
+#295 - [USADO PARA TEXTURA: Créditos]
+#296 - [USADO PARA TEXTURA: Créditos] 
+#297 - [USADO PARA TEXTURA: Créditos]
+
+#999 - [VCAST DE TESTE - NÃO USADO]

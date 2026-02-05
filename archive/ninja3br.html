@@ -1,0 +1,352 @@
+﻿<!DOCTYPE html>
+<html>
+  <style>
+    html {
+      color-scheme: light dark;
+    }
+    
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=0.7" />
+  <meta
+    name="description"
+    content="Um site feito para armazenar conteúdo de romhacking e tradução de alguns jogos que a muito já foram esquecidos, mas não por mim. Seja bem vindo ao meu mundo!"
+  />
+  <meta
+    name="keywords"
+    content="raiden, bit.raiden, site, novo, tradução, br, Brasil, naruto, sasuke, jogo, game, playstation, ps, psx, ps2, mega drive, genesis, translate, project, projeto, versão brasileira, romhacking, hack, modificação, mod"
+  />
+  <meta name="robots" content="" />
+  <meta name="revisit-after" content="1 day" />
+  <meta name="language" content="Portuguese" />
+  <meta name="generator" content="N/A" />
+  <meta
+    property="og:image"
+    content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png"
+  />
+  <script>
+    function pause_play() {
+      const video = document.getElementById("myVideo");
+
+      if (video.paused !== true) video.pause();
+      else video.play();
+    }
+    function folder(e) {
+      if (e.id == "hide_folder") {
+        console.log(e.id);
+        const node = e.parentElement.querySelector("#hidden");
+        if (node.className == "hiddendiv") {
+          node.className = "showdiv";
+          e.children[1].style.transform = "scaleY(-1)";
+        } else {
+          node.className = "hiddendiv";
+          e.children[1].style.transform = "scaleY(+1)";
+        }
+      }
+    }
+  </script>
+  <head>
+    <meta http-equip="Content-Type" content="text/html; charset=utf-8" />
+    <title>Naruto Shippuden: Ultimate Ninja 3 BR</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav//apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav//favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav//favicon-16x16.png">
+    <link rel="manifest" href="/fav//site.webmanifest">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561"
+     crossorigin="anonymous"></script>
+    <link
+      rel="stylesheet"
+      href="ninja3br.css"
+    />
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
+<style>
+  #hovertext_a:hover{
+  height: 2.4em;
+  background-color: #0400ff;
+  color: rgb(255, 255, 255);
+  filter: grayscale(90%);
+  border-bottom: 2px solid rgb(255, 255, 255);
+}
+</style>
+<script src="https://www.w3schools.com/lib/w3data.js"></script>
+    <div w3-include-html="/navbar.html"></div> 
+    <script>
+    w3IncludeHTML();
+    </script>
+  </head>
+
+  <body>
+    <div id="head" onclick="pause_play()">
+      <div
+        class="container"
+        style="
+          position: relative;
+          background-color: rgba(0, 0, 0, 0.5);
+          padding: 2em;
+          margin: 0 auto;
+        "
+      >
+        <video
+          id="myVideo"
+          preload="auto"
+          autoplay="true"
+          onloadstart="this.volume=0.1"
+        >
+          <source src="media/Intro.mp4" type="video/mp4" />
+          <!-- The video -->
+
+          Sorry, your browser does not support HTML5 video.
+        </video>
+        <table>
+          <td style="min-width: fit-content; height: 512px">
+            <img id="cape" class="center" src="/projects/ps2/ninja3br/media/Capa.jpg" />
+            <h1
+              id="title"
+              style="
+                padding: 0 10px;
+                color: rgb(241, 163, 46);
+                font-style: normal;
+                text-align: center;
+                -webkit-text-stroke-color: rgb(0, 0, 0);
+                text-shadow: 2px 2px 1px rgb(128, 0, 0),
+                  4px 2px 0.2em rgba(0, 0, 0, 0.63);
+                overflow: hidden; /* Ensures the content is not revealed until the animation */
+              "
+            >
+              Naruto Shippuden: Ultimate Ninja 3 Versão Brasileira
+            </h1>
+            <p
+              style="
+                padding: 1em 2em 1em 2em;
+                margin: auto;
+                text-align: center;
+                font-weight: bolder;
+                font-size: 20px auto;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              "
+            >
+              <b>Esse</b> é o terceiro jogo da série Narutimate Ninja (Naruto
+              Ultimate Ninja) lançado para o Playstation®2 pela Bandai e a
+              CyberConnect2. O jogo conta com diversos modos de jogo, Minigames, 
+              Combate PvP, RPG de Mundo Semi-Aberto e o Modo Herói que permitem ao 
+              jogador experimentar uma experiência de jogo expandida diferente dos outros jogos da série.
+              O Modo RPG do jogo se passa numa história não canonizada do anime(enquanto o Herói conta a história clássica do anime),
+              o filler do torneio dos cristais.
+              O player deve sair em busca de cristais derrotando jonins e outros companheiros. O Modo de Combate PvP possi muitos personagens 
+              diferente dos dois primeiros jogos da série e com isso também variados jutsus customizáveis.
+            </p>
+          </td>
+        </table>
+      </div>
+    </div>
+
+    <br />
+
+    <div id="body">
+      <!-- Slideshow container -->
+
+      <br />
+      <h2 id="under">Sobre o Projeto</h2>
+      <p style="font-size: 20px">
+        <b>O</b> projeto de tradução foi iniciado em <b>2020</b> por Andyson, a princípio com edição de texturas do jogo que contêm em si textos gráficos para traduzir para nosso idioma, vindo do inglês. Mais tarde Andyson conheceu Bit.Raiden, zMath3us, WilliamVaz e a comunidade RomHacker e Modder de Naruto, e assim obteve ajuda para desencadear o projeto a nível de ROM.
+        <br />
+        <br />
+        <b>Andyson tem traduzido textos e texturas por conta própria com ajuda para adaptar textos do jogo desde então...</b>
+      </p>
+      <br />
+      <h2 id="under">Imagens</h2>
+      <div id="gallery" data-fit="cover" data-autohide="a11">
+        <script type="text/javascript" src="/scripts/gallery.js"></script>
+        <script
+          type="text/javascript"
+          src="/scripts/spotlight.bundle.js"
+        ></script>
+
+        <div id="gallery_container" class="slideshow-container">
+          <!-- Full-width images with number and caption text -->
+          <div class="mySlides fade first">
+            <a
+              data-description="
+          O Menu inicial.
+          "
+              style="width: 100%"
+              class="spotlight"
+              href="https://i.postimg.cc/zfQxCnvY/gsdx-20220710142821.png"
+            >
+              <img
+                alt="Menu Inicial"
+                style="width: 100%"
+                src="https://i.postimg.cc/zfQxCnvY/gsdx-20220710142821.png"
+              />
+            </a>
+          </div>
+
+          <div class="mySlides fade">
+            <a
+              data-description="
+          Modos de jogo traduzidos!
+          "
+              class="spotlight"
+              href="https://i.postimg.cc/bNWmK08C/gsdx-20220710143746.png"
+            >
+              <img alt="Modos de Jogo" src="https://i.postimg.cc/bNWmK08C/gsdx-20220710143746.png" />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          História do Heróis traduzido.
+          "
+              class="spotlight"
+              href="https://i.postimg.cc/fLD28wZM/gsdx-20220710143844.png"
+            >
+              <img alt="Modo Herói" src="https://i.postimg.cc/fLD28wZM/gsdx-20220710143844.png" />
+            </a>
+          </div>
+          <div class="mySlides fade">
+            <a
+              data-description="
+          Menu de seleção de personagem no combate.
+          "
+              style="background-size: cover"
+              class="spotlight"
+              href="https://i.postimg.cc/ZRHfg1Kp/gsdx-20220710143915.png"
+            >
+              <img
+                style="background-size: cover"
+                alt="Seleção de Personagem"
+                src="https://i.postimg.cc/ZRHfg1Kp/gsdx-20220710143915.png"
+              />
+            </a>
+          </div>
+
+          <div class="mySlides fade">
+            <a
+              data-description="
+          Diálogos do jogo traduzidos.
+          "
+              class="spotlight"
+              href="https://i.postimg.cc/tgH2gXsF/gsdx-20220710144020.png"
+            >
+              <img alt="Diálogos" src="https://i.postimg.cc/tgH2gXsF/gsdx-20220710144020.png" />
+            </a>
+          </div>
+
+          <!-- Next and previous buttons -->
+          <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+          <a class="next" onclick="plusSlides(1)">&#10095;</a>
+        </div>
+        <!-- The dots/circles -->
+      </div>
+      <div style="text-align: center">
+        <span class="dot active" onclick="currentSlide(1)"></span>
+        <span class="dot" onclick="currentSlide(2)"></span>
+        <span class="dot" onclick="currentSlide(3)"></span>
+        <span class="dot" onclick="currentSlide(4)"></span>
+        <span class="dot" onclick="currentSlide(5)"></span>
+      </div>
+      <div id="credits">
+        <h2 id="under">Créditos</h2>
+        <p style="text-align: center;
+        font-family:Arial, Helvetica, sans-serif;
+        ">
+          <b>Andyson</b> - Projeto e Tradutor(Gráficos e Textos)<br />
+          <b>Bit.Raiden</b> - RomHacking(CCS Text Editor e Alocação de Texto) e Revisador<br />
+        </p>
+      </div>
+      <div id="progress">
+        <h2 id="under">Progresso Atual</h2>
+        <p style="text-align: center;
+        font-family:Arial, Helvetica, sans-serif;
+        ">
+          <b>Texturas</b>: 50%<br />
+          <b>Textos[HERÓI]</b>: 100%<br />
+          <b>Textos[RPG]:</b>: 100%<br />
+          <b>Textos[SISTEMA]</b>: 40%<br />          
+          <b>Revisão</b>: 5% 
+        </p>
+      </div>
+      <div>
+        <h2 id="under">Diretório do Projeto</h2>
+      </div>
+      <div class="folder">
+        <br />
+
+        <div id="download" class="hidden_folder">
+          <picture id="hide_folder" onclick="folder(this)">
+            <source
+              srcset="/elements/down_arrow.png"
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              id="hide_folder"
+              style="transform: scaleY(-1)"
+              src="/elements/light_down_arrow.png"
+            />
+          </picture>
+          <h1>Download</h1>
+          <br />
+          <div class="showdiv" id="hidden">
+            <picture id="hide_folder" onclick="folder(this)">
+              <source
+                srcset="/elements/down_arrow.png"
+                media="(prefers-color-scheme: dark)"
+              />
+              <img
+                id="hide_folder"
+                style="transform: scaleY(-1)"
+                src="/elements/light_down_arrow.png"
+              />
+            </picture>
+            <h2 id="changelog_title">Changelog</h2>
+            <br />
+            <div class="showdiv" id="hidden">
+              <p style="text-align: center">
+              <h3>Versão 1.0:</h3>
+              *Em andamento...;<br />
+            </p>
+            </div>
+             <div class="showdiv" id="hidden">
+            <div id="v1.0" class="hidden_folder"></div>
+            <picture id="hide_folder" onclick="folder(this)">
+              <source
+                srcset="/elements/down_arrow.png"
+                media="(prefers-color-scheme: dark)"
+              />
+              <img
+                id="hide_folder"
+                style="transform: scaleY(-1)"
+                src="/elements/light_down_arrow.png"
+              />
+            </picture>
+            <h2>Versão 1.0</h2>
+            <br />
+            <div class="showdiv" id="hidden">
+              <img
+                style="width:90%;display: block; margin-left: auto; margin-right: auto"
+                src="media/Icon.png"
+              />
+              <p style="text-align: center">
+                <b>Tipo de ROM</b>: Imagem de Disco (ISO)<br />
+                <b>Versão do Jogo</b>: NTSC - SLUS_217.27<br />
+                <br />
+                
+              </p>
+            </div>
+          </div>
+          </div>
+         
+        </div>
+      </div>
+      <br />
+    </div>
+    <br />
+  </body>
+  <footer>
+    <footer>
+      <div w3-include-html="/footer.html"></div> 
+      <script>
+        w3IncludeHTML();
+        </script>
+    </footer>
+  </footer>
+</html>

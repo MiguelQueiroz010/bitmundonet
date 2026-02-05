@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title id="page-title">BitMundo - Projeto</title>
+    
+    <meta name="description" id="meta-desc" content="Detalhes do projeto BitMundo." />
+    <meta name="keywords" id="meta-key" content="bitmundo, tradução, ps2, ps1, romhacking" />
+    
+    <!-- Shared Assets -->
+    <link rel="stylesheet" href="/css/navigator.css" />
+    <link rel="stylesheet" href="/css/projects.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png">
+    
+    <!-- Scripts -->
+    <script src="https://www.w3schools.com/lib/w3data.js"></script>
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script type="text/javascript" src="/scripts/projects_loader.js"></script>
+    <script type="text/javascript" src="/scripts/gallery.js"></script>
+    <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script>
+
+    <script>
+        function toggle_video() {
+            const video = document.getElementById("project-video-player");
+            if (video) {
+                if (video.paused) video.play();
+                else video.pause();
+            }
+        }
+
+        function toggleFolder(e) {
+            const dirItem = e.closest('.dir-item');
+            if (dirItem) {
+                dirItem.classList.toggle('open');
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div w3-include-html="/navbar.html"></div>
+    <script>w3IncludeHTML();</script>
+
+    <!-- Standardized Project Template -->
+    <div id="project-container">
+        <!-- Hero Section -->
+        <header id="project-head" onclick="toggle_video()">
+            <video id="project-video-player" preload="auto" autoplay loop>
+                <source id="video-source" src="" type="video/mp4" />
+            </video>
+            
+            <div class="hero-content">
+                <img id="project-cover" src="" alt="Capa do Jogo" />
+                <div class="info-glass">
+                    <div id="project-platform" class="hero-platform">Carregando Plat...</div>
+                    <h1 id="project-title-display">Carregando...</h1>
+                    
+                    <div class="hero-progress-container">
+                        <div class="progress-info">
+                            <span>Status de Tradução</span>
+                            <span id="global-percent-text">0%</span>
+                        </div>
+                        <div class="hero-progress-bg">
+                            <div id="global-progress-fill" class="hero-progress-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <p id="project-summary">Aguarde um momento</p>
+                </div>
+            </div>
+        </header>
+
+        <main id="body">
+            <!-- New Video/Lives Section -->
+            <section id="lives-section" class="section" style="display: none; margin-bottom: 4rem;">
+                <h2 id="under">Vídeos e Lives</h2>
+                <div id="lives-container"></div>
+            </section>
+
+            <!-- Description Section -->
+            <section class="section">
+                <h2 id="under">Sobre o Projeto</h2>
+                <div id="project-description"></div>
+            </section>
+
+            <!-- Gallery Section -->
+            <section class="section">
+                <h2 id="under">Imagens</h2>
+                <div id="gallery" data-fit="cover">
+                    <div id="gallery_container" class="slideshow-container">
+                        <!-- Slides dynamically injected -->
+                    </div>
+                    <div id="gallery-dots" style="text-align: center; margin-top: 1.5rem;">
+                        <!-- Dots dynamically injected -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Metadata Grid (Credits & Progress) -->
+            <div class="project-meta-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; margin-top: 4rem;">
+                <!-- Credits -->
+                <div id="credits" class="meta-section">
+                    <h2 id="under">Equipe</h2>
+                    <div id="credits-list"></div>
+                </div>
+
+                <!-- Progress -->
+                <div id="progress" class="meta-section">
+                    <h2 id="under">Progresso</h2>
+                    <div id="progress-list"></div>
+                </div>
+            </div>
+
+            <!-- Downloads Section -->
+            <section id="downloads" class="section" style="margin-top: 4rem;">
+                <h2 id="under">Downloads</h2>
+                <div id="downloads-container" class="modern-directory">
+                    <!-- Modern folder structure injected here -->
+                </div>
+            </section>
+
+            <!-- Comments Section (Firebase) -->
+            <section id="comments-section" class="section" style="margin-top: 6rem;">
+                <h2 id="under">Comentários</h2>
+                <div id="comments-container" class="comments-list">
+                    <p style="color: rgba(255,255,255,0.5);">Carregando comentários...</p>
+                </div>
+                
+                <div class="comment-form-box">
+                    <h3>Deixe seu comentário</h3>
+                    <form id="comment-form">
+                        <input type="text" id="comment-user" placeholder="Seu Nome" required>
+                        <textarea id="comment-text" placeholder="Sua Mensagem" required></textarea>
+                        <button type="submit" class="comment-submit-btn">ENVIAR COMENTÁRIO</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <div w3-include-html="/footer.html"></div>
+    
+    <script>
+        w3IncludeHTML(); // Run again to capture both navbar and footer
+    </script>
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script type="module" src="/scripts/comments_loader.js"></script>
+</body>
+</html>

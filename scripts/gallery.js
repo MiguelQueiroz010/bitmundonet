@@ -2,10 +2,12 @@
 let slideIndex = 1;
 let slideInterval;
 
-document.addEventListener("DOMContentLoaded", function () {
+function initGallery() {
   showSlides(slideIndex);
   startAutoSlide();
-});
+}
+
+document.addEventListener("DOMContentLoaded", initGallery);
 
 function startAutoSlide() {
   slideInterval = setInterval(function () {

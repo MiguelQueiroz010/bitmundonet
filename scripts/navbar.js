@@ -64,6 +64,13 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// Admin Icon Click Handler
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#admin-icon')) {
+    window.location.href = '/admin_login.html';
+  }
+});
+
 
 
 

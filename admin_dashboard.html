@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitMundo Admin - Dashboard</title>
+    
+    <link rel="stylesheet" href="/css/navigator.css" />
+    <style>
+        :root {
+            --admin-primary: rgb(241, 163, 46);
+            --admin-bg: #0a0a0c;
+            --admin-glass: rgba(20, 20, 25, 0.9);
+            --admin-border: rgba(241, 163, 46, 0.2);
+        }
+
+        body {
+            background: var(--admin-bg);
+            color: #eee;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #000;
+            border-right: 1px solid var(--admin-border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar h2 {
+            color: var(--admin-primary);
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(241, 163, 46, 0.1);
+            color: var(--admin-primary);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 3rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Dashboard Sections */
+        .dash-section {
+            display: none;
+            animation: fade-in 0.5s ease;
+        }
+
+        .dash-section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--admin-glass);
+            border: 1px solid var(--admin-border);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--admin-primary);
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            color: white;
+            outline: none;
+        }
+
+        .save-btn {
+            background: var(--admin-primary);
+            color: #000;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .save-btn:hover {
+            filter: brightness(1.2);
+        }
+
+        /* GitHub Config Styling */
+        .github-banner {
+            background: #24292e;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(100px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+            to { 
+                opacity: 0; 
+                transform: translateX(100px);
+            }
+        }
+
+        /* Loading state for buttons */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Improved input focus states */
+        .form-group input:focus, 
+        .form-group textarea:focus, 
+        .form-group select:focus {
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 3px rgba(241, 163, 46, 0.1);
+        }
+
+        /* Avatar Styles */
+        .admin-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--admin-primary);
+            box-shadow: 0 0 20px rgba(241, 163, 46, 0.3);
+            margin: 0 auto 1rem;
+            display: block;
+        }
+
+        .admin-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--admin-primary);
+            box-shadow: 0 0 10px rgba(241, 163, 46, 0.2);
+        }
+
+        .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--admin-primary), #fbbf24);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--admin-primary);
+            box-shadow: 0 0 20px rgba(241, 163, 46, 0.3);
+        }
+
+        .profile-section {
+            text-align: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(241, 163, 46, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .profile-name {
+            color: var(--admin-primary);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+    
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile-section">
+            <div id="sidebar-avatar-container">
+                <div class="avatar-placeholder">👤</div>
+            </div>
+            <div class="profile-name" id="sidebar-name">Admin</div>
+        </div>
+        <h2>BitMundo Central</h2>
+        <button class="nav-btn active" onclick="switchSection('profile', this)">Meu Perfil</button>
+        <button class="nav-btn" onclick="switchSection('comments', this)">Comentários</button>
+        <button class="nav-btn" onclick="switchSection('projects', this)">Editar Projetos (XML)</button>
+        <button class="nav-btn" onclick="switchSection('articles', this)">Postagens (XML)</button>
+        <div style="margin-top: auto;">
+            <a href="/index.html" style="display: block; margin-bottom: 1rem;">
+                <button class="nav-btn" style="width: 100%; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">
+                    ← Voltar ao Site
+                </button>
+            </a>
+            <button class="logout-btn" id="logout-btn">Sair do Sistema</button>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <header>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div id="header-avatar-container">
+                    <!-- Avatar will be loaded here -->
+                </div>
+                <div>
+                    <h1 id="greeting">Olá, Admin</h1>
+                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5);">Bem-vindo ao centro de comando.</p>
+                </div>
+            </div>
+            <div id="status-gh" style="color: var(--admin-primary); font-size: 0.8rem;">
+                <!-- GH Sync Status -->
+            </div>
+        </header>
+
+        <!-- Profile Section -->
+        <section id="profile" class="dash-section active">
+            <div class="card">
+                <h3>Configurações de Perfil</h3>
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label>Nome Público</label>
+                        <input type="text" id="admin-name" placeholder="Ex: Bit.Raiden">
+                    </div>
+                    <div class="form-group">
+                        <label>Avatar URL</label>
+                        <input type="text" id="admin-avatar">
+                    </div>
+                    <div class="github-banner">
+                        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="30" style="filter: invert(1);">
+                        <div style="flex: 1;">
+                            <label style="font-size: 0.7rem; color: #999;">GitHub Personal Token (Necessário para salvar XMLs)</label>
+                            <input type="password" id="gh-token" style="background: rgba(0,0,0,0.5); border: 1px solid #444; width: 100%; border-radius: 4px; padding: 4px; color: #fff;">
+                        </div>
+                    </div>
+                    <button type="submit" class="save-btn">Atualizar Perfil</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Comments Moderation Section -->
+        <section id="comments" class="dash-section">
+            <div class="card">
+                <h3>Gestão de Comentários</h3>
+                <div id="comments-stats" style="margin-bottom: 2rem;">
+                    <!-- Stats will be loaded here -->
+                </div>
+                <div id="admin-comments-list">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- XML Projects Editor -->
+        <section id="projects" class="dash-section">
+            <div class="card">
+                <h3>Editor de Projetos (XML)</h3>
+                <p style="font-size: 0.8rem; margin-bottom: 2rem;">As alterações feitas aqui serão enviadas diretamente para o repositório GitHub.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <!-- Editor -->
+                    <div>
+                        <h4 style="color: var(--admin-primary); margin-bottom: 1rem;">📝 Editor</h4>
+                        <div id="xml-projects-list">
+                            <!-- Table or list of projects -->
+                        </div>
+                        <button class="save-btn" style="background: #3b82f6; margin-top: 1rem;" onclick="addNewProject()">ADICIONAR NOVO PROJETO</button>
+                    </div>
+                    
+                    <!-- Preview -->
+                    <div>
+                        <h4 style="color: var(--admin-primary); margin-bottom: 1rem;">👁️ Prévia</h4>
+                        <div id="projects-preview" style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); min-height: 300px;">
+                            <p style="text-align: center; color: rgba(255,255,255,0.3); padding: 2rem;">Selecione um projeto para ver a prévia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- XML Articles Editor -->
+        <section id="articles" class="dash-section">
+            <div class="card">
+                <h3>Editor de Postagens (XML)</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <!-- Editor -->
+                    <div>
+                        <h4 style="color: var(--admin-primary); margin-bottom: 1rem;">📝 Editor</h4>
+                        <div id="xml-articles-list">
+                            <!-- List of posts -->
+                        </div>
+                        <button class="save-btn" style="background: #3b82f6; margin-top: 1rem;" onclick="addNewArticle()">ADICIONAR NOVA POSTAGEM</button>
+                    </div>
+                    
+                    <!-- Preview -->
+                    <div>
+                        <h4 style="color: var(--admin-primary); margin-bottom: 1rem;">👁️ Prévia</h4>
+                        <div id="articles-preview" style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); min-height: 300px;">
+                            <p style="text-align: center; color: rgba(255,255,255,0.3); padding: 2rem;">Selecione uma postagem para ver a prévia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="/scripts/admin_controller.js"></script>
+</body>
+</html>

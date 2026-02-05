@@ -244,7 +244,7 @@ html::-webkit-scrollbar-thumb {
 }
 
 /*MOBILE CASES*/
-@media screen and (max-width: 990px) {
+@media screen and (max-width: 768px) {
   #nav a {
     font: 0px verdana;
     border-radius: 2em;

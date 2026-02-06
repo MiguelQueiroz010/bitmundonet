@@ -24,6 +24,9 @@ jobs:
               -e "s/\${FIREBASE_MEASUREMENT_ID}/${{ secrets.FIREBASE_MEASUREMENT_ID }}/g" \
               scripts/firebase-config.template.js > scripts/firebase-config.js
 
+      - name: Prepare Workspace (Ensure ignored files are published)
+        run: rm -f .gitignore
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

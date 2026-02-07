@@ -23,9 +23,11 @@
     <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script>
 
     <script>
+        let videoPlaying = true;
         function toggle_video(e) {
             if (e) e.stopPropagation();
             const video = document.getElementById("project-video-player");
+            const iframe = document.getElementById("project-video-iframe");
             const playIcon = document.getElementById("play-icon");
             const pauseIcon = document.getElementById("pause-icon");
             
@@ -39,6 +41,17 @@
                     if (playIcon) playIcon.style.display = "block";
                     if (pauseIcon) pauseIcon.style.display = "none";
                 }
+            } else if (iframe) {
+                videoPlaying = !videoPlaying;
+                const command = videoPlaying ? 'playVideo' : 'pauseVideo';
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    event: 'command',
+                    func: command,
+                    args: []
+                }), '*');
+                
+                if (playIcon) playIcon.style.display = videoPlaying ? "none" : "block";
+                if (pauseIcon) pauseIcon.style.display = videoPlaying ? "block" : "none";
             }
         }
 

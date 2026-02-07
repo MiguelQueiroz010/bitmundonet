@@ -143,13 +143,38 @@ async function initDetail() {
         }, 500);
     }
 
-    const videoSource = document.getElementById('video-source');
-    if (videoSource) videoSource.src = video;
     const videoPlayer = document.getElementById('project-video-player');
-    if (videoPlayer) {
-        videoPlayer.load();
-        videoPlayer.muted = false;
-        videoPlayer.volume = 0.5;
+    const heroHead = document.getElementById('project-head');
+
+    if (video && heroHead) {
+        const embedUrl = getEmbedUrl(video);
+        if (embedUrl) {
+            // It's a YouTube or Streamable video
+            heroHead.insertAdjacentHTML('afterbegin', `
+                <iframe id="project-video-iframe" 
+                        src="${embedUrl}" 
+                        frameborder="0" 
+                        allow="autoplay; fullscreen; picture-in-picture" 
+                        allowfullscreen 
+                        style="pointer-events: none;">
+                </iframe>
+            `);
+            if (videoPlayer) videoPlayer.remove();
+
+            // Keep control button visible
+            const toggleBtn = document.getElementById('video-toggle');
+            if (toggleBtn) toggleBtn.style.display = 'flex';
+        } else {
+            // Normal MP4 video
+            const videoSource = document.getElementById('video-source');
+            if (videoSource) videoSource.src = video;
+            if (videoPlayer) {
+                videoPlayer.load();
+                videoPlayer.muted = true; // Background videos should usually be muted
+                videoPlayer.volume = 0;
+                videoPlayer.play().catch(e => console.warn("Autoplay blocked:", e));
+            }
+        }
     }
 
     const coverEl = document.getElementById('project-cover');
@@ -295,6 +320,29 @@ async function initDetail() {
     if (typeof window.initGallery === 'function') {
         window.initGallery();
     }
+}
+
+/**
+ * Helper to get embed URL for YouTube and Streamable
+ */
+function getEmbedUrl(url) {
+    if (!url) return null;
+    url = url.trim();
+
+    // YouTube
+    const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch && ytMatch[1]) {
+        const videoId = ytMatch[1];
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&enablejsapi=1`;
+    }
+
+    // Streamable
+    const stMatch = url.match(/(?:https?:\/\/)?(?:www\.)?streamable\.com\/([a-zA-Z0-9]+)/);
+    if (stMatch && stMatch[1]) {
+        return `https://streamable.com/e/${stMatch[1]}?autoplay=1&muted=1&loop=1&controls=0`;
+    }
+
+    return null;
 }
 
 /**

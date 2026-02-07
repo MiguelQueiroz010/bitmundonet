@@ -5,8 +5,9 @@ import { getFirebaseConfig } from "./firebase-manager.js";
 
 async function initFirebase() {
     const firebaseConfig = await getFirebaseConfig();
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig, "bitmundo-public");
     return {
+        app,
         db: getFirestore(app),
         auth: getAuth(app)
     };

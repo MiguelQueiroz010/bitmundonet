@@ -31,13 +31,26 @@ async function initComments() {
 }
 
 /**
+ * Helper: Resolve User Name consistently
+ */
+function resolveUserName(user) {
+    if (!user) return "Usuário";
+    const displayName = user.displayName;
+    if (displayName && displayName !== "null" && displayName.trim() !== "") {
+        return displayName;
+    }
+    return user.email?.split('@')[0] || "Usuário";
+}
+
+/**
  * Helper: Generate Initials Avatar
  */
 function getAvatarHTML(user) {
+    const name = resolveUserName(user);
     if (user.photoURL) {
-        return `<img src="${user.photoURL}" class="user-avatar" referrerPolicy="no-referrer" alt="${user.displayName}" onerror="this.replaceWith(getInitialsElement('${user.displayName}'))">`;
+        return `<img src="${user.photoURL}" class="user-avatar" referrerPolicy="no-referrer" alt="${name}" onerror="this.replaceWith(getInitialsElement('${name}'))">`;
     }
-    return getInitialsString(user.displayName);
+    return getInitialsString(name);
 }
 
 /**
@@ -80,11 +93,12 @@ function updateFormState(user) {
         // Logged In Design
         const avatarHTML = getAvatarHTML(user);
 
+        const displayName = resolveUserName(user);
         authContainer.innerHTML = `
             <div class="auth-user-info">
                 ${avatarHTML}
                 <div style="flex-grow: 1;">
-                    <div style="font-weight: bold; color: #fff;">${user.displayName || 'Usuário'}</div>
+                    <div style="font-weight: bold; color: #fff;">${displayName}</div>
                     <div style="font-size: 0.75rem; color: #aaa;">Logado via Google</div>
                 </div>
                 <button type="button" class="logout-btn" id="btn-logout" style="pointer-events: all; cursor: pointer;">Sair</button>
@@ -161,12 +175,12 @@ function loadComments(db) {
         }
 
         const allComments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
+
         // Sorting: Pinned first, then by timestamp
         allComments.sort((a, b) => {
             if (a.pinned && !b.pinned) return -1;
             if (!a.pinned && b.pinned) return 1;
-            
+
             const timeA = a.timestamp?.seconds || 0;
             const timeB = b.timestamp?.seconds || 0;
             return timeB - timeA;
@@ -186,23 +200,24 @@ function loadComments(db) {
                 `<button class="delete-comment-btn" onclick="window.deleteMyComment('${comment.id}')" title="Excluir meu comentário">✕</button>` : '';
 
             // Avatar Handling in List
+            const authorName = (comment.user === "null" || !comment.user || comment.user === "Usuário") ? "Usuário" : comment.user;
             const avatar = comment.userPhoto ?
-                `<img src="${comment.userPhoto}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${comment.user}')">` :
-                getInitialsString(comment.user);
+                `<img src="${comment.userPhoto}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${authorName}')">` :
+                getInitialsString(authorName);
 
             const pinnedBadge = comment.pinned ? `<span class="pinned-badge">📌 Fixado</span>` : '';
-            
+
             // Filter replies for this comment
             const commentReplies = replies.filter(r => r.parentId === comment.id);
             const repliesHTML = commentReplies.map(reply => {
                 const replyDate = reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString('pt-BR', {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 }) : 'Agora mesmo';
-                
+
                 const replyIsOwner = currentUser && (reply.uid === currentUser.uid);
                 const replyDeleteBtn = replyIsOwner ?
                     `<button class="delete-comment-btn" onclick="window.deleteMyComment('${reply.id}')" title="Excluir minha resposta">✕</button>` : '';
-                
+
                 const replyAvatar = reply.userPhoto ?
                     `<img src="${reply.userPhoto}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${reply.user}')">` :
                     getInitialsString(reply.user);
@@ -212,7 +227,7 @@ function loadComments(db) {
                         <div class="comment-header">
                             <div class="comment-header-main">
                                 ${replyAvatar}
-                                <span class="comment-author">${reply.user}</span>
+                                <span class="comment-author">${(reply.user === "null" || !reply.user || reply.user === "Usuário") ? "Usuário" : reply.user}</span>
                                 <span class="comment-date">${replyDate}</span>
                             </div>
                             ${replyDeleteBtn}
@@ -240,7 +255,7 @@ function loadComments(db) {
                             <div style="display: flex; flex-direction: column;">
                                 <div style="display: flex; align-items: center;">
                                     ${pinnedBadge}
-                                    <span class="comment-author">${comment.user}</span>
+                                    <span class="comment-author">${(comment.user === "null" || !comment.user || comment.user === "Usuário") ? "Usuário" : comment.user}</span>
                                 </div>
                                 <span class="comment-date">${date}</span>
                             </div>
@@ -284,7 +299,7 @@ window.deleteMyComment = async (commentId) => {
 window.showReplyForm = (parentId) => {
     const container = document.getElementById(`reply-form-container-${parentId}`);
     if (!container) return;
-    
+
     // Close other reply forms if open? Or just don't duplicate.
     if (container.innerHTML !== "") {
         container.innerHTML = "";
@@ -300,7 +315,7 @@ window.showReplyForm = (parentId) => {
             </div>
         </div>
     `;
-    
+
     document.getElementById(`reply-text-${parentId}`).focus();
 };
 
@@ -319,12 +334,12 @@ window.submitReply = async (parentId) => {
     try {
         submitBtn.disabled = true;
         submitBtn.innerText = "Enviando...";
-        
+
         const db = await dbPromise;
         const commentData = {
             projectId: projectId,
             parentId: parentId,
-            user: currentUser.displayName,
+            user: resolveUserName(currentUser),
             userPhoto: currentUser.photoURL,
             uid: currentUser.uid,
             text: text,
@@ -361,7 +376,7 @@ function setupForm(db, auth) {
 
         const commentData = {
             projectId: projectId,
-            user: currentUser.displayName,
+            user: resolveUserName(currentUser),
             userPhoto: currentUser.photoURL,
             uid: currentUser.uid,
             text: textInput.value,

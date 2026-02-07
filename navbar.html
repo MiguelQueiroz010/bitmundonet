@@ -113,17 +113,7 @@
     overflow-y: auto;
 }
 
-/* Specific animations for JS to hook into */
-@keyframes slide_in {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-}
-@keyframes slide_out {
-    from { transform: translateX(0); }
-    to { transform: translateX(100%); }
-}
-
-#dropdown[style*="animationName: slide_in"] {
+#dropdown.active {
     transform: translateX(0);
 }
 

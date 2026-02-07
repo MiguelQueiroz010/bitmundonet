@@ -32,7 +32,7 @@ function scrollFunction() {
     }
   }
 
-  // 2. Seamless Logic (Calculus-based jump compensation)
+  // 2. Seamless Logic (Padding-based jump compensation)
   if (navbar && head) {
     if (scrollPos > threshold && !isFixed) {
       isFixed = true;
@@ -41,10 +41,7 @@ function scrollFunction() {
       head.style.display = "none";
       document.body.style.paddingTop = navStripHeight + "px";
       document.body.classList.add("nav-scrolled");
-
-      // CALCULUS: Compensation for hidden banner to prevent visual jump
-      window.scrollTo(0, scrollPos - threshold);
-    } else if (scrollPos < 1 && isFixed) {
+    } else if (scrollPos < 10 && isFixed) { // Increased margin for stability
       isFixed = false;
       navbar.style.position = "relative";
       head.style.display = "block";
@@ -75,25 +72,29 @@ document.addEventListener('click', (e) => {
 
 
 function dropdown() {
-  if (document.getElementById("dropdown").style.animationName == "slide_in") {
-    document.getElementById("mobile_dropdown").style.position = "relative";
+  const dropdownMenu = document.getElementById("dropdown");
+  const mobileToggle = document.getElementById("mobile_dropdown");
+  const mobileLogo = document.getElementById("mobile_logo");
+  const youtubeGallery = document.getElementById("youtube-galleryM");
+
+  if (!dropdownMenu) return;
+
+  const isActive = dropdownMenu.classList.contains("active");
+
+  if (isActive) {
+    // Closing
+    dropdownMenu.classList.remove("active");
     document.body.style.overflow = "auto";
-    document.getElementById("mobile_dropdown").style.display = "block";
-    document.getElementById("dropdown").style.animationName = "slide_out";
-    document.getElementById("dropdown").style.animationDuration = "0.45s";
-    document.getElementById("mobile_logo").style.display = "block";
-    document.getElementById("youtube-galleryM").style.display = "inline";
+    if (mobileToggle) mobileToggle.style.display = "block";
+    if (mobileLogo) mobileLogo.style.display = "block";
+    if (youtubeGallery) youtubeGallery.style.display = "inline";
   }
   else {
-    document.getElementById("mobile_dropdown").style.position = "relative";
+    // Opening
+    dropdownMenu.classList.add("active");
     document.body.style.overflow = "hidden";
-    document.getElementById("mobile_dropdown").style.position = "relative";
-    document.getElementById("mobile_dropdown").style.display = "none";
-    document.getElementById("dropdown").style.animationName = "slide_in";
-    document.getElementById("dropdown").style.animationDuration = "0.45s";
-    document.getElementById("mobile_logo").style.display = "none";
-    document.getElementById("youtube-galleryM").style.display = "none";
+    if (mobileToggle) mobileToggle.style.display = "none";
+    if (mobileLogo) mobileLogo.style.display = "none";
+    if (youtubeGallery) youtubeGallery.style.display = "none";
   }
-
-
 }

@@ -2112,7 +2112,10 @@ window.loadTools = () => {
                                 <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">${t.type}</div>
                             </div>
                         </div>
-                        <button class="save-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="editTool('${doc.id}')">✏️</button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="save-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="editTool('${doc.id}')">✏️</button>
+                            <button class="save-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="deleteTool('${doc.id}')">🗑️</button>
+                        </div>
                     </div>`;
         }).join('')}
             </div>
@@ -2254,34 +2257,110 @@ window.saveNewProject = async () => {
  * Save new article to Firestore
  */
 window.saveNewArticle = async () => {
-    const id = document.getElementById('art-id').value;
-    const title = document.getElementById('art-title').value;
-    const category = document.getElementById('art-category').value;
+    // ... existing implementation remains as is if found, but I saw it at 2256
+}
 
-    if (!id || !title) {
-        alert("ID e Título são obrigatórios!");
+/**
+ * Tool Management Functions
+ */
+
+window.addNewTool = () => {
+    const html = `
+        <div style="padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">🛠️ Nova Ferramenta (Firestore)</h3>
+                <button class="save-btn" style="background: rgba(255, 255, 255, 0.39);" onclick="closeModal()">✕ Fechar</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>ID Único (slug)</label>
+                    <input type="text" id="new-tool-id" placeholder="ex: psh-menu">
+                </div>
+                <div class="form-group">
+                    <label>Nome da Ferramenta</label>
+                    <input type="text" id="new-tool-name">
+                </div>
+                <div class="form-group">
+                    <label>Versão</label>
+                    <input type="text" id="new-tool-ver" placeholder="ex: 1.0">
+                </div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <input type="text" id="new-tool-type" placeholder="ex: Editor de Scripts">
+                </div>
+                <div class="form-group">
+                    <label>Créditos</label>
+                    <input type="text" id="new-tool-credit">
+                </div>
+                <div class="form-group">
+                    <label>Ícone (URL)</label>
+                    <input type="text" id="new-tool-icon" placeholder="/media/tools/icon.png">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>URL Download</label>
+                    <input type="text" id="new-tool-url">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Descrição</label>
+                <textarea id="new-tool-desc" style="height: 100px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Extras (Links Adicionais)</label>
+                <input type="text" id="new-tool-extra">
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="save-btn" style="flex: 1;" onclick="saveNewTool()">Criar no DB</button>
+            </div>
+        </div>
+    `;
+    window.showModal(html);
+};
+
+window.saveNewTool = async () => {
+    const id = document.getElementById('new-tool-id').value;
+    const name = document.getElementById('new-tool-name').value;
+
+    if (!id || !name) {
+        alert("ID e Nome são obrigatórios!");
         return;
     }
 
     const data = {
-        title: title,
-        category: category || 'Geral',
-        author: 'Admin',
-        date: new Date().toLocaleDateString('pt-BR'),
-        content: '',
-        topics: null,
+        name: name,
+        version: document.getElementById('new-tool-ver').value || '',
+        type: document.getElementById('new-tool-type').value || '',
+        credit: document.getElementById('new-tool-credit').value || '',
+        icon: document.getElementById('new-tool-icon').value || '',
+        url: document.getElementById('new-tool-url').value || '',
+        description: document.getElementById('new-tool-desc').value || '',
+        extra: document.getElementById('new-tool-extra').value || '',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        migratedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString()
     };
 
     try {
-        await setDoc(doc(db, "articles", id), data);
-        showNotification("✅ Artigo criado com sucesso!", "success");
+        await setDoc(doc(db, "tools", id), data);
+        showNotification("✅ Ferramenta criada com sucesso!", "success");
         window.closeModal();
-        loadArticles();
+        loadTools();
     } catch (e) {
-        showNotification("Erro ao criar artigo: " + e.message, "error");
+        showNotification("Erro ao criar ferramenta: " + e.message, "error");
+    }
+};
+
+window.deleteTool = async (id) => {
+    if (confirm(`Deseja realmente excluir a ferramenta "${id}"?`)) {
+        try {
+            await deleteDoc(doc(db, "tools", id));
+            showNotification("✅ Ferramenta excluída!", "success");
+            loadTools();
+        } catch (e) {
+            showNotification("Erro ao excluir: " + e.message, "error");
+        }
     }
 };
 

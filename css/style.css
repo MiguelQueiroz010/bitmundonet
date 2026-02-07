@@ -57,6 +57,12 @@ a {
   transition: all 0.3s ease;
 }
 
+.article-content {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word; /* Better for long URLs than break-all */
+}
+
 .article-content a {
     color: #3b82f6 !important; /* Blue */
     text-decoration: underline !important;

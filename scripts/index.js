@@ -31,44 +31,16 @@ export async function loadArticlesFromFirestore() {
     // Instead, we fetch and sort on the client-side.
     const q = query(
       collection(db, "articles"),
-      where("selected", "==", true)
+      where("selected", "==", true),
+      orderBy("__name__", "desc"),
+      limit(10)
     );
 
     const querySnapshot = await getDocs(q);
     container.innerHTML = ""; // Clear loader
 
-    // Convert docs to array and sort by date descending
-    const articles = [];
     querySnapshot.forEach((doc) => {
-      articles.push(doc.data());
-    });
-
-    articles.sort((a, b) => {
-      const getTimestamp = (item) => {
-        // 1. Priority: System Timestamp (updatedAt)
-        if (item.updatedAt) return new Date(item.updatedAt).getTime();
-
-        // 2. Fallback: Manual Date
-        const d = item.date;
-        if (!d) return 0;
-        if (typeof d === 'string') {
-          // Handle DD/MM/YYYY
-          if (d.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-            const [day, month, year] = d.split('/');
-            return new Date(`${year}-${month}-${day}`).getTime();
-          }
-          const t = new Date(d).getTime();
-          return isNaN(t) ? 0 : t;
-        }
-        return 0;
-      };
-
-      // Descending: Newest first
-      return getTimestamp(b) - getTimestamp(a);
-    });
-
-    articles.forEach((article) => {
-      renderArticle(article, container);
+      renderArticle({ ...doc.data(), id: doc.id }, container);
     });
   } catch (error) {
     console.error("Erro ao carregar artigos do Firestore:", error);

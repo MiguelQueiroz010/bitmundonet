@@ -170,8 +170,8 @@ async function initDetail() {
             if (videoSource) videoSource.src = video;
             if (videoPlayer) {
                 videoPlayer.load();
-                videoPlayer.muted = true; // Background videos should usually be muted
-                videoPlayer.volume = 0;
+                videoPlayer.muted = false;
+                videoPlayer.volume = 0.3;
                 videoPlayer.play().catch(e => console.warn("Autoplay blocked:", e));
             }
         }
@@ -333,13 +333,13 @@ function getEmbedUrl(url) {
     const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
     if (ytMatch && ytMatch[1]) {
         const videoId = ytMatch[1];
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&enablejsapi=1`;
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&enablejsapi=1`;
     }
 
     // Streamable
     const stMatch = url.match(/(?:https?:\/\/)?(?:www\.)?streamable\.com\/([a-zA-Z0-9]+)/);
     if (stMatch && stMatch[1]) {
-        return `https://streamable.com/e/${stMatch[1]}?autoplay=1&muted=1&loop=1&controls=0`;
+        return `https://streamable.com/e/${stMatch[1]}?autoplay=1&muted=0&loop=1&controls=0`;
     }
 
     return null;

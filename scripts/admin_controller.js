@@ -1958,6 +1958,7 @@ window.editTool = async (id) => {
                 <div class="form-group"><label>Nome</label><input type="text" id="tool-name" value="${t.name || ''}"></div>
                 <div class="form-group"><label>Versão</label><input type="text" id="tool-ver" value="${t.version || ''}"></div>
                 <div class="form-group"><label>Tipo</label><input type="text" id="tool-type" value="${t.type || ''}"></div>
+                <div class="form-group"><label>Alvo</label><input type="text" id="tool-target" value="${t.target || ''}"></div>
                 <div class="form-group"><label>Crédito</label><input type="text" id="tool-credit" value="${t.credit || ''}"></div>
                 <div class="form-group"><label>Ícone (URL)</label><input type="text" id="tool-icon" value="${t.icon || ''}"></div>
                 <div class="form-group"><label>URL Download</label><input type="text" id="tool-url" value="${t.url || ''}"></div>
@@ -1978,6 +1979,7 @@ window.saveToolChanges = async (id) => {
         name: document.getElementById('tool-name').value,
         version: document.getElementById('tool-ver').value,
         type: document.getElementById('tool-type').value,
+        target: document.getElementById('tool-target').value,
         credit: document.getElementById('tool-credit').value,
         icon: document.getElementById('tool-icon').value,
         url: document.getElementById('tool-url').value,
@@ -2290,6 +2292,10 @@ window.addNewTool = () => {
                     <input type="text" id="new-tool-type" placeholder="ex: Editor de Scripts">
                 </div>
                 <div class="form-group">
+                    <label>Alvo</label>
+                    <input type="text" id="new-tool-target" placeholder="ex: PC, Android, iOS">
+                </div>
+                <div class="form-group">
                     <label>Créditos</label>
                     <input type="text" id="new-tool-credit">
                 </div>
@@ -2333,6 +2339,7 @@ window.saveNewTool = async () => {
         name: name,
         version: document.getElementById('new-tool-ver').value || '',
         type: document.getElementById('new-tool-type').value || '',
+        target: document.getElementById('new-tool-target').value || '',
         credit: document.getElementById('new-tool-credit').value || '',
         icon: document.getElementById('new-tool-icon').value || '',
         url: document.getElementById('new-tool-url').value || '',

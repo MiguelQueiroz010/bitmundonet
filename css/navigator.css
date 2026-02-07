@@ -307,7 +307,6 @@ html {
   user-select: none; /* Standard syntax */
   color-scheme: light dark;
   color: white;
-  text-shadow: 4px 2px black;
   background-color: rgb(10, 20, 80);
 }
 

@@ -1,27 +1,43 @@
+import { dbPromise } from './db-context.js';
+import { collection, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { parseArticleTags } from "./utils.js";
+
 /**
- * Projects Loader Script (Minimalist / Structured Data Version)
+ * Projects Loader Script (Firestore Version)
  */
 
 async function loadProjects() {
+    const db = await dbPromise;
     try {
-        const response = await fetch('/projects.xml');
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(text, "text/xml");
-        return Array.from(xmlDoc.getElementsByTagName("project"));
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-        console.error("Error loading projects.xml:", error);
+        console.error("Error loading projects from Firestore:", error);
         return [];
     }
 }
 
-function renderProjectCard(project) {
-    const id = project.getAttribute("id");
-    const title = project.getElementsByTagName("title")[0].textContent;
-    const subtitle = project.getElementsByTagName("subtitle")[0]?.textContent || "";
-    const thumbnail = project.getElementsByTagName("thumbnail")[0]?.textContent || "";
-    const logo = project.getElementsByTagName("logo")[0]?.textContent || "";
-    const status = project.getElementsByTagName("status")[0]?.textContent || "Mod";
+async function loadProjectById(id) {
+    const db = await dbPromise;
+    try {
+        const docRef = doc(db, "projects", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        }
+    } catch (error) {
+        console.error("Error loading project by ID:", error);
+    }
+    return null;
+}
+
+function renderProjectCard(p) {
+    const id = p.id;
+    const title = p.title || "";
+    const subtitle = p.subtitle || "";
+    const thumbnail = p.thumbnail || "";
+    const logo = p.logo || "";
+    const status = p.status || "Mod";
 
     const statusClass = status === 'Completo' ? 'status-complete' :
         status === 'Em Progresso' ? 'status-wip' : 'status-mod';
@@ -49,11 +65,10 @@ async function initListing() {
 
     // Group by platform
     const platforms = {};
-    projects.forEach(project => {
-        const platformTag = project.getElementsByTagName("platform")[0];
-        const platform = platformTag ? platformTag.textContent : "Outros";
+    projects.forEach(p => {
+        const platform = p.platform || "Outros";
         if (!platforms[platform]) platforms[platform] = [];
-        platforms[platform].push(project);
+        platforms[platform].push(p);
     });
 
     let html = '';
@@ -81,28 +96,40 @@ async function initDetail() {
     const projectId = params.get('id');
     if (!projectId) return;
 
-    const projects = await loadProjects();
-    const project = projects.find(p => p.getAttribute("id") === projectId);
+    console.log("Initializing project detail for:", projectId);
+    const project = await loadProjectById(projectId);
 
     if (!project) {
-        document.body.innerHTML = "<h1>Projeto não encontrado</h1>";
+        console.error("Project not found:", projectId);
+        document.body.innerHTML = `<div style="padding: 5rem; text-align: center;">
+            <h1>Projeto não encontrado</h1>
+            <p>Verifique se o ID "${projectId}" está correto no banco de dados.</p>
+            <a href="/" style="color: var(--primary);">Voltar para Início</a>
+        </div>`;
         return;
     }
 
-    const title = project.getElementsByTagName("title")[0].textContent;
-    const summary = project.getElementsByTagName("subtitle")[0]?.textContent || "";
-    const desc = project.getElementsByTagName("description")[0]?.textContent || "";
-    const video = project.getElementsByTagName("video")[0]?.textContent || "";
-    const cover = project.getElementsByTagName("cover")[0]?.textContent || "";
-    const platform = project.getElementsByTagName("platform")[0]?.textContent || "Outros";
-    const globalProgress = project.getElementsByTagName("global_progress")[0]?.textContent || "0%";
+    const title = project.title || "";
+    const summary = project.subtitle || "";
+    const desc = project.description || "";
+    const video = project.video || "";
+    const cover = project.cover || "";
+    const platform = project.platform || "Outros";
+    const globalProgress = project.progress?.global || "0%";
 
     // Fill Page Info
     document.title = `${title} - BitMundo`;
-    document.getElementById('project-title-display').innerHTML = title;
-    document.getElementById('project-summary').textContent = summary;
-    document.getElementById('project-description').innerHTML = desc;
-    document.getElementById('project-platform').textContent = platform;
+    const titleDisplay = document.getElementById('project-title-display');
+    if (titleDisplay) titleDisplay.innerHTML = title;
+
+    const summaryEl = document.getElementById('project-summary');
+    if (summaryEl) summaryEl.textContent = summary;
+
+    const descEl = document.getElementById('project-description');
+    if (descEl) descEl.innerHTML = parseArticleTags(desc);
+
+    const platEl = document.getElementById('project-platform');
+    if (platEl) platEl.textContent = platform;
 
     // Animate Global Progress
     const percentInt = parseInt(globalProgress) || 0;
@@ -121,14 +148,15 @@ async function initDetail() {
     const videoPlayer = document.getElementById('project-video-player');
     if (videoPlayer) {
         videoPlayer.load();
-        videoPlayer.muted = false; // Restore audio as requested
+        videoPlayer.muted = false;
         videoPlayer.volume = 0.5;
     }
 
-    document.getElementById('project-cover').src = cover;
+    const coverEl = document.getElementById('project-cover');
+    if (coverEl) coverEl.src = cover;
 
-    // Live Video Section (New)
-    const liveVideoUrl = project.getElementsByTagName("live_video")[0]?.textContent;
+    // Live Video Section (YouTube)
+    const liveVideoUrl = project.live_video;
     const livesSection = document.getElementById('lives-section');
     if (liveVideoUrl && livesSection) {
         livesSection.style.display = 'block';
@@ -144,20 +172,20 @@ async function initDetail() {
     }
 
     // Gallery
-    const galleryItems = Array.from(project.getElementsByTagName("gallery_item"));
+    const galleryItems = project.gallery || [];
     const galleryContainer = document.getElementById('gallery_container');
     const dotContainer = document.getElementById('gallery-dots');
 
-    if (galleryItems.length > 0) {
+    if (galleryItems.length > 0 && galleryContainer) {
         let galleryHtml = '';
         let dotsHtml = '';
         galleryItems.forEach((item, idx) => {
-            const src = item.getAttribute("src");
-            const caption = item.getAttribute("caption") || "";
+            const src = item.src;
+            const caption = item.caption || "";
             galleryHtml += `
                 <div class="mySlides fade ${idx === 0 ? 'first' : ''}">
                     <a class="spotlight" href="${src}" data-description="${caption}">
-                        <img src="${src}" alt="${caption}" style="width: 100%;">
+                        <img src="${src}" alt="${caption}">
                     </a>
                 </div>
             `;
@@ -168,32 +196,34 @@ async function initDetail() {
             <a class="next" onclick="plusSlides(1)">&#10095;</a>
         `;
         galleryContainer.innerHTML = galleryHtml;
-        dotContainer.innerHTML = dotsHtml;
+        if (dotContainer) dotContainer.innerHTML = dotsHtml;
     } else {
-        document.getElementById('gallery').style.display = 'none';
+        const gallerySection = document.getElementById('gallery');
+        if (gallerySection) gallerySection.style.display = 'none';
     }
 
     // Credits
-    const creditItems = Array.from(project.getElementsByTagName("credit_item"));
+    const creditItems = project.credits || [];
     const creditsList = document.getElementById('credits-list');
-    if (creditItems.length > 0) {
+    if (creditItems.length > 0 && creditsList) {
         creditsList.innerHTML = creditItems.map(item => `
             <div class="credit-item">
-                <span class="credit-name">${item.getAttribute("name")}</span>
-                <span class="credit-role">${item.textContent}</span>
+                <span class="credit-name">${item.name}</span>
+                <span class="credit-role">${item.role}</span>
             </div>
         `).join('');
     } else {
-        document.getElementById('credits').style.display = 'none';
+        const creditsSection = document.getElementById('credits');
+        if (creditsSection) creditsSection.style.display = 'none';
     }
 
-    // Progress (Masterful Bars)
-    const progressItems = Array.from(project.getElementsByTagName("progress_item"));
+    // Progress (Detailed Bars)
+    const progressItems = project.progress?.items || [];
     const progressList = document.getElementById('progress-list');
-    if (progressItems.length > 0) {
+    if (progressItems.length > 0 && progressList) {
         progressList.innerHTML = progressItems.map(item => {
-            const label = item.getAttribute("label");
-            const valueText = item.textContent;
+            const label = item.label;
+            const valueText = item.value;
             const percent = parseInt(valueText) || 0;
             return `
                 <div class="progress-item-wrapper">
@@ -208,25 +238,25 @@ async function initDetail() {
             `;
         }).join('');
     } else {
-        document.getElementById('progress').style.display = 'none';
+        const progressSection = document.getElementById('progress');
+        if (progressSection) progressSection.style.display = 'none';
     }
 
     // Downloads
-    const downloadItems = Array.from(project.getElementsByTagName("download_item"));
+    const downloadItems = project.downloads || [];
     const downloadContainer = document.getElementById('downloads-container');
-    if (downloadItems.length > 0) {
+    if (downloadItems.length > 0 && downloadContainer) {
         downloadContainer.innerHTML = downloadItems.map(item => {
-            const version = item.getAttribute("version");
-            const type = item.getAttribute("type");
-            const maintenance = item.getAttribute("maintenance") === "true";
-            const url = item.getAttribute("url");
-            const changelog = item.getElementsByTagName("changelog")[0]?.textContent || "";
+            const version = item.version;
+            const type = item.type;
+            const maintenance = item.maintenance === true || item.maintenance === "true";
+            const url = item.url;
+            const changelog = item.changelog || "";
 
             return `
                 <div class="dir-item">
                     <div class="dir-header" onclick="toggleFolder(this)">
                         <div class="dir-title">
-                            
                             <span>${version} (${type})</span>
                         </div>
                         <img src="/elements/light_down_arrow.png" class="dir-arrow" alt="Arrow">
@@ -235,7 +265,9 @@ async function initDetail() {
                         ${changelog ? `
                             <div class="changelog-box">
                                 <h4>Alterações / Informações</h4>
-                                <p>${changelog}</p>
+                                <div class="changelog-content" style="font-size: 0.9rem; line-height: 1.6;">
+                                    ${parseArticleTags(changelog)}
+                                </div>
                             </div>
                         ` : ''}
                         ${maintenance ? `
@@ -259,9 +291,9 @@ async function initDetail() {
         if (downloadsSection) downloadsSection.style.display = 'none';
     }
 
-    // Initialize Gallery
-    if (typeof initGallery === 'function') {
-        initGallery();
+    // Initialize Gallery Hooks
+    if (typeof window.initGallery === 'function') {
+        window.initGallery();
     }
 }
 
@@ -302,15 +334,26 @@ function setProjectView(view) {
     }
 }
 
-window.onload = () => {
+// Expose setProjectView to the global scope for HTML onclick
+window.setProjectView = setProjectView;
+
+// Initializer Boot
+function boot() {
     if (document.getElementById('projects-container')) {
         initListing().then(() => {
             const savedView = localStorage.getItem('projectsView');
-            if (savedView === 'list') {
-                setProjectView('list');
-            }
+            if (savedView === 'list') window.setProjectView('list');
         });
-    } else if (document.getElementById('project-container')) {
+    } else if (document.getElementById('project-container') || document.getElementById('project-head')) {
         initDetail();
     }
-};
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+} else {
+    boot();
+}
+
+// Exports for other modules if needed
+export { loadProjects, loadProjectById, renderProjectCard };

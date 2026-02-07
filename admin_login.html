@@ -158,23 +158,84 @@
             
             <button type="submit" class="login-btn">Acessar Sistema</button>
             <div id="login-error" class="error-msg">Credenciais inválidas ou acesso negado.</div>
+            
+            <!-- Setup Local Fallback UI -->
+            <div id="setup-local-container" style="display: none; margin-top: 1.5rem; text-align: center; border-top: 1px solid rgba(241, 163, 46, 0.2); padding-top: 1.5rem;">
+                <p style="font-size: 0.7rem; color: #999;">Parece que o Firebase não está configurado.</p>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.5rem;">
+                    <button type="button" onclick="document.getElementById('local-setup-modal').style.display='block'" 
+                            style="background: transparent; border: 1px solid #f1a32e; color: #f1a32e; padding: 0.4rem 1rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">
+                        Configurar Firebase Local
+                    </button>
+                    <button type="button" onclick="clearConfig()" 
+                            style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 0.4rem 1rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">
+                        Limpar Local
+                    </button>
+                </div>
+            </div>
         </form>
+    </div>
+
+    <!-- Modal for Local Setup -->
+    <div id="local-setup-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 2rem;">
+        <div class="login-card" style="max-width: 500px;">
+            <h2 style="color: #f1a32e; font-size: 1rem; margin-bottom: 1rem;">Configurar Firebase Local</h2>
+            <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 1rem;">Cole aqui o código `firebaseConfig` gerado no console do Firebase para rodar localmente.</p>
+            <textarea id="local-config-input" placeholder='{ "apiKey": "...", ... }' style="width: 100%; height: 150px; background: #000; border: 1px solid #333; color: #0f0; font-family: monospace; padding: 0.5rem; margin-bottom: 1rem;"></textarea>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="saveLocalConfig()" style="flex: 1; padding: 0.8rem; background: #f1a32e; border: none; font-weight: bold; cursor: pointer;">SALVAR</button>
+                <button onclick="document.getElementById('local-setup-modal').style.display='none'" style="flex: 1; padding: 0.8rem; background: #333; color: #fff; border: none; cursor: pointer;">CANCELAR</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import firebaseConfig from "/scripts/firebase-config.js";
+        import { getFirebaseConfig, saveLocalFirebaseConfig } from "/scripts/firebase-manager.js";
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        let auth;
+        
+        async function init() {
+            const config = await getFirebaseConfig();
+            
+            // Check if placeholders
+            if (Object.values(config).some(val => typeof val === 'string' && val.includes('${'))) {
+                document.getElementById('setup-local-container').style.display = 'block';
+                return;
+            }
+
+            try {
+                const app = initializeApp(config);
+                auth = getAuth(app);
+            } catch (e) {
+                console.error("Firebase Init Error:", e);
+                document.getElementById('setup-local-container').style.display = 'block';
+            }
+        }
+
+        init();
+
+        window.saveLocalConfig = () => {
+            const val = document.getElementById('local-config-input').value;
+            if (saveLocalFirebaseConfig(val)) {
+                alert("Configuração salva! Recarregando...");
+                location.reload();
+            } else {
+                alert("JSON inválido!");
+            }
+        };
 
         const loginForm = document.getElementById('login-form');
         const errorMsg = document.getElementById('login-error');
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!auth) {
+                document.getElementById('setup-local-container').style.display = 'block';
+                alert("Firebase não configurado. Use o botão abaixo.");
+                return;
+            }
             errorMsg.style.display = 'none';
 
             const email = document.getElementById('email').value;
@@ -186,8 +247,21 @@
             } catch (error) {
                 console.error("Login fallied:", error);
                 errorMsg.style.display = 'block';
+                
+                // If the error is about the API key, show the setup UI even if it was previously hidden
+                if (error.code && (error.code.includes('api-key') || error.code.includes('invalid-api-key'))) {
+                    errorMsg.textContent = "Chave de API do Firebase inválida!";
+                    document.getElementById('setup-local-container').style.display = 'block';
+                }
             }
         });
+
+        window.clearConfig = () => {
+            if (confirm("Deseja limpar a configuração local do Firebase?")) {
+                localStorage.removeItem('bitmundo_firebase_config');
+                location.reload();
+            }
+        };
 
         // Matrix Rain logic for aesthetic
         const canvas = document.getElementById('matrix-canvas');

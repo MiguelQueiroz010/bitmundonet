@@ -18,16 +18,27 @@
     <!-- Scripts -->
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
-    <script type="text/javascript" src="/scripts/projects_loader.js"></script>
+    <script type="module" src="/scripts/projects_loader.js"></script>
     <script type="text/javascript" src="/scripts/gallery.js"></script>
     <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script>
 
     <script>
-        function toggle_video() {
+        function toggle_video(e) {
+            if (e) e.stopPropagation();
             const video = document.getElementById("project-video-player");
+            const playIcon = document.getElementById("play-icon");
+            const pauseIcon = document.getElementById("pause-icon");
+            
             if (video) {
-                if (video.paused) video.play();
-                else video.pause();
+                if (video.paused) {
+                    video.play();
+                    if (playIcon) playIcon.style.display = "none";
+                    if (pauseIcon) pauseIcon.style.display = "block";
+                } else {
+                    video.pause();
+                    if (playIcon) playIcon.style.display = "block";
+                    if (pauseIcon) pauseIcon.style.display = "none";
+                }
             }
         }
 
@@ -48,10 +59,15 @@
     <!-- Standardized Project Template -->
     <div id="project-container">
         <!-- Hero Section -->
-        <header id="project-head" onclick="toggle_video()">
-            <video id="project-video-player" preload="auto" autoplay loop>
+        <header id="project-head">
+            <video id="project-video-player" preload="auto" autoplay loop muted playsinline>
                 <source id="video-source" src="" type="video/mp4" />
             </video>
+            
+            <button class="video-control-btn" id="video-toggle" onclick="toggle_video(event)" title="Play/Pause">
+                <svg id="play-icon" style="display: none;" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
             
             <div class="hero-content">
                 <img id="project-cover" src="" alt="Capa do Jogo" />
@@ -61,7 +77,7 @@
                     
                     <div class="hero-progress-container">
                         <div class="progress-info">
-                            <span>Status de Tradução</span>
+                            <span>Progresso Geral</span>
                             <span id="global-percent-text">0%</span>
                         </div>
                         <div class="hero-progress-bg">
@@ -133,7 +149,7 @@
                 <div class="comment-form-box">
                     <h3>Deixe seu comentário</h3>
                     <form id="comment-form">
-                        <input type="text" id="comment-user" placeholder="Seu Nome" required>
+                        <input type="text" id="comment-user" placeholder="Seu Nome" style="display: none;">
                         <textarea id="comment-text" placeholder="Sua Mensagem" required></textarea>
                         <button type="submit" class="comment-submit-btn">ENVIAR COMENTÁRIO</button>
                     </form>

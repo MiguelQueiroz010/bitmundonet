@@ -1,155 +1,62 @@
+import { dbPromise } from './db-context.js';
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { parseArticleTags } from "./utils.js";
+
 var gamesData = [];
 var currentLibraryView = 'name';
 
-function parseArticleTags(text) {
-    if (!text) return "";
-    let html = text;
-    // Replace (image style="...")path(/image)
-    html = html.replace(/\(image style="([^"]+)"\)([^)]*)\(\/image\)/gi, '<img src="$2" style="$1" class="article-img">');
-    // Replace (font-size = "...")text(/font-size)
-    html = html.replace(/\(font-size = "([^"]+)"\)([^)]*)\(\/font-size\)/gi, '<span style="font-size: $1;">$2</span>');
-    // Replace (color = "...")text(/color)
-    html = html.replace(/\(color = "([^"]+)"\)([^)]*)\(\/color\)/gi, '<span style="color: $1;">$2</span>');
-    return html.replace(/\n/g, '<br>'); // Preserve line breaks
-}
+// parseArticleTags removed - now imported from utils.js
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadLibrary();
-});
-
-function loadLibrary() {
-    fetch('/library.xml')
-        .then(response => response.text())
-        .then(data => {
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(data, "application/xml");
-            parseGames(xml);
-            renderLibrary();
-        })
-        .catch(err => console.error("Erro ao carregar biblioteca:", err));
-}
-
-function parseGames(xml) {
-    const games = xml.getElementsByTagName("game");
-    gamesData = [];
-
-    Array.from(games).forEach(game => {
-        if (game.getAttribute("active") === "false") return;
-
-        const getVal = (tag, parent = game) => {
-            const el = parent.getElementsByTagName(tag)[0];
-            return el ? el.textContent : "";
-        };
-
-        const info = game.getElementsByTagName("info")[0];
-        const pub = game.getElementsByTagName("publication")[0];
-        const prev = game.getElementsByTagName("previews")[0];
-        const hist = game.getElementsByTagName("history")[0];
-        const dev = game.getElementsByTagName("development")[0];
-        const rom = game.getElementsByTagName("romhacking")[0];
-        const walk = game.getElementsByTagName("walkthrough")[0];
-        const cheatsEl = game.getElementsByTagName("cheats")[0];
-        const mediaEl = game.getElementsByTagName("media")[0];
-        const ostEl = game.getElementsByTagName("ost")[0];
-
-        // Parse Media Gallery
-        let mediaGallery = [];
-        if (mediaEl) {
-            const items = mediaEl.getElementsByTagName("item");
-            Array.from(items).forEach(m => {
-                mediaGallery.push({ type: m.getAttribute("type"), url: m.getAttribute("url") });
-            });
-        }
-
-        // Parse OST
-        let tracklist = [];
-        if (ostEl) {
-            const tracks = ostEl.getElementsByTagName("track");
-            Array.from(tracks).forEach(t => {
-                tracklist.push({ title: t.getAttribute("title"), url: t.getAttribute("url") });
-            });
-        }
-
-        // Parse Cheats
-        let cheats = [];
-        if (cheatsEl) {
-            const codes = cheatsEl.getElementsByTagName("code");
-            Array.from(codes).forEach(c => {
-                cheats.push({ name: c.getAttribute("name"), code: c.textContent });
-            });
-        }
-
-        gamesData.push({
-            id: game.getAttribute("id"),
-            title: getVal("title", info),
-            platform: getVal("platform", info),
-            genre: getVal("genre", info),
-            year: getVal("release_year", info),
-            cover: getVal("cover", info),
-            publisher: getVal("publisher", pub),
-            developer: getVal("developer", pub),
-            region: getVal("region", pub),
-            summary: getVal("summary", prev),
-            video: getVal("video_url", prev),
-            lore: getVal("lore", hist),
-            impact: getVal("impact", hist),
-            dev_details: getVal("details", dev),
-            legacy: getVal("legacy", dev),
-            translator: getVal("translator", rom),
-            status: getVal("status", rom),
-            dev_notes: getVal("details_dev", rom),
-            hacker_credits: getVal("credits_hacker", rom),
-            guide_url: getVal("guide_url", walk),
-            tips: getVal("tips", walk),
-            cheats: cheats,
-            gallery: mediaGallery,
-            ost: tracklist
-        });
-    });
+async function loadLibrary() {
+    const db = await dbPromise;
+    try {
+        const querySnapshot = await getDocs(collection(db, "library"));
+        gamesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(game => game.active !== false && game.active !== "false");
+        renderLibrary();
+    } catch (err) {
+        console.error("Erro ao carregar biblioteca do Firestore:", err);
+        const container = document.getElementById("library-container");
+        if (container) container.innerHTML = "<p>Erro ao carregar a biblioteca.</p>";
+    }
 }
 
 function renderLibrary() {
     const container = document.getElementById("library-container");
+    if (!container) return;
     container.innerHTML = "";
 
-    // Sort by name by default
-    gamesData.sort((a, b) => a.title.localeCompare(b.title));
+    gamesData.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
     let groups = {};
 
     if (currentLibraryView === 'name') {
-        // Group by Alphabet
         gamesData.forEach(game => {
-            const letter = game.title.charAt(0).toUpperCase();
+            const letter = (game.title || " ").charAt(0).toUpperCase();
             if (!groups[letter]) groups[letter] = [];
             groups[letter].push(game);
         });
     } else if (currentLibraryView === 'platform') {
-        // Group by Platform
         gamesData.forEach(game => {
             const plat = game.platform || "Outros";
             if (!groups[plat]) groups[plat] = [];
             groups[plat].push(game);
         });
     } else if (currentLibraryView === 'genre') {
-        // Group by Genre
         gamesData.forEach(game => {
-            const genre = game.genre.split('/')[0].trim() || "Geral";
+            const genre = (game.genre || "Geral").split('/')[0].trim();
             if (!groups[genre]) groups[genre] = [];
             groups[genre].push(game);
         });
     }
 
     const sortedKeys = Object.keys(groups).sort();
-
     sortedKeys.forEach(key => {
-        // Add Header
         const header = document.createElement("h2");
         header.className = "category-header";
         header.textContent = key;
         container.appendChild(header);
 
-        // Add Cards
         groups[key].forEach(game => {
             const card = document.createElement("div");
             card.className = "game-card animate-fade-in";
@@ -160,7 +67,7 @@ function renderLibrary() {
                 <div class="game-body">
                     <div class="game-meta">
                         <span class="platform-tag">${game.platform}</span>
-                        <span>${game.year}</span>
+                        <span>${game.release_year || game.year || ''}</span>
                     </div>
                     <h2 class="game-title">${game.title}</h2>
                     <p style="color: var(--text-muted); font-size: 0.9rem;">${game.genre}</p>
@@ -171,16 +78,6 @@ function renderLibrary() {
     });
 }
 
-function switchLibraryView(mode, btn) {
-    currentLibraryView = mode;
-
-    // Update active class
-    document.querySelectorAll('.lib-view-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    renderLibrary();
-}
-
 function openModal(id) {
     const game = gamesData.find(g => g.id == id);
     if (!game) return;
@@ -188,12 +85,10 @@ function openModal(id) {
     const modal = document.getElementById("game-modal");
     const body = document.getElementById("modal-body");
 
-    // Clear and prepare
-    body.innerHTML = "";
     body.innerHTML = `
         <div class="wiki-header" style="margin-bottom: 2rem;">
             <h1 style="color: #fff; font-size: 2.5rem; margin-bottom: 0.5rem;">${game.title}</h1>
-            <p style="color: var(--highlight); font-size: 1.2rem;">${game.platform} | ${game.year}</p>
+            <p style="color: var(--highlight); font-size: 1.2rem;">${game.platform} | ${game.release_year || game.year || ''}</p>
         </div>
 
         <div class="wiki-container">
@@ -218,10 +113,10 @@ function openModal(id) {
                         <h2>Introdução</h2>
                         <p>${parseArticleTags(game.summary)}</p>
                     </div>
-                    ${game.video ? `
+                    ${game.video_url || game.video ? `
                     <div class="wiki-section">
                         <h2>Trailer / GamePlay</h2>
-                        <iframe width="100%" height="400" src="${game.video}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
+                        <iframe width="100%" height="400" src="${game.video_url || game.video}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
                     </div>` : ''}
                 </div>
 
@@ -243,7 +138,7 @@ function openModal(id) {
                     </div>
                     <div class="wiki-section">
                         <h2>Legado Tecnológico</h2>
-                        <p>${parseArticleTags(game.legacy)}</p>
+                        <p>${parseArticleTags(game.dev_legacy || game.legacy)}</p>
                     </div>
                 </div>
 
@@ -251,7 +146,7 @@ function openModal(id) {
                     <div class="wiki-section">
                         <h2>Galeria de Mídia</h2>
                         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
-                            ${game.gallery.length > 0 ? game.gallery.map(m => `
+                            ${(game.media || game.gallery || []).length > 0 ? (game.media || game.gallery).map(m => `
                                 <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
                                     <img src="${m.url}" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 0.5rem; border-radius: 4px;">
                                     <p style="font-size: 0.8rem; color: var(--highlight);">${m.type}</p>
@@ -265,7 +160,7 @@ function openModal(id) {
                     <div class="wiki-section">
                         <h2>Trilha Sonora (OST)</h2>
                         <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            ${game.ost.length > 0 ? game.ost.map(t => `
+                            ${(game.ost || []).length > 0 ? game.ost.map(t => `
                                 <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-weight: 600;">${t.title}</span>
                                     <audio controls style="height: 30px;">
@@ -282,27 +177,27 @@ function openModal(id) {
                     <div class="wiki-section">
                         <h2>Detalhes da Tradução</h2>
                         <p>Este projeto foi liderado por <strong>${game.translator}</strong> e encontra-se no status: <span style="color: ${game.status === 'Completo' ? '#4ade80' : 'var(--highlight)'}">${game.status}</span>.</p>
-                        <p>${parseArticleTags(game.dev_notes)}</p>
+                        <p>${parseArticleTags(game.details_dev || game.dev_notes)}</p>
                     </div>
                     <div class="wiki-section">
                         <h2>Créditos</h2>
-                        <p>${parseArticleTags(game.hacker_credits)}</p>
+                        <p>${parseArticleTags(game.credits_hacker || game.hacker_credits)}</p>
                     </div>
                 </div>
 
                 <div id="tab-extra" class="tab-pane wiki-article">
                     <div class="wiki-section">
                         <h2>Detonado e Dicas</h2>
-                        <p>${parseArticleTags(game.tips)}</p>
+                        <p>${parseArticleTags(game.guide_tips || game.tips)}</p>
                         ${game.guide_url ? `<a href="${game.guide_url}" target="_blank" class="view-btn" style="display: inline-block; margin-top: 1rem; text-decoration: none; background: var(--primary); color: #fff; padding: 0.8rem 1.5rem; border-radius: 5px;">Acessar Guia Externo</a>` : ''}
                     </div>
                     
                     <div class="wiki-section">
                         <h2 style="color: #4ade80;">Cheats (GameShark / Action Replay)</h2>
-                        ${game.cheats.length > 0 ? game.cheats.map(c => `
+                        ${(game.cheats || []).length > 0 ? game.cheats.map(c => `
                             <div style="background: rgba(74, 222, 128, 0.05); padding: 1rem; border-radius: 4px; border-left: 4px solid #4ade80; margin-bottom: 1rem; font-family: monospace;">
                                 <strong style="color: #4ade80; display: block; margin-bottom: 0.2rem;">${c.name}</strong> 
-                                <code style="color: #fff; font-size: 1.1rem;">${c.code}</code>
+                                <code style="color: #fff; font-size: 1.1rem;">${c.value || c.code}</code>
                             </div>
                         `).join('') : '<p>Dados de cheats não cadastrados.</p>'}
                     </div>
@@ -313,7 +208,7 @@ function openModal(id) {
                 <div class="infobox-title">Dados Técnicos</div>
                 <table class="infobox-table">
                     <tr><th>Plataforma</th><td>${game.platform}</td></tr>
-                    <tr><th>Lançamento</th><td>${game.year}</td></tr>
+                    <tr><th>Lançamento</th><td>${game.release_year || game.year || ''}</td></tr>
                     <tr><th>Gênero</th><td>${game.genre}</td></tr>
                     <tr><th>Editora</th><td>${game.publisher}</td></tr>
                     <tr><th>Dev</th><td>${game.developer}</td></tr>
@@ -334,29 +229,33 @@ function openModal(id) {
     document.body.style.overflow = "hidden";
 }
 
-function closeModal() {
+// Global scope hooks
+window.switchLibraryView = (mode, btn) => {
+    currentLibraryView = mode;
+    document.querySelectorAll('.lib-view-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderLibrary();
+};
+
+window.closeModal = () => {
     document.getElementById("game-modal").style.display = "none";
     document.body.style.overflow = "auto";
-}
+};
 
-function switchTab(evt, tabId) {
+window.switchTab = (evt, tabId) => {
     const tabPanes = document.getElementsByClassName("tab-pane");
-    for (let i = 0; i < tabPanes.length; i++) {
-        tabPanes[i].classList.remove("active");
-    }
+    for (let i = 0; i < tabPanes.length; i++) tabPanes[i].classList.remove("active");
 
     const tabBtns = document.getElementsByClassName("tab-btn");
-    for (let i = 0; i < tabBtns.length; i++) {
-        tabBtns[i].classList.remove("active");
-    }
+    for (let i = 0; i < tabBtns.length; i++) tabBtns[i].classList.remove("active");
 
     document.getElementById(tabId).classList.add("active");
     evt.currentTarget.classList.add("active");
-}
+};
 
 window.onclick = function (event) {
     const modal = document.getElementById("game-modal");
-    if (event.target == modal) {
-        closeModal();
-    }
-}
+    if (event.target == modal) window.closeModal();
+};
+
+document.addEventListener('DOMContentLoaded', loadLibrary);

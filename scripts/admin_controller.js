@@ -717,6 +717,29 @@ window.sortArticles = (sortType) => {
     loadArticles();
 };
 
+/**
+ * Helper to get embed URL for YouTube and Streamable
+ */
+function getEmbedUrl(url) {
+    if (!url) return null;
+    url = url.trim();
+
+    // YouTube
+    const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch && ytMatch[1]) {
+        const videoId = ytMatch[1];
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&enablejsapi=1`;
+    }
+
+    // Streamable
+    const stMatch = url.match(/(?:https?:\/\/)?(?:www\.)?streamable\.com\/([a-zA-Z0-9]+)/);
+    if (stMatch && stMatch[1]) {
+        return `https://streamable.com/e/${stMatch[1]}?autoplay=1&muted=1&loop=1&controls=0`;
+    }
+
+    return null;
+}
+
 window.previewProject = async (id) => {
     const docRef = doc(db, "projects", id);
     const docSnap = await getDoc(docRef);
@@ -827,21 +850,43 @@ window.previewProject = async (id) => {
                 body { background: #000; overflow-x: hidden; margin: 0; }
                 /* Fix header overlap in preview */
                 #project-head { 
-                    min-height: auto !important; 
+                    min-height: 400px !important; 
                     height: auto !important; 
                     padding: 80px 20px !important; 
                     display: flex !important;
                     align-items: center !important;
+                    position: relative !important;
                 }
                 /* Ensure video stays behind */
-                #project-video-player {
+                #project-video-player, #project-video-iframe {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100%;
                     height: 100%;
                     z-index: 0;
+                    opacity: 0.5;
+                    border: none;
+                    pointer-events: none;
+                    object-fit: cover;
                 }
+                .video-control-btn {
+                    z-index: 20;
+                    position: absolute;
+                    bottom: 20px;
+                    right: 20px;
+                    background: rgba(0,0,0,0.5);
+                    border: 1px solid rgba(255,255,255,0.2);
+                    border-radius: 50%;
+                    width: 44px;
+                    height: 44px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    color: white;
+                }
+                .video-control-btn svg { width: 24px; height: 24px; fill: currentColor; }
                 .hero-content {
                     position: relative;
                     z-index: 10;
@@ -868,9 +913,11 @@ window.previewProject = async (id) => {
                     dots[slideIndex-1].className += " active";
                 }
 
+                let videoPlaying = true;
                 function toggle_video(e) {
                     if (e) e.stopPropagation();
                     const video = document.getElementById("project-video-player");
+                    const iframe = document.getElementById("project-video-iframe");
                     const playIcon = document.getElementById("play-icon");
                     const pauseIcon = document.getElementById("pause-icon");
                     
@@ -884,6 +931,17 @@ window.previewProject = async (id) => {
                             if (playIcon) playIcon.style.display = "block";
                             if (pauseIcon) pauseIcon.style.display = "none";
                         }
+                    } else if (iframe) {
+                        videoPlaying = !videoPlaying;
+                        const command = videoPlaying ? 'playVideo' : 'pauseVideo';
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: command,
+                            args: []
+                        }), '*');
+                        
+                        if (playIcon) playIcon.style.display = videoPlaying ? "none" : "block";
+                        if (pauseIcon) pauseIcon.style.display = videoPlaying ? "block" : "none";
                     }
                 }
             </script>
@@ -891,16 +949,34 @@ window.previewProject = async (id) => {
         <body>
             <div id="project-container">
                 <header id="project-head">
-                    ${p.video ? `
-                        <video id="project-video-player" autoplay loop muted playsinline>
-                            <source src="${p.video}" type="video/mp4">
-                        </video>
-                        <button class="video-control-btn" id="video-toggle" onclick="toggle_video(event)" title="Play/Pause">
-                            <svg id="play-icon" style="display: none;" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            <svg id="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        </button>
-                    ` : ''}
-                    
+                    ${p.video ? (() => {
+            const embedUrl = getEmbedUrl(p.video);
+            const buttonHtml = `
+                            <button class="video-control-btn" id="video-toggle" onclick="toggle_video(event)" title="Play/Pause" style="display: flex;">
+                                <svg id="play-icon" style="display: none;" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                <svg id="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                        `;
+
+            if (embedUrl) {
+                return `
+                                <iframe id="project-video-iframe" 
+                                        src="${embedUrl}" 
+                                        frameborder="0" 
+                                        allow="autoplay; fullscreen; picture-in-picture" 
+                                        allowfullscreen>
+                                </iframe>
+                                ${buttonHtml}
+                            `;
+            } else {
+                return `
+                                <video id="project-video-player" autoplay loop muted playsinline>
+                                    <source src="${p.video}" type="video/mp4">
+                                </video>
+                                ${buttonHtml}
+                            `;
+            }
+        })() : ''}                  
                     <div class="hero-content">
                         <img id="project-cover" src="${p.cover || ''}" alt="Capa" onerror="this.style.display='none'">
                         <div class="info-glass">
@@ -943,8 +1019,8 @@ window.previewProject = async (id) => {
                             <h2 id="under">Progresso</h2>
                             <div id="progress-list">
                                 ${p.progress.items.map(item => {
-        const percent = parseInt(item.value) || 0;
-        return `
+            const percent = parseInt(item.value) || 0;
+            return `
                                         <div class="progress-item-wrapper">
                                             <div class="progress-label">
                                                 <span class="label-text">${item.label}</span>
@@ -955,7 +1031,7 @@ window.previewProject = async (id) => {
                                             </div>
                                         </div>
                                     `;
-    }).join('')}
+        }).join('')}
                             </div>
                         </div>` : ''}
                     </div>

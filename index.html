@@ -28,7 +28,7 @@
     
     <!-- Scripts -->
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
-    <script type="text/javascript" src="/scripts/index.js"></script>
+    <script type="module" src="/scripts/index.js"></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
 </head>
 
@@ -60,52 +60,13 @@
                     <h2 class="section-title">Destaques</h2>
                     
                     <div class="slideshow-container hero-slideshow" id="gallery" data-autohide="a11">
-                         <script type="text/javascript" src="/scripts/gallery.js"></script>
-                         <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script>
-
-                        <!-- Slide 1: Naruto -->
-                        <div class="mySlides fade first">
-                            <div class="slide-content-wrapper">
-                                <a href="projects/ps2/ninja5br/ninja5br.html">
-                                    <img src="projects/ps2/ninja5br/media/poster.png" alt="Naruto Shippuden Ultimate Ninja 5" loading="lazy">
-                                    <div class="slide-caption-overlay">
-                                        <div class="caption-content">
-                                            <h2>Naruto Shippuden Ultimate Ninja 5+ BR</h2>
-                                            <span class="status-badge">Projeto Completo</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
+                        <div style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">
+                            Carregando destaques...
                         </div>
-
-                        <!-- Slide 2: Bob Esponja -->
-                        <div class="mySlides fade">
-                            <div class="slide-content-wrapper">
-                                <a href="projects/ps2/sbcfkk/sbcfkk.html">
-                                    <img src="projects/ps2/sbcfkk/media/capa.jpg" alt="Bob Esponja" style="filter: grayscale(80%);" loading="lazy">
-                                    <div class="slide-caption-overlay">
-                                        <div class="caption-content">
-                                            <h2>Bob Esponja: Criatura do Siri Cascudo</h2>
-                                            <div class="progress-container">
-                                                <div class="progress-bar" style="width: 25%;"></div>
-                                                <span class="percentage-text">25% Completo</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Manual Navigation Buttons -->
-                        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-                        <a class="next" onclick="plusSlides(1)">&#10095;</a>
                     </div>
-
-                    <!-- Navigation Dots -->
-                    <div class="dots-container">
-                        <span class="dot" onclick="currentSlide(1)"></span>
-                        <span class="dot" onclick="currentSlide(2)"></span>
-                    </div>
+                    
+                    <script type="text/javascript" src="/scripts/gallery.js"></script>
+                    <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script>
                     
                 </section>
 
@@ -119,17 +80,7 @@
                     </div>
                 </section>
                 
-                <!-- YouTube Gallery (Mobile/Desktop Consolidated) -->
-                 <section class="glass-panel" style="padding: 2rem; margin-top: 3rem;">
-                    <h2 class="section-title">Vídeos do YouTube</h2>
-                    <div id="youtube-gallery" style="width: 100%; max-width: 100%; overflow: hidden;">
-                        <script src="https://static.elfsight.com/platform/platform.js" async></script>
-                        <div class="elfsight-app-326735bf-c4ef-4e77-a596-503f95e94f27" data-elfsight-app-lazy></div>
-                    </div>
-                    <!-- Hidden mobile div ID if JS searches for it explicitly, though we can likely consolidate -->
-                    <!-- The JS toggles youtube-galleryM display. Let's keep a placeholder if needed or just use this -->
-                    <div id="youtube-galleryM" style="display:none;"></div> 
-                 </section>
+              
 
             </div>
             
@@ -158,6 +109,13 @@
                     </div>
                 </div>
 
+                <!-- Support Widget -->
+                <div class="glass-panel sidebar-widget" id="support" style="text-align: center; padding: 1.5rem;">
+                    <h3 class="brand-font" style="margin-bottom: 1rem; color: var(--primary);">Apoie o Projeto</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Ajude a manter os Projetos vivos, mande qualquer valor no PIX.</p>
+                    <iframe style="border-radius: 12px; border: none; width: 100%;" src="https://widget.livepix.gg/embed/920763c0-5ff2-44e5-a7bc-466b0ed59861" width="100%" height="300px"></iframe>
+                </div>
+
                 <!-- Clock Widget -->
                 <div class="glass-panel sidebar-widget" id="clock" style="text-align: center;">
                     <h3 class="brand-font" style="margin-bottom: 1rem;">Horário Atual</h3>
@@ -184,13 +142,16 @@
         </script>
     </footer>
 
-    <!-- XML Article Loader -->
-    <script>
+    <!-- XML Article Loader (Transformed to Firestore) -->
+    <script type="module">
+        import { loadArticlesFromFirestore, loadRecentGallery } from "/scripts/index.js";
+        
         // Ensure this function exists and works
-        if(typeof readXml === 'function') {
-            readXml("/article.xml");
-        } else {
-            console.warn("readXml function not found - check /scripts/index.js");
+        try {
+            loadArticlesFromFirestore();
+            loadRecentGallery();
+        } catch (e) {
+            console.warn("Firestore Article Loader failed:", e);
         }
     </script>
 </body>

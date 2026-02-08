@@ -135,7 +135,7 @@ function renderArticle(a, container) {
                 <h3 style="font-size: 1rem; margin-bottom: 1rem;">Deixe seu comentário</h3>
                 <form id="comment-form-${articleId}">
                     <textarea placeholder="Sua Mensagem" required></textarea>
-                    <button type="submit" class="comment-submit-btn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">ENVIAR</button>
+                    <button type="submit" class="comment-submit-btn">ENVIAR</button>
                 </form>
             </div>
         </div>

@@ -149,10 +149,8 @@ function updateFormState(user, commentForm) {
     } else {
         // Logged Out Design
         authContainer.innerHTML = `
-            <div style="text-align: center; padding: 2rem; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; margin-bottom: 1rem;">
-                <p style="color: white; font-weight: bold; margin-bottom: 1rem; font-size: 1.1rem;">
-                    Faça login para comentar ou reagir a essa postagem!
-                </p>
+            <div class="login-wall-prompt">
+                <p>Faça login para comentar ou reagir a essa postagem!</p>
                 <button type="button" class="google-btn" style="margin: 0 auto;">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
                     Entrar com Google

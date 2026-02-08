@@ -11,6 +11,8 @@
     <!-- Shared Assets -->
     <link rel="stylesheet" href="/css/navigator.css" />
     <link rel="stylesheet" href="/css/projects.css" />
+    <link rel="stylesheet" href="/css/comments.css" />
+    <link rel="stylesheet" href="/css/reactions.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png">
@@ -152,6 +154,12 @@
                 </div>
             </section>
 
+            <!-- Reactions Section -->
+            <section id="reactions-section" class="section" style="margin-top: 4rem;">
+                <h2 id="under">O que achou do projeto?</h2>
+                <div id="project-reactions"></div>
+            </section>
+
             <!-- Comments Section (Firebase) -->
             <section id="comments-section" class="section" style="margin-top: 6rem;">
                 <h2 id="under">Comentários</h2>
@@ -179,5 +187,6 @@
     </script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
     <script type="module" src="/scripts/comments_loader.js"></script>
+    <script type="module" src="/scripts/navbar_auth.js"></script>
 </body>
 </html>

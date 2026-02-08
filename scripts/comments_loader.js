@@ -2,32 +2,22 @@ import { dbPromise, authPromise } from './db-context.js';
 import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
-// Get Project ID from URL
-const params = new URLSearchParams(window.location.search);
-const projectId = params.get('id');
-
-const commentsContainer = document.getElementById('comments-container');
-const commentForm = document.getElementById('comment-form');
-
 // Global Auth State
 let currentUser = null;
+let authInitialized = false;
 
-if (projectId && commentsContainer) {
-    initComments();
-}
-
-async function initComments() {
-    const db = await dbPromise;
+/**
+ * Initialize global auth listener once
+ */
+async function ensureAuthListener() {
+    if (authInitialized) return;
     const auth = await authPromise;
-
-    // Initialize Auth Listener
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
-        updateFormState(user);
-        loadComments(db); // Reload comments to update delete buttons
+        // Notify all active comment sections about auth change
+        window.dispatchEvent(new CustomEvent('bitmundo-auth-change', { detail: user }));
     });
-
-    setupForm(db, auth);
+    authInitialized = true;
 }
 
 /**
@@ -70,15 +60,55 @@ function getInitialsString(name) {
     return `<div class="user-avatar-placeholder">${initials}</div>`;
 }
 
+/**
+ * Initialization function for a specific project/article
+ */
+export async function initComments(projectId, containerId = 'comments-container', formId = 'comment-form') {
+    const commentsContainer = document.getElementById(containerId);
+    const commentForm = document.getElementById(formId);
+
+    if (!projectId || !commentsContainer) return;
+
+    const db = await dbPromise;
+    const auth = await authPromise;
+
+    await ensureAuthListener();
+
+    // Listener for auth changes specific to this instance
+    const authHandler = (e) => {
+        const user = e.detail;
+        updateFormState(user, commentForm);
+        loadComments(db, projectId, commentsContainer);
+    };
+
+    window.addEventListener('bitmundo-auth-change', authHandler);
+
+    // Initial load
+    updateFormState(currentUser, commentForm);
+    loadComments(db, projectId, commentsContainer);
+    setupForm(db, auth, projectId, commentForm);
+
+    // Return unsubscribe/cleanup if needed
+    return () => {
+        window.removeEventListener('bitmundo-auth-change', authHandler);
+    };
+}
+
+// Auto-init if on context that has the default IDs (legacy support)
+const params = new URLSearchParams(window.location.search);
+const defaultProjectId = params.get('id');
+if (defaultProjectId && document.getElementById('comments-container')) {
+    initComments(defaultProjectId);
+}
 
 /**
  * Handle UI state based on Auth
  */
-function updateFormState(user) {
+function updateFormState(user, commentForm) {
     if (!commentForm) return;
 
-    const userField = document.getElementById('comment-user');
     const formBox = commentForm.closest('.comment-form-box');
+    if (!formBox) return;
 
     // Remove existing auth UI if present to rebuild
     const existingAuthUI = formBox.querySelector('.auth-ui-container');
@@ -92,8 +122,8 @@ function updateFormState(user) {
     if (user) {
         // Logged In Design
         const avatarHTML = getAvatarHTML(user);
-
         const displayName = resolveUserName(user);
+
         authContainer.innerHTML = `
             <div class="auth-user-info">
                 ${avatarHTML}
@@ -101,66 +131,67 @@ function updateFormState(user) {
                     <div style="font-weight: bold; color: #fff;">${displayName}</div>
                     <div style="font-size: 0.75rem; color: #aaa;">Logado via Google</div>
                 </div>
-                <button type="button" class="logout-btn" id="btn-logout" style="pointer-events: all; cursor: pointer;">Sair</button>
+                <button type="button" class="logout-btn" style="pointer-events: all; cursor: pointer;">Sair</button>
             </div>
         `;
 
-        // Hide manual name input as we use auth name
-        if (userField) userField.style.display = 'none';
-
-        // Add Logout Listener - Use setTimeout to ensure DOM is ready
         formBox.insertBefore(authContainer, commentForm);
 
-        setTimeout(async () => {
-            const btn = document.getElementById('btn-logout');
-            if (btn) {
-                btn.onclick = async () => {
-                    const auth = await authPromise;
-                    await signOut(auth);
-                };
-            }
-        }, 50);
+        const logoutBtn = authContainer.querySelector('.logout-btn');
+        logoutBtn.onclick = async () => {
+            const auth = await authPromise;
+            await signOut(auth);
+        };
+
+        // Ensure form is visible
+        commentForm.style.display = 'block';
 
     } else {
         // Logged Out Design
         authContainer.innerHTML = `
-            <button type="button" class="google-btn" id="btn-login-google">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-                Entrar com Google para Comentar
-            </button>
+            <div style="text-align: center; padding: 2rem; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; margin-bottom: 1rem;">
+                <p style="color: white; font-weight: bold; margin-bottom: 1rem; font-size: 1.1rem;">
+                    Faça login para comentar ou reagir a essa postagem!
+                </p>
+                <button type="button" class="google-btn" style="margin: 0 auto;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                    Entrar com Google
+                </button>
+            </div>
         `;
 
-        if (userField) userField.style.display = 'none'; // Keep hidden, force login
-
-        // Add Login Listener
         formBox.insertBefore(authContainer, commentForm);
-        document.getElementById('btn-login-google').addEventListener('click', async () => {
+
+        // Hide the actual form
+        commentForm.style.display = 'none';
+
+        authContainer.querySelector('.google-btn').onclick = async () => {
             const auth = await authPromise;
             const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
             } catch (e) {
                 console.error("Login failed", e);
-
                 if (e.code === 'auth/unauthorized-domain') {
-                    alert("ERRO DE DOMÍNIO: Este domínio (localhost/IP) não está autorizado no Firebase.\n\nVá em Authentication > Settings > Authorized Domains e adicione-o.");
-                } else if (e.code === 'auth/popup-closed-by-user') {
-                    // Ignore
-                } else {
+                    alert("ERRO DE DOMÍNIO: Este domínio não está autorizado no Firebase.");
+                } else if (e.code !== 'auth/popup-closed-by-user') {
                     alert("Erro ao fazer login: " + e.message);
                 }
             }
-        });
+        };
     }
 }
 
 /**
  * Real-time listener for comments
  */
-let unsubscribe = null;
+const activeUnsubscribes = new Map();
 
-function loadComments(db) {
-    if (unsubscribe) unsubscribe();
+function loadComments(db, projectId, container) {
+    // Cleanup previous listener for this specific container if it exists
+    if (activeUnsubscribes.has(container)) {
+        activeUnsubscribes.get(container)();
+    }
 
     const q = query(
         collection(db, "comments"),
@@ -168,9 +199,9 @@ function loadComments(db) {
         orderBy("timestamp", "desc")
     );
 
-    unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, (snapshot) => {
         if (snapshot.empty) {
-            commentsContainer.innerHTML = '<p style="color: rgba(255,255,255,0.3); text-align: center;">Nenhum comentário ainda. Seja o primeiro!</p>';
+            container.innerHTML = '<p style="color: rgba(255,255,255,0.3); text-align: center;">Nenhum comentário ainda. Seja o primeiro!</p>';
             return;
         }
 
@@ -180,7 +211,6 @@ function loadComments(db) {
         allComments.sort((a, b) => {
             if (a.pinned && !b.pinned) return -1;
             if (!a.pinned && b.pinned) return 1;
-
             const timeA = a.timestamp?.seconds || 0;
             const timeB = b.timestamp?.seconds || 0;
             return timeB - timeA;
@@ -189,17 +219,15 @@ function loadComments(db) {
         const parentComments = allComments.filter(c => !c.parentId);
         const replies = allComments.filter(c => c.parentId);
 
-        commentsContainer.innerHTML = parentComments.map(comment => {
+        container.innerHTML = parentComments.map(comment => {
             const date = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleDateString('pt-BR', {
                 day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
             }) : 'Agora mesmo';
 
-            // Check ownership
             const isOwner = currentUser && (comment.uid === currentUser.uid);
             const deleteBtn = isOwner ?
                 `<button class="delete-comment-btn" onclick="window.deleteMyComment('${comment.id}')" title="Excluir meu comentário">✕</button>` : '';
 
-            // Avatar Handling in List
             const authorName = (comment.user === "null" || !comment.user || comment.user === "Usuário") ? "Usuário" : comment.user;
             const avatar = comment.userPhoto ?
                 `<img src="${comment.userPhoto}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${authorName}')">` :
@@ -207,7 +235,6 @@ function loadComments(db) {
 
             const pinnedBadge = comment.pinned ? `<span class="pinned-badge">📌 Fixado</span>` : '';
 
-            // Filter replies for this comment
             const commentReplies = replies.filter(r => r.parentId === comment.id);
             const repliesHTML = commentReplies.map(reply => {
                 const replyDate = reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString('pt-BR', {
@@ -241,7 +268,7 @@ function loadComments(db) {
 
             const replySection = repliesHTML ? `<div class="comment-replies">${repliesHTML}</div>` : '';
             const replyBtn = currentUser ? `
-                <button class="reply-btn" onclick="window.showReplyForm('${comment.id}')">
+                <button class="reply-btn" onclick="window.showReplyForm('${comment.id}', '${projectId}')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
                     Responder
                 </button>
@@ -252,10 +279,10 @@ function loadComments(db) {
                     <div class="comment-header">
                         <div class="comment-header-main">
                             ${avatar}
-                            <div style="display: flex; flex-direction: column;">
+                            <div class="comment-meta">
                                 <div style="display: flex; align-items: center;">
                                     ${pinnedBadge}
-                                    <span class="comment-author">${(comment.user === "null" || !comment.user || comment.user === "Usuário") ? "Usuário" : comment.user}</span>
+                                    <span class="comment-author">${authorName}</span>
                                 </div>
                                 <span class="comment-date">${date}</span>
                             </div>
@@ -275,16 +302,16 @@ function loadComments(db) {
         }).join('');
     }, (error) => {
         console.error("Comments listener error:", error);
-        commentsContainer.innerHTML = '<p style="color: rgba(255,0,0,0.5); text-align: center;">Erro ao carregar comentários.</p>';
     });
+
+    activeUnsubscribes.set(container, unsubscribe);
 }
 
 /**
- * Global function for delete button (since it's injected HTML)
+ * Global function for delete button
  */
 window.deleteMyComment = async (commentId) => {
     if (!confirm("Deseja realmente excluir isso?")) return;
-
     try {
         const db = await dbPromise;
         await deleteDoc(doc(db, "comments", commentId));
@@ -296,11 +323,10 @@ window.deleteMyComment = async (commentId) => {
 /**
  * Handle reply UI
  */
-window.showReplyForm = (parentId) => {
+window.showReplyForm = (parentId, projectId) => {
     const container = document.getElementById(`reply-form-container-${parentId}`);
     if (!container) return;
 
-    // Close other reply forms if open? Or just don't duplicate.
     if (container.innerHTML !== "") {
         container.innerHTML = "";
         return;
@@ -311,7 +337,7 @@ window.showReplyForm = (parentId) => {
             <textarea id="reply-text-${parentId}" placeholder="Escreva sua resposta..."></textarea>
             <div class="reply-form-actions">
                 <button class="reply-cancel-btn" onclick="document.getElementById('reply-form-container-${parentId}').innerHTML=''">Cancelar</button>
-                <button class="reply-submit-btn" id="submit-reply-${parentId}" onclick="window.submitReply('${parentId}')">Responder</button>
+                <button class="reply-submit-btn" id="submit-reply-${parentId}" onclick="window.submitReply('${parentId}', '${projectId}')">Responder</button>
             </div>
         </div>
     `;
@@ -319,24 +345,18 @@ window.showReplyForm = (parentId) => {
     document.getElementById(`reply-text-${parentId}`).focus();
 };
 
-window.submitReply = async (parentId) => {
-    if (!currentUser) {
-        alert("Você precisa estar logado!");
-        return;
-    }
-
+window.submitReply = async (parentId, projectId) => {
+    if (!currentUser) return alert("Você precisa estar logado!");
     const textInput = document.getElementById(`reply-text-${parentId}`);
     const submitBtn = document.getElementById(`submit-reply-${parentId}`);
     const text = textInput.value.trim();
-
     if (!text) return;
 
     try {
         submitBtn.disabled = true;
         submitBtn.innerText = "Enviando...";
-
         const db = await dbPromise;
-        const commentData = {
+        await addDoc(collection(db, "comments"), {
             projectId: projectId,
             parentId: parentId,
             user: resolveUserName(currentUser),
@@ -344,12 +364,9 @@ window.submitReply = async (parentId) => {
             uid: currentUser.uid,
             text: text,
             timestamp: serverTimestamp()
-        };
-
-        await addDoc(collection(db, "comments"), commentData);
+        });
         document.getElementById(`reply-form-container-${parentId}`).innerHTML = "";
     } catch (e) {
-        console.error("Error replying:", e);
         alert("Erro ao responder: " + e.message);
     } finally {
         submitBtn.disabled = false;
@@ -360,10 +377,10 @@ window.submitReply = async (parentId) => {
 /**
  * Handle new comment submission
  */
-function setupForm(db, auth) {
+function setupForm(db, auth, projectId, commentForm) {
     if (!commentForm) return;
 
-    commentForm.addEventListener('submit', async (e) => {
+    commentForm.onsubmit = async (e) => {
         e.preventDefault();
 
         if (!currentUser) {
@@ -371,8 +388,10 @@ function setupForm(db, auth) {
             return;
         }
 
-        const textInput = document.getElementById('comment-text');
+        const textInput = commentForm.querySelector('textarea');
         const submitBtn = commentForm.querySelector('.comment-submit-btn');
+
+        if (!textInput.value.trim()) return;
 
         const commentData = {
             projectId: projectId,
@@ -385,17 +404,18 @@ function setupForm(db, auth) {
 
         try {
             submitBtn.disabled = true;
+            const originalText = submitBtn.innerText;
             submitBtn.innerText = 'ENVIANDO...';
 
             await addDoc(collection(db, "comments"), commentData);
 
             textInput.value = '';
-            submitBtn.innerText = 'ENVIAR COMENTÁRIO';
+            submitBtn.innerText = originalText;
         } catch (error) {
             console.error("Error adding comment: ", error);
             alert("Erro ao enviar: " + error.message);
         } finally {
             submitBtn.disabled = false;
         }
-    });
+    };
 }

@@ -623,8 +623,7 @@ window.saveProjectChanges = async (id) => {
         video: document.getElementById('edit-video').value,
         live_video: document.getElementById('edit-live').value,
         description: document.getElementById('edit-desc').value,
-        meta_keywords: document.getElementById('edit-keywords').value,
-        updatedAt: new Date().toISOString(),
+        meta_keywords: document.getElementById('edit-keywords').value
     };
 
     try {
@@ -661,12 +660,13 @@ window.loadArticles = () => {
 
             switch (currentArticlesSort) {
                 case 'date-desc':
-                    const timeA = new Date(dataA.migratedAt || dataA.date || 0);
-                    const timeB = new Date(dataB.migratedAt || dataB.date || 0);
+                    // Parse "DD/MM/YYYY" -> YYYY-MM-DD for sorting
+                    const timeA = new Date(parseDate(dataA.date));
+                    const timeB = new Date(parseDate(dataB.date));
                     return timeB - timeA;
                 case 'date-asc':
-                    const timeA2 = new Date(dataA.migratedAt || dataA.date || 0);
-                    const timeB2 = new Date(dataB.migratedAt || dataB.date || 0);
+                    const timeA2 = new Date(parseDate(dataA.date));
+                    const timeB2 = new Date(parseDate(dataB.date));
                     return timeA2 - timeB2;
                 case 'title-asc':
                     return (dataA.title || '').localeCompare(dataB.title || '');
@@ -738,6 +738,25 @@ function getEmbedUrl(url) {
     }
 
     return null;
+}
+
+/**
+ * Helper to parse DD/MM/YYYY or DD-MM-YYYY dates
+ */
+function parseDate(dateStr) {
+    if (!dateStr) return 0;
+
+    // Check if it's already ISO (YYYY-MM-DD)
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) return dateStr;
+
+    // Parse DD/MM/YYYY or DD-MM-YYYY
+    const parts = dateStr.includes('/') ? dateStr.split('/') : dateStr.split('-');
+    if (parts.length === 3) {
+        // If first part is 4 digits, it's likely YYYY-MM-DD already
+        if (parts[0].length === 4) return dateStr;
+        return `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert to YYYY-MM-DD
+    }
+    return dateStr;
 }
 
 window.previewProject = async (id) => {
@@ -1177,19 +1196,41 @@ window.addNewArticle = () => {
                 <button class="save-btn" style="background: rgba(255, 255, 255, 0.39);" onclick="closeModal()">✕ Fechar</button>
             </div>
 
-            <div class="form-group">
-                <label>ID Único (slug)</label>
-                <input type="text" id="art-id" placeholder="ex: lancamento-mario">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="art-title">
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <input type="text" id="art-category">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Título</label>
-                <input type="text" id="art-title">
+
+            <!-- Topics Section (Visible by Default) -->
+            <div id="topics-container" style="margin-top: 2rem; display: block;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px dotted rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                    <h4 style="color: var(--admin-primary); margin: 0;">📦 Tópicos Estruturados</h4>
+                    <button class="save-btn" style="padding: 0.5rem 1rem; font-size: 0.75rem; background: #10b981; color: #000;" onclick="addTopicRow()">+ Novo Tópico</button>
+                </div>
+                <div id="topics-list">
+                    <!-- Empty initially -->
+                </div>
             </div>
-            <div class="form-group">
-                <label>Categoria</label>
-                <input type="text" id="art-category">
+
+            <!-- Legacy Content Section (Hidden by Default) -->
+            <div class="form-group" style="margin-top: 2rem; display: none;" id="legacy-content-group">
+                <label>Conteúdo (Simples)</label>
+                <textarea id="art-content" style="height: 400px; font-family: monospace;"></textarea>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+
+            <!-- Toggle Button -->
+            <button class="save-btn" style="margin-top: 1.5rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.7rem; width: 100%; border: 1px dashed rgba(59, 130, 246, 0.3);" 
+                    onclick="toggleTopicSystem(true)">
+                🔄 Reverter para Conteúdo Simples
+            </button>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
                 <button class="save-btn" style="flex: 1;" onclick="saveArticleChanges(null)">Criar no DB</button>
             </div>
         </div>
@@ -1275,15 +1316,35 @@ window.editArticle = async (id) => {
 };
 
 window.saveArticleChanges = async (id) => {
-    const newId = id || document.getElementById('art-id').value;
-    if (!newId) return alert("Preencha o ID!");
+    // 1. Determine ID
+    let newId = id;
+    const idInput = document.getElementById('art-id');
+    const titleInput = document.getElementById('art-title');
+
+    if (!newId) {
+        if (idInput) {
+            newId = idInput.value.trim();
+        }
+        // Fallback: Generate from Title if ID input is missing or empty
+        if (!newId && titleInput) {
+            newId = titleInput.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        }
+    }
+
+    if (!newId) return alert("Erro: Não foi possível gerar um ID. Verifique o título.");
+
+    // 2. Determine Author & Date (Auto if missing)
+    const authorInput = document.getElementById('art-author');
+    const author = authorInput ? authorInput.value : "BitMundo";
+
+    const dateInput = document.getElementById('art-date');
+    const date = dateInput ? dateInput.value : new Date().toLocaleDateString('pt-BR');
 
     const data = {
-        title: document.getElementById('art-title').value,
-        author: document.getElementById('art-author').value,
+        title: titleInput.value,
+        author: author,
         category: document.getElementById('art-category').value,
-        date: document.getElementById('art-date').value,
-        updatedAt: new Date().toISOString()
+        date: date
     };
 
     // Handle Topics if active
@@ -2215,7 +2276,8 @@ window.deleteSelected = async (collectionName) => {
  * Save new project to Firestore
  */
 window.saveNewProject = async () => {
-    const id = document.getElementById('new-id').value;
+    const idInput = document.getElementById('new-id').value;
+    const id = idInput ? idInput.trim() : null;
     const title = document.getElementById('new-title').value;
     const platform = document.getElementById('new-platform').value;
     const status = document.getElementById('new-status').value;

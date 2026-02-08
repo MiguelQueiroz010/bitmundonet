@@ -1,6 +1,7 @@
 import { dbPromise } from './db-context.js';
-import { collection, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { parseArticleTags } from "./utils.js";
+import { initReactions } from "./reactions_manager.js";
 
 /**
  * Projects Loader Script (Firestore Version)
@@ -319,6 +320,11 @@ async function initDetail() {
     // Initialize Gallery Hooks
     if (typeof window.initGallery === 'function') {
         window.initGallery();
+    }
+
+    // Initialize Reactions
+    if (document.getElementById('project-reactions')) {
+        initReactions(projectId, 'project-reactions');
     }
 }
 

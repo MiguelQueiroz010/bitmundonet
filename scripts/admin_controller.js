@@ -308,43 +308,71 @@ function loadCommentsAdmin() {
             return;
         }
 
-        listEl.innerHTML = snapshot.docs.map(doc => {
-            const data = doc.data();
-            const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
-            const timeAgo = getTimeAgo(date);
-            const isPinned = data.pinned === true;
-            const isReply = !!data.parentId;
+        const allComments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const parents = allComments.filter(c => !c.parentId);
+        const replies = allComments.filter(c => c.parentId);
 
-            return `
-                <div class="card" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid ${isPinned ? 'var(--admin-primary)' : 'rgba(255,255,255,0.05)'}; position: relative; ${isReply ? 'margin-left: 2rem; opacity: 0.8;' : ''}">
+        listEl.innerHTML = parents.map(parent => {
+            const date = parent.timestamp?.toDate ? parent.timestamp.toDate() : new Date();
+            const timeAgo = getTimeAgo(date);
+            const isPinned = parent.pinned === true;
+
+            let parentHtml = `
+                <div class="card" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid ${isPinned ? 'var(--admin-primary)' : 'rgba(255,255,255,0.05)'}; position: relative;">
                     ${isPinned ? '<span style="position: absolute; top: -10px; right: 10px; background: var(--admin-primary); color: #000; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: bold;">📌 FIXADO</span>' : ''}
                     <div style="display:flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                         <div>
-                            <strong style="color: var(--admin-primary); font-size: 0.95rem;">${data.user || 'Anônimo'}</strong>
-                            ${isReply ? '<span style="font-size: 0.7rem; color: #60a5fa; margin-left: 0.5rem;">↪ Resposta</span>' : ''}
+                            <strong style="color: var(--admin-primary); font-size: 0.95rem;">${parent.user || 'Anônimo'}</strong>
                             <span style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-left: 0.5rem;">${timeAgo}</span>
                         </div>
                         <span style="font-size: 0.7rem; background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px;">
-                            ${data.projectId || 'N/A'}
+                            ${parent.projectId || 'N/A'}
                         </span>
                     </div>
-                    <p style="font-size: 0.9rem; margin: 0.5rem 0; line-height: 1.5; color: rgba(255,255,255,0.8);">${data.text}</p>
+                    <p style="font-size: 0.9rem; margin: 0.5rem 0; line-height: 1.5; color: rgba(255,255,255,0.8);">${parent.text}</p>
                     <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
-                        <button onclick="window.replyToCommentAdmin('${doc.id}', '${data.projectId || ''}', '${data.user || 'Anônimo'}', '${(data.text || '').replace(/'/g, "\\'")}')" 
+                        <button onclick="window.replyToCommentAdmin('${parent.id}', '${parent.projectId || ''}', '${parent.user || 'Anônimo'}', '${(parent.text || '').replace(/'/g, "\\'")}')" 
                                 style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; cursor: pointer; font-size: 0.7rem; padding: 0.25rem 0.75rem; border-radius: 4px; transition: all 0.2s;">
                             💬 Responder
                         </button>
-                        <button onclick="togglePinComment('${doc.id}', ${isPinned})" 
+                        <button onclick="togglePinComment('${parent.id}', ${isPinned})" 
                                 style="background: rgba(241, 163, 46, 0.1); border: 1px solid rgba(241, 163, 46, 0.3); color: #f1a32e; cursor: pointer; font-size: 0.7rem; padding: 0.25rem 0.75rem; border-radius: 4px; transition: all 0.2s;">
                             ${isPinned ? '📍 Desafixar' : '📌 Fixar'}
                         </button>
-                        <button onclick="deleteComment('${doc.id}')" 
+                        <button onclick="deleteComment('${parent.id}')" 
                                 style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; cursor: pointer; font-size: 0.7rem; padding: 0.25rem 0.75rem; border-radius: 4px; transition: all 0.2s;">
                             🗑️ Excluir
                         </button>
                     </div>
                 </div>
             `;
+
+            // Nest replies
+            const childReplies = replies.filter(r => r.parentId === parent.id).sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+            childReplies.forEach(reply => {
+                const rDate = reply.timestamp?.toDate ? reply.timestamp.toDate() : new Date();
+                const rTimeAgo = getTimeAgo(rDate);
+                parentHtml += `
+                    <div class="card" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid rgba(255,255,255,0.05); margin-left: 2rem; border-left: 2px solid var(--admin-primary); opacity: 0.9;">
+                        <div style="display:flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <div>
+                                <strong style="color: var(--admin-primary); font-size: 0.95rem;">${reply.user || 'Anônimo'}</strong>
+                                <span style="font-size: 0.7rem; color: #60a5fa; margin-left: 0.5rem;">↪ Resposta</span>
+                                <span style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-left: 0.5rem;">${rTimeAgo}</span>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.9rem; margin: 0.5rem 0; line-height: 1.5; color: rgba(255,255,255,0.8);">${reply.text}</p>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                            <button onclick="deleteComment('${reply.id}')" 
+                                    style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; cursor: pointer; font-size: 0.7rem; padding: 0.25rem 0.75rem; border-radius: 4px; transition: all 0.2s;">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return parentHtml;
         }).join('');
 
         updateCommentsStats(snapshot.size);

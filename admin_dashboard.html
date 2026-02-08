@@ -349,6 +349,20 @@
                         <input type="text" id="admin-avatar">
                     </div>
                     
+                    <div id="google-link-section" style="margin-top: 1.5rem; padding: 1.5rem; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; display: flex; flex-direction: column; gap: 1rem;">
+                        <h4 style="color: #60a5fa; font-size: 0.9rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                            Permissões de Moderador (Site)
+                        </h4>
+                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin: 0;">Vincule sua conta Google para ter poderes de Admin ao comentar no site principal.</p>
+                        
+                        <div id="google-link-status" style="font-size: 0.8rem; font-weight: 600;">
+                            Status: <span style="color: #94a3b8;">Verificando...</span>
+                        </div>
+
+                        <button type="button" id="btn-link-google" class="save-btn" style="background: #fff; color: #000; width: fit-content;" onclick="linkGoogleAccount()">Vincular Conta Google</button>
+                    </div>
+
                     <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
                         <h4 style="color: var(--admin-primary); font-size: 0.9rem; margin-bottom: 1rem;">🏠 Ambiente Local (LiveServer)</h4>
                         <p style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 1rem;">Cole aqui o código `firebaseConfig` para usar o sistema sem deploys no GitHub.</p>

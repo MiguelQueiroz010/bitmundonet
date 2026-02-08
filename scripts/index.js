@@ -1,5 +1,5 @@
 import { dbPromise } from './db-context.js';
-import { collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { collection, query, where, getDocs, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { parseArticleTags, renderTopics } from "./utils.js";
 
 window.onload = loadpb;
@@ -18,56 +18,112 @@ function loadpb() {
   if (typeof showSlides === 'function') showSlides();
 }
 
+let lastVisibleDoc = null;
+const articlesPerPage = 10;
+
 /**
  * LOAD ARTICLES FROM FIRESTORE
  */
-export async function loadArticlesFromFirestore() {
+export async function loadArticlesFromFirestore(isLoadMore = false) {
   const db = await dbPromise;
   const container = document.getElementById("cont");
+  const loadMoreBtn = document.getElementById("load-more-container");
   if (!container) return;
 
   try {
-    // We removed orderBy from the query to avoid requiring a manual index in Firestore.
-    // Instead, we fetch and sort on the client-side.
-    const q = query(
-      collection(db, "articles"),
-      where("selected", "==", true),
-      limit(20) // Increased limit to ensure new posts are fetched
-    );
+    // If not load more, clear container and reset lastVisible
+    if (!isLoadMore) {
+      container.innerHTML = `<div style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">Carregando publicações...</div>`;
+      lastVisibleDoc = null;
+    }
+
+    // Query strategy:
+    // 1. Order by sortDate (ISO YYYY-MM-DD) descending
+    // 2. Limit to articlesPerPage
+    // 3. Start after previous last visible doc if loading more
+    let q;
+    if (isLoadMore && lastVisibleDoc) {
+      q = query(
+        collection(db, "articles"),
+        where("selected", "==", true),
+        orderBy("sortDate", "desc"),
+        startAfter(lastVisibleDoc),
+        limit(articlesPerPage)
+      );
+    } else {
+      q = query(
+        collection(db, "articles"),
+        where("selected", "==", true),
+        orderBy("sortDate", "desc"),
+        limit(articlesPerPage)
+      );
+    }
 
     const querySnapshot = await getDocs(q);
-    container.innerHTML = ""; // Clear loader
 
-    const docs = [];
+    if (!isLoadMore) container.innerHTML = ""; // Clear loader after fetch
+
+    if (querySnapshot.empty && !isLoadMore) {
+      container.innerHTML = "<p>Nenhuma publicação encontrada.</p>";
+      if (loadMoreBtn) loadMoreBtn.style.display = "none";
+      return;
+    }
+
+    // Save last visible doc for next pagination
+    lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+    // Show/Hide Load More button
+    if (loadMoreBtn) {
+      loadMoreBtn.style.display = (querySnapshot.docs.length === articlesPerPage) ? "block" : "none";
+    }
+
     querySnapshot.forEach((doc) => {
-      docs.push({ ...doc.data(), id: doc.id });
+      renderArticle({ ...doc.data(), id: doc.id }, container);
     });
 
-    // Client-side Sort: Newest First using ONLY 'date' (DD/MM/YYYY or DD-MM-YYYY)
-    docs.sort((a, b) => {
-      const parse = (d) => {
-        if (!d) return 0;
-        const parts = d.includes('/') ? d.split('/') : d.split('-');
-        if (parts.length === 3) {
-          // Check if it's already YYYY-MM-DD
-          if (parts[0].length === 4) return new Date(d).getTime();
-          // Convert DD-MM-YYYY or DD/MM/YYYY to YYYY-MM-DD
-          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
-        }
-        return new Date(d).getTime(); // Fallback
-      };
-
-      return parse(b.date) - parse(a.date);
-    });
-
-    docs.forEach((article) => {
-      renderArticle(article, container);
-    });
   } catch (error) {
     console.error("Erro ao carregar artigos do Firestore:", error);
-    container.innerHTML = "<p>Erro ao carregar publicações.</p>";
+    if (error.message.includes("index")) {
+      // Fallback for missing index during migration
+      loadArticlesLegacyFallback();
+    } else {
+      container.innerHTML = "<p>Erro ao carregar publicações.</p>";
+    }
   }
 }
+
+/**
+ * Fallback for articles without sortDate or if index is missing
+ */
+async function loadArticlesLegacyFallback() {
+  const db = await dbPromise;
+  const container = document.getElementById("cont");
+  const q = query(collection(db, "articles"), where("selected", "==", true), limit(50));
+  const querySnapshot = await getDocs(q);
+  container.innerHTML = "";
+
+  const docs = [];
+  querySnapshot.forEach(d => docs.push({ ...d.data(), id: d.id }));
+
+  // Client-side Sort
+  docs.sort((a, b) => {
+    const parse = (d) => {
+      if (!d) return 0;
+      const parts = d.includes('/') ? d.split('/') : d.split('-');
+      if (parts.length === 3) {
+        if (parts[0].length === 4) return new Date(d).getTime();
+        return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+      }
+      return new Date(d).getTime();
+    };
+    return parse(b.date) - parse(a.date);
+  });
+
+  docs.slice(0, 10).forEach(article => renderArticle(article, container));
+  document.getElementById("load-more-container").style.display = "none"; // Disable pagination in fallback
+}
+
+window.loadMoreArticles = () => loadArticlesFromFirestore(true);
 
 /**
  * Standardized Article Tag Parser

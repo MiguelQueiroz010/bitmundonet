@@ -330,6 +330,10 @@ function loadCommentsAdmin() {
                     </div>
                     <p style="font-size: 0.9rem; margin: 0.5rem 0; line-height: 1.5; color: rgba(255,255,255,0.8);">${data.text}</p>
                     <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                        <button onclick="window.replyToCommentAdmin('${doc.id}', '${data.projectId || ''}', '${data.user || 'Anônimo'}', '${(data.text || '').replace(/'/g, "\\'")}')" 
+                                style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; cursor: pointer; font-size: 0.7rem; padding: 0.25rem 0.75rem; border-radius: 4px; transition: all 0.2s;">
+                            💬 Responder
+                        </button>
                         <button onclick="togglePinComment('${doc.id}', ${isPinned})" 
                                 style="background: rgba(241, 163, 46, 0.1); border: 1px solid rgba(241, 163, 46, 0.3); color: #f1a32e; cursor: pointer; font-size: 0.7rem; padding: 0.25rem 0.75rem; border-radius: 4px; transition: all 0.2s;">
                             ${isPinned ? '📍 Desafixar' : '📌 Fixar'}
@@ -389,6 +393,61 @@ window.togglePinComment = async (id, currentState) => {
         showNotification(currentState ? "📍 Comentário desafixado" : "📌 Comentário fixado!", "success");
     } catch (e) {
         showNotification("Erro ao fixar: " + e.message, "error");
+    }
+};
+
+window.replyToCommentAdmin = (parentId, projectId, parentUser, parentText) => {
+    const html = `
+        <div style="padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">💬 Responder Comentário</h3>
+                <button class="save-btn" style="background: #4b5563; color: white;" onclick="closeModal()">✕ Fechar</button>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin: 0 0 0.5rem 0;">Respondendo para <strong>${parentUser}</strong>:</p>
+                <p style="font-size: 0.9rem; margin: 0; color: rgba(255,255,255,0.9); font-style: italic;">"${parentText}"</p>
+            </div>
+            <div class="form-group">
+                <label>Sua Resposta</label>
+                <textarea id="admin-reply-text" style="height: 120px;" placeholder="Digite aqui sua resposta oficial..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="save-btn" style="flex: 2; padding: 1rem;" onclick="window.submitAdminReply('${parentId}', '${projectId}')">🚀 Enviar Resposta</button>
+                <button class="save-btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="closeModal()">Cancelar</button>
+            </div>
+        </div>
+    `;
+    window.showModal(html);
+};
+
+window.submitAdminReply = async (parentId, projectId) => {
+    const text = document.getElementById('admin-reply-text').value;
+    if (!text.trim()) return alert("Digite uma mensagem!");
+
+    try {
+        const user = auth.currentUser;
+        // Check if admin has a linked name in config
+        const adminSnap = await getDoc(doc(db, "admin_config", user.uid));
+        const adminName = adminSnap.exists() ? adminSnap.data().name : "Administrador";
+
+        const replyData = {
+            parentId: parentId,
+            projectId: projectId,
+            text: text,
+            user: adminName,
+            userId: user.uid,
+            timestamp: new Date(), // Firebase will convert this to Timestamp
+            isAdmin: true,
+            pinned: false
+        };
+
+        await setDoc(doc(collection(db, "comments")), replyData);
+        showNotification("✅ Resposta enviada com sucesso!", "success");
+        window.closeModal();
+        loadCommentsAdmin();
+    } catch (e) {
+        console.error("Error sending reply:", e);
+        showNotification("❌ Erro ao responder: " + e.message, "error");
     }
 };
 
@@ -510,7 +569,6 @@ window.closeModal = () => {
     if (overlay) overlay.remove();
 };
 
-
 window.addNewProject = () => {
     const html = `
         <div style="padding: 2rem;">
@@ -548,7 +606,6 @@ window.addNewProject = () => {
     `;
     window.showModal(html);
 };
-
 
 window.editProject = async (id) => {
     const docRef = doc(db, "projects", id);
@@ -636,7 +693,8 @@ window.saveProjectChanges = async (id) => {
         video: document.getElementById('edit-video').value,
         live_video: document.getElementById('edit-live').value,
         description: document.getElementById('edit-desc').value,
-        meta_keywords: document.getElementById('edit-keywords').value
+        meta_keywords: document.getElementById('edit-keywords').value,
+        sortDate: new Date().toISOString()
     };
 
     try {
@@ -645,7 +703,7 @@ window.saveProjectChanges = async (id) => {
         showNotification("✅ Projeto atualizado com sucesso!", "success");
         loadProjects();
     } catch (e) {
-        showNotification("Erro ao salvar: " + e.message, "error");
+        showNotification("❌ Erro ao salvar: " + e.message, "error");
     }
 };
 
@@ -1082,7 +1140,6 @@ window.previewProject = async (id) => {
     frameDoc.close();
 };
 
-
 window.previewArticle = async (id) => {
     const docSnap = await getDoc(doc(db, "articles", id));
     if (!docSnap.exists()) return;
@@ -1199,7 +1256,6 @@ window.previewLibrary = async (id) => {
     frameDoc.write(docContent);
     frameDoc.close();
 };
-
 
 window.addNewArticle = () => {
     const html = `
@@ -1357,7 +1413,8 @@ window.saveArticleChanges = async (id) => {
         title: titleInput.value,
         author: author,
         category: document.getElementById('art-category').value,
-        date: date
+        date: date,
+        sortDate: parseDate(date)
     };
 
     // Handle Topics if active
@@ -1392,7 +1449,6 @@ window.editLibrary = async (id) => {
     const docSnap = await getDoc(doc(db, "library", id));
     if (!docSnap.exists()) return;
     const g = docSnap.data();
-
 
     // Remove existing modal if any
     const existing = document.querySelector('.modal-overlay');
@@ -2059,7 +2115,8 @@ window.saveToolChanges = async (id) => {
         url: document.getElementById('tool-url').value,
         description: document.getElementById('tool-desc').value,
         extra: document.getElementById('tool-extra').value,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        sortDate: new Date().toISOString()
     };
     await setDoc(doc(db, "tools", id), data, { merge: true });
     showNotification("✅ Salvo com sucesso!", "success");
@@ -2246,7 +2303,6 @@ window.clearLocalFirebase = () => {
     }
 };
 
-
 /* --- MASS DELETE & SELECTION --- */
 
 window.toggleDeleteButton = (collection) => {
@@ -2275,7 +2331,6 @@ window.deleteSelected = async (collectionName) => {
         if (collectionName === 'projects') loadProjects();
         if (collectionName === 'articles') loadArticles();
         if (collectionName === 'library') loadLibrary();
-
 
     } catch (error) {
         console.error("Delete Error:", error);
@@ -2317,7 +2372,8 @@ window.saveNewProject = async () => {
         credits: [],
         progress: { global: '0%' },
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        sortDate: new Date().toISOString()
     };
 
     try {
@@ -2421,7 +2477,8 @@ window.saveNewTool = async () => {
         description: document.getElementById('new-tool-desc').value || '',
         extra: document.getElementById('new-tool-extra').value || '',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        sortDate: new Date().toISOString()
     };
 
     try {
@@ -2449,52 +2506,7 @@ window.deleteTool = async (id) => {
 /**
  * Save library changes to Firestore
  */
-window.saveLibraryChanges = async (id) => {
-    if (!id) {
-        alert("ID inválido!");
-        return;
-    }
-
-    const data = {
-        title: document.getElementById('lib-title').value,
-        platform: document.getElementById('lib-platform').value,
-        genre: document.getElementById('lib-genre').value,
-        release_year: document.getElementById('lib-year').value,
-        cover: document.getElementById('lib-cover').value,
-        rating: document.getElementById('lib-rating').value,
-        publisher: document.getElementById('lib-pub').value,
-        developer: document.getElementById('lib-dev').value,
-        translator: document.getElementById('lib-trans').value,
-        status: document.getElementById('lib-status').value,
-        video_url: document.getElementById('lib-video').value,
-        summary: document.getElementById('lib-summary').value,
-        lore: document.getElementById('lib-lore').value,
-        impact: document.getElementById('lib-impact').value,
-        guide_url: document.getElementById('lib-guide').value,
-        guide_tips: document.getElementById('lib-tips').value,
-        details_dev: document.getElementById('lib-details-dev').value,
-        credits_hacker: document.getElementById('lib-hacker').value,
-        region: document.getElementById('lib-region').value,
-        dev_details: document.getElementById('lib-dev-details').value,
-        dev_legacy: document.getElementById('lib-dev-legacy').value,
-        updatedAt: new Date().toISOString()
-    };
-
-    // Add order field if it exists
-    const orderInput = document.getElementById('lib-order');
-    if (orderInput) {
-        data.order = parseInt(orderInput.value) || 0;
-    }
-
-    try {
-        await setDoc(doc(db, "library", id), data, { merge: true });
-        showNotification("✅ Biblioteca atualizada com sucesso!", "success");
-        window.closeModal();
-        loadLibrary();
-    } catch (e) {
-        showNotification("Erro ao salvar: " + e.message, "error");
-    }
-};
+// Redundant saveLibraryChanges removed
 
 /**
  * Add a new topic row to the article editor
@@ -2550,9 +2562,6 @@ window.toggleTopicSystem = (currentlyUsingTopics) => {
     }
 };
 
-
-
-
 // Helper functions for adding dynamic list rows in library editor
 
 window.addMediaRow = () => {
@@ -2586,8 +2595,6 @@ window.addMediaRow = () => {
     updateLibraryPreview();
 
 };
-
-
 
 window.addOSTRow = () => {
 
@@ -2627,8 +2634,6 @@ window.addOSTRow = () => {
 
 };
 
-
-
 window.addCheatRow = () => {
 
     const container = document.getElementById('cheats-list');
@@ -2661,122 +2666,72 @@ window.addCheatRow = () => {
 
 };
 
-
-
 // Save library changes to Firestore
 
 window.saveLibraryChanges = async (id) => {
-
     if (!id) return alert("Erro: ID não encontrado!");
-
     const data = {
-
-        order: parseInt(document.getElementById('lib-order').value) || 0,
-
+        order: parseInt(document.getElementById('lib-order')?.value) || 0,
         title: document.getElementById('lib-title').value,
-
         platform: document.getElementById('lib-platform').value,
-
         genre: document.getElementById('lib-genre').value,
-
         release_year: document.getElementById('lib-year').value,
-
         cover: document.getElementById('lib-cover').value,
-
         rating: document.getElementById('lib-rating').value,
-
         publisher: document.getElementById('lib-pub').value,
-
         developer: document.getElementById('lib-dev').value,
-
         translator: document.getElementById('lib-trans').value,
-
         status: document.getElementById('lib-status').value,
-
         video_url: document.getElementById('lib-video').value,
-
         summary: document.getElementById('lib-summary').value,
-
         lore: document.getElementById('lib-lore').value,
-
         impact: document.getElementById('lib-impact').value,
-
         guide_url: document.getElementById('lib-guide').value,
-
         guide_tips: document.getElementById('lib-tips').value,
-
         details_dev: document.getElementById('lib-details-dev').value,
-
         credits_hacker: document.getElementById('lib-hacker').value,
-
         region: document.getElementById('lib-region').value,
-
         dev_details: document.getElementById('lib-dev-details').value,
-
         dev_legacy: document.getElementById('lib-dev-legacy').value,
-
         media: [],
-
         ost: [],
-
         cheats: [],
-
-        updatedAt: new Date().toISOString()
-
+        updatedAt: new Date().toISOString(),
+        sortDate: new Date().toISOString()
     };
 
+    // Harvest Media
     document.querySelectorAll('.media-row').forEach(row => {
-
         const src = row.querySelector('.media-src').value;
-
         const caption = row.querySelector('.media-caption').value;
-
         if (src) data.media.push({ src, caption });
-
     });
 
+    // Harvest OST
     document.querySelectorAll('.ost-row').forEach(row => {
-
         const title = row.querySelector('.ost-title').value;
-
         const url = row.querySelector('.ost-url').value;
-
         const duration = row.querySelector('.ost-duration').value;
-
         if (title) data.ost.push({ title, url, duration });
-
     });
 
+    // Harvest Cheats
     document.querySelectorAll('.cheat-row').forEach(row => {
-
         const code = row.querySelector('.cheat-code').value;
-
         const description = row.querySelector('.cheat-description').value;
-
         if (code) data.cheats.push({ code, description });
-
     });
 
     try {
-
         const docRef = doc(db, "library", id);
-
         await setDoc(docRef, data, { merge: true });
-
-        showNotification("��� Biblioteca atualizada com sucesso!", "success");
-
-        console.log("��� Dados salvos:", data);
-
+        showNotification("✅ Biblioteca atualizada!", "success");
+        if (typeof loadLibrary === 'function') loadLibrary();
+        if (typeof updateLibraryPreview === 'function') updateLibraryPreview();
     } catch (e) {
-
-        console.error("��� Erro ao salvar:", e);
-
-        showNotification("��� Erro ao salvar: " + e.message, "error");
-
+        showNotification("❌ Erro ao salvar: " + e.message, "error");
     }
-
 };
-
 
 /**
  * BACKUP & RESTORE SYSTEM (JSON)

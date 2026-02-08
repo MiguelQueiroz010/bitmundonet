@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, onSnapshot, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { getFirebaseConfig, saveLocalFirebaseConfig } from "./firebase-manager.js";
 import { parseArticleTags, sanitizeString } from "./utils.js";
@@ -133,6 +133,19 @@ async function loadConfig(uid) {
         // Update status indicator
         document.getElementById('status-db').innerText = "Banco de Dados: Conectado";
         document.getElementById('status-db').style.color = "#10b981";
+
+        // Update Google Link Status
+        const linkStatus = document.getElementById('google-link-status');
+        const linkBtn = document.getElementById('btn-link-google');
+        if (data.linkedGoogleEmail) {
+            linkStatus.innerHTML = `Status: <span style="color: #10b981;">Vinculado (${data.linkedGoogleEmail})</span>`;
+            linkBtn.textContent = "Trocar Conta Google";
+            linkBtn.style.background = "rgba(16, 185, 129, 0.1)";
+            linkBtn.style.color = "#10b981";
+            linkBtn.style.border = "1px solid rgba(16, 185, 129, 0.3)";
+        } else {
+            linkStatus.innerHTML = `Status: <span style="color: #64748b;">Não vinculado</span>`;
+        }
     }
 }
 
@@ -2884,4 +2897,46 @@ window.restoreSystem = async (input) => {
         }
     };
     reader.readAsText(file);
+};
+/**
+ * Link Google Account for Moderation Permissions
+ */
+window.linkGoogleAccount = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const googleEmail = result.user.email;
+
+        // 1. Save to admin's private config
+        await setDoc(doc(db, "admin_config", user.uid), {
+            linkedGoogleEmail: googleEmail,
+            lastLinkedAt: new Date().toISOString()
+        }, { merge: true });
+
+        // 2. Add to public admin list for comments_loader.js
+        // We use a dedicated document for public emails to avoid exposing full admin configs
+        const publicAdminRef = doc(db, "config", "public_admins");
+        const publicSnap = await getDoc(publicAdminRef);
+        let emails = [];
+        if (publicSnap.exists()) {
+            emails = publicSnap.data().emails || [];
+        }
+
+        if (!emails.includes(googleEmail)) {
+            emails.push(googleEmail);
+            await setDoc(publicAdminRef, { emails: emails }, { merge: true });
+        }
+
+        showNotification(`✅ Conta ${googleEmail} vinculada com sucesso!`, "success");
+        loadConfig(user.uid);
+
+    } catch (error) {
+        console.error("Error linking Google account:", error);
+        if (error.code !== 'auth/popup-closed-by-user') {
+            showNotification("❌ Erro ao vincular conta: " + error.message, "error");
+        }
+    }
 };

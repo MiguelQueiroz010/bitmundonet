@@ -120,22 +120,26 @@ function renderArticle(a, container) {
                 <span style="margin-left: 1rem;">Publicado em: <strong>${date}</strong></span>
             </div>
             <button class="toggle-comments-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                Comentários
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                COMENTAR
             </button>
         </div>
         
-        <!-- Comments Section (Hidden by default) -->
-        <div class="comments-section comments-section-embedded" style="display: none; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+        <!-- Comments Section (Visible by default) -->
+        <div class="comments-section comments-section-embedded" style="display: block; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
             <div id="comments-container-${articleId}" class="comments-list">
                 <p style="color: rgba(255,255,255,0.3); text-align: center;">Carregando comentários...</p>
             </div>
             
-            <div class="comment-form-box">
+            <!-- Comment Form (Hidden by default, shown via toggle) -->
+            <div class="comment-form-box" style="display: none; transition: all 0.3s ease;">
                 <h3 style="font-size: 1rem; margin-bottom: 1rem;">Deixe seu comentário</h3>
                 <form id="comment-form-${articleId}">
-                    <textarea placeholder="Sua Mensagem" required></textarea>
-                    <button type="submit" class="comment-submit-btn">ENVIAR</button>
+                    <textarea placeholder="Escreva seu comentário aqui..." required></textarea>
+                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <button type="submit" class="comment-submit-btn">ENVIAR COMENTÁRIO</button>
+                        <button type="button" class="comment-cancel-btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.8rem; font-family: 'Exo 2', sans-serif;">CANCELAR</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -146,21 +150,25 @@ function renderArticle(a, container) {
 
   // Interaction Logic
   const toggleBtn = articleDiv.querySelector('.toggle-comments-btn');
-  const commentsSection = articleDiv.querySelector('.comments-section');
-  let commentsInitialized = false;
+  const textarea = articleDiv.querySelector('textarea');
+  const commentFormBox = articleDiv.querySelector('.comment-form-box');
 
   toggleBtn.onclick = () => {
-    const isVisible = commentsSection.style.display !== 'none';
-    commentsSection.style.display = isVisible ? 'none' : 'block';
-    toggleBtn.classList.toggle('active', !isVisible);
-    // toggleBtn.style.background = isVisible ? 'rgba(59, 130, 246, 0.1)' : 'var(--primary)';
-    // toggleBtn.style.color = isVisible ? 'var(--primary)' : '#fff';
-
-    if (!isVisible && !commentsInitialized) {
-      initComments(articleId, `comments-container-${articleId}`, `comment-form-${articleId}`);
-      commentsInitialized = true;
+    const isHidden = commentFormBox.style.display === 'none';
+    commentFormBox.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) {
+      textarea.focus();
+      textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
+
+  const cancelBtn = articleDiv.querySelector('.comment-cancel-btn');
+  cancelBtn.onclick = () => {
+    commentFormBox.style.display = 'none';
+  };
+
+  // Auto-init comments
+  initComments(articleId, `comments-container-${articleId}`, `comment-form-${articleId}`);
 
   // Initialize Reactions
   initReactions(articleId, `reactions-container-${articleId}`);

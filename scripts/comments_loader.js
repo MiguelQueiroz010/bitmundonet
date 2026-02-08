@@ -1,10 +1,38 @@
 import { dbPromise, authPromise } from './db-context.js';
-import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
 // Global Auth State
 let currentUser = null;
 let authInitialized = false;
+let publicAdmins = []; // List of authorized admin emails
+
+/**
+ * Fetch authorized admins list
+ */
+async function fetchPublicAdmins() {
+    try {
+        const db = await dbPromise;
+        const publicSnap = await getDoc(doc(db, "config", "public_admins"));
+        if (publicSnap.exists()) {
+            publicAdmins = publicSnap.data().emails || [];
+        }
+    } catch (e) {
+        console.warn("Failed to fetch admin list:", e);
+    }
+}
+
+// Initial fetch
+fetchPublicAdmins();
+
+/**
+ * Toggle all comments visibility
+ */
+window.toggleAllComments = (containerId) => {
+    const key = `showAll_${containerId}`;
+    window[key] = !window[key];
+    window.dispatchEvent(new CustomEvent('bitmundo-toggle-comments', { detail: containerId }));
+};
 
 /**
  * Initialize global auth listener once
@@ -82,6 +110,13 @@ export async function initComments(projectId, containerId = 'comments-container'
     };
 
     window.addEventListener('bitmundo-auth-change', authHandler);
+
+    // Listener for toggle expansion
+    window.addEventListener('bitmundo-toggle-comments', (e) => {
+        if (e.detail === containerId) {
+            loadComments(db, projectId, commentsContainer);
+        }
+    });
 
     // Initial load
     updateFormState(currentUser, commentForm);
@@ -217,14 +252,36 @@ function loadComments(db, projectId, container) {
         const parentComments = allComments.filter(c => !c.parentId);
         const replies = allComments.filter(c => c.parentId);
 
-        container.innerHTML = parentComments.map(comment => {
+        // State for "Ver todos" (simple toggle in window scope for this specific container)
+        const containerKey = `showAll_${container.id}`;
+        const showAll = window[containerKey] || false;
+
+        const visibleParents = showAll ? parentComments : parentComments.slice(0, 2);
+        const hiddenCount = parentComments.length - visibleParents.length;
+
+        // Admin check: Hardcoded domain OR presence in the linked public_admins list
+        const isAdmin = currentUser && (
+            currentUser.email?.endsWith('@bitraiden.org') ||
+            publicAdmins.includes(currentUser.email)
+        );
+
+        let html = visibleParents.map(comment => {
             const date = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleDateString('pt-BR', {
                 day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
             }) : 'Agora mesmo';
 
             const isOwner = currentUser && (comment.uid === currentUser.uid);
-            const deleteBtn = isOwner ?
-                `<button class="delete-comment-btn" onclick="window.deleteMyComment('${comment.id}')" title="Excluir meu comentário">✕</button>` : '';
+
+            // Delete button for owners OR admins
+            const deleteBtn = (isOwner || isAdmin) ?
+                `<button class="delete-comment-btn" onclick="window.deleteMyComment('${comment.id}')" title="Excluir">✕</button>` : '';
+
+            // Pin button ONLY for admins
+            const pinBtn = isAdmin ?
+                `<button class="pin-comment-btn ${comment.pinned ? 'active' : ''}" onclick="window.togglePinComment('${comment.id}', ${!comment.pinned})" title="${comment.pinned ? 'Desafixar' : 'Fixar'}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    ${comment.pinned ? 'Desafixar' : 'Fixar'}
+                </button>` : '';
 
             const authorName = (comment.user === "null" || !comment.user || comment.user === "Usuário") ? "Usuário" : comment.user;
             const avatar = comment.userPhoto ?
@@ -292,12 +349,33 @@ function loadComments(db, projectId, container) {
                     </div>
                     <div class="comment-actions">
                         ${replyBtn}
+                        ${pinBtn}
                     </div>
                     <div id="reply-form-container-${comment.id}"></div>
                     ${replySection}
                 </div>
             `;
         }).join('');
+
+        if (hiddenCount > 0 && !showAll) {
+            html += `
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="view-all-comments-btn" onclick="window.toggleAllComments('${container.id}')">
+                        Ver todos os comentários (${parentComments.length})
+                    </button>
+                </div>
+            `;
+        } else if (showAll && parentComments.length > 2) {
+            html += `
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="view-all-comments-btn" onclick="window.toggleAllComments('${container.id}')">
+                        Ver menos
+                    </button>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
     }, (error) => {
         console.error("Comments listener error:", error);
     });
@@ -409,6 +487,11 @@ function setupForm(db, auth, projectId, commentForm) {
 
             textInput.value = '';
             submitBtn.innerText = originalText;
+
+            // Auto-hide form after success to save space
+            const formBox = commentForm.closest('.comment-form-box');
+            if (formBox) formBox.style.display = 'none';
+
         } catch (error) {
             console.error("Error adding comment: ", error);
             alert("Erro ao enviar: " + error.message);
@@ -417,3 +500,17 @@ function setupForm(db, auth, projectId, commentForm) {
         }
     };
 }
+
+/**
+ * Admin Feature: Pin/Unpin Comment
+ */
+window.togglePinComment = async (commentId, shouldPin) => {
+    try {
+        const db = await dbPromise;
+        await updateDoc(doc(db, "comments", commentId), {
+            pinned: shouldPin
+        });
+    } catch (e) {
+        alert("Erro ao (des)fixar: " + e.message);
+    }
+};

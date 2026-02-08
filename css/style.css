@@ -1186,3 +1186,110 @@ footer {
         height: 45px;
     }
 }
+
+/* --- Navbar User Profile --- */
+.nav-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-md);
+    transition: background 0.3s;
+}
+
+.nav-user-profile:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.nav-user-avatar-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nav-user-profile:hover .nav-user-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--highlight);
+    border-color: var(--highlight);
+}
+
+.nav-user-info-dropdown {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+}
+
+.nav-user-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--text-main);
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-auth-btn-logout {
+    background: transparent;
+    border: none;
+    color: #ef4444; /* Red for logout */
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.nav-auth-btn-logout:hover {
+    color: #ff6b6b;
+    text-decoration: underline;
+}
+
+.nav-auth-btn.login {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: black;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-auth-btn.login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255,255,255,0.3);
+}
+
+/* Mobile Adjustments for Auth */
+@media (max-width: 768px) {
+    .nav-user-profile {
+        width: 100%;
+        justify-content: center;
+        background: rgba(255,255,255,0.05); /* Always visible bg on mobile */
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .nav-user-name {
+        font-size: 1rem;
+    }
+}

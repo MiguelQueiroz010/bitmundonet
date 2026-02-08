@@ -51,7 +51,6 @@
     border-bottom: 1px solid rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 0.5rem 2rem;
     height: 70px;
 }
@@ -147,28 +146,33 @@
            </div>
         </div>
 
-        <!-- Desktop Links -->
-        <div class="nav-links" id="pc_nav">
-            <a href="/index.html" class="nav-item">
-                <img src="/media/home_icon.png" alt="Home"> Início
-            </a>
-            <a href="/projetos.html" class="nav-item" id="projects">
-                <img src="/media/projects_icon.png" alt="Projects"> Projetos
-            </a>
-            <a href="/library.html" class="nav-item" id="library">
-                <img src="/media/library_icon.png" alt="Library"> Biblioteca
-            </a>
-            <a href="/tools.html" class="nav-item" id="tools">
-                <img src="/media/tools_icon.png" alt="Tools"> Ferramentas
-            </a>
-            <a href="/about.html" class="nav-item" id="about_box">
-                <img src="/media/info.png" alt="Info"> Saiba Mais
-            </a>
-        </div>
+        <!-- Desktop Links & Auth (Right Aligned) -->
+        <div style="display: flex; align-items: center; gap: 2rem; margin-left: auto;">
+            <!-- Desktop Links -->
+            <div class="nav-links" id="pc_nav" style="display: flex; gap: 2rem; align-items: center;">
+                <a href="/index.html" class="nav-item">
+                    <img src="/media/home_icon.png" alt="Home"> Início
+                </a>
+                <a href="/projetos.html" class="nav-item" id="projects">
+                    <img src="/media/projects_icon.png" alt="Projects"> Projetos
+                </a>
+                <a href="/library.html" class="nav-item" id="library">
+                    <img src="/media/library_icon.png" alt="Library"> Biblioteca
+                </a>
+                <a href="/tools.html" class="nav-item" id="tools">
+                    <img src="/media/tools_icon.png" alt="Tools"> Ferramentas
+                </a>
+                <a href="/about.html" class="nav-item" id="about_box">
+                    <img src="/media/info.png" alt="Info"> Saiba Mais
+                </a>
+            </div>
 
-        <!-- Mobile Toggle Button -->
-        <div id="mobile-toggle" onclick="dropdown()">
-            <a id="mobile_dropdown">☰</a>
+            <div id="navbar-auth-container"></div>
+
+            <!-- Mobile Toggle Button (Visible on mobile) -->
+            <div id="mobile-toggle" onclick="dropdown()">
+                <a id="mobile_dropdown">☰</a>
+            </div>
         </div>
     </nav>
 
@@ -196,9 +200,14 @@
             <img src="/media/info.png"> Saiba Mais
         </a>
         
+        <a href="#support" class="nav-item">
+            <img src="/media/info.png" style="filter: hue-rotate(45deg);"> Apoiar Projeto
+        </a>
+
         <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
              <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">
-                Bit.Mundo Network © 2026
+                Bit.Mundo Network © 2026<br>
+                v2.5.0 - Stable
              </p>
         </div>
     </div>

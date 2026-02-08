@@ -30,10 +30,10 @@ export async function initReactions(targetId, containerId) {
 
     const renderReactions = (user) => {
         if (!user) {
-            // Login Wall for Reactions - Simplified
+            // Login Wall for Reactions - Unified Style
             container.innerHTML = `
-                <div style="text-align: center; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <p style="color: #ccc; font-size: 0.9rem; margin-bottom: 0.5rem;">Faça login para reagir</p>
+                <div class="login-wall-prompt" style="padding: 1.5rem; margin-bottom: 0;">
+                    <p style="font-size: 0.95rem; margin-bottom: 1rem;">Faça login para reagir</p>
                     <button class="google-btn-small" id="react-login-btn">
                         Entrar com Google
                     </button>

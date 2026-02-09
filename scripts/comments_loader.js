@@ -1,6 +1,7 @@
 import { dbPromise, authPromise } from './db-context.js';
 import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+import { getLocalEmailJSConfig } from './emailjs-manager.js';
 
 // EMAILJS CONFIGURATION
 let EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
@@ -8,6 +9,17 @@ let EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
 let EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
 
 async function loadEmailJSConfig() {
+    // 1. Check Local Storage first (for development)
+    const localConfig = getLocalEmailJSConfig();
+    if (localConfig) {
+        EMAILJS_SERVICE_ID = localConfig.serviceId;
+        EMAILJS_TEMPLATE_ID = localConfig.templateId;
+        EMAILJS_PUBLIC_KEY = localConfig.publicKey;
+        console.log("Using local EmailJS configuration");
+        return;
+    }
+
+    // 2. Fallback to generated config file (for deployment)
     try {
         const module = await import('./emailjs-config.js');
         const config = module.default;
@@ -17,20 +29,52 @@ async function loadEmailJSConfig() {
             EMAILJS_TEMPLATE_ID = config.TEMPLATE_ID;
         }
     } catch (e) {
-        // Fallback for local development or if file doesn't exist yet
         console.warn("EmailJS config not found, using defaults/placeholders.");
     }
 }
 
 async function initEmailJS() {
     await loadEmailJSConfig();
+
+    // Check if already loaded (e.g. via another script tag)
+    const existing = window.emailjs || window.emailJS;
+    if (existing) {
+        if (typeof existing.init === 'function') {
+            existing.init(EMAILJS_PUBLIC_KEY);
+            return;
+        }
+    }
+
     if (!window.emailjs) {
         const script = document.createElement('script');
-        script.src = "/scripts/lib/email.min.js";
+        // Use relative path to be safe in different environments
+        script.src = "scripts/lib/email.min.js";
+        script.async = true;
+
         script.onload = () => {
-            window.emailjs.init(EMAILJS_PUBLIC_KEY);
-            console.log("EmailJS initialized");
+            // EmailJS v3+ often attaches to window.emailjs or global emailjs
+            const ej = window.emailjs || window.emailJS || (typeof emailjs !== 'undefined' ? emailjs : null);
+
+            if (ej) {
+                // Handle different export styles if necessary
+                const initFn = ej.init || (ej.default && ej.default.init);
+                if (typeof initFn === 'function') {
+                    initFn(EMAILJS_PUBLIC_KEY);
+                    // Ensure window.emailjs is set even if only global emailjs exists
+                    if (!window.emailjs) window.emailjs = ej.default || ej;
+                    console.log("EmailJS initialized");
+                } else {
+                    console.warn("EmailJS loaded but 'init' function not found.", ej);
+                }
+            } else {
+                console.error("EmailJS script loaded but 'emailjs' object not found in global scope.");
+            }
         };
+
+        script.onerror = () => {
+            console.error("Failed to load EmailJS SDK from:", script.src);
+        };
+
         document.head.appendChild(script);
     }
 }
@@ -512,18 +556,58 @@ window.submitReply = async (parentId, projectId) => {
             const parentDoc = await getDoc(doc(db, "comments", parentId));
             if (parentDoc.exists()) {
                 const parentData = parentDoc.data();
-                if (parentData.email && parentData.email !== currentUser.email) {
-                    window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                        to_email: parentData.email,
+                const recipientEmail = parentData.email;
+
+                console.log("Checking email notification for parent comment:", {
+                    recipientEmail,
+                    type: typeof recipientEmail,
+                    hasAtSymbol: recipientEmail?.includes?.('@'),
+                    currentUserEmail: currentUser.email
+                });
+
+                // Stricter validation: must be a string, must look like an email, and not be "null" string
+                const isValidEmail = recipientEmail &&
+                    typeof recipientEmail === 'string' &&
+                    recipientEmail.includes('@') &&
+                    recipientEmail !== "null" &&
+                    recipientEmail.trim() !== "";
+
+                if (isValidEmail && recipientEmail !== currentUser.email) {
+                    console.log("✅ Sending email notification to:", recipientEmail);
+                    console.log("📧 EmailJS Template Parameters:", {
+                        reply_to: recipientEmail,
                         from_name: replyData.user,
                         message: text,
                         article_link: window.location.href,
                         project_name: document.title
                     });
+
+                    window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                        reply_to: recipientEmail,  // This must match your EmailJS template's "To Email" field
+                        from_name: replyData.user,
+                        message: text,
+                        article_link: window.location.href,
+                        project_name: document.title
+                    }).then(
+                        res => console.log("✅ Email sent successfully:", res),
+                        err => {
+                            console.error("❌ EmailJS Error details:", err);
+                            console.error("💡 Make sure your EmailJS template 'To Email' field is set to: {{reply_to}}");
+                        }
+                    );
+                } else {
+                    const reason = !recipientEmail ? "No email stored in parent comment" :
+                        typeof recipientEmail !== 'string' ? `Email is not a string (type: ${typeof recipientEmail})` :
+                            !recipientEmail.includes('@') ? "Email doesn't contain @" :
+                                recipientEmail === "null" ? "Email is the string 'null'" :
+                                    recipientEmail.trim() === "" ? "Email is empty string" :
+                                        recipientEmail === currentUser.email ? "Recipient is the same as current user" :
+                                            "Unknown reason";
+                    console.log("⚠️ Email notification skipped. Reason:", reason);
                 }
             }
         } catch (emailErr) {
-            console.warn("Failed to send email notification:", emailErr);
+            console.warn("Failed to send email notification (Firestore/Logic Error):", emailErr);
         }
     } catch (e) {
         alert("Erro ao responder: " + e.message);

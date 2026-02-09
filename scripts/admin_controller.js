@@ -797,6 +797,73 @@ window.addNewProject = () => {
     window.showModal(html);
 };
 
+// --- Helper Functions for Project Editor ---
+
+window.addProgressRow = (containerId = 'progress-list', data = {}) => {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'progress-item-row';
+    div.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px;';
+    div.innerHTML = `
+        <input type="text" placeholder="Nome (ex: Tradução)" class="prog-label" value="${data.label || ''}" style="flex: 2; font-size: 0.8rem; padding: 0.4rem;">
+        <input type="text" placeholder="%" class="prog-value" value="${data.value || ''}" style="flex: 1; font-size: 0.8rem; padding: 0.4rem;">
+        <button onclick="this.parentElement.remove()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer;">✕</button>
+    `;
+    container.appendChild(div);
+};
+
+window.addDownloadRow = (containerId = 'downloads-list', data = {}) => {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'download-item-row';
+    div.style.cssText = 'background: rgba(255,255,255,0.02); padding: 0.8rem; border-radius: 4px; margin-bottom: 0.8rem; border: 1px solid rgba(255,255,255,0.05);';
+    div.innerHTML = `
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="text" placeholder="Versão (ex: v1.0)" class="dl-version" value="${data.version || ''}" style="flex: 1; font-size: 0.8rem;">
+            <input type="text" placeholder="Tipo (ex: IPS / ISO)" class="dl-type" value="${data.type || ''}" style="flex: 1; font-size: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.3rem; background: rgba(0,0,0,0.3); padding: 0 0.5rem; border-radius: 4px;">
+                <input type="checkbox" class="dl-maintenance" ${data.maintenance === true || data.maintenance === 'true' ? 'checked' : ''}>
+                <label style="font-size: 0.7rem; color: #aaa;">Manut.</label>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+             <input type="text" placeholder="URL do Download" class="dl-url" value="${data.url || ''}" style="width: 100%; font-size: 0.8rem;">
+        </div>
+        <div>
+            <textarea placeholder="Changelog / Notas (HTML permitido)" class="dl-changelog" style="width: 100%; height: 60px; font-size: 0.8rem; font-family: monospace;">${data.changelog || ''}</textarea>
+        </div>
+        <button onclick="this.parentElement.remove()" style="width: 100%; margin-top: 0.5rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.3rem; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">Remover Opção de Download</button>
+    `;
+    container.appendChild(div);
+};
+
+window.addCreditRow = (containerId = 'credits-list', data = {}) => {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'credit-item-row';
+    div.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px;';
+    div.innerHTML = `
+        <input type="text" placeholder="Nome" class="cred-name" value="${data.name || ''}" style="flex: 1; font-size: 0.8rem; padding: 0.4rem;">
+        <input type="text" placeholder="Função (ex: Tradutor)" class="cred-role" value="${data.role || ''}" style="flex: 1; font-size: 0.8rem; padding: 0.4rem;">
+        <button onclick="this.parentElement.remove()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer;">✕</button>
+    `;
+    container.appendChild(div);
+};
+
+window.addGalleryRow = (containerId = 'gallery-list', data = {}) => {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'gallery-item-row';
+    div.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px;';
+    div.innerHTML = `
+        <input type="text" placeholder="URL da Imagem" class="gal-src" value="${data.src || ''}" style="flex: 2; font-size: 0.8rem; padding: 0.4rem;">
+        <input type="text" placeholder="Legenda (Opcional)" class="gal-caption" value="${data.caption || ''}" style="flex: 1; font-size: 0.8rem; padding: 0.4rem;">
+        <button onclick="this.parentElement.remove()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer;">✕</button>
+    `;
+    container.appendChild(div);
+};
+
+
 window.editProject = async (id) => {
     const docRef = doc(db, "projects", id);
     const docSnap = await getDoc(docRef);
@@ -834,6 +901,10 @@ window.editProject = async (id) => {
                             <option value="Modificação" ${p.status === 'Modificação' ? 'selected' : ''}>Modificação</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Descrição (HTML Sugerido)</label>
+                        <textarea id="edit-desc" style="height: 100px; font-family: monospace;">${p.description || ''}</textarea>
+                    </div>
                 </div>
 
                 <!-- Media URLs -->
@@ -844,32 +915,95 @@ window.editProject = async (id) => {
                     <div class="form-group"><label>Cover (Banner)</label><input type="text" id="edit-cover" value="${p.cover || ''}"></div>
                     <div class="form-group"><label>Vídeo (Intro)</label><input type="text" id="edit-video" value="${p.video || ''}"></div>
                     <div class="form-group"><label>Lives (YouTube)</label><input type="text" id="edit-live" value="${p.live_video || ''}"></div>
+                    <div class="form-group"><label>Meta Keywords</label><input type="text" id="edit-keywords" value="${p.meta_keywords || ''}"></div>
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 1rem;">
-                <label>Descrição (HTML Sugerido)</label>
-                <textarea id="edit-desc" style="height: 120px; font-family: monospace;">${p.description || ''}</textarea>
-            </div>
+            <!-- Extended Sections -->
+            <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem;">
+                 
+                 <!-- Progress Section -->
+                 <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="color: var(--admin-primary); margin: 0;">📊 Progresso</h4>
+                        <button class="save-btn" style="padding: 0.3rem 0.6rem; font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: #10b981;" onclick="addProgressRow()">+ Adicionar Item</button>
+                    </div>
+                    <div class="form-group" style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px;">
+                        <label>Progresso Geral (Global)</label>
+                        <input type="text" id="edit-progress-global" value="${p.progress?.global || (p.status === 'Completo' ? '100%' : '0%')}" placeholder="ex: 50%">
+                    </div>
+                    <div id="progress-list">
+                        <!-- Dynamic Items -->
+                    </div>
+                 </div>
 
-            <div class="form-group">
-                <label>Meta Keywords</label>
-                <input type="text" id="edit-keywords" value="${p.meta_keywords || ''}" placeholder="mario, snes, tradução">
+                 <!-- Downloads Section -->
+                 <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="color: var(--admin-primary); margin: 0;">⬇️ Downloads / Patches</h4>
+                        <button class="save-btn" style="padding: 0.3rem 0.6rem; font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: #10b981;" onclick="addDownloadRow()">+ Adicionar Download</button>
+                    </div>
+                    <div id="downloads-list">
+                        <!-- Dynamic Items -->
+                    </div>
+                 </div>
+
+                 <div class="responsive-grid">
+                     <!-- Credits -->
+                     <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: var(--admin-primary); margin: 0;">👥 Créditos</h4>
+                            <button class="save-btn" style="padding: 0.3rem 0.6rem; font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: #10b981;" onclick="addCreditRow()">+ Adicionar</button>
+                        </div>
+                        <div id="credits-list">
+                            <!-- Dynamic Items -->
+                        </div>
+                     </div>
+
+                     <!-- Gallery -->
+                     <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: var(--admin-primary); margin: 0;">🖼️ Galeria</h4>
+                            <button class="save-btn" style="padding: 0.3rem 0.6rem; font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: #10b981;" onclick="addGalleryRow()">+ Adicionar</button>
+                        </div>
+                        <div id="gallery-list">
+                            <!-- Dynamic Items -->
+                        </div>
+                     </div>
+                 </div>
+
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
                 <button class="save-btn" style="flex: 2; padding: 1rem;" onclick="saveProjectChanges('${id}')">💾 Salvar no Banco de Dados</button>
                 <button class="save-btn" style="flex: 1; background: rgba(239, 68, 68, 0.1); color: #ef4444;" onclick="deleteProject('${id}')">🗑️ Excluir</button>
             </div>
-            <p style="text-align: center; font-size: 0.65rem; color: #555; margin-top: 1rem;">Campos de Galeria e Créditos estão sendo migrados via XML, suporte à edição manual em breve.</p>
         `;
     window.showModal(html);
+
+    // Populate Dynamic Lists after HTML injection
+    if (p.progress && Array.isArray(p.progress.items)) {
+        p.progress.items.forEach(item => addProgressRow('progress-list', item));
+    }
+
+    if (Array.isArray(p.downloads)) {
+        p.downloads.forEach(item => addDownloadRow('downloads-list', item));
+    }
+
+    if (Array.isArray(p.credits)) {
+        p.credits.forEach(item => addCreditRow('credits-list', item));
+    }
+
+    if (Array.isArray(p.gallery)) {
+        p.gallery.forEach(item => addGalleryRow('gallery-list', item));
+    }
 };
 
 window.saveProjectChanges = async (id) => {
     const newId = id || document.getElementById('edit-id')?.value;
     if (!newId) return alert("Erro de ID!");
 
+    // Basic Data
     const data = {
         title: document.getElementById('edit-title').value,
         subtitle: document.getElementById('edit-subtitle').value,
@@ -882,14 +1016,69 @@ window.saveProjectChanges = async (id) => {
         live_video: document.getElementById('edit-live').value,
         description: document.getElementById('edit-desc').value,
         meta_keywords: document.getElementById('edit-keywords').value,
-        sortDate: new Date().toISOString()
+        updatedAt: new Date().toISOString() // Prefer updatedAt for sorting
     };
+
+    // --- Collect Dynamic Data ---
+
+    // 1. Progress
+    const globalProgress = document.getElementById('edit-progress-global').value;
+    const progressItems = [];
+    document.querySelectorAll('.progress-item-row').forEach(row => {
+        const label = row.querySelector('.prog-label').value;
+        const value = row.querySelector('.prog-value').value;
+        if (label) progressItems.push({ label, value });
+    });
+
+    data.progress = {
+        global: globalProgress,
+        items: progressItems
+    };
+
+    // 2. Downloads
+    data.downloads = [];
+    document.querySelectorAll('.download-item-row').forEach(row => {
+        const version = row.querySelector('.dl-version').value;
+        const type = row.querySelector('.dl-type').value;
+        const url = row.querySelector('.dl-url').value;
+        const maintenance = row.querySelector('.dl-maintenance').checked;
+        const changelog = row.querySelector('.dl-changelog').value;
+
+        if (version || url) { // Only save if has minimum content
+            data.downloads.push({
+                version,
+                type,
+                url,
+                maintenance,
+                changelog
+            });
+        }
+    });
+
+    // 3. Credits
+    data.credits = [];
+    document.querySelectorAll('.credit-item-row').forEach(row => {
+        const name = row.querySelector('.cred-name').value;
+        const role = row.querySelector('.cred-role').value;
+        if (name) data.credits.push({ name, role });
+    });
+
+    // 4. Gallery
+    data.gallery = [];
+    document.querySelectorAll('.gallery-item-row').forEach(row => {
+        const src = row.querySelector('.gal-src').value;
+        const caption = row.querySelector('.gal-caption').value;
+        if (src) data.gallery.push({ src, caption });
+    });
 
     try {
         const docRef = doc(db, "projects", newId);
         await setDoc(docRef, data, { merge: true });
         showNotification("✅ Projeto atualizado com sucesso!", "success");
         loadProjects();
+        // Don't close modal immediately to allow further edits, or close? 
+        // Standard behavior is usually stay open or close. Let's close to confirm save.
+        // window.closeAdminModal(); 
     } catch (e) {
         showNotification("❌ Erro ao salvar: " + e.message, "error");
     }

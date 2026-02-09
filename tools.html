@@ -31,6 +31,7 @@
      
     <!-- CSS -->
     <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/persistent_player.css" />
     <style>
         /* Tool specific local styles overrides or additions */
         #alphabet-list {
@@ -196,5 +197,29 @@
 
     <!-- Tools Script -->
     <script type="module" src="/scripts/tools.js"></script>
+
+    <!-- Persistent SoundCloud Player -->
+    <div id="persistent-player-container">
+        <button id="player-toggle-btn" title="Ocultar Player">▼</button>
+        <div class="persistent-player-wrapper">
+            <div class="player-controls">
+                <button id="player-play-btn" title="Reproduzir">▶</button>
+                <div class="player-label">
+                    <span>Player de Música</span>
+                </div>
+            </div>
+            <div class="player-widget-container">
+                <iframe id="sc-widget" 
+                        width="100%" 
+                        height="100%" 
+                        scrolling="no" 
+                        frameborder="no" 
+                        allow="autoplay" 
+                        src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A2097610755&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+                </iframe>
+            </div>
+        </div>
+    </div>
+    <script src="/scripts/persistent_player.js"></script>
 </body>
 </html>

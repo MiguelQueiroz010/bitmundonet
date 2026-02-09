@@ -1,0 +1,65 @@
+/* Emoji Picker Styles */
+.emoji-trigger {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.emoji-trigger:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+.emoji-picker-container {
+    position: absolute;
+    z-index: 9999;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 280px; /* Reduced width */
+    height: 320px; /* Reduced height to match JS */
+}
+
+/* Close button for the picker */
+.emoji-picker-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ef4444; /* Bright red */
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10001;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.emoji-picker-close:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+/* Position for reply forms specifically */
+.reply-form-container .emoji-trigger {
+    margin-bottom: 0.5rem;
+}

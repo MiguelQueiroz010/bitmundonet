@@ -9,6 +9,7 @@
     <meta name="keywords" id="meta-key" content="bitmundo, tradução, ps2, ps1, romhacking" />
     
     <!-- Shared Assets -->
+     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/navigator.css" />
     <link rel="stylesheet" href="/css/projects.css" />
     <link rel="stylesheet" href="/css/comments.css" />
@@ -179,12 +180,12 @@
         </main>
     </div>
 
-    <!-- Footer -->
-    <div w3-include-html="/footer.html"></div>
-    
-    <script>
-        w3IncludeHTML(); // Run again to capture both navbar and footer
-    </script>
+    <!-- Footer Tag now standardized -->
+    <footer>
+        <div w3-include-html="/footer.html"></div>
+        <script>w3IncludeHTML();</script>
+    </footer>
+
     <script type="text/javascript" src="/scripts/navbar.js"></script>
     <script type="module" src="/scripts/comments_loader.js"></script>
     <script type="module" src="/scripts/navbar_auth.js"></script>

@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, onSnapshot, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, onSnapshot, deleteDoc, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { getFirebaseConfig, saveLocalFirebaseConfig } from "./firebase-manager.js";
+import { saveLocalEmailJSConfig, clearLocalEmailJSConfig } from "./emailjs-manager.js";
 import { parseArticleTags, sanitizeString } from "./utils.js";
 
 // Inject Emoji CSS
@@ -265,9 +266,9 @@ window.runDatabaseSanitization = async () => {
 // --- Article Date Fix Utility ---
 window.fixArticleDates = async () => {
     if (!confirm("Isso irá percorrer todas as postagens e adicionar o campo de ordenação (sortDate) onde estiver faltando. Deseja continuar?")) return;
-    
+
     showNotification("🔧 Verificando postagens...", "info");
-    
+
     try {
         const q = query(collection(db, "articles"));
         const querySnapshot = await getDocs(q);
@@ -289,7 +290,7 @@ window.fixArticleDates = async () => {
         if (count > 0) {
             await batch.commit();
             showNotification(`✅ Sucesso! ${count} postagens atualizadas com sortDate.`, "success");
-            loadArticles(); 
+            loadArticles();
         } else {
             showNotification("✅ Todas as postagens já possuem ordenação correta.", "success");
         }
@@ -672,6 +673,94 @@ window.submitAdminReply = async (parentId, projectId) => {
     } catch (e) {
         console.error("Error sending reply:", e);
         showNotification("❌ Erro ao responder: " + e.message, "error");
+    }
+};
+
+/**
+ * Fix Missing Emails in Comments Database
+ * Scans all comments and populates missing email fields
+ */
+window.fixMissingEmails = async function () {
+    if (!confirm('This will scan all comments and attempt to add missing email fields.\n\nNote: Due to Firebase limitations, emails cannot be automatically retrieved. Comments will be flagged for manual review.\n\nContinue?')) {
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = '⏳ Scanning database...';
+
+    try {
+        // Get all comments
+        const commentsRef = collection(db, 'comments');
+        const snapshot = await getDocs(commentsRef);
+
+        let total = snapshot.size;
+        let missing = 0;
+        let fixed = 0;
+        let failed = 0;
+        let skipped = 0;
+
+        showNotification(`Found ${total} comments. Checking for missing emails...`, 'info');
+
+        for (const docSnap of snapshot.docs) {
+            const data = docSnap.data();
+
+            // Check if email is missing or invalid
+            const hasValidEmail = data.email &&
+                typeof data.email === 'string' &&
+                data.email.includes('@') &&
+                data.email !== 'null' &&
+                data.email.trim() !== '';
+
+            if (!hasValidEmail) {
+                missing++;
+
+                // Try to populate with UID-based placeholder
+                if (data.uid) {
+                    try {
+                        await updateDoc(doc(db, 'comments', docSnap.id), {
+                            email: `uid:${data.uid}@pending.fix`,
+                            emailFixNeeded: true,
+                            emailFixedAt: new Date().toISOString()
+                        });
+                        fixed++;
+                        console.log(`✅ Flagged comment ${docSnap.id} for manual email fix`);
+                    } catch (e) {
+                        console.error(`❌ Failed to update comment ${docSnap.id}:`, e);
+                        failed++;
+                    }
+                } else {
+                    // No UID available, cannot fix
+                    console.warn(`⚠️ Comment ${docSnap.id} has no UID, cannot fix`);
+                    failed++;
+                }
+            } else {
+                skipped++;
+            }
+        }
+
+        btn.innerText = '✅ Migration Complete';
+
+        const resultMessage = `Migration complete!\n\nTotal comments: ${total}\nValid emails: ${skipped}\nMissing emails: ${missing}\nFlagged for review: ${fixed}\nFailed: ${failed}`;
+
+        showNotification(resultMessage, 'success');
+        console.log('📊 Migration Results:', { total, missing, fixed, failed, skipped });
+
+        // Reload comments to show updated data
+        if (document.getElementById('comments').classList.contains('active')) {
+            loadCommentsAdmin();
+        }
+
+    } catch (error) {
+        console.error('❌ Migration error:', error);
+        showNotification('Migration failed: ' + error.message, 'error');
+        btn.innerText = originalText;
+    } finally {
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }, 3000);
     }
 };
 
@@ -2710,6 +2799,37 @@ window.saveLocalFirebase = () => {
 window.clearLocalFirebase = () => {
     if (confirm("Deseja limpar a configuração local?")) {
         localStorage.removeItem('bitmundo_firebase_config');
+        location.reload();
+    }
+};
+
+window.saveLocalEmailJS = () => {
+    const serviceId = document.getElementById('local-emailjs-service').value;
+    const templateId = document.getElementById('local-emailjs-template').value;
+    const publicKey = document.getElementById('local-emailjs-public').value;
+
+    if (!serviceId || !templateId || !publicKey) {
+        alert("Preencha todos os campos do EmailJS!");
+        return;
+    }
+
+    const config = {
+        serviceId,
+        templateId,
+        publicKey
+    };
+
+    if (saveLocalEmailJSConfig(config)) {
+        showNotification("✅ Configuração EmailJS salva!", "success");
+        setTimeout(() => location.reload(), 1500);
+    } else {
+        showNotification("❌ Erro ao salvar configuração!", "error");
+    }
+};
+
+window.clearLocalEmailJS = () => {
+    if (confirm("Deseja limpar a configuração local do EmailJS?")) {
+        clearLocalEmailJSConfig();
         location.reload();
     }
 };

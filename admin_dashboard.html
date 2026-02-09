@@ -532,13 +532,31 @@
 
                     <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
                         <h4 style="color: var(--admin-primary); font-size: 0.9rem; margin-bottom: 1rem;">🏠 Ambiente Local (LiveServer)</h4>
-                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 1rem;">Cole aqui o código `firebaseConfig` para usar o sistema sem deploys no GitHub.</p>
-                        <div class="form-group">
-                            <textarea id="local-firebase-config" placeholder='{ "apiKey": "...", "authDomain": "...", ... }' style="font-family: monospace; font-size: 0.75rem; height: 100px;"></textarea>
+                        
+                        <!-- Firebase Local Config -->
+                        <div style="margin-bottom: 2rem;">
+                            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 1rem;">Cole aqui o código `firebaseConfig` para usar o sistema sem deploys no GitHub.</p>
+                            <div class="form-group">
+                                <textarea id="local-firebase-config" placeholder='{ "apiKey": "...", "authDomain": "...", ... }' style="font-family: monospace; font-size: 0.75rem; height: 100px;"></textarea>
+                            </div>
+                            <div style="display: flex; gap: 1rem;">
+                                <button type="button" class="save-btn" style="background: rgba(255,255,255,0.1); color: #fff; flex: 1;" onclick="saveLocalFirebase()">Salvar Firebase</button>
+                                <button type="button" class="save-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; flex: 1; border: 1px solid rgba(239, 68, 11, 0.13);" onclick="clearLocalFirebase()">Limpar Firebase</button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 1rem;">
-                            <button type="button" class="save-btn" style="background: rgba(255,255,255,0.1); color: #fff; flex: 1;" onclick="saveLocalFirebase()">Salvar Local</button>
-                            <button type="button" class="save-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; flex: 1; border: 1px solid rgba(239, 68, 68, 0.2);" onclick="clearLocalFirebase()">Limpar Local</button>
+
+                        <!-- EmailJS Local Config -->
+                        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.05);">
+                            <h4 style="color: #60a5fa; font-size: 0.8rem; margin-bottom: 1rem;">📧 Configuração EmailJS Local</h4>
+                            <div class="responsive-grid" style="gap: 1rem;">
+                                <div class="form-group" style="margin-bottom: 0.5rem;"><label>Service ID</label><input type="text" id="local-emailjs-service" placeholder="service_xxx"></div>
+                                <div class="form-group" style="margin-bottom: 0.5rem;"><label>Template ID</label><input type="text" id="local-emailjs-template" placeholder="template_xxx"></div>
+                                <div class="form-group" style="margin-bottom: 0.5rem;"><label>Public Key</label><input type="text" id="local-emailjs-public" placeholder="user_xxx / public_key"></div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button type="button" class="save-btn" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; flex: 1; border: 1px solid rgba(59, 130, 246, 0.2);" onclick="saveLocalEmailJS()">Salvar EmailJS</button>
+                                <button type="button" class="save-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; flex: 1; border: 1px solid rgba(239, 68, 68, 0.2);" onclick="clearLocalEmailJS()">Limpar EmailJS</button>
+                            </div>
                         </div>
                     </div>
 
@@ -564,6 +582,18 @@
         <section id="comments" class="dash-section">
             <div class="card">
                 <h3>Gestão de Comentários</h3>
+                
+                <!-- Database Migration Tool -->
+                <div style="margin-bottom: 2rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px;">
+                    <h4 style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.5rem;">🔧 Database Maintenance</h4>
+                    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem;">
+                        Fix old comments missing email fields for notification system
+                    </p>
+                    <button class="save-btn" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);" onclick="fixMissingEmails()">
+                        📧 Fix Missing Emails in Database
+                    </button>
+                </div>
+                
                 <div id="comments-stats" style="margin-bottom: 2rem;">
                     <!-- Stats will be loaded here -->
                 </div>

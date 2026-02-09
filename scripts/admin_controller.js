@@ -262,6 +262,44 @@ window.runDatabaseSanitization = async () => {
     }
 };
 
+// --- Article Date Fix Utility ---
+window.fixArticleDates = async () => {
+    if (!confirm("Isso irá percorrer todas as postagens e adicionar o campo de ordenação (sortDate) onde estiver faltando. Deseja continuar?")) return;
+    
+    showNotification("🔧 Verificando postagens...", "info");
+    
+    try {
+        const q = query(collection(db, "articles"));
+        const querySnapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        let count = 0;
+
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            // Only update if sortDate is missing and we have a date string to parse
+            if (!data.sortDate && data.date) {
+                const sDate = parseDate(data.date);
+                if (sDate) {
+                    batch.update(doc(db, "articles", docSnap.id), { sortDate: sDate });
+                    count++;
+                }
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
+            showNotification(`✅ Sucesso! ${count} postagens atualizadas com sortDate.`, "success");
+            loadArticles(); 
+        } else {
+            showNotification("✅ Todas as postagens já possuem ordenação correta.", "success");
+        }
+
+    } catch (e) {
+        console.error("Erro ao corrigir datas:", e);
+        showNotification("❌ Erro: " + e.message, "error");
+    }
+};
+
 // --- Initialization Boot ---
 initFirebase();
 

@@ -24,6 +24,13 @@ jobs:
               -e "s/\${FIREBASE_MEASUREMENT_ID}/${{ secrets.FIREBASE_MEASUREMENT_ID }}/g" \
               scripts/firebase-config.template.js > scripts/firebase-config.js
 
+      - name: Inject EmailJS Secrets
+        run: |
+          sed -e "s/\${EMAILJS_SERVICE_ID}/${{ secrets.EMAILJS_SERVICE_ID }}/g" \
+              -e "s/\${EMAILJS_TEMPLATE_ID}/${{ secrets.EMAILJS_TEMPLATE_ID }}/g" \
+              -e "s/\${EMAILJS_PUBLIC_KEY}/${{ secrets.EMAILJS_PUBLIC_KEY }}/g" \
+              scripts/emailjs-config.template.js > scripts/emailjs-config.js
+
       - name: Prepare Workspace (Ensure ignored files are published)
         run: rm -f .gitignore
 

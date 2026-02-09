@@ -2,6 +2,40 @@ import { dbPromise, authPromise } from './db-context.js';
 import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
+// EMAILJS CONFIGURATION
+let EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
+let EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
+let EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+
+async function loadEmailJSConfig() {
+    try {
+        const module = await import('./emailjs-config.js');
+        const config = module.default;
+        if (config && !config.PUBLIC_KEY.includes('${')) {
+            EMAILJS_PUBLIC_KEY = config.PUBLIC_KEY;
+            EMAILJS_SERVICE_ID = config.SERVICE_ID;
+            EMAILJS_TEMPLATE_ID = config.TEMPLATE_ID;
+        }
+    } catch (e) {
+        // Fallback for local development or if file doesn't exist yet
+        console.warn("EmailJS config not found, using defaults/placeholders.");
+    }
+}
+
+async function initEmailJS() {
+    await loadEmailJSConfig();
+    if (!window.emailjs) {
+        const script = document.createElement('script');
+        script.src = "/scripts/lib/email.min.js";
+        script.onload = () => {
+            window.emailjs.init(EMAILJS_PUBLIC_KEY);
+            console.log("EmailJS initialized");
+        };
+        document.head.appendChild(script);
+    }
+}
+initEmailJS();
+
 // Inject Emoji CSS
 if (!document.getElementById('emoji-picker-css')) {
     const link = document.createElement('link');
@@ -459,16 +493,38 @@ window.submitReply = async (parentId, projectId) => {
         submitBtn.disabled = true;
         submitBtn.innerText = "Enviando...";
         const db = await dbPromise;
-        await addDoc(collection(db, "comments"), {
+        const replyData = {
             projectId: projectId,
             parentId: parentId,
             user: resolveUserName(currentUser),
             userPhoto: currentUser.photoURL,
             uid: currentUser.uid,
+            email: currentUser.email, // Store email for notifications
             text: text,
             timestamp: serverTimestamp()
-        });
+        };
+
+        await addDoc(collection(db, "comments"), replyData);
         document.getElementById(`reply-form-container-${parentId}`).innerHTML = "";
+
+        // Send Email Notification to Parent author
+        try {
+            const parentDoc = await getDoc(doc(db, "comments", parentId));
+            if (parentDoc.exists()) {
+                const parentData = parentDoc.data();
+                if (parentData.email && parentData.email !== currentUser.email) {
+                    window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                        to_email: parentData.email,
+                        from_name: replyData.user,
+                        message: text,
+                        article_link: window.location.href,
+                        project_name: document.title
+                    });
+                }
+            }
+        } catch (emailErr) {
+            console.warn("Failed to send email notification:", emailErr);
+        }
     } catch (e) {
         alert("Erro ao responder: " + e.message);
     } finally {
@@ -501,6 +557,7 @@ function setupForm(db, auth, projectId, commentForm) {
             user: resolveUserName(currentUser),
             userPhoto: currentUser.photoURL,
             uid: currentUser.uid,
+            email: currentUser.email, // Store email for notifications
             text: textInput.value,
             timestamp: serverTimestamp()
         };

@@ -6,6 +6,23 @@
     <title>Ferramentas - Bit.Raiden</title>
     
     <meta name="description" content="Ferramentas e utilitários para romhacking." />
+    <meta name="keywords" content="ferramentas, utilities, romhacking, download" />
+    <meta name="author" content="Bit.Raiden">
+    <link rel="canonical" href="https://bitmundo.net/tools.html" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bitmundo.net/tools.html" />
+    <meta property="og:title" content="Ferramentas - Bit.Raiden" />
+    <meta property="og:description" content="Ferramentas e utilitários para romhacking." />
+    <meta property="og:image" content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://bitmundo.net/tools.html" />
+    <meta property="twitter:title" content="Ferramentas - Bit.Raiden" />
+    <meta property="twitter:description" content="Ferramentas e utilitários para romhacking." />
+    <meta property="twitter:image" content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png" />
     <!-- Scripts -->
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
@@ -37,6 +54,34 @@
             border-radius: var(--radius-md);
             padding: 1.5rem;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .toolItem {
+                padding: 0.75rem;
+                flex-direction: row;
+                align-items: center;
+                gap: 0.8rem;
+                text-align: left;
+            }
+            .toolItem h2 {
+                font-size: 1rem !important;
+                margin: 0;
+            }
+            .toolIcon {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            #alphabet-list li h3 {
+                font-size: 1.3rem;
+                margin-top: 1.5rem;
+            }
+            #tools-header {
+                padding: 1.5rem !important;
+            }
         }
 
         .toolItem:hover {
@@ -129,7 +174,7 @@
              <p class="hero-subtitle">Utilitários para edição e tradução.</p>
         </div>
 
-        <div class="glass-panel" style="padding: 2rem; margin-bottom: 4rem;">
+        <section class="glass-panel" id="tools-header">
             <div class="view-controls">
                 <button class="view-btn active" onclick="switchView('name')">Ordem Alfabética</button>
                 <button class="view-btn" onclick="switchView('target')">Por Categoria (Alvo)</button>

@@ -2,6 +2,15 @@ import { dbPromise, authPromise } from './db-context.js';
 import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
+// Inject Emoji CSS
+if (!document.getElementById('emoji-picker-css')) {
+    const link = document.createElement('link');
+    link.id = 'emoji-picker-css';
+    link.rel = 'stylesheet';
+    link.href = 'css/emoji_picker.css';
+    document.head.appendChild(link);
+}
+
 // Global Auth State
 let currentUser = null;
 let authInitialized = false;
@@ -213,6 +222,23 @@ function updateFormState(user, commentForm) {
             }
         };
     }
+
+    // Add Emoji Button to main form if not present
+    if (user) {
+        const textArea = commentForm.querySelector('textarea');
+        const submitBtn = commentForm.querySelector('.comment-submit-btn');
+        if (textArea && submitBtn && !commentForm.querySelector('.emoji-trigger')) {
+            const emojiBtn = document.createElement('button');
+            emojiBtn.type = "button";
+            emojiBtn.className = "emoji-trigger";
+            emojiBtn.innerHTML = "😊";
+            emojiBtn.title = "Inserir Emoji";
+            emojiBtn.onclick = (e) => window.showEmojiPicker(emojiBtn, textArea);
+
+            // Insert before submit button
+            submitBtn.parentNode.insertBefore(emojiBtn, submitBtn);
+        }
+    }
 }
 
 /**
@@ -411,7 +437,8 @@ window.showReplyForm = (parentId, projectId) => {
     container.innerHTML = `
         <div class="reply-form-container">
             <textarea id="reply-text-${parentId}" placeholder="Escreva sua resposta..."></textarea>
-            <div class="reply-form-actions">
+            <div class="reply-form-actions" style="display: flex; align-items: center; justify-content: flex-end;">
+                <button type="button" class="emoji-trigger" onclick="window.showEmojiPicker(this, document.getElementById('reply-text-${parentId}'))">😊</button>
                 <button class="reply-cancel-btn" onclick="document.getElementById('reply-form-container-${parentId}').innerHTML=''">Cancelar</button>
                 <button class="reply-submit-btn" id="submit-reply-${parentId}" onclick="window.submitReply('${parentId}', '${projectId}')">Responder</button>
             </div>
@@ -513,4 +540,160 @@ window.togglePinComment = async (commentId, shouldPin) => {
     } catch (e) {
         alert("Erro ao (des)fixar: " + e.message);
     }
+};
+
+/**
+ * EMOJI PICKER SHARED LOGIC
+ */
+let emojiPickerInstance = null;
+let picmoLoaded = false;
+
+async function loadPicmo() {
+    if (picmoLoaded) return;
+    return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = "/scripts/lib/picmo.js";
+        script.onload = () => {
+            picmoLoaded = true;
+            resolve();
+        };
+        document.head.appendChild(script);
+    });
+}
+
+window.showEmojiPicker = async (triggerEl, textareaEl) => {
+    if (!textareaEl) return console.error("Emoji Picker: Textarea not found");
+
+    // Toggle logic: If clicking the same active button, just close and return
+    const existing = document.querySelector('.emoji-picker-container');
+    if (existing) {
+        existing.remove();
+        document.querySelectorAll('.emoji-trigger').forEach(btn => btn.dataset.active = "false");
+        if (triggerEl.dataset.active === "true") {
+            triggerEl.dataset.active = "false";
+            return;
+        }
+    }
+
+    await loadPicmo();
+
+    const pickerContainer = document.createElement('div');
+    pickerContainer.className = 'emoji-picker-container';
+
+    // Explicit close button (✕)
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'emoji-picker-close';
+    closeBtn.innerHTML = '✕';
+    closeBtn.type = "button";
+    closeBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        pickerContainer.remove();
+        triggerEl.dataset.active = "false";
+    };
+    pickerContainer.appendChild(closeBtn);
+
+    // Create a sub-container for the actual picker
+    const pickerRoot = document.createElement('div');
+    pickerRoot.style.width = '100%';
+    pickerRoot.style.height = '100%';
+    pickerContainer.appendChild(pickerRoot);
+
+    document.body.appendChild(pickerContainer);
+
+    // Position
+    const rect = triggerEl.getBoundingClientRect();
+    const pickerHeight = 320;
+    const pickerWidth = 280;
+
+    let top = rect.top + window.scrollY - pickerHeight - 10;
+    let left = rect.left + window.scrollX;
+
+    if (top < window.scrollY + 60) {
+        top = rect.bottom + window.scrollY + 10;
+    }
+
+    if (left + pickerWidth > window.innerWidth) {
+        left = window.innerWidth - pickerWidth - 15;
+    }
+    if (left < 10) left = 10;
+
+    pickerContainer.style.top = `${top}px`;
+    pickerContainer.style.left = `${left}px`;
+    pickerContainer.style.height = `${pickerHeight}px`;
+
+    const picker = picmo.createPicker({
+        rootElement: pickerRoot,
+        autoFocusSearch: true,
+        width: '100%',
+        height: '100%'
+    });
+
+    // Handle Emoji Selection
+    const onSelect = (selection) => {
+        console.log("Emoji selected:", selection);
+        let emoji = "";
+
+        if (typeof selection === 'string') {
+            emoji = selection;
+        } else if (selection && typeof selection === 'object') {
+            // Priority list of properties where the emoji string might hide
+            emoji = selection.emoji || selection.native || selection.data || selection.url;
+
+            // If still not found, search all properties for something that looks like an emoji
+            if (!emoji || typeof emoji !== 'string') {
+                emoji = Object.values(selection).find(v => typeof v === 'string' && v.length <= 8 && /\p{Emoji}/u.test(v));
+            }
+        }
+
+        if (!emoji || typeof emoji !== 'string') {
+            console.error("Could not extract emoji string from selection:", selection);
+            return;
+        }
+
+        console.log("Emoji extracted:", emoji);
+
+        const start = textareaEl.selectionStart;
+        const end = textareaEl.selectionEnd;
+        const text = textareaEl.value;
+
+        // Try to use execCommand for better undo support and cursor handling
+        textareaEl.focus();
+        try {
+            // Modern insertion
+            if (!document.execCommand('insertText', false, emoji)) {
+                throw new Error('execCommand rejected');
+            }
+        } catch (e) {
+            // Fallback manual insertion
+            textareaEl.value = text.substring(0, start) + emoji + text.substring(end);
+            const newPos = start + emoji.length;
+            textareaEl.setSelectionRange(newPos, newPos);
+        }
+
+        // Close and cleanup
+        setTimeout(() => {
+            pickerContainer.remove();
+            triggerEl.dataset.active = "false";
+            document.removeEventListener('click', clickOutside);
+        }, 10);
+    };
+
+    picker.addEventListener('emoji', onSelect);
+    picker.addEventListener('emoji:select', onSelect);
+    picker.addEventListener('select', onSelect);
+
+    const clickOutside = (e) => {
+        if (!pickerContainer.contains(e.target) && e.target !== triggerEl) {
+            pickerContainer.remove();
+            triggerEl.dataset.active = "false";
+            document.removeEventListener('click', clickOutside);
+        }
+    };
+
+    setTimeout(() => {
+        document.addEventListener('click', clickOutside);
+    }, 100);
+
+    triggerEl.dataset.active = "true";
 };

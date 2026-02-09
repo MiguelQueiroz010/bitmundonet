@@ -554,10 +554,37 @@
 }
 
 @media (max-width: 768px) {
-  #project-head { height: 60vh; min-height: 450px; }
-  #project-title-display { font-size: 2rem; }
-  #project-cover { width: 180px; height: 260px; }
-  .info-glass { padding: 1.5rem; }
+  #project-head { 
+    height: auto; 
+    min-height: 100vh; /* Better for mobile stacking */
+    padding: 100px 1rem 60px 1rem;
+    flex-direction: column;
+  }
+  #project-title-display { 
+    font-size: 1.8rem; 
+    letter-spacing: 1px;
+    -webkit-text-stroke: 1px black;
+  }
+  #project-cover { 
+    width: 220px; 
+    height: 310px; 
+    margin-bottom: 0;
+  }
+  .info-glass { 
+    padding: 1.2rem; 
+    width: 100%;
+    border-radius: 12px;
+  }
+  .hero-content {
+      gap: 1.5rem;
+      width: 100%;
+  }
+  #project-summary {
+      font-size: 1rem;
+  }
+  .hero-progress-container {
+      margin: 1rem 0;
+  }
 }
 
 
@@ -565,11 +592,11 @@
 /* Video Control Button */
 .video-control-btn {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  top: 80px; /* Move to top right area instead of bottom right to avoid overlap */
+  right: 15px;
   z-index: 100;
-  background: rgba(10, 10, 15, 0.6);
-  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 15, 0.4);
+  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(241, 163, 46, 0.3);
   color: rgb(241, 163, 46);

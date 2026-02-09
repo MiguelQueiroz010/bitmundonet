@@ -118,12 +118,24 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .nav-links { display: none; }
-    #mobile-toggle { display: block; }
-    /* Mobile logo in navbar when scrolled or needed */
-    #mobile_logo { display: none; } 
-    
-    .banner-container { height: 250px; }
+    .nav-links, #pc_nav { 
+        display: none !important; 
+    }
+    #mobile-toggle { 
+        display: block !important; 
+    }
+    .brand-area div {
+        font-size: 1rem !important;
+    }
+    .banner-container { 
+        height: 220px !important; 
+    }
+    .logo-overlay {
+        max-width: 85%;
+    }
+    .nav-bar-strip {
+        padding: 0 1rem;
+    }
 }
 </style>
 
@@ -178,10 +190,11 @@
 
     <!-- Mobile Dropdown Menu -->
     <div id="dropdown">
-         <div id="mobile_close" onclick="dropdown()" style="align-self: flex-end; font-size: 2rem; cursor: pointer;">&times;</div>
-         
-         <div style="text-align: center; margin-bottom: 2rem;" id="mobile_logo">
-             <img src="/media/mobile_bitmundo_banner.png" style="max-width: 200px; margin: 0 auto;">
+         <div style="position: relative; width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; padding-top: 10px;">
+             <div id="mobile_logo" style="font-family: 'Exo 2'; font-weight: bold; font-size: 1.5rem; text-align: center;">
+                <span style="color: var(--primary);">Painel</span> Navegador
+             </div>
+             <div id="mobile_close" onclick="dropdown()" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 2.5rem; cursor: pointer; color: white; z-index: 1001; line-height: 1;">&times;</div>
          </div>
 
          <a href="/index.html" class="nav-item">
@@ -206,7 +219,7 @@
 
         <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
              <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">
-                Bit.Mundo Network © 2026<br>
+                Site Bit.Raiden © 2026<br>
                 v2.5.0 - Stable
              </p>
         </div>

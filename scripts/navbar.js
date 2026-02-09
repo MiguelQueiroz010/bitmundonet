@@ -86,7 +86,6 @@ function dropdown() {
     dropdownMenu.classList.remove("active");
     document.body.style.overflow = "auto";
     if (mobileToggle) mobileToggle.style.display = "block";
-    if (mobileLogo) mobileLogo.style.display = "block";
     if (youtubeGallery) youtubeGallery.style.display = "inline";
   }
   else {
@@ -94,7 +93,6 @@ function dropdown() {
     dropdownMenu.classList.add("active");
     document.body.style.overflow = "hidden";
     if (mobileToggle) mobileToggle.style.display = "none";
-    if (mobileLogo) mobileLogo.style.display = "none";
     if (youtubeGallery) youtubeGallery.style.display = "none";
   }
 }

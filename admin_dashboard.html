@@ -14,6 +14,10 @@
             --admin-border: rgba(241, 163, 46, 0.2);
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         /* High-Fidelity Preview Injection */
         @import url('/css/style.css');
         @import url('/css/projects.css');
@@ -45,6 +49,8 @@
             padding: 2rem 1.5rem;
             position: fixed;
             height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
         }
 
         .sidebar h2 {
@@ -59,7 +65,7 @@
         .nav-btn {
             background: transparent;
             border: none;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.9);
             padding: 1rem;
             text-align: left;
             font-size: 0.9rem;
@@ -69,11 +75,13 @@
             border-radius: 8px;
             margin-bottom: 0.5rem;
             transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .nav-btn:hover, .nav-btn.active {
-            background: rgba(241, 163, 46, 0.1);
-            color: var(--admin-primary);
+            background: rgba(241, 163, 46, 0.15);
+            color: #fff;
+            box-shadow: inset 0 0 10px rgba(241, 163, 46, 0.1);
         }
 
         .main-content {
@@ -153,6 +161,50 @@
 
         .save-btn:hover {
             filter: brightness(1.2);
+        }
+
+        .responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .responsive-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .modal-content {
+                padding: 1rem !important;
+                width: 95% !important;
+                max-height: 95vh !important;
+            }
+            .modal-overlay {
+                padding: 0.5rem !important;
+            }
+            .modal-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                text-align: center;
+                gap: 1rem !important;
+            }
+            .modal-header h3 {
+                font-size: 1.1rem !important;
+            }
+            .modal-header .save-btn {
+                width: 100% !important;
+                padding: 0.6rem !important;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
         }
 
         /* GitHub Config Styling */
@@ -286,16 +338,130 @@
             position: relative;
             transform: scale(0.95);
             animation: scaleUp 0.3s forwards;
-            padding: 0; /* Content padding handled inside */
+            padding: 2rem;
         }
 
         @keyframes fadeIn { to { opacity: 1; } }
         @keyframes scaleUp { to { transform: scale(1); } }
     
     </style>
+    <style>
+        /* ... previous styles ... */
+
+        /* Mobile Responsive Dashboard */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+                transition: transform 0.3s ease;
+                width: 85%;
+                max-width: 300px;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+                padding: 1.5rem 1rem;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 0.5rem !important; /* Minimal padding */
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+                padding: 1rem; /* Header needs some padding */
+            }
+
+            /* Hamburger Menu */
+            .menu-toggle {
+                display: block !important;
+                position: absolute;
+                top: 1.5rem;
+                right: 1.5rem;
+                font-size: 1.5rem;
+                background: none;
+                border: none;
+                color: var(--admin-primary);
+                cursor: pointer;
+                z-index: 1001;
+            }
+
+            /* Stack Grids & Optimize Editors */
+            .dash-section .card > div {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem !important;
+            }
+
+            .card {
+                padding: 1rem !important; /* Reduced padding */
+                border-radius: 10px;
+            }
+
+            /* Better Form Elements for Mobile */
+            .form-group input, .form-group textarea, .form-group select {
+                font-size: 16px !important; /* Prevent iOS zoom */
+                padding: 0.8rem !important;
+            }
+
+            .save-btn {
+                width: 100%;
+                padding: 1rem;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Adjust Horizontal Scroll for Tables if needed */
+            #xml-projects-list, #xml-articles-list, #library-list, #tools-list {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-bottom: 1rem;
+            }
+
+            /* Preview Area Adjustments */
+            #projects-preview, #articles-preview, #library-preview {
+                min-height: 200px;
+                max-height: 400px;
+                font-size: 0.9rem;
+            }
+
+            /* Header Adjustments */
+            h1#greeting {
+                font-size: 1.2rem !important;
+            }
+
+            /* Adjust Modal */
+            .modal-content { --modal-padding: 2rem;
+                width: 95%;
+                margin: 10px;
+                padding: 1rem !important;
+            }
+            
+            /* Overlay */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 999;
+                backdrop-filter: blur(2px);
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+
+        .menu-toggle { display: none; }
+    </style>
 </head>
 <body>
-    <div class="sidebar">
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="admin-sidebar">
+        <!-- Sidebar Content -->
         <div class="profile-section">
             <div id="sidebar-avatar-container">
                 <div class="avatar-placeholder">👤</div>
@@ -303,12 +469,12 @@
             <div class="profile-name" id="sidebar-name">Admin</div>
         </div>
         <h2>BitMundo Central</h2>
-        <button class="nav-btn active" onclick="switchSection('profile', this)">Meu Perfil</button>
-        <button class="nav-btn" onclick="switchSection('projects', this)">Projetos (DB)</button>
-        <button class="nav-btn" onclick="switchSection('articles', this)">Postagens (DB)</button>
-        <button class="nav-btn" onclick="switchSection('library', this)">Biblioteca (DB)</button>
-        <button class="nav-btn" onclick="switchSection('tools', this)">Ferramentas (DB)</button>
-        <button class="nav-btn" onclick="switchSection('comments', this)">Comentários</button>
+        <button class="nav-btn active" onclick="switchSection('profile', this); toggleSidebar()">Meu Perfil</button>
+        <button class="nav-btn" onclick="switchSection('projects', this); toggleSidebar()">Projetos (DB)</button>
+        <button class="nav-btn" onclick="switchSection('articles', this); toggleSidebar()">Postagens (DB)</button>
+        <button class="nav-btn" onclick="switchSection('library', this); toggleSidebar()">Biblioteca (DB)</button>
+        <button class="nav-btn" onclick="switchSection('tools', this); toggleSidebar()">Ferramentas (DB)</button>
+        <button class="nav-btn" onclick="switchSection('comments', this); toggleSidebar()">Comentários</button>
         <div style="margin-top: auto;">
             <a href="/index.html" style="display: block; margin-bottom: 1rem;">
                 <button class="nav-btn" style="width: 100%; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">
@@ -320,17 +486,18 @@
     </div>
 
     <main class="main-content">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
         <header>
-            <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
                 <div id="header-avatar-container">
                     <!-- Avatar will be loaded here -->
                 </div>
                 <div>
-                    <h1 id="greeting">Olá, Admin</h1>
-                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5);">Bem-vindo ao centro de comando do site!</p>
+                    <h1 id="greeting" style="font-size: 1.5rem; margin: 0;">Olá, Admin</h1>
+                    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin: 0;">Bem-vindo ao centro de comando!</p>
                 </div>
             </div>
-            <div id="status-db" style="color: var(--admin-primary); font-size: 0.8rem;">
+            <div id="status-db" style="color: var(--admin-primary); font-size: 0.8rem; align-self: flex-start;">
                 <!-- DB Status -->
             </div>
         </header>
@@ -492,5 +659,18 @@
     </main>
 
     <script type="module" src="/scripts/admin_controller.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            } else {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+            }
+        }
+    </script>
 </body>
 </html>

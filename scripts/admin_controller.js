@@ -4,8 +4,165 @@ import { getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy,
 import { getFirebaseConfig, saveLocalFirebaseConfig } from "./firebase-manager.js";
 import { parseArticleTags, sanitizeString } from "./utils.js";
 
+// Inject Emoji CSS
+if (!document.getElementById('emoji-picker-css')) {
+    const link = document.createElement('link');
+    link.id = 'emoji-picker-css';
+    link.rel = 'stylesheet';
+    link.href = 'css/emoji_picker.css';
+    document.head.appendChild(link);
+}
+
 // Initialize Firebase App asynchronously
 let app, auth, db;
+
+/**
+ * EMOJI PICKER SHARED LOGIC
+ */
+let picmoLoaded = false;
+
+async function loadPicmo() {
+    if (picmoLoaded) return;
+    return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = "/scripts/lib/picmo.js";
+        script.onload = () => {
+            picmoLoaded = true;
+            resolve();
+        };
+        document.head.appendChild(script);
+    });
+}
+
+window.showEmojiPicker = async (triggerEl, textareaEl) => {
+    if (!textareaEl) return console.error("Emoji Picker: Textarea not found");
+
+    // Toggle logic: If clicking the same active button, just close and return
+    const existing = document.querySelector('.emoji-picker-container');
+    if (existing) {
+        existing.remove();
+        document.querySelectorAll('.emoji-trigger').forEach(btn => btn.dataset.active = "false");
+        if (triggerEl.dataset.active === "true") {
+            triggerEl.dataset.active = "false";
+            return;
+        }
+    }
+
+    await loadPicmo();
+
+    const pickerContainer = document.createElement('div');
+    pickerContainer.className = 'emoji-picker-container';
+
+    // Explicit close button (✕)
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'emoji-picker-close';
+    closeBtn.innerHTML = '✕';
+    closeBtn.type = "button";
+    closeBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        pickerContainer.remove();
+        triggerEl.dataset.active = "false";
+    };
+    pickerContainer.appendChild(closeBtn);
+
+    // Create a sub-container for the actual picker
+    const pickerRoot = document.createElement('div');
+    pickerRoot.style.width = '100%';
+    pickerRoot.style.height = '100%';
+    pickerContainer.appendChild(pickerRoot);
+
+    document.body.appendChild(pickerContainer);
+
+    // Position
+    const rect = triggerEl.getBoundingClientRect();
+    const pickerHeight = 320;
+    const pickerWidth = 280;
+
+    let top = rect.top + window.scrollY - pickerHeight - 10;
+    let left = rect.left + window.scrollX;
+
+    if (top < window.scrollY + 60) {
+        top = rect.bottom + window.scrollY + 10;
+    }
+
+    if (left + pickerWidth > window.innerWidth) {
+        left = window.innerWidth - pickerWidth - 15;
+    }
+    if (left < 10) left = 10;
+
+    pickerContainer.style.top = `${top}px`;
+    pickerContainer.style.left = `${left}px`;
+    pickerContainer.style.height = `${pickerHeight}px`;
+
+    const picker = picmo.createPicker({
+        rootElement: pickerRoot,
+        autoFocusSearch: true,
+        width: '100%',
+        height: '100%'
+    });
+
+    // Handle Emoji Selection
+    const onSelect = (selection) => {
+        console.log("Picmo Selection received:", selection);
+        let emoji = "";
+
+        if (typeof selection === 'string') {
+            emoji = selection;
+        } else if (selection && typeof selection === 'object') {
+            emoji = selection.emoji || selection.native || selection.data || selection.url;
+            if (!emoji || typeof emoji !== 'string') {
+                emoji = Object.values(selection).find(v => typeof v === 'string' && v.length <= 8 && /\p{Emoji}/u.test(v));
+            }
+        }
+
+        if (!emoji || typeof emoji !== 'string') {
+            console.error("Could not extract emoji string from selection:", selection);
+            return;
+        }
+
+        console.log("Emoji extracted:", emoji);
+
+        const start = textareaEl.selectionStart;
+        const end = textareaEl.selectionEnd;
+        const text = textareaEl.value;
+
+        textareaEl.focus();
+        try {
+            if (!document.execCommand('insertText', false, emoji)) {
+                throw new Error('execCommand rejected');
+            }
+        } catch (e) {
+            textareaEl.value = text.substring(0, start) + emoji + text.substring(end);
+            const newPos = start + emoji.length;
+            textareaEl.setSelectionRange(newPos, newPos);
+        }
+
+        setTimeout(() => {
+            pickerContainer.remove();
+            triggerEl.dataset.active = "false";
+            document.removeEventListener('click', clickOutside);
+        }, 10);
+    };
+
+    picker.addEventListener('emoji', onSelect);
+    picker.addEventListener('emoji:select', onSelect);
+    picker.addEventListener('select', onSelect);
+
+    const clickOutside = (e) => {
+        if (!pickerContainer.contains(e.target) && e.target !== triggerEl) {
+            pickerContainer.remove();
+            triggerEl.dataset.active = "false";
+            document.removeEventListener('click', clickOutside);
+        }
+    };
+
+    setTimeout(() => {
+        document.addEventListener('click', clickOutside);
+    }, 100);
+
+    triggerEl.dataset.active = "true";
+};
 
 async function initFirebase() {
     const config = await getFirebaseConfig();
@@ -426,10 +583,9 @@ window.togglePinComment = async (id, currentState) => {
 
 window.replyToCommentAdmin = (parentId, projectId, parentUser, parentText) => {
     const html = `
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div class="modal-header">
                 <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">💬 Responder Comentário</h3>
-                <button class="save-btn" style="background: #4b5563; color: white;" onclick="closeModal()">✕ Fechar</button>
+                <button class="save-btn" style="background: #4b5563; color: white;" onclick="closeAdminModal()">✕ Fechar</button>
             </div>
             <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
                 <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin: 0 0 0.5rem 0;">Respondendo para <strong>${parentUser}</strong>:</p>
@@ -437,14 +593,16 @@ window.replyToCommentAdmin = (parentId, projectId, parentUser, parentText) => {
             </div>
             <div class="form-group">
                 <label>Sua Resposta</label>
-                <textarea id="admin-reply-text" style="height: 120px;" placeholder="Digite aqui sua resposta oficial..."></textarea>
+                <div style="position: relative;">
+                    <textarea id="admin-reply-text" style="height: 120px;" placeholder="Digite aqui sua resposta oficial..."></textarea>
+                    <button type="button" class="emoji-trigger" onclick="window.showEmojiPicker(this, document.getElementById('admin-reply-text'))" style="position: absolute; bottom: 10px; right: 10px; margin: 0;">😊</button>
+                </div>
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button class="save-btn" style="flex: 2; padding: 1rem;" onclick="window.submitAdminReply('${parentId}', '${projectId}')">🚀 Enviar Resposta</button>
-                <button class="save-btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="closeModal()">Cancelar</button>
+                <button class="save-btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="closeAdminModal()">Cancelar</button>
             </div>
-        </div>
-    `;
+        `;
     window.showModal(html);
 };
 
@@ -580,7 +738,7 @@ window.showModal = (contentHtml) => {
 
     // Close on click outside
     overlay.onclick = (e) => {
-        if (e.target === overlay) window.closeModal();
+        if (e.target === overlay) window.closeAdminModal();
     };
 
     overlay.innerHTML = `
@@ -592,20 +750,25 @@ window.showModal = (contentHtml) => {
     document.body.appendChild(overlay);
 };
 
-window.closeModal = () => {
+
+window.closeAdminLibraryEditor = () => {
+    const overlay = document.querySelector('.modal-overlay');
+    if (overlay) overlay.remove();
+    if (typeof window.loadLibrary === 'function') window.loadLibrary();
+};
+window.closeAdminModal = () => {
     const overlay = document.querySelector('.modal-overlay');
     if (overlay) overlay.remove();
 };
 
 window.addNewProject = () => {
     const html = `
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div class="modal-header">
                 <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">🆕 Novo Projeto no Firestore</h3>
-                <button class="save-btn" style="background: #7b889bff; color: white;" onclick="closeModal()">✕ Fechar</button>
+                <button class="save-btn" style="background: #7b889bff; color: white;" onclick="closeAdminModal()">✕ Fechar</button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="responsive-grid">
                 <div>
                     <h4 style="font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 1rem;">Obrigatório</h4>
                     <div class="form-group"><label>ID Único (slug)</label><input type="text" id="new-id" placeholder="ex: mario-ptbr"></div>
@@ -630,8 +793,7 @@ window.addNewProject = () => {
             </p>
 
             <button class="save-btn" style="width: 100%; padding: 1rem; margin-top: 1.5rem;" onclick="saveNewProject()">🚀 Criar Projeto</button>
-        </div>
-    `;
+        `;
     window.showModal(html);
 };
 
@@ -642,13 +804,12 @@ window.editProject = async (id) => {
     const p = docSnap.data();
 
     const html = `
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div class="modal-header">
                 <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">🚀 Editando Projeto: ${p.title}</h3>
-                <button class="save-btn" style="background: #4b5563; color: white;" onclick="closeModal()">✕ Fechar</button>
+                <button class="save-btn" style="background: #4b5563; color: white;" onclick="closeAdminModal()">✕ Fechar</button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="responsive-grid">
                 <!-- Basic Info -->
                 <div>
                     <h4 style="font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 1rem;">Infos Básicas</h4>
@@ -701,8 +862,7 @@ window.editProject = async (id) => {
                 <button class="save-btn" style="flex: 1; background: rgba(239, 68, 68, 0.1); color: #ef4444;" onclick="deleteProject('${id}')">🗑️ Excluir</button>
             </div>
             <p style="text-align: center; font-size: 0.65rem; color: #555; margin-top: 1rem;">Campos de Galeria e Créditos estão sendo migrados via XML, suporte à edição manual em breve.</p>
-        </div>
-    `;
+        `;
     window.showModal(html);
 };
 
@@ -1287,13 +1447,12 @@ window.previewLibrary = async (id) => {
 
 window.addNewArticle = () => {
     const html = `
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div class="modal-header">
                 <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">📰 Nova Postagem (Firestore)</h3>
-                <button class="save-btn" style="background: rgba(255, 255, 255, 0.39);" onclick="closeModal()">✕ Fechar</button>
+                <button class="save-btn" style="background: rgba(255, 255, 255, 0.39);" onclick="closeAdminModal()">✕ Fechar</button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="responsive-grid">
                 <div class="form-group">
                     <label>Título</label>
                     <input type="text" id="art-title">
@@ -1330,8 +1489,7 @@ window.addNewArticle = () => {
             <div style="display: flex; gap: 1rem; margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
                 <button class="save-btn" style="flex: 1;" onclick="saveArticleChanges(null)">Criar no DB</button>
             </div>
-        </div>
-    `;
+        `;
     window.showModal(html);
 };
 
@@ -1341,13 +1499,12 @@ window.editArticle = async (id) => {
     const a = docSnap.data();
 
     const html = `
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div class="modal-header">
                 <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">📰 Editando Artigo: ${a.title}</h3>
-                <button class="save-btn" style="background: rgba(255, 255, 255, 0.46);" onclick="closeModal()">✕ Fechar</button>
+                <button class="save-btn" style="background: rgba(255, 255, 255, 0.46);" onclick="closeAdminModal()">✕ Fechar</button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="responsive-grid">
                 <div class="form-group">
                     <label>Título</label>
                     <input type="text" id="art-title" value="${a.title || ''}">
@@ -1407,8 +1564,7 @@ window.editArticle = async (id) => {
                 <button class="save-btn" style="flex: 2; padding: 1rem;" onclick="saveArticleChanges('${id}')">💾 Salvar Alterações no Firestore</button>
                 <button class="save-btn" style="flex: 1; background: rgba(239, 68, 68, 0.1); color: #ef4444;" onclick="deleteArticle('${id}')">🗑️ Excluir</button>
             </div>
-        </div>
-    `;
+        `;
     window.showModal(html);
 };
 
@@ -1489,12 +1645,12 @@ window.editLibrary = async (id) => {
     overlay.style.padding = '1rem';
 
     // Close logic
-    window.closeModal = () => { if (overlay) overlay.remove(); window.loadLibrary(); };
-    overlay.onclick = (e) => { if (e.target === overlay) window.closeModal(); };
+    const localClose = () => { if (overlay) overlay.remove(); window.loadLibrary(); };
+    overlay.onclick = (e) => { if (e.target === overlay) window.closeAdminModal(); };
 
     // Split Layout HTML
     overlay.innerHTML = `
-        <div class="modal-content" style="width: 98vw; height: 95vh; max-width: none; max-height: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border-radius: 8px;">
+        <div class="modal-content" style="width: 98vw; height: 95vh; max-width: none; max-height: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); overflow: hidden; border-radius: 8px;">
             
             <!-- LEFT: EDITOR -->
             <div style="display: flex; flex-direction: column; overflow-y: auto; background: #1a1a1a; border-right: 1px solid rgba(255,255,255,0.1);">
@@ -1504,7 +1660,7 @@ window.editLibrary = async (id) => {
                     <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.4rem;">🎮 Editando: ${g.title}</h3>
                     <div style="display: flex; gap: 1rem;">
                         <button class="save-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="saveLibraryChanges('${id}')">💾 Salvar</button>
-                        <button class="save-btn" style="background: rgba(255, 255, 255, 0.49); color: white;" onclick="closeModal()">✕ Fechar</button>
+                        <button class="save-btn" style="background: rgba(255, 255, 255, 0.49); color: white;" onclick="closeAdminLibraryEditor()">✕ Fechar</button>
                     </div>
                 </div>
 
@@ -1515,7 +1671,7 @@ window.editLibrary = async (id) => {
                         <input type="number" id="lib-order" value="${g.order || 0}" oninput="updateLibraryPreview()">
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="responsive-grid">
                         <!-- Basic Info -->
                         <div>
                             <h4 style="color: #999; font-size: 0.7rem; text-transform: uppercase;">Informações Gerais</h4>
@@ -1538,19 +1694,19 @@ window.editLibrary = async (id) => {
                         </div>
                     </div>
 
-                    <div style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div style="grid-column: span 2; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
                         <div class="form-group"><label>Sinopse / Sumário</label><textarea id="lib-summary" style="height: 100px;" oninput="updateLibraryPreview()">${g.summary || ''}</textarea></div>
                         <div class="form-group"><label>Guia / Walkthrough (URL)</label><input type="text" id="lib-guide" value="${g.guide_url || ''}" oninput="updateLibraryPreview()"></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
                         <div class="form-group"><label>Lore / História</label><textarea id="lib-lore" style="height: 80px;" oninput="updateLibraryPreview()">${g.lore || ''}</textarea></div>
                         <div class="form-group"><label>Dicas de Guia</label><textarea id="lib-tips" style="height: 80px;" oninput="updateLibraryPreview()">${g.guide_tips || ''}</textarea></div>
                         <div class="form-group"><label>Impacto / Legado</label><textarea id="lib-impact" style="height: 80px;" oninput="updateLibraryPreview()">${g.impact || ''}</textarea></div>
                         <div class="form-group"><label>Detalhes Dev (ROMhacking)</label><textarea id="lib-details-dev" style="height: 80px;" oninput="updateLibraryPreview()">${g.details_dev || ''}</textarea></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
                         <div class="form-group"><label>Créditos Hacker</label><input type="text" id="lib-hacker" value="${g.credits_hacker || ''}" oninput="updateLibraryPreview()"></div>
                         <div class="form-group"><label>Região</label><input type="text" id="lib-region" value="${g.region || ''}" oninput="updateLibraryPreview()"></div>
                         <div class="form-group"><label>Desenvolvimento (Detalhes)</label><textarea id="lib-dev-details" style="height: 80px;" oninput="updateLibraryPreview()">${g.dev_details || ''}</textarea></div>
@@ -2107,12 +2263,12 @@ window.editTool = async (id) => {
     const listEl = document.getElementById('tools-list');
     listEl.innerHTML = `
         <div class="card" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); color: #fff; max-width: 800px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div class="modal-header">
                 <h3 style="margin: 0; color: var(--admin-primary);">🛠️ Editando Ferramenta: ${t.name}</h3>
                 <button class="save-btn" style="background: rgba(255, 255, 255, 0.43); color: white;" onclick="loadTools()">✕ Fechar</button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="responsive-grid" style="gap: 1rem;">
                 <div class="form-group"><label>Nome</label><input type="text" id="tool-name" value="${t.name || ''}"></div>
                 <div class="form-group"><label>Versão</label><input type="text" id="tool-ver" value="${t.version || ''}"></div>
                 <div class="form-group"><label>Tipo</label><input type="text" id="tool-type" value="${t.type || ''}"></div>
@@ -2427,13 +2583,12 @@ window.saveNewArticle = async () => {
 
 window.addNewTool = () => {
     const html = `
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div class="modal-header">
                 <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">🛠️ Nova Ferramenta (Firestore)</h3>
-                <button class="save-btn" style="background: rgba(255, 255, 255, 0.39);" onclick="closeModal()">✕ Fechar</button>
+                <button class="save-btn" style="background: rgba(255, 255, 255, 0.39);" onclick="closeAdminModal()">✕ Fechar</button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="responsive-grid">
                 <div class="form-group">
                     <label>ID Único (slug)</label>
                     <input type="text" id="new-tool-id" placeholder="ex: psh-menu">
@@ -2480,8 +2635,7 @@ window.addNewTool = () => {
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button class="save-btn" style="flex: 1;" onclick="saveNewTool()">Criar no DB</button>
             </div>
-        </div>
-    `;
+        `;
     window.showModal(html);
 };
 

@@ -6,6 +6,23 @@
     <title>Biblioteca - BitMundo</title>
     
     <meta name="description" content="Biblioteca completa de jogos traduzidos e informações técnicas." />
+    <meta name="keywords" content="biblioteca, tradução, romhacking, info técnica, games" />
+    <meta name="author" content="Bit.Raiden">
+    <link rel="canonical" href="https://bitmundo.net/library.html" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bitmundo.net/library.html" />
+    <meta property="og:title" content="Biblioteca - BitMundo" />
+    <meta property="og:description" content="Biblioteca completa de jogos traduzidos e informações técnicas." />
+    <meta property="og:image" content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://bitmundo.net/library.html" />
+    <meta property="twitter:title" content="Biblioteca - BitMundo" />
+    <meta property="twitter:description" content="Biblioteca completa de jogos traduzidos e informações técnicas." />
+    <meta property="twitter:image" content="https://i.postimg.cc/fyRzwH4X/bitmundo-logo.png" />
     
     <!-- CSS -->
     <link rel="stylesheet" href="/css/style.css" />
@@ -48,6 +65,12 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 2rem;
             margin-top: 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .library-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .game-card {
@@ -444,8 +467,10 @@
     </div>
 
     <!-- Footer -->
-    <div w3-include-html="/footer.html"></div>
-    <script>w3IncludeHTML();</script>
+    <footer>
+        <div w3-include-html="/footer.html"></div>
+        <script>w3IncludeHTML();</script>
+    </footer>
 
     <script type="module" src="/scripts/library.js"></script>
 </body>

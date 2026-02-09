@@ -12,7 +12,8 @@ function loadpb() {
   const ProgressCounter = elem[0].getAttribute("pcounter") || "0%";
   var text = document.getElementById("progress_num");
   document.documentElement.style.setProperty('--pbar_centage', ProgressCounter);
-  document.getElementById("pbc").style.width = ProgressCounter;
+  var pbc = document.getElementById("pbc");
+  if (pbc) pbc.style.width = ProgressCounter;
 
   if (text) text.innerHTML = "Progresso: " + ProgressCounter;
   if (typeof showSlides === 'function') showSlides();
@@ -64,9 +65,8 @@ export async function loadArticlesFromFirestore(isLoadMore = false) {
     if (!isLoadMore) container.innerHTML = ""; // Clear loader after fetch
 
     if (querySnapshot.empty && !isLoadMore) {
-      container.innerHTML = "<p>Nenhuma publicação encontrada.</p>";
-      if (loadMoreBtn) loadMoreBtn.style.display = "none";
-      return;
+      console.log("Modern query empty, using legacy fallback.");
+      return loadArticlesLegacyFallback();
     }
 
     // Save last visible doc for next pagination
@@ -158,22 +158,23 @@ function renderArticle(a, container) {
 
   const articleDiv = document.createElement('div');
   articleDiv.className = 'article glass-panel';
-  articleDiv.style = `margin-bottom: 3rem; padding: 2.5rem; text-align: ${align}; border: 1px solid rgba(255,255,255,0.05);`;
+  // Standardized via CSS class .article
+  articleDiv.style.textAlign = align;
 
   articleDiv.innerHTML = `
-    <div style="display: flex; flex-direction: column; gap: 2rem;">
-        <div style="display: flex; align-items: center; gap: 2rem;">
-            ${image ? `<img id="titlemage" src="${image}" alt="${title}" style="border-radius: var(--radius-md); ${imageStyle}">` : ''}
-            <h2 style="color: var(--highlight); font-size: 2.0rem; margin: 0; text-transform: none; line-height: 1.2; flex: 1;">${title}</h2>
+    <div class="article-wrapper">
+        <div class="article-header">
+            ${image ? `<img id="titlemage" class="article-title-img" src="${image}" alt="${title}" style="${imageStyle}">` : ''}
+            <h2 class="article-title">${title}</h2>
         </div>
-        <div class="article-content" style="color: var(--text-main); font-size: 1.15rem; line-height: 1.8;">
+        <div class="article-content">
             ${contentHtml}
         </div>
         <div id="reactions-container-${articleId}"></div>
-        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; color: var(--text-muted);">
-            <div>
-                <span>Postado por: <strong style="color: var(--primary);">${author}</strong></span>
-                <span style="margin-left: 1rem;">Publicado em: <strong>${date}</strong></span>
+        <div class="article-footer">
+            <div class="article-meta">
+                <span>Postado por: <strong class="meta-author">${author}</strong></span>
+                <span class="meta-date">Publicado em: <strong>${date}</strong></span>
             </div>
             <button class="toggle-comments-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -182,19 +183,19 @@ function renderArticle(a, container) {
         </div>
         
         <!-- Comments Section (Visible by default) -->
-        <div class="comments-section comments-section-embedded" style="display: block; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="comments-section comments-section-embedded">
             <div id="comments-container-${articleId}" class="comments-list">
                 <p style="color: rgba(255,255,255,0.3); text-align: center;">Carregando comentários...</p>
             </div>
             
             <!-- Comment Form (Hidden by default, shown via toggle) -->
-            <div class="comment-form-box" style="display: none; transition: all 0.3s ease;">
-                <h3 style="font-size: 1rem; margin-bottom: 1rem;">Deixe seu comentário</h3>
+            <div class="comment-form-box" style="display: none;">
+                <h3 class="comment-form-title">Deixe seu comentário</h3>
                 <form id="comment-form-${articleId}">
                     <textarea placeholder="Escreva seu comentário aqui..." required></textarea>
-                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                    <div class="comment-form-actions">
                         <button type="submit" class="comment-submit-btn">ENVIAR COMENTÁRIO</button>
-                        <button type="button" class="comment-cancel-btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.8rem; font-family: 'Exo 2', sans-serif;">CANCELAR</button>
+                        <button type="button" class="comment-cancel-btn">CANCELAR</button>
                     </div>
                 </form>
             </div>

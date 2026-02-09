@@ -629,7 +629,7 @@ window.submitAdminReply = async (parentId, projectId) => {
 
         await setDoc(doc(collection(db, "comments")), replyData);
         showNotification("✅ Resposta enviada com sucesso!", "success");
-        window.closeModal();
+        window.closeAdminModal();
         loadCommentsAdmin();
     } catch (e) {
         console.error("Error sending reply:", e);
@@ -2666,7 +2666,7 @@ window.saveNewTool = async () => {
     try {
         await setDoc(doc(db, "tools", id), data);
         showNotification("✅ Ferramenta criada com sucesso!", "success");
-        window.closeModal();
+        window.closeAdminModal();
         loadTools();
     } catch (e) {
         showNotification("Erro ao criar ferramenta: " + e.message, "error");

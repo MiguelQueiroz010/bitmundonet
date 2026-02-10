@@ -675,11 +675,33 @@ function setupForm(db, auth, projectId, commentForm) {
 window.togglePinComment = async (commentId, shouldPin) => {
     try {
         const db = await dbPromise;
-        await updateDoc(doc(db, "comments", commentId), {
-            pinned: shouldPin
-        });
+        const auth = await authPromise;
+
+        console.log('togglePinComment called', { commentId, shouldPin, user: auth.currentUser ? auth.currentUser.email : null, uid: auth.currentUser ? auth.currentUser.uid : null });
+
+        // Diagnostics: check admin_config for uid and config/public_admins
+        try {
+            if (auth.currentUser) {
+                const adm = await getDoc(doc(db, 'admin_config', auth.currentUser.uid));
+                console.log('admin_config.exists:', adm.exists());
+            }
+        } catch (err) {
+            console.warn('Could not read admin_config:', err);
+        }
+
+        try {
+            const pub = await getDoc(doc(db, 'config', 'public_admins'));
+            console.log('public_admins exists:', pub.exists(), 'data:', pub.exists() ? pub.data() : null);
+        } catch (err) {
+            console.warn('Could not read config/public_admins:', err);
+        }
+
+        // Attempt update
+        await updateDoc(doc(db, 'comments', commentId), { pinned: shouldPin });
+        console.log('togglePinComment: update succeeded');
     } catch (e) {
-        alert("Erro ao (des)fixar: " + e.message);
+        console.error('Toggle pin error', e);
+        alert('Erro ao (des)fixar: ' + e.message + (e.code ? ' (code: ' + e.code + ')' : ''));
     }
 };
 

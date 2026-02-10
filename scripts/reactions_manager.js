@@ -1,12 +1,13 @@
 import { dbPromise, authPromise } from './db-context.js';
-import { doc, getDoc, setDoc, updateDoc, increment, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { doc, getDoc, setDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
 let currentUser = null;
 let authInitialized = false;
+let isProcessing = false; // TRAVA DE SEGURANÇA: impede spam de cliques
 
 /**
- * Initialize global auth listener
+ * Listener global de autenticação
  */
 async function ensureAuthListener() {
     if (authInitialized) return;
@@ -19,7 +20,7 @@ async function ensureAuthListener() {
 }
 
 /**
- * Initialize reactions for a target (article or project)
+ * Inicializa as reações
  */
 export async function initReactions(targetId, containerId) {
     const container = document.getElementById(containerId);
@@ -28,18 +29,22 @@ export async function initReactions(targetId, containerId) {
     await ensureAuthListener();
     const db = await dbPromise;
 
+    // Variáveis para armazenar os unsubscribes (limpeza de memória)
+    let unsubCounts = () => {};
+    let unsubUser = () => {};
+
     const renderReactions = (user) => {
+        // Limpa listeners anteriores se o user mudar
+        unsubCounts();
+        unsubUser();
+
         if (!user) {
-            // Login Wall for Reactions - Unified Style
             container.innerHTML = `
                 <div class="login-wall-prompt" style="padding: 1.5rem; margin-bottom: 0;">
                     <p style="font-size: 0.95rem; margin-bottom: 1rem;">Faça login para reagir</p>
-                    <button class="google-btn-small" id="react-login-btn">
-                        Entrar com Google
-                    </button>
+                    <button class="google-btn-small" id="react-login-btn">Entrar com Google</button>
                 </div>
             `;
-
             const btn = container.querySelector('#react-login-btn');
             if (btn) {
                 btn.onclick = async () => {
@@ -51,7 +56,6 @@ export async function initReactions(targetId, containerId) {
             return;
         }
 
-        // Render Buttons if Logged In
         container.innerHTML = `
             <div class="reactions-container">
                 <button class="reaction-btn like" data-type="like">
@@ -71,9 +75,8 @@ export async function initReactions(targetId, containerId) {
 
         const btns = container.querySelectorAll('.reaction-btn');
 
-        // Re-attach listeners for counts
-        const countsDoc = doc(db, "reactions", targetId);
-        onSnapshot(countsDoc, (snapshot) => {
+        // Listener dos contadores globais
+        unsubCounts = onSnapshot(doc(db, "reactions", targetId), (snapshot) => {
             const data = snapshot.data() || { like: 0, dislike: 0, heart: 0 };
             btns.forEach(btn => {
                 const type = btn.dataset.type;
@@ -81,104 +84,77 @@ export async function initReactions(targetId, containerId) {
             });
         });
 
-        // Re-attach user choice listener
-        const userDoc = doc(db, "reactions", targetId, "users", user.uid);
-        onSnapshot(userDoc, (snapshot) => {
+        // Listener da escolha específica deste usuário
+        unsubUser = onSnapshot(doc(db, "reactions", targetId, "users", user.uid), (snapshot) => {
             const userChoice = snapshot.data()?.type;
             btns.forEach(btn => {
-                if (btn.dataset.type === userChoice) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                btn.classList.toggle('active', btn.dataset.type === userChoice);
             });
         });
 
-        // Click Logic
+        // Lógica de clique
         btns.forEach(btn => {
-            btn.onclick = async () => {
-                const type = btn.dataset.type;
-                await toggleReaction(targetId, type);
-            };
+            btn.onclick = () => toggleReaction(targetId, btn.dataset.type);
         });
     };
 
-    // Initial check is handled by the auth listener below
-
-    // Update on auth change
     window.addEventListener('bitmundo-auth-change', (e) => renderReactions(e.detail));
-
-    // Also trigger immediately if we have user (or lack thereof)
     renderReactions(currentUser);
 
+    // Retorna função de limpeza
     return () => {
         unsubCounts();
-        if (unsubUser) unsubUser();
+        unsubUser();
     };
 }
 
 /**
- * Core Logic: Toggle or Swap Reactions
+ * Lógica de troca/remoção de reação com TRAVA ANTI-SPAM
  */
 async function toggleReaction(targetId, newType) {
+    if (isProcessing) return; // Se já estiver salvando, ignora o clique
+    
     const db = await dbPromise;
-    const uid = currentUser.uid;
+    if (!currentUser) return;
 
+    isProcessing = true; // Ativa a trava
+    const uid = currentUser.uid;
     const userDocRef = doc(db, "reactions", targetId, "users", uid);
     const countsDocRef = doc(db, "reactions", targetId);
 
     try {
         const userSnap = await getDoc(userDocRef);
         const oldType = userSnap.data()?.type;
-
         const updates = {};
 
         if (oldType === newType) {
-            // Remove reaction
+            // Remove reação
             await setDoc(userDocRef, { type: null }, { merge: true });
             updates[newType] = increment(-1);
         } else {
-            // New or Swapped reaction
+            // Nova ou Troca
             await setDoc(userDocRef, { type: newType }, { merge: true });
             updates[newType] = increment(1);
-            if (oldType) {
-                updates[oldType] = increment(-1);
-            }
+            if (oldType) updates[oldType] = increment(-1);
         }
 
-        // Apply counts
         await setDoc(countsDocRef, updates, { merge: true });
 
     } catch (e) {
-        console.error("Reaction Error:", e);
-        if (e.code === 'permission-denied') {
-            alert("Erro de permissão: Você não tem permissão para reagir aqui.");
-        } else {
-            alert("Erro ao reagir: " + e.message);
-        }
+        console.error("Erro na Reação:", e);
+        if (e.code === 'permission-denied') showToast("Login expirado ou sem permissão.");
+    } finally {
+        // Libera a trava após 500ms (evita duplo clique acidental)
+        setTimeout(() => { isProcessing = false; }, 500);
     }
 }
 
-// Simple Toast Notification for errors/info (optional enhancement)
 function showToast(message) {
-    // create a simple toast element if it doesn't exist
     let toast = document.getElementById('toast-notification');
     if (!toast) {
         toast = document.createElement('div');
         toast.id = 'toast-notification';
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            z-index: 10000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        `;
+        toast.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:8px;z-index:10000;opacity:0;transition:opacity 0.3s;pointer-events:none;`;
         document.body.appendChild(toast);
     }
     toast.textContent = message;

@@ -3385,42 +3385,27 @@ window.restoreSystem = async (input) => {
 /**
  * Link Google Account for Moderation Permissions
  */
-window.linkGoogleAccount = async () => {
+// MODIFICAÇÃO: Remova ou comente a função window.linkGoogleAccount antiga.
+// A promoção de admin deve ser feita manualmente no Console do Firebase ou via Admin SDK.
+
+window.verifyAdminStatus = async () => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const provider = new GoogleAuthProvider();
     try {
-        const result = await signInWithPopup(auth, provider);
-        const googleEmail = result.user.email;
-
-        // 1. Save to admin's private config
-        await setDoc(doc(db, "admin_config", user.uid), {
-            linkedGoogleEmail: googleEmail,
-            lastLinkedAt: new Date().toISOString()
-        }, { merge: true });
-
-        // 2. Add to public admin list for comments_loader.js
-        // We use a dedicated document for public emails to avoid exposing full admin configs
-        const publicAdminRef = doc(db, "config", "public_admins");
-        const publicSnap = await getDoc(publicAdminRef);
-        let emails = [];
-        if (publicSnap.exists()) {
-            emails = publicSnap.data().emails || [];
+        // Tentamos ler um documento que só admins podem ler
+        const adminRef = doc(db, "admin_config", user.uid);
+        const snap = await getDoc(adminRef);
+        
+        if (snap.exists()) {
+            showNotification("Acesso administrativo confirmado", "success");
+            loadConfig(user.uid);
+        } else {
+            showNotification("Acesso negado: Você não é um administrador.", "error");
+            await signOut(auth); // Desloga por segurança
         }
-
-        if (!emails.includes(googleEmail)) {
-            emails.push(googleEmail);
-            await setDoc(publicAdminRef, { emails: emails }, { merge: true });
-        }
-
-        showNotification(`✅ Conta ${googleEmail} vinculada com sucesso!`, "success");
-        loadConfig(user.uid);
-
     } catch (error) {
-        console.error("Error linking Google account:", error);
-        if (error.code !== 'auth/popup-closed-by-user') {
-            showNotification("❌ Erro ao vincular conta: " + error.message, "error");
-        }
+        console.error("Erro de permissão:", error);
+        showNotification("Erro: Você não tem permissão de administrador.", "error");
     }
 };

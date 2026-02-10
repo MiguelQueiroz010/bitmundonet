@@ -342,6 +342,33 @@ async function loadConfig(uid) {
         } else {
             linkStatus.innerHTML = `Status: <span style="color: #64748b;">Não vinculado</span>`;
         }
+
+        // Controlar visibilidade das seções locais
+        controlLocalSections();
+    }
+}
+// Função para verificar se é acesso local
+function isLocalEnvironment() {
+    const host = window.location.hostname;
+    return host === 'localhost' || 
+               host === '127.0.0.1' || 
+               host.startsWith('192.168.') || 
+               host.startsWith('172.') ||
+               host === '[::1]';
+}
+
+// Controlar visibilidade das seções locais
+function controlLocalSections() {
+    const isLocal = isLocalEnvironment();
+    const localapisection = document.getElementById('local-api-section');
+    const localEnvironmentSection = document.querySelector('h4[style*="🏠"]')?.closest('div');
+    
+    if (localapisection) {
+        localapisection.style.display = isLocal ? 'block' : 'none';
+    }
+    
+    if (localEnvironmentSection) {
+        localEnvironmentSection.style.display = isLocal ? 'block' : 'none';
     }
 }
 

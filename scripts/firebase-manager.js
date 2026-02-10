@@ -30,32 +30,28 @@ function isPlaceholder(config) {
 }
 
 export async function getFirebaseConfig() {
-    // 1. Check localStorage (Priority for local development)
-    // This avoids a 404 network error in the console when running via Live Server
-    const localConfigStr = localStorage.getItem('bitmundo_firebase_config');
-    if (localConfigStr) {
-        try {
-            const localConfig = JSON.parse(localConfigStr);
-            if (!isPlaceholder(localConfig)) {
-                return localConfig;
+    const isLocal = ['localhost', '127.0.0.1', '172.25.0.1'].some(ip => location.hostname.includes(ip));
+    
+    // SÓ aceita config do localStorage se for ambiente local
+    if (isLocal) {
+        const localConfigStr = localStorage.getItem('bitmundo_firebase_config');
+        if (localConfigStr) {
+            try {
+                return JSON.parse(localConfigStr);
+            } catch (e) {
+                console.error('Erro na config local');
             }
-        } catch (e) {
-            console.error('Error parsing local Firebase config:', e);
         }
     }
 
-    // 2. Check static file (Fallback for GitHub Deploy)
-    const staticConfig = await getStaticConfig();
-    if (staticConfig && !isPlaceholder(staticConfig)) {
-        return staticConfig;
+    // Em produção, usa sempre o arquivo estático injetado pelo GitHub Actions
+    try {
+        const module = await import('./firebase-config.js');
+        return module.default;
+    } catch (e) {
+        console.error("Configuração de produção não encontrada.");
+        return null;
     }
-
-    // 3. Return placeholder/invalid config (will trigger setup UI)
-    return staticConfig || {
-        apiKey: "MISSING",
-        authDomain: "MISSING",
-        projectId: "MISSING"
-    };
 }
 
 export function saveLocalFirebaseConfig(config) {

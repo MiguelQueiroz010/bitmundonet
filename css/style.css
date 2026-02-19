@@ -80,11 +80,7 @@ a {
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.article:hover, 
-.article *:hover {
-    box-shadow: none !important;
-    text-shadow: none !important;
-}
+
 
 ul {
   list-style: none;
@@ -117,7 +113,6 @@ h1, h2, h3, h4, .brand-font {
 
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   border: var(--glass-border);
   box-shadow: var(--glass-shadow);

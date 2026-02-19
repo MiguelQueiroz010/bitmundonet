@@ -30,8 +30,8 @@ function isPlaceholder(config) {
 }
 
 export async function getFirebaseConfig() {
-    const isLocal = ['localhost', '127.0.0.1', '172.25.0.1'].some(ip => location.hostname.includes(ip));
-    
+    const isLocal = ['localhost', '127.0.0.1', '172.25.0.1', '192.168.1.22'].some(ip => location.hostname.includes(ip));
+
     // SÓ aceita config do localStorage se for ambiente local
     if (isLocal) {
         const localConfigStr = localStorage.getItem('bitmundo_firebase_config');

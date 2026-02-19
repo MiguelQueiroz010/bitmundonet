@@ -32,20 +32,41 @@ function scrollFunction() {
     }
   }
 
-  // 2. Seamless Logic (Padding-based jump compensation)
-  if (navbar && head) {
+  // 2. Seamless Logic (Sticky Strip)
+  const navStrip = document.querySelector(".nav-bar-strip");
+
+  if (navbar && head && navStrip) {
+    // When the scroll passes the banner height (threshold), we fix the strip
     if (scrollPos > threshold && !isFixed) {
       isFixed = true;
-      navbar.style.position = "fixed";
-      navbar.style.top = "0";
-      head.style.display = "none";
-      document.body.style.paddingTop = navStripHeight + "px";
+
+      // Fix the strip to the top
+      navStrip.style.position = "fixed";
+      navStrip.style.top = "0";
+      navStrip.style.left = "0";
+      navStrip.style.width = "100%";
+      navStrip.style.zIndex = "1000";
+      navStrip.style.boxShadow = "0 4px 20px rgba(0,0,0,0.5)"; // Add shadow for visibility
+
+      // Add padding to the parent container to prevent content jump
+      // transform the navbar container into a placeholder of the same height as the strip
+      navbar.style.paddingBottom = navStripHeight + "px";
+
       document.body.classList.add("nav-scrolled");
-    } else if (scrollPos < 10 && isFixed) { // Increased margin for stability
+
+    } else if (scrollPos <= threshold && isFixed) {
       isFixed = false;
-      navbar.style.position = "relative";
-      head.style.display = "block";
-      document.body.style.paddingTop = "0";
+
+      // Reset strip to normal flow
+      navStrip.style.position = "relative";
+      navStrip.style.top = "auto";
+      navStrip.style.left = "auto";
+      navStrip.style.width = "100%";
+      navStrip.style.boxShadow = "none";
+
+      // Remove placeholder padding
+      navbar.style.paddingBottom = "0";
+
       document.body.classList.remove("nav-scrolled");
     }
   }
@@ -76,10 +97,15 @@ function dropdown() {
   const mobileToggle = document.getElementById("mobile_dropdown");
   const mobileLogo = document.getElementById("mobile_logo");
   const youtubeGallery = document.getElementById("youtube-galleryM");
+  const navStrip = document.querySelector(".nav-bar-strip");
 
   if (!dropdownMenu) return;
 
   const isActive = dropdownMenu.classList.contains("active");
+
+  if (navStrip) {
+    navStrip.style.transition = "opacity 0.3s ease, visibility 0.3s ease";
+  }
 
   if (isActive) {
     // Closing
@@ -87,6 +113,16 @@ function dropdown() {
     document.body.style.overflow = "auto";
     if (mobileToggle) mobileToggle.style.display = "block";
     if (youtubeGallery) youtubeGallery.style.display = "inline";
+
+    // Restore Navbar
+    if (navStrip) {
+      navStrip.style.opacity = "1";
+      navStrip.style.visibility = "visible";
+    }
+    // Restore dropdown position
+    dropdownMenu.style.top = "";
+    dropdownMenu.style.height = "";
+    dropdownMenu.style.paddingTop = "";
   }
   else {
     // Opening
@@ -94,5 +130,16 @@ function dropdown() {
     document.body.style.overflow = "hidden";
     if (mobileToggle) mobileToggle.style.display = "none";
     if (youtubeGallery) youtubeGallery.style.display = "none";
+
+    // Hide Navbar
+    if (navStrip) {
+      navStrip.style.opacity = "0";
+      navStrip.style.visibility = "hidden";
+    }
+    // Expand dropdown to cover screen
+    dropdownMenu.style.top = "0";
+    dropdownMenu.style.height = "100vh";
+    // Add safer padding for the close button
+    dropdownMenu.style.paddingTop = "2rem";
   }
 }

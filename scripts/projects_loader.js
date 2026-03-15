@@ -278,6 +278,73 @@ async function initDetail() {
             const maintenance = item.maintenance === true || item.maintenance === "true";
             const url = item.url;
             const changelog = item.changelog || "";
+            const soundUrl = item.sound_url || "";
+
+            // Build download button depending on sound_url presence
+            let downloadBtn = '';
+            if (maintenance) {
+                downloadBtn = `
+                    <div class="maintenance">
+                        <span>EM MANUTENÇÃO</span>
+                        <p style="font-size: 0.8rem; margin-top: 5px; color: rgba(239, 68, 68, 0.7);">
+                            Este arquivo está sendo atualizado.
+                        </p>
+                    </div>
+                `;
+            } else if (soundUrl) {
+                // Pegadinha: Raiden leva o botão e ele esfarela
+                const escapedSound = soundUrl.replace(/'/g, "\\'");
+                downloadBtn = `
+                    <div class="prank-container">
+                        <a href="#" class="download-link" onclick="
+                            event.preventDefault();
+                            const container = this.closest('.prank-container');
+                            if (container.classList.contains('prank-running')) return;
+                            
+                            // Injetar GIF se não existir
+                            let gif = container.querySelector('.prank-gif');
+                            if (!gif) {
+                                gif = document.createElement('img');
+                                gif.src = '/raiden_fly.gif';
+                                gif.className = 'prank-gif';
+                                container.appendChild(gif);
+                            }
+                            
+                            // Tocar Som
+                            var a = new Audio('${escapedSound}');
+                            a.play().catch(function(){});
+                            
+                            // Iniciar Corrida
+                            container.classList.add('prank-running');
+                            
+                            // Ao chegar na borda (1.2s de animação), esfarelar
+                            setTimeout(() => {
+                                // Fixar posição real no viewport para o esfarelamento
+                                const rect = container.getBoundingClientRect();
+                                container.classList.remove('prank-running');
+                                container.style.position = 'fixed';
+                                container.style.left = rect.left + 'px';
+                                container.style.top = rect.top + 'px';
+                                container.style.width = rect.width + 'px';
+                                container.style.margin = '0';
+                                
+                                container.classList.add('snap-disintegrate');
+                                
+                                // Remover de vez
+                                setTimeout(() => container.remove(), 1500);
+                            }, 1200);
+                        ">
+                            EFETUAR DOWNLOAD
+                        </a>
+                    </div>
+                `;
+            } else {
+                downloadBtn = `
+                    <a href="${url}" target="_blank" class="download-link">
+                        EFETUAR DOWNLOAD
+                    </a>
+                `;
+            }
 
             return `
                 <div class="dir-item">
@@ -296,18 +363,7 @@ async function initDetail() {
                                 </div>
                             </div>
                         ` : ''}
-                        ${maintenance ? `
-                            <div class="maintenance">
-                                <span>EM MANUTENÇÃO</span>
-                                <p style="font-size: 0.8rem; margin-top: 5px; color: rgba(239, 68, 68, 0.7);">
-                                    Este arquivo está sendo atualizado.
-                                </p>
-                            </div>
-                        ` : `
-                            <a href="${url}" target="_blank" class="download-link">
-                                EFETUAR DOWNLOAD
-                            </a>
-                        `}
+                        ${downloadBtn}
                     </div>
                 </div>
             `;

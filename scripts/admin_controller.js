@@ -983,6 +983,10 @@ window.addDownloadRow = (containerId = 'downloads-list', data = {}) => {
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
              <input type="text" placeholder="URL do Download" class="dl-url" value="${data.url || ''}" style="width: 100%; font-size: 0.8rem;">
         </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
+            <span style="font-size: 0.7rem; color: rgba(241,163,46,0.8); white-space: nowrap;">🔊 Som:</span>
+            <input type="text" placeholder="URL do áudio ao clicar em Download (opcional)" class="dl-sound" value="${data.sound_url || ''}" style="flex: 1; font-size: 0.8rem;">
+        </div>
         <div>
             <textarea placeholder="Changelog / Notas (HTML permitido)" class="dl-changelog" style="width: 100%; height: 60px; font-size: 0.8rem; font-family: monospace;">${data.changelog || ''}</textarea>
         </div>
@@ -1197,6 +1201,7 @@ window.saveProjectChanges = async (id) => {
         const url = row.querySelector('.dl-url').value;
         const maintenance = row.querySelector('.dl-maintenance').checked;
         const changelog = row.querySelector('.dl-changelog').value;
+        const sound_url = row.querySelector('.dl-sound')?.value || '';
 
         if (version || url) { // Only save if has minimum content
             data.downloads.push({
@@ -1204,7 +1209,8 @@ window.saveProjectChanges = async (id) => {
                 type,
                 url,
                 maintenance,
-                changelog
+                changelog,
+                sound_url
             });
         }
     });

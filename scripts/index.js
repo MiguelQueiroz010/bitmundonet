@@ -363,9 +363,59 @@ export async function loadRecentGallery() {
   }
 }
 
+// Global Site Config Loader
+async function loadSiteConfig() {
+  const defaultUrl = "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A2097610755&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true";
+  let finalUrl = defaultUrl;
+
+  try {
+    const db = await dbPromise;
+    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js");
+    const docRef = doc(db, "articles", "site_config_main");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.soundcloud_url) {
+        finalUrl = data.soundcloud_url.trim();
+        const srcMatch = finalUrl.match(/src=["'](.*?)["']/);
+        if (srcMatch && srcMatch[1]) finalUrl = srcMatch[1];
+        if (!finalUrl.includes('w.soundcloud.com/player')) {
+          const encodedUrl = encodeURIComponent(finalUrl);
+          finalUrl = `https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true`;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Erro ao carregar configurações do site:", e);
+  }
+
+  const radioDiv = document.getElementById("radio");
+  if (radioDiv) {
+    radioDiv.innerHTML = `<iframe id="sc-widget" width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="${finalUrl}"></iframe>`;
+
+    // Carrega a API do SoundCloud para controlar o volume
+    const setupVolume = () => {
+      const widget = SC.Widget('sc-widget');
+      widget.bind(SC.Widget.Events.READY, () => {
+        widget.setVolume(8); // Volume de 0 a 100. 15 é um volume ambiente gostoso.
+      });
+    };
+
+    if (!window.SC) {
+      const script = document.createElement('script');
+      script.src = "https://w.soundcloud.com/player/api.js";
+      script.onload = setupVolume;
+      document.body.appendChild(script);
+    } else {
+      setupVolume();
+    }
+  }
+}
+
 // Add to onload chain
 const originalOnload = window.onload;
 window.onload = function () {
   if (originalOnload) originalOnload();
   loadRecentGallery();
+  loadSiteConfig();
 };

@@ -318,6 +318,20 @@ async function loadConfig(uid) {
         document.getElementById('admin-name').value = data.name || "";
         document.getElementById('admin-avatar').value = data.avatar || "";
 
+        // Load Global Site Configs
+        try {
+            const siteConfigRef = doc(db, "articles", "site_config_main");
+            const siteConfigSnap = await getDoc(siteConfigRef);
+            if (siteConfigSnap.exists()) {
+                const siteData = siteConfigSnap.data();
+                if (document.getElementById('admin-soundcloud')) {
+                    document.getElementById('admin-soundcloud').value = siteData.soundcloud_url || "";
+                }
+            }
+        } catch (e) {
+            console.error("Erro ao carregar configs globais:", e);
+        }
+
         // Update avatar display
         updateAvatarDisplay(data.avatar, data.name);
 
@@ -425,6 +439,7 @@ function setupProfileForm() {
         // Get form values
         const name = document.getElementById('admin-name').value;
         const avatar = document.getElementById('admin-avatar').value;
+        const soundcloud_url = document.getElementById('admin-soundcloud')?.value || "";
 
         // Show loading state
         const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -439,6 +454,14 @@ function setupProfileForm() {
                 name: name,
                 avatar: avatar,
                 updatedAt: new Date().toISOString()
+            }, { merge: true });
+
+            // Save Global configs (In articles collection to bypass read restrictions)
+            const siteConfigRef = doc(db, "articles", "site_config_main");
+            await setDoc(siteConfigRef, {
+                soundcloud_url: soundcloud_url,
+                updatedAt: new Date().toISOString(),
+                selected: false // Prevents showing in articles list
             }, { merge: true });
 
             // Update avatar display immediately

@@ -2647,7 +2647,11 @@ window.editTool = async (id) => {
                 <div class="form-group"><label>Alvo</label><input type="text" id="tool-target" value="${t.target || ''}"></div>
                 <div class="form-group"><label>Crédito</label><input type="text" id="tool-credit" value="${t.credit || ''}"></div>
                 <div class="form-group"><label>Ícone (URL)</label><input type="text" id="tool-icon" value="${t.icon || ''}"></div>
-                <div class="form-group"><label>URL Download</label><input type="text" id="tool-url" value="${t.url || ''}"></div>
+                <div class="form-group"><label>URL (Download ou Link)</label><input type="text" id="tool-url" value="${t.url || ''}"></div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+                    <input type="checkbox" id="tool-online" style="width: 20px; height: 20px; cursor: pointer; border-radius: 4px;" ${t.isOnline ? 'checked' : ''}>
+                    <label for="tool-online" style="margin:0; cursor:pointer;" title="Muda o botão de Download para Rodar Online nas ferramentas">É uma Ferramenta Online?</label>
+                </div>
             </div>
             <div class="form-group"><label>Descrição</label><textarea id="tool-desc" style="height: 100px;">${t.description || ''}</textarea></div>
             <div class="form-group"><label>Extras (Links Adicionais)</label><input type="text" id="tool-extra" value="${t.extra || ''}"></div>
@@ -2669,6 +2673,7 @@ window.saveToolChanges = async (id) => {
         credit: document.getElementById('tool-credit').value,
         icon: document.getElementById('tool-icon').value,
         url: document.getElementById('tool-url').value,
+        isOnline: document.getElementById('tool-online').checked || false,
         description: document.getElementById('tool-desc').value,
         extra: document.getElementById('tool-extra').value,
         updatedAt: new Date().toISOString(),
@@ -3020,9 +3025,13 @@ window.addNewTool = () => {
                     <label>Ícone (URL)</label>
                     <input type="text" id="new-tool-icon" placeholder="/media/tools/icon.png">
                 </div>
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>URL Download</label>
-                    <input type="text" id="new-tool-url">
+                <div class="form-group" style="grid-column: span 1;">
+                    <label>URL (Download ou Link)</label>
+                    <input type="text" id="new-tool-url" placeholder="https://...">
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-start; margin-top: 1.5rem;">
+                    <input type="checkbox" id="new-tool-online" style="width: 20px; height: 20px; cursor: pointer; border-radius: 4px;">
+                    <label for="new-tool-online" style="margin:0; cursor:pointer;" title="Muda o botão de Download para Rodar Online nas ferramentas">É uma Ferramenta Online?</label>
                 </div>
             </div>
             
@@ -3059,6 +3068,7 @@ window.saveNewTool = async () => {
         credit: document.getElementById('new-tool-credit').value || '',
         icon: document.getElementById('new-tool-icon').value || '',
         url: document.getElementById('new-tool-url').value || '',
+        isOnline: document.getElementById('new-tool-online').checked || false,
         description: document.getElementById('new-tool-desc').value || '',
         extra: document.getElementById('new-tool-extra').value || '',
         createdAt: new Date().toISOString(),

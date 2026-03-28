@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrator HOG (DBZ) - Bit.Raiden</title>
+    
+    <meta name="description" content="Ferramenta baseada em Web para extrair arquivos HOG" />
+    <meta name="author" content="Bit.Raiden">
+
+    <!-- Scripts da Base do Site (Navbar e Footer) -->
+    <script src="https://www.w3schools.com/lib/w3data.js"></script>
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script type="module" src="/scripts/navbar_auth.js"></script>
+     
+    <!-- CSS Base do Site -->
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <style>
+        /* Estilos específicos da ferramenta HOG */
+        .extractor-panel {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-md);
+            padding: 3rem;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animação Estilo DBZ (Aura Super Saiyajin) */
+        .dbz-animation {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 2rem;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,235,59,0.8) 0%, rgba(255,152,0,0.5) 50%, transparent 80%);
+            box-shadow: 0 0 20px 10px rgba(255,193,7,0.4);
+            display: none; /* Só mostra quando em processo */
+            position: relative;
+        }
+
+        .dbz-animation.active {
+            animation: pulseAura 0.8s infinite alternate;
+        }
+        
+        .dbz-animation::after {
+            content: "⚡";
+            font-size: 5rem;
+            position: absolute;
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: shakeDragon 0.3s infinite;
+        }
+
+        @keyframes pulseAura {
+            0% { transform: scale(0.9); box-shadow: 0 0 20px 10px rgba(255,235,59,0.5); }
+            100% { transform: scale(1.2); box-shadow: 0 0 50px 20px rgba(255,152,0,0.8); }
+        }
+
+        @keyframes shakeDragon {
+            0% { transform: translate(-50%, -50%) rotate(-10deg); filter: drop-shadow(0 0 5px orange); }
+            50% { transform: translate(-50%, -50%) rotate(10deg); filter: drop-shadow(0 0 15px yellow); }
+            100% { transform: translate(-50%, -50%) rotate(-10deg); filter: drop-shadow(0 0 5px orange); }
+        }
+
+        /* Estilo do Botão Principal */
+        .btn-abrir-hog {
+            background: linear-gradient(135deg, #FF9800, #F44336); /* Cores DBZ - Laranja para Vermelho */
+            color: #fff;
+            border: 2px solid #FFC107;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.5rem;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-abrir-hog:hover {
+            box-shadow: 0 0 25px rgba(255, 152, 0, 0.8);
+            transform: translateY(-5px) scale(1.05);
+            border-color: #FFF;
+        }
+
+        /* Área de Informações de Processo */
+        .info-area {
+            margin-top: 2.5rem;
+            color: var(--text-muted);
+            text-align: left;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,152,0,0.2);
+            padding: 1.5rem;
+            border-radius: var(--radius-sm);
+            min-height: 150px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .info-area ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 1rem;
+        }
+        
+        .info-area li {
+            padding: 0.3rem 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .info-area li::before {
+            content: "↳";
+            color: #FF9800;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        .blink-text {
+            animation: textBlink 1.5s infinite;
+            color: #FFC107;
+            font-weight: bold;
+        }
+        
+        @keyframes textBlink {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar (Componente Reutilizado) -->
+    <div w3-include-html="/navbar.html"></div>
+    <script>w3IncludeHTML();</script>
+
+    <main class="container">
+        <!-- Cabeçalho -->
+        <div class="text-center mt-5 mb-5">
+             <h1 class="hero-title">HOG Extractor</h1>
+             <p class="hero-subtitle">Ferramenta em nuvem para extração de pacotes .HOG (Dragon Ball Z)</p>
+        </div>
+
+        <!-- Painel Principal da Ferramenta -->
+        <section class="extractor-panel">
+            
+            <!-- Recipiente da Animação DBZ -->
+            <div id="animation-container" class="dbz-animation"></div>
+
+            <!-- Botão de Ação -->
+            <button id="btn-open-file" class="btn-abrir-hog">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Selecionar HOG
+            </button>
+
+            <!-- Área de Status e Logs -->
+            <div class="info-area" id="info-area">
+                <p>Nenhum arquivo carregado. Clique no botão acima para abrir um pacote <strong>.hog</strong> do seu dispositivo.</p>
+                <p style="opacity: 0.7; font-size: 0.9em;"><em>(O arquivo não será enviado a nenhum servidor, tudo acontece localmente no seu navegador usando File System Access API)</em></p>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer (Componente Reutilizado) -->
+    <footer>
+        <div w3-include-html="/footer.html"></div>
+        <script>w3IncludeHTML();</script>
+    </footer>
+
+    <!-- Script de Funcionalidades da Ferramenta -->
+    <script type="module" src="/scripts/hog_extractor.js"></script>
+</body>
+</html>

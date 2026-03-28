@@ -77,9 +77,17 @@ function renderTools() {
                         <strong>Créditos:</strong> <span style="color:#4ade80">${tool.credit || tool.credits || ''}</span>
                     </p>
                     <div id="link" style="margin-top: 1.5rem;">
-                        <a href="${tool.url}" target="_blank" style="display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                            <img src="/media/download.png" style="width: 48px; height: 48px;">
-                            <span style="font-size: 0.9rem;">Download (${tool.version || ''})</span>
+                        <a href="${tool.url}" target="${tool.isOnline ? '_self' : '_blank'}" style="display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; transition: 0.2s;">
+                            ${tool.isOnline
+                                ? `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 6px rgba(96,165,250,0.6)); margin-bottom: 2px;">
+                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                     <polyline points="15 3 21 3 21 9"></polyline>
+                                     <line x1="10" y1="14" x2="21" y2="3"></line>
+                                   </svg>
+                                   <span style="font-size: 1rem; font-weight: bold; color: #60a5fa; text-shadow: 0 0 10px rgba(96,165,250,0.5);">Rodar Online</span>`
+                                : `<img src="/media/download.png" style="width: 48px; height: 48px;">
+                                   <span style="font-size: 0.9rem; color: #fff;">Download (${tool.version || ''})</span>`
+                            }
                         </a>
                     </div>
                 </div>

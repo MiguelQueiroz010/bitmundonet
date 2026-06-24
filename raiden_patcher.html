@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raiden Patcher - Web Edition</title>
+    
+    <meta name="description" content="Ferramenta baseada em Web para Patching de ISOs (PS2)" />
+    <meta name="author" content="Bit.Raiden">
+
+    <!-- CSS Base do Site -->
+    <link rel="stylesheet" href="/css/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Painel Base */
+        .extractor-panel {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-md);
+            padding: 3rem;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .files-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Botões */
+        .btn-select {
+            background: rgba(0, 150, 255, 0.1);
+            color: #3af;
+            border: 2px dashed #06f;
+            padding: 1.2rem 2rem;
+            font-size: 1.1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            text-transform: uppercase;
+            min-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-select:hover {
+            background: rgba(0, 150, 255, 0.2);
+            border-color: #3af;
+            box-shadow: 0 0 15px rgba(51, 170, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-select.loaded {
+            background: rgba(0, 255, 100, 0.1);
+            border: 2px solid #0f0;
+            color: #0f0;
+        }
+
+        .btn-abrir-hog {
+            background: linear-gradient(135deg, #06f, #3af);
+            color: #fff;
+            border: 2px solid #3af;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.3rem;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(51, 170, 255, 0.4);
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        .btn-abrir-hog:hover {
+            box-shadow: 0 0 25px rgba(51, 170, 255, 0.8);
+            transform: translateY(-5px) scale(1.05);
+            border-color: #FFF;
+        }
+
+        .btn-abrir-hog:disabled {
+            background: #555;
+            color: #888;
+            border-color: #666;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        /* Animação FullScreen Container */
+        #anim-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000;
+            display: none; /* Hide by default */
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+        }
+        
+        /* -------------------------------------
+           Estilos copiados de raiden-patch-animation.html
+           ------------------------------------- */
+        #stage { position:relative; width:100vw; height:100vh; background:#000; overflow:hidden; }
+        #mainCanvas { position:absolute; inset:0; z-index:2; }
+        #ps2bg {
+          position:absolute; inset:0; z-index:1;
+          background: radial-gradient(ellipse at 50% 65%, #001845 0%, #000c2e 45%, #000000 100%);
+          opacity:0; transition:opacity 1s ease;
+        }
+        #vignette {
+          position:absolute; inset:0; z-index:3; pointer-events:none;
+          background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.78) 100%);
+        }
+        #raidenSVG {
+          position:absolute; left:50%; top:50%;
+          transform:translate(-50%,-50%) scale(0);
+          z-index:10; opacity:0;
+          transition: transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
+          filter: drop-shadow(0 0 24px #3af) drop-shadow(0 0 55px #06f);
+        }
+        #raidenGifAnim {
+          position:absolute; left:50%; top:50%;
+          transform:translate(-50%,-50%) scale(0);
+          z-index:15; opacity:0;
+          transition: transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
+          border-radius: 5px;
+          pointer-events: none;
+        }
+        #ringWrap {
+          position:absolute; left:50%; top:50%;
+          transform:translate(-50%,-50%);
+          z-index:11; opacity:0; transition:opacity 0.5s ease;
+        }
+        #ringPath {
+          stroke-dasharray:502; stroke-dashoffset:502;
+          transition:stroke-dashoffset 0.12s linear;
+          filter:drop-shadow(0 0 5px #3af);
+        }
+        #statusWrap {
+          position:absolute; bottom:11%; left:0; right:0;
+          text-align:center; z-index:12; opacity:0; transition:opacity 0.5s ease;
+        }
+        #statusTitle {
+          font-family:'Orbitron',monospace; font-weight:900;
+          font-size:clamp(1rem,2.8vw,1.5rem); letter-spacing:0.35em; color:#fff;
+          text-shadow:0 0 16px #3af, 0 0 40px #06f; margin-bottom:8px;
+        }
+        #statusMsg { font-size:clamp(0.6rem,1.4vw,0.78rem); letter-spacing:0.22em; color:#5a9cc5; text-transform:uppercase; }
+        #pctLabel {
+          font-family:'Orbitron',monospace; font-size:clamp(0.75rem,1.8vw,0.95rem);
+          font-weight:700; color:#3af; margin-top:6px; text-shadow:0 0 10px #3af;
+        }
+        #flawless {
+          position:absolute; inset:0; display:flex; flex-direction:column;
+          align-items:center; justify-content:center; z-index:20;
+          opacity:0; pointer-events:none;
+          background:radial-gradient(ellipse at center, rgba(0,30,100,0.6) 0%, rgba(0,0,0,0.94) 70%);
+          transition:opacity 0.3s ease;
+        }
+        #flawlessText {
+          font-family:'Orbitron',monospace; font-weight:900;
+          font-size:clamp(2.2rem,9vw,5.5rem); letter-spacing:0.12em;
+          background:linear-gradient(180deg,#ffffff 0%,#99ccff 35%,#2255ee 100%);
+          -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+          filter:drop-shadow(0 0 18px rgba(80,150,255,0.95));
+          transform:scale(3.5); opacity:0;
+          transition:transform 0.55s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
+        }
+        #victoryText {
+          font-family:'Orbitron',monospace; font-size:clamp(0.9rem,2.8vw,1.6rem);
+          font-weight:400; letter-spacing:0.55em; color:#88bbee; margin-top:10px;
+          opacity:0; transform:translateY(22px);
+          transition:opacity 0.45s ease, transform 0.45s ease;
+          text-shadow:0 0 18px #3366ff;
+        }
+        #isoReadyText {
+          font-size:clamp(0.62rem,1.3vw,0.82rem); letter-spacing:0.28em;
+          color:#446688; margin-top:22px; opacity:0; transition:opacity 0.5s ease;
+        }
+        #btn-close-anim {
+          position:absolute; bottom:7%; left:50%; transform:translateX(-50%);
+          z-index:25; opacity:0; background:transparent; border:1px solid #1a2a40;
+          color:#3a5060; font-family:'Share Tech Mono',monospace; font-size:0.72rem;
+          letter-spacing:0.18em; padding:9px 22px; cursor:pointer; text-transform:uppercase;
+          transition:all 0.2s, opacity 0.4s; border-radius:2px;
+          pointer-events: none;
+        }
+        #btn-close-anim:hover { border-color:#3af; color:#3af; box-shadow:0 0 12px rgba(51,170,255,0.25); }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar (Componente Reutilizado) -->
+    <script src="https://www.w3schools.com/lib/w3data.js"></script>
+    <div w3-include-html="/navbar.html"></div>
+    <script>w3IncludeHTML();</script>
+
+    <main class="container">
+        <!-- Cabeçalho -->
+        <div class="text-center mt-5 mb-5">
+             <h1 class="hero-title">Raiden Web Patcher</h1>
+             <p class="hero-subtitle">Aplicador de mods de ISO universal cross-platform (Client-Side Streaming)</p>
+        </div>
+
+        <!-- Painel Principal da Ferramenta -->
+        <section class="extractor-panel">
+            
+            <div class="files-container">
+                <button id="btn-select-iso" class="btn-select">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="12" cy="13" r="3"></circle></svg>
+                    <span id="label-iso">Selecionar ISO Base (Raw/Dump)</span>
+                </button>
+                
+                <button id="btn-select-patch" class="btn-select">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span id="label-patch">Selecionar Arquivo de Patch (.RPT)</span>
+                </button>
+            </div>
+
+            <!-- Botão de Ação -->
+            <button id="btn-apply-patch" class="btn-abrir-hog" disabled>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Gerar Disco Patcheado
+            </button>
+
+            <!-- Status Memory Info -->
+            <div style="margin-top:20px; color:#aaa; font-size:0.9rem;">
+                <p id="space-lbl">Patcher utilizará streaming nativo para economizar sua memória RAM.</p>
+                <p id="storage-lbl" style="color:var(--text-muted);"></p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Overlay Animação de Patch -->
+    <div id="anim-overlay">
+        <div id="stage">
+          <div id="ps2bg"></div>
+          <canvas id="mainCanvas"></canvas>
+          <div id="vignette"></div>
+
+          <!-- SVG Original PS2 Rings -->
+          <svg id="raidenSVG" width="190" height="190" viewBox="0 0 190 190">
+            <defs>
+              <filter id="glow"><feGaussianBlur stdDeviation="3.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="glow2"><feGaussianBlur stdDeviation="6" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M95 8 L12 138 L178 138 Z" fill="rgba(20,55,180,0.12)" stroke="#3af" stroke-width="1.8" opacity="0.88" filter="url(#glow)"/>
+            <ellipse cx="95" cy="138" rx="83" ry="11" fill="rgba(15,45,160,0.18)" stroke="#3af" stroke-width="1.8" opacity="0.8" filter="url(#glow)"/>
+            <line x1="95" y1="8"  x2="40"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
+            <line x1="95" y1="8"  x2="150" y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
+            <line x1="95" y1="8"  x2="95"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.3"/>
+            <path d="M103 44 L86 92 L99 92 L82 144 L116 84 L102 84 Z" fill="#3af" opacity="0.95" filter="url(#glow2)"/>
+            <line x1="28" y1="138" x2="162" y2="138" stroke="rgba(51,170,255,0.35)" stroke-width="1"/>
+          </svg>
+          
+          <!-- Raiden Teste GIF no centro -->
+          <img id="raidenGifAnim" src="/assets/raiden_teste.gif" alt="Raiden Animation" />
+
+          <!-- Arco PS2 Ring -->
+          <div id="ringWrap">
+            <svg width="230" height="230" viewBox="0 0 230 230">
+              <circle cx="115" cy="115" r="80" fill="none" stroke="rgba(20,50,130,0.35)" stroke-width="2.5"/>
+              <circle id="ringPath" cx="115" cy="115" r="80" fill="none" stroke="#3af" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90 115 115)"/>
+              <circle cx="115" cy="115" r="74" fill="none" stroke="rgba(51,170,255,0.06)" stroke-width="1"/>
+            </svg>
+          </div>
+
+          <div id="statusWrap">
+            <div id="statusTitle">APLICANDO PATCH</div>
+            <div id="statusMsg">Autenticando Permissões...</div>
+            <div id="pctLabel">0%</div>
+          </div>
+
+          <div id="flawless">
+            <div id="flawlessText">FLAWLESS</div>
+            <div id="victoryText">VICTORY</div>
+            <div id="isoReadyText">— ISO MODIFICADA. DISCO GRAVADO COM SUCESSO! —</div>
+          </div>
+
+          <button id="btn-close-anim">✖ Sair e Voltar ao Patcher</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div w3-include-html="/footer.html"></div>
+        <script>w3IncludeHTML();</script>
+    </footer>
+
+    <!-- Script Autenticador -->
+    <script type="module" src="/scripts/navbar_auth.js"></script>
+    <!-- Script de Funcionalidades da Ferramenta -->
+    <script type="module" src="/scripts/raiden_patcher.js"></script>
+</body>
+</html>

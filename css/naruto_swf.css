@@ -1,0 +1,454 @@
+/* Naruto Ultimate Ninja SWF/MKWarehouse Theme - BitMundo */
+/* Pure layout, isolated from main site */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+}
+
+:root {
+    --swf-bg: #030005;
+    --swf-accent: #ff4500;
+    --swf-glow-blue: #00bfff;
+    --swf-glow-orange: #ff8c00;
+    --swf-metal-dark: #2a2a2a;
+    --swf-metal-light: #8c8c8c;
+    --swf-text: #f0f0f0;
+}
+
+body.naruto-swf-mode {
+    background-color: var(--swf-bg);
+    background-image: 
+        radial-gradient(circle at center, #1b0a00 0%, #030005 80%),
+        url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABZJREFUeNpi2DzV4T8DEwMDAgwAEGAAKq4CHf3b7LAAAAAASUVORK5CYII='); /* subtle scanline */
+    color: var(--swf-text);
+    overflow-x: hidden;
+    font-family: Verdana, sans-serif;
+    cursor: crosshair; 
+}
+
+/* Back Button Subtle */
+.stealth-back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    opacity: 0.15;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    z-index: 9999;
+    text-transform: uppercase;
+}
+
+.stealth-back-btn:hover {
+    opacity: 1;
+    color: var(--swf-accent);
+    text-shadow: 0 0 10px var(--swf-glow-orange);
+    transform: scale(1.05);
+}
+
+/* Base Title */
+.swf-title {
+    font-family: 'Exo 2', Impact, sans-serif;
+    text-transform: uppercase;
+    text-align: center;
+    background: linear-gradient(180deg, #fff 0%, var(--swf-metal-light) 50%, var(--swf-metal-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.8));
+    font-size: 3rem;
+    margin: 50px 0 20px 0;
+    letter-spacing: 2px;
+}
+
+/* HUB PAGE - Game Cover Selection */
+.hub-gallery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin: 40px auto;
+    perspective: 1000px;
+    height: 60vh;
+}
+
+.un-cover {
+    width: 250px;
+    height: 350px;
+    background-color: #111;
+    border: 3px solid var(--swf-metal-dark);
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, border-color 0.4s ease;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.un-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.7;
+    transition: opacity 0.4s;
+}
+
+.un-cover:hover {
+    transform: scale(1.15) translateZ(50px);
+    border-color: var(--swf-accent);
+    box-shadow: 0 0 30px var(--swf-glow-orange), inset 0 0 20px var(--swf-glow-orange);
+    z-index: 10;
+}
+
+.un-cover:hover img {
+    opacity: 1;
+}
+
+.un-title-bar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 10px 0;
+    text-align: center;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: bold;
+    color: var(--swf-accent);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.un-cover:hover .un-title-bar {
+    transform: translateY(0);
+}
+
+
+/* GAME PAGE (SWF SPA) Styles */
+.swf-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    position: relative;
+    min-height: 85vh;
+    border: 2px solid var(--swf-metal-dark);
+    box-shadow: 0 0 30px rgba(255, 69, 0, 0.3);
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+}
+
+.swf-header {
+    height: 250px;
+    background-image: url('/media/ps2/ninja5br/poster.png'); 
+    background-size: cover;
+    background-position: center 20%;
+    border-bottom: 4px solid var(--swf-accent);
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+}
+
+.swf-header-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 80%);
+}
+
+.swf-game-logo {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    z-index: 2;
+    text-shadow: 3px 3px 0px #000, 0 0 15px var(--swf-accent);
+    margin: 0;
+}
+
+.swf-nav {
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(90deg, transparent 0%, #111 20%, #111 80%, transparent 100%);
+    padding: 15px 0;
+    border-bottom: 2px solid #333;
+}
+
+.swf-btn {
+    background: linear-gradient(180deg, #444 0%, #1a1a1a 100%);
+    border: 2px solid #555;
+    color: #ccc;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    padding: 10px 30px;
+    margin: 0 10px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    user-select: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.8);
+}
+
+.swf-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.swf-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.4s;
+}
+
+.swf-btn:hover::before {
+    left: 150%;
+}
+
+.swf-btn:hover, .swf-btn.active {
+    color: #fff;
+    border-color: var(--swf-accent);
+    box-shadow: 0 0 15px var(--swf-glow-orange), inset 0 0 10px var(--swf-glow-orange);
+    text-shadow: 0 0 8px var(--swf-glow-orange);
+}
+
+
+/* SPA Content Scenes */
+.swf-scene {
+    display: none; 
+    padding: 40px;
+    animation: fadeInScene 0.4s ease forwards;
+    flex: 1;
+}
+
+.swf-scene.active { display: block; }
+
+@keyframes fadeInScene {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.scene-title {
+    font-family: 'Exo 2', sans-serif;
+    color: var(--swf-accent);
+    font-size: 2rem;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed #555;
+    padding-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* SPRITE Roster */
+.roster-container {
+    display: flex;
+    gap: 30px;
+}
+
+.roster-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 70px);
+    gap: 10px;
+    background: #080808;
+    padding: 20px;
+    border: 2px solid #222;
+    box-shadow: inset 0 0 30px #000;
+}
+
+.roster-slot {
+    width: 70px;
+    height: 70px;
+    background-color: #111;
+    border: 2px solid #333;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-size: cover;
+    background-position: center;
+    image-rendering: pixelated; /* Sprite nostalgia */
+}
+
+.roster-slot:hover, .roster-slot.selected {
+    border-color: var(--swf-accent);
+    box-shadow: 0 0 10px var(--swf-accent);
+    transform: scale(1.15);
+    z-index: 2;
+    background-color: #331500;
+}
+
+.roster-info-panel {
+    flex: 1;
+    background: #111;
+    border: 1px solid var(--swf-metal-dark);
+    padding: 30px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.roster-char-name {
+    font-size: 2.5rem;
+    font-family: 'Exo 2', Impact, sans-serif;
+    color: #fff;
+    text-shadow: 0 0 10px var(--swf-glow-blue);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--swf-glow-blue);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.roster-char-desc {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.roster-char-sprite {
+    margin-top: auto;
+    align-self: center;
+    width: 200px;
+    height: 200px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 10px rgba(0,255,255,0.3));
+}
+
+/* Jutsus Section - Local Videos */
+.jutsu-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.jutsu-card {
+    background: #000;
+    border: 2px solid #333;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.jutsu-card:hover {
+    border-color: var(--swf-accent);
+    box-shadow: 0 0 20px var(--swf-accent);
+    transform: translateY(-5px);
+}
+
+.jutsu-name {
+    color: #fff;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.jutsu-video-preview {
+    width: 100%;
+    height: 160px;
+    background: #111;
+    overflow: hidden;
+    position: relative;
+    outline: 1px solid #222;
+}
+
+.jutsu-video-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.jutsu-card:hover .jutsu-video-preview video {
+    opacity: 1;
+}
+
+.jutsu-play-icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: rgba(255,255,255,0.7);
+    text-shadow: 0 0 10px #000;
+    pointer-events: none;
+    transition: color 0.3s;
+}
+
+.jutsu-card:hover .jutsu-play-icon {
+    color: var(--swf-accent);
+}
+
+/* Modal Popup for Native Video */
+.swf-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.swf-modal.active {
+    display: flex;
+}
+
+.swf-modal-video {
+    width: 80%;
+    max-width: 1000px;
+    border: 4px solid var(--swf-metal-dark);
+    box-shadow: 0 0 30px var(--swf-glow-orange);
+    background: #000;
+}
+
+.swf-modal-close {
+    margin-top: 20px;
+    background: var(--swf-metal-dark);
+    color: #fff;
+    border: 2px solid var(--swf-accent);
+    padding: 10px 30px;
+    font-size: 1.5rem;
+    font-family: 'Exo 2', sans-serif;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.swf-modal-close:hover {
+    background: var(--swf-accent);
+    color: #000;
+    box-shadow: 0 0 15px var(--swf-accent);
+}
+
+@media (max-width: 900px) {
+    .roster-container { flex-direction: column; }
+    .roster-info-panel { min-height: auto; }
+}
+
+@media (max-width: 768px) {
+    .hub-gallery { flex-direction: column; height: auto; }
+    .un-cover { width: 80%; height: 250px; }
+    .swf-nav { flex-wrap: wrap; }
+    .swf-btn { margin-bottom: 10px; font-size: 1rem; padding: 10px 15px; }
+    .swf-modal-video { width: 95%; }
+}

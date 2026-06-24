@@ -1,33 +1,6 @@
-function ReadBuffer(buffer, offset, size) {
-    const reader = new DataView(buffer);
-    return reader.buffer.slice(offset, offset + size);
-}
+import { IOextent } from "./IUP/io_extent.js";
+const { readBytes, readUInt, readString } = IOextent;
 
-function readUint8(buffer, offset) {
-    const reader = new DataView(buffer);
-    return reader.getUint8(offset);
-}
-
-function readUint16(buffer, offset) {
-    const reader = new DataView(buffer);
-    return reader.getUint16(offset, true);
-}
-
-function readUint32(buffer, offset) {
-    const reader = new DataView(buffer);
-    return reader.getUint32(offset, true);
-}
-
-function readString(buffer, offset) {
-    const reader = new DataView(buffer);
-    let name = "";
-    let i = offset;
-    while (reader.getUint8(i) !== 0) {
-        name += String.fromCharCode(reader.getUint8(i));
-        i++;
-    }
-    return name;
-}
 
 class FileEntry {
     constructor(nameOffset, offset, size) {
@@ -47,19 +20,18 @@ class HogFile {
     parse(buffer) {
         console.log("Iniciando a leitura (parse) do cabeçalho HOG...");
 
-        this.magic = readUint32(buffer, 0);
-        this.fileCount = readUint32(buffer, 4);
-        const FileIndexBuffer_Size = readUint32(buffer, 8);
-        const FileIndexBuffer_Offset = readUint32(buffer, 0xC);
+        this.magic = readUInt(buffer, 0, 32);
+        this.fileCount = readUInt(buffer, 4, 32);
+        const FileIndexBuffer_Size = readUInt(buffer, 8, 32);
+        const FileIndexBuffer_Offset = readUInt(buffer, 0xC, 32);
 
         for (let i = FileIndexBuffer_Offset; i < FileIndexBuffer_Offset + (this.fileCount * 0xC); i += 0xC) {
             let entry = new FileEntry(
-                readUint32(buffer, i),
-                readUint32(buffer, i + 4),
-                readUint32(buffer, i + 8)
+                readUInt(buffer, i, 32),
+                readUInt(buffer, i + 4, 32),
+                readUInt(buffer, i + 8, 32)
             );
             this.entries.push(entry);
-            //console.log(`Arquivo ${i}: nameoffs: 0x${entry.nameOffset.toString(16)} size: 0x${entry.size.toString(16)} offs: 0x${entry.offset.toString(16)}`);
         }
 
         console.log(`Parse concluído: HOG identificado com ${this.fileCount} arquivos.`);
@@ -168,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Passo D: Jogar nossos bytes do ArrayBuffer lá pra dentro
                 // (Notei que sua função lá no topo começa com 'R' maiúsculo -> ReadBuffer, ajustei aqui)
-                await writable.write(ReadBuffer(arrayBuffer, fileOffset, fileSize));
+                await writable.write(readBytes(arrayBuffer, fileOffset, fileSize));
 
                 // Passo E: Fechar o buffer (Termina de Salvar do Cache pro HD do Usuário)
                 await writable.close();

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raiden Patcher — Patch Animation</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#000; min-height:100vh; overflow:hidden; font-family:'Share Tech Mono',monospace; }
+
+#stage { position:relative; width:100vw; height:100vh; background:#000; overflow:hidden; }
+#mainCanvas { position:absolute; inset:0; z-index:2; }
+#ps2bg {
+  position:absolute; inset:0; z-index:1;
+  background: radial-gradient(ellipse at 50% 65%, #001845 0%, #000c2e 45%, #000000 100%);
+  opacity:0; transition:opacity 1s ease;
+}
+#vignette {
+  position:absolute; inset:0; z-index:3; pointer-events:none;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.78) 100%);
+}
+#raidenSVG {
+  position:absolute; left:50%; top:50%;
+  transform:translate(-50%,-50%) scale(0);
+  z-index:10; opacity:0;
+  transition: transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
+  filter: drop-shadow(0 0 24px #3af) drop-shadow(0 0 55px #06f);
+}
+#ringWrap {
+  position:absolute; left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  z-index:11; opacity:0; transition:opacity 0.5s ease;
+}
+#ringPath {
+  stroke-dasharray:502; stroke-dashoffset:502;
+  transition:stroke-dashoffset 0.12s linear;
+  filter:drop-shadow(0 0 5px #3af);
+}
+#statusWrap {
+  position:absolute; bottom:11%; left:0; right:0;
+  text-align:center; z-index:12; opacity:0; transition:opacity 0.5s ease;
+}
+#statusTitle {
+  font-family:'Orbitron',monospace; font-weight:900;
+  font-size:clamp(1rem,2.8vw,1.5rem); letter-spacing:0.35em; color:#fff;
+  text-shadow:0 0 16px #3af, 0 0 40px #06f; margin-bottom:8px;
+}
+#statusMsg { font-size:clamp(0.6rem,1.4vw,0.78rem); letter-spacing:0.22em; color:#5a9cc5; text-transform:uppercase; }
+#pctLabel {
+  font-family:'Orbitron',monospace; font-size:clamp(0.75rem,1.8vw,0.95rem);
+  font-weight:700; color:#3af; margin-top:6px; text-shadow:0 0 10px #3af;
+}
+#flawless {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; z-index:20;
+  opacity:0; pointer-events:none;
+  background:radial-gradient(ellipse at center, rgba(0,30,100,0.6) 0%, rgba(0,0,0,0.94) 70%);
+  transition:opacity 0.3s ease;
+}
+#flawlessText {
+  font-family:'Orbitron',monospace; font-weight:900;
+  font-size:clamp(2.2rem,9vw,5.5rem); letter-spacing:0.12em;
+  background:linear-gradient(180deg,#ffffff 0%,#99ccff 35%,#2255ee 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 18px rgba(80,150,255,0.95));
+  transform:scale(3.5); opacity:0;
+  transition:transform 0.55s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
+}
+#victoryText {
+  font-family:'Orbitron',monospace; font-size:clamp(0.9rem,2.8vw,1.6rem);
+  font-weight:400; letter-spacing:0.55em; color:#88bbee; margin-top:10px;
+  opacity:0; transform:translateY(22px);
+  transition:opacity 0.45s ease, transform 0.45s ease;
+  text-shadow:0 0 18px #3366ff;
+}
+#isoReadyText {
+  font-size:clamp(0.62rem,1.3vw,0.82rem); letter-spacing:0.28em;
+  color:#446688; margin-top:22px; opacity:0; transition:opacity 0.5s ease;
+}
+#demoControls {
+  position:fixed; bottom:18px; right:18px; z-index:100;
+  display:flex; flex-direction:column; gap:7px; align-items:flex-end;
+}
+.demo-label { color:#223; font-family:'Share Tech Mono',monospace; font-size:0.6rem; letter-spacing:0.18em; }
+.demo-btn {
+  background:rgba(0,8,25,0.92); border:1px solid #1a2235; color:#445;
+  font-family:'Share Tech Mono',monospace; font-size:0.68rem; letter-spacing:0.14em;
+  padding:7px 14px; cursor:pointer; text-transform:uppercase; border-radius:2px; transition:all 0.18s;
+}
+.demo-btn:hover { border-color:#3af; color:#3af; }
+#progressSlider { width:150px; accent-color:#3af; cursor:pointer; }
+#restartBtn {
+  position:absolute; bottom:7%; left:50%; transform:translateX(-50%);
+  z-index:25; opacity:0; background:transparent; border:1px solid #1a2a40;
+  color:#3a5060; font-family:'Share Tech Mono',monospace; font-size:0.72rem;
+  letter-spacing:0.18em; padding:9px 22px; cursor:pointer; text-transform:uppercase;
+  transition:all 0.2s, opacity 0.4s; border-radius:2px;
+}
+#restartBtn:hover { border-color:#3af; color:#3af; box-shadow:0 0 12px rgba(51,170,255,0.25); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="ps2bg"></div>
+  <canvas id="mainCanvas"></canvas>
+  <div id="vignette"></div>
+
+  <svg id="raidenSVG" width="190" height="190" viewBox="0 0 190 190">
+    <defs>
+      <filter id="glow"><feGaussianBlur stdDeviation="3.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="glow2"><feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <path d="M95 8 L12 138 L178 138 Z" fill="rgba(20,55,180,0.12)"
+          stroke="#3af" stroke-width="1.8" opacity="0.88" filter="url(#glow)"/>
+    <ellipse cx="95" cy="138" rx="83" ry="11" fill="rgba(15,45,160,0.18)"
+             stroke="#3af" stroke-width="1.8" opacity="0.8" filter="url(#glow)"/>
+    <line x1="95" y1="8"  x2="40"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
+    <line x1="95" y1="8"  x2="150" y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
+    <line x1="95" y1="8"  x2="95"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.3"/>
+    <path d="M103 44 L86 92 L99 92 L82 144 L116 84 L102 84 Z"
+          fill="#3af" opacity="0.95" filter="url(#glow2)"/>
+    <line x1="28" y1="138" x2="162" y2="138" stroke="rgba(51,170,255,0.35)" stroke-width="1"/>
+  </svg>
+
+  <div id="ringWrap">
+    <svg width="230" height="230" viewBox="0 0 230 230">
+      <circle cx="115" cy="115" r="80" fill="none" stroke="rgba(20,50,130,0.35)" stroke-width="2.5"/>
+      <circle id="ringPath" cx="115" cy="115" r="80" fill="none"
+              stroke="#3af" stroke-width="2.5" stroke-linecap="round"
+              transform="rotate(-90 115 115)"/>
+      <circle cx="115" cy="115" r="74" fill="none" stroke="rgba(51,170,255,0.06)" stroke-width="1"/>
+    </svg>
+  </div>
+
+  <div id="statusWrap">
+    <div id="statusTitle">APLICANDO PATCH</div>
+    <div id="statusMsg">Inicializando...</div>
+    <div id="pctLabel">0%</div>
+  </div>
+
+  <div id="flawless">
+    <div id="flawlessText">FLAWLESS</div>
+    <div id="victoryText">VICTORY</div>
+    <div id="isoReadyText">— ISO GERADA COM SUCESSO —</div>
+  </div>
+
+  <button id="restartBtn" onclick="restartAnim()">↺ replay</button>
+</div>
+
+<div id="demoControls">
+  <div class="demo-label">DEMO CONTROLS</div>
+  <button class="demo-btn" onclick="startAnim()">▶ iniciar patch</button>
+  <input type="range" id="progressSlider" min="0" max="100" value="0"
+         oninput="onSlider(this.value)">
+  <div class="demo-label" style="color:#1a2a3a">arrastar = progresso manual</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════════
+const canvas = document.getElementById('mainCanvas');
+const ctx    = canvas.getContext('2d');
+let W = 0, H = 0;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', () => { resize(); if(state!==ST.IDLE) rebuildParticles(); });
+
+// ═══════════════════════════════════════════════════════
+//  LIGHTWEIGHT PARTICLE SYSTEM (replaces heavy blocks)
+//  ~60 particles instead of hundreds of DOM/canvas blocks
+// ═══════════════════════════════════════════════════════
+const PARTICLE_COUNT = 60;
+let particles = [];
+
+class Particle {
+  constructor() { this.reset(true); }
+
+  reset(initial) {
+    // Scatter randomly across screen
+    this.x    = Math.random() * W;
+    this.y    = initial ? Math.random() * H : H + 10;
+    // Size: mix of dots and short dashes
+    this.type = Math.random() < 0.6 ? 'dot' : 'dash';
+    this.r    = this.type === 'dot' ? 1.5 + Math.random() * 3 : 0;
+    this.dw   = this.type === 'dash' ? 8  + Math.random() * 18 : 0;
+    this.dh   = this.type === 'dash' ? 2  + Math.random() * 3  : 0;
+    // PS2 blue palette
+    const hue  = 210 + Math.floor(Math.random() * 40);
+    const sat  = 60  + Math.floor(Math.random() * 40);
+    const lit  = 40  + Math.floor(Math.random() * 35);
+    this.color = `hsl(${hue},${sat}%,${lit}%)`;
+    this.glow  = `hsla(${hue},100%,70%,0.5)`;
+    // Float physics — gentle, unique per particle
+    this.sx   = Math.random() * Math.PI * 2;
+    this.sy   = Math.random() * Math.PI * 2;
+    this.frx  = 0.0003 + Math.random() * 0.0004;
+    this.fry  = 0.0004 + Math.random() * 0.0005;
+    this.ax   = 20 + Math.random() * 50;
+    this.ay   = 15 + Math.random() * 40;
+    this.baseX = this.x;
+    this.baseY = this.y;
+    this.rot   = Math.random() * Math.PI;
+    this.rotSpd= (Math.random() - .5) * 0.005;
+    this.alpha = initial ? Math.random() * 0.7 : 0;
+    this.targetAlpha = 0.25 + Math.random() * 0.55;
+    this.pulseS= Math.random() * Math.PI * 2;
+    this.pulseFr= 0.001 + Math.random() * 0.002;
+    // Explode
+    this.boom  = false;
+    this.bvx=0; this.bvy=0; this.brotv=0; this.balpha=1;
+  }
+
+  update(t, collapse) {
+    if (this.boom) {
+      this.bvy  += 0.35;
+      this.baseX += this.bvx;
+      this.baseY += this.bvy;
+      this.rot   += this.brotv;
+      this.balpha = Math.max(0, this.balpha - 0.026);
+      this.alpha  = this.balpha;
+      return;
+    }
+    // Fade in
+    if (this.alpha < this.targetAlpha) this.alpha = Math.min(this.targetAlpha, this.alpha + 0.008);
+
+    // Floating
+    const fx = Math.sin(t * this.frx + this.sx) * this.ax;
+    const fy = Math.sin(t * this.fry + this.sy) * this.ay;
+    this.rot += this.rotSpd;
+
+    // Pulse opacity
+    const pulse = 0.7 + 0.3 * Math.sin(t * this.pulseFr + this.pulseS);
+
+    // Collapse toward center
+    const cx = W / 2, cy = H / 2;
+    const colX = (cx - this.baseX) * collapse * 0.9;
+    const colY = (cy - this.baseY) * collapse * 0.9;
+
+    this.x = this.baseX + fx + colX;
+    this.y = this.baseY + fy + colY;
+    this.alpha = (this.targetAlpha * pulse) * (1 - collapse * 0.5);
+  }
+
+  draw(ctx) {
+    if (this.alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    ctx.shadowBlur  = 8;
+    ctx.shadowColor = this.glow;
+    ctx.fillStyle   = this.color;
+
+    if (this.type === 'dot') {
+      ctx.beginPath();
+      ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // dash / streak
+      ctx.fillRect(-this.dw / 2, -this.dh / 2, this.dw, this.dh);
+    }
+    ctx.restore();
+  }
+
+  explode() {
+    this.boom  = true;
+    const a    = Math.random() * Math.PI * 2;
+    const spd  = 3 + Math.random() * 8;
+    this.bvx   = Math.cos(a) * spd;
+    this.bvy   = Math.sin(a) * spd - 2;
+    this.brotv = (Math.random() - .5) * 0.2;
+    this.balpha= 1;
+  }
+}
+
+function rebuildParticles() {
+  particles = [];
+  for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+}
+
+// ═══════════════════════════════════════════════════════
+//  LIGHTNING
+// ═══════════════════════════════════════════════════════
+let bolts=[];
+function spawnLightning(intensity){
+  const cx=W/2,cy=H/2,n=Math.floor(2+intensity*4);
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,r=100+Math.random()*Math.min(W,H)*0.38;
+    bolts.push({x1:cx,y1:cy,x2:cx+Math.cos(a)*r,y2:cy+Math.sin(a)*r,
+      life:1,decay:0.07+Math.random()*0.09,rough:50+intensity*28,depth:4+Math.floor(intensity),
+      col:Math.random()<.7?'#4af':'#88ddff'});
+  }
+}
+function boltSegs(x1,y1,x2,y2,r,d){
+  if(d===0) return [[x1,y1,x2,y2]];
+  const mx=(x1+x2)/2+(Math.random()-.5)*r, my=(y1+y2)/2+(Math.random()-.5)*r;
+  const s=[...boltSegs(x1,y1,mx,my,r*.55,d-1),...boltSegs(mx,my,x2,y2,r*.55,d-1)];
+  if(d>2&&Math.random()<.38){const bx=mx+(Math.random()-.5)*r*1.4,by=my+r*(Math.random()*.7+.2);s.push(...boltSegs(mx,my,bx,by,r*.38,d-2));}
+  return s;
+}
+function drawBolts(){
+  bolts=bolts.filter(b=>b.life>0);
+  for(const b of bolts){
+    const segs=boltSegs(b.x1,b.y1,b.x2,b.y2,b.rough,b.depth);
+    ctx.save(); ctx.globalAlpha=b.life; ctx.strokeStyle=b.col;
+    ctx.lineWidth=1.2; ctx.shadowBlur=10; ctx.shadowColor='#3af';
+    ctx.beginPath();
+    for(const[sx,sy,ex,ey]of segs){ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);}
+    ctx.stroke(); ctx.restore();
+    b.life-=b.decay;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SPARKS
+// ═══════════════════════════════════════════════════════
+let sparks=[];
+function spawnSparks(n){
+  const cx=W/2,cy=H/2;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,spd=2+Math.random()*6;
+    sparks.push({x:cx+(Math.random()-.5)*60,y:cy+(Math.random()-.5)*60,
+      vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-1,life:1,
+      decay:0.03+Math.random()*0.04,r:1.5+Math.random()*2,
+      col:Math.random()<.7?'#4af':'#adf'});
+  }
+}
+function drawSparks(){
+  sparks=sparks.filter(s=>s.life>0);
+  for(const s of sparks){
+    ctx.save(); ctx.globalAlpha=s.life*.9; ctx.fillStyle=s.col;
+    ctx.shadowBlur=6; ctx.shadowColor=s.col;
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r*s.life,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    s.x+=s.vx; s.y+=s.vy; s.vy+=0.14; s.life-=s.decay;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCANLINE
+// ═══════════════════════════════════════════════════════
+let scanY=-10,scanning=false,scanCb=null;
+function startScanline(cb){ scanY=-10; scanning=true; scanCb=cb; }
+function drawScanline(){
+  if(!scanning) return;
+  scanY+=H/85;
+  if(scanY>H+15){ scanning=false; if(scanCb)scanCb(); return; }
+  const g=ctx.createLinearGradient(0,scanY-20,0,scanY+20);
+  g.addColorStop(0,'rgba(51,170,255,0)');
+  g.addColorStop(.4,'rgba(51,170,255,0.5)');
+  g.addColorStop(.5,'rgba(190,235,255,0.92)');
+  g.addColorStop(.6,'rgba(51,170,255,0.5)');
+  g.addColorStop(1,'rgba(51,170,255,0)');
+  ctx.fillStyle=g; ctx.shadowBlur=14; ctx.shadowColor='#3af';
+  ctx.fillRect(0,scanY-20,W,40); ctx.shadowBlur=0;
+}
+
+// ═══════════════════════════════════════════════════════
+//  CORE GLOW
+// ═══════════════════════════════════════════════════════
+let coreA=0;
+function drawCore(t){
+  if(coreA<=0) return;
+  const p=0.72+0.28*Math.sin(t*.0018),r=115+28*p;
+  const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,r);
+  g.addColorStop(0,`rgba(55,140,255,${0.2*coreA*p})`);
+  g.addColorStop(.5,`rgba(18,58,200,${0.09*coreA})`);
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATE MACHINE
+// ═══════════════════════════════════════════════════════
+const ST={IDLE:0,RISING:1,PATCHING:2,FINALE:3,DONE:4};
+let state=ST.IDLE, progress=0, ltimer=null, ptimer=null, lintensity=0;
+
+function startAnim(){
+  if(state!==ST.IDLE) return;
+  state=ST.RISING;
+  document.getElementById('ps2bg').style.opacity='1';
+  rebuildParticles();
+  setTimeout(()=>{
+    startScanline(()=>{
+      show('raidenSVG','1','translate(-50%,-50%) scale(1)');
+      show('ringWrap','1');
+      show('statusWrap','1');
+      coreA=1; state=ST.PATCHING;
+      lintensity=0.25; startLLoop(); startPAuto();
+    });
+  }, 900);
+}
+
+function show(id,op,tr){
+  const el=document.getElementById(id);
+  el.style.opacity=op;
+  if(tr) el.style.transform=tr;
+}
+
+function startLLoop(){
+  if(ltimer) clearInterval(ltimer);
+  ltimer=setInterval(()=>{
+    if(Math.random()<.55){ spawnLightning(lintensity); if(Math.random()<.3) spawnSparks(6); }
+  },160);
+}
+function stopLLoop(){ if(ltimer){clearInterval(ltimer);ltimer=null;} }
+
+function startPAuto(){
+  const total=13000,tick=80; let e=0;
+  ptimer=setInterval(()=>{
+    e+=tick; const r=e/total;
+    let p; if(r<.35) p=r*1.6*100; else if(r<.8) p=(0.56+(r-.35)*.78)*100; else p=(0.91+(r-.8)*.45)*100;
+    p=Math.min(p,99); setProgress(p);
+    document.getElementById('progressSlider').value=p;
+    if(e>=total){ clearInterval(ptimer); setProgress(100); setTimeout(triggerFinale,200); }
+  },tick);
+}
+
+function setProgress(p){
+  progress=p;
+  document.getElementById('ringPath').style.strokeDashoffset=502-(p/100)*502;
+  updateStatus(p);
+  lintensity=0.2+(p/100)*1.4;
+  if(p>0&&p%25<1.5) spawnSparks(20);
+}
+
+const MSGS=[[0,'Invocando o Trovão...'],[8,'Descriptografando patch RPT...'],
+  [18,'Validando MD5 da ISO...'],[32,'Extraindo arquivos modificados...'],
+  [48,'Lendo estrutura ISO9660+UDF...'],[62,'Substituindo arquivos patcheados...'],
+  [76,'Reconstruindo ISO do zero...'],[89,'Gravando no disco...'],[97,'Finalizando...']];
+function updateStatus(p){
+  let m=MSGS[0][1]; for(const[t,msg]of MSGS) if(p>=t)m=msg;
+  document.getElementById('statusMsg').textContent=m;
+  document.getElementById('pctLabel').textContent=Math.floor(p)+'%';
+}
+
+// ═══════════════════════════════════════════════════════
+//  FINALE
+// ═══════════════════════════════════════════════════════
+function triggerFinale(){
+  state=ST.FINALE; lintensity=3;
+  spawnSparks(80); spawnLightning(3); spawnLightning(3);
+  for(const p of particles) p.explode();
+  flashScreen(); stopLLoop();
+  setTimeout(()=>{
+    show('raidenSVG','0'); show('ringWrap','0'); show('statusWrap','0'); coreA=0;
+  },250);
+  setTimeout(()=>{
+    const fl=document.getElementById('flawless');
+    fl.style.opacity='1'; fl.style.pointerEvents='auto';
+    const ft=document.getElementById('flawlessText');
+    ft.style.opacity='1'; ft.style.transform='scale(1)';
+    for(let i=0;i<4;i++) setTimeout(()=>spawnLightning(1.8),i*130);
+    setTimeout(()=>{ const vt=document.getElementById('victoryText'); vt.style.opacity='1'; vt.style.transform='translateY(0)'; },420);
+    setTimeout(()=>{ document.getElementById('isoReadyText').style.opacity='1'; },900);
+    setTimeout(()=>{ document.getElementById('restartBtn').style.opacity='0.5'; },1500);
+    state=ST.DONE;
+  },520);
+}
+
+function flashScreen(){
+  const fl=document.createElement('div');
+  fl.style.cssText='position:absolute;inset:0;z-index:50;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.07s ease';
+  document.getElementById('stage').appendChild(fl);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fl.style.opacity='.92';
+    setTimeout(()=>{ fl.style.opacity='0'; setTimeout(()=>fl.remove(),350); },100);
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER LOOP
+// ═══════════════════════════════════════════════════════
+function loop(t){
+  requestAnimationFrame(loop);
+  ctx.clearRect(0,0,W,H);
+  const colP=(state===ST.PATCHING||state===ST.FINALE)?Math.max(0,Math.min(1,(progress-25)/65)):0;
+  drawCore(t);
+  for(const p of particles){ p.update(t, state===ST.FINALE?0:colP); p.draw(ctx); }
+  drawScanline();
+  drawBolts();
+  drawSparks();
+}
+requestAnimationFrame(loop);
+
+// ═══════════════════════════════════════════════════════
+//  RESTART + SLIDER
+// ═══════════════════════════════════════════════════════
+function restartAnim(){
+  state=ST.IDLE; progress=0;
+  if(ptimer) clearInterval(ptimer); stopLLoop();
+  bolts=[]; sparks=[]; particles=[]; coreA=0;
+  ['ps2bg','ringWrap','statusWrap','restartBtn','isoReadyText','victoryText','flawlessText','flawless']
+    .forEach(id=>{ const el=document.getElementById(id); el.style.opacity='0'; if(el.style.pointerEvents!==undefined) el.style.pointerEvents='none'; });
+  document.getElementById('flawlessText').style.transform='scale(3.5)';
+  document.getElementById('victoryText').style.transform='translateY(22px)';
+  document.getElementById('ringPath').style.strokeDashoffset='502';
+  document.getElementById('raidenSVG').style.opacity='0';
+  document.getElementById('raidenSVG').style.transform='translate(-50%,-50%) scale(0)';
+  document.getElementById('progressSlider').value=0;
+  document.getElementById('statusMsg').textContent='Inicializando...';
+  document.getElementById('pctLabel').textContent='0%';
+  setTimeout(startAnim,350);
+}
+
+function onSlider(val){
+  if(state===ST.IDLE){
+    state=ST.PATCHING;
+    document.getElementById('ps2bg').style.opacity='1';
+    rebuildParticles();
+    show('raidenSVG','1','translate(-50%,-50%) scale(1)');
+    show('ringWrap','1'); show('statusWrap','1');
+    coreA=1; lintensity=0.5; startLLoop();
+  }
+  if(ptimer) clearInterval(ptimer);
+  const p=parseFloat(val); setProgress(p);
+  if(p>=100) setTimeout(triggerFinale,200);
+}
+
+window.addEventListener('load',()=>setTimeout(startAnim,700));
+</script>
+</body>
+</html>

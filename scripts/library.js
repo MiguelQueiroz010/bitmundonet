@@ -60,7 +60,13 @@ function renderLibrary() {
         groups[key].forEach(game => {
             const card = document.createElement("div");
             card.className = "game-card animate-fade-in";
-            card.onclick = () => openModal(game.id);
+            card.onclick = () => {
+                if (game.altPageUrl && game.altPageUrl.trim() !== '') {
+                    window.location.href = game.altPageUrl;
+                } else {
+                    openModal(game.id);
+                }
+            };
 
             card.innerHTML = `
                 <img src="${game.cover || '/media/placeholder.png'}" class="game-cover" alt="${game.title}">

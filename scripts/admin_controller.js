@@ -2053,6 +2053,7 @@ window.editLibrary = async (id) => {
                             <div class="form-group"><label>Ano Lançamento</label><input type="text" id="lib-year" value="${g.release_year || ''}" oninput="updateLibraryPreview()"></div>
                             <div class="form-group"><label>Capa (URL)</label><input type="text" id="lib-cover" value="${g.cover || ''}" oninput="updateLibraryPreview()"></div>
                             <div class="form-group"><label>Rating</label><input type="text" id="lib-rating" value="${g.rating || ''}" oninput="updateLibraryPreview()"></div>
+                            <div class="form-group"><label>URL Alternativa (Hub Custom)</label><input type="text" id="lib-alt-url" value="${g.altPageUrl || ''}" oninput="updateLibraryPreview()" placeholder="/projects/naruto/un5.html"></div>
                         </div>
 
                         <!-- Pub & Romhacking -->
@@ -2177,6 +2178,7 @@ window.updateLibraryPreview = async () => {
         release_year: document.getElementById('lib-year').value,
         cover: document.getElementById('lib-cover').value,
         rating: document.getElementById('lib-rating').value,
+        altPageUrl: document.getElementById('lib-alt-url')?.value || '',
         publisher: document.getElementById('lib-pub').value,
         developer: document.getElementById('lib-dev').value,
         translator: document.getElementById('lib-trans').value,
@@ -3273,6 +3275,7 @@ window.saveLibraryChanges = async (id) => {
         release_year: document.getElementById('lib-year').value,
         cover: document.getElementById('lib-cover').value,
         rating: document.getElementById('lib-rating').value,
+        altPageUrl: document.getElementById('lib-alt-url')?.value || '',
         publisher: document.getElementById('lib-pub').value,
         developer: document.getElementById('lib-dev').value,
         translator: document.getElementById('lib-trans').value,

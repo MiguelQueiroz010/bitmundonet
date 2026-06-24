@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ultimate Ninja 5 - Acervo Isolado</title>
+    
+    <meta name="description" content="Página de arquivos e sprites Ultimate Ninja 5." />
+    
+    <!-- Custom SWF Theme ONLY -->
+    <link rel="stylesheet" href="/css/naruto_swf.css" />
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png">
+</head>
+
+<body class="naruto-swf-mode">
+
+    <!-- Stealth Back Button -->
+    <a href="/projects/naruto/index.html" class="stealth-back-btn" title="Voltar para a Coleção">
+        <span>&laquo;</span> Voltar ao HUB
+    </a>
+
+    <!-- Main Content Container -->
+    <div class="swf-container">
+        
+        <!-- Header Poster/Banner -->
+        <header class="swf-header">
+            <div class="swf-header-overlay"></div>
+            <h1 class="swf-game-logo">Ultimate Ninja 5</h1>
+        </header>
+
+        <!-- Interactive Navigation -->
+        <nav class="swf-nav">
+            <button class="swf-btn active" data-target="scene-about">Sobre</button>
+            <button class="swf-btn" data-target="scene-roster">Sprites</button>
+            <button class="swf-btn" data-target="scene-jutsus">Vídeos (Ougis)</button>
+            <a href="/projects/ps2/ninja5br/detalhes.html" class="swf-btn" style="text-decoration: none; display: flex; align-items: center;">
+                Página Download
+            </a>
+        </nav>
+
+        <!-- SCENE: ABOUT -->
+        <main id="scene-about" class="swf-scene active">
+            <h2 class="scene-title">Registro do Jogo</h2>
+            <div style="font-size: 1.2rem; line-height: 1.8; color: #ddd; max-width: 800px;">
+                <p style="margin-bottom: 20px;">
+                    Seção arquivada para preservar a interface nostálgica e extrações diretas do jogo <strong>Naruto Shippuden: Ultimate Ninja 5</strong> de PS2.
+                </p>
+                <p>
+                    Aqui você encontra os sprites rasgados da VRAM do console e visualizações diretas de vídeos originais.
+                    O objetivo é ter o acervo limpo, rodando por cima do layout básico do site.
+                </p>
+                <div style="margin-top: 40px;">
+                    <img src="/media/ps2/ninja5br/media/icon.png" alt="Icon Ninja" style="max-width: 250px; pointer-events: none;">
+                </div>
+            </div>
+        </main>
+
+        <!-- SCENE: CHARACTERS (SPRITE ROSTER) -->
+        <main id="scene-roster" class="swf-scene">
+            <h2 class="scene-title">Sprites de Personagem</h2>
+            
+            <div class="roster-container">
+                <!-- Left: Grid of Sprites -->
+                <div class="roster-grid">
+                    <!-- Naruto -->
+                    <div class="roster-slot selected" 
+                            style="background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3AxbHpjbzRhazdsNjU3Z252YzhmMzhjcG43ZXNnMGpyOW4yeDgzdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/pPhhD0jWdG8Y8/giphy.gif');"
+                            data-name="Naruto (Shippuden)" 
+                            data-desc="Status: Idle Animation (Extraído do game. Animação loop padrão.)"
+                            data-sprite="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3AxbHpjbzRhazdsNjU3Z252YzhmMzhjcG43ZXNnMGpyOW4yeDgzdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/pPhhD0jWdG8Y8/giphy.gif"></div>
+                    
+                    <!-- Sasuke -->
+                    <div class="roster-slot" 
+                            style="background-image: url('https://media1.tenor.com/m/Hw2NIt0b3WIAAAAd/sasuke-naruto.gif');"
+                            data-name="Sasuke Uchiha" 
+                            data-desc="Status: Idle Base (GIF provisório representando o sprite loop)"
+                            data-sprite="https://media1.tenor.com/m/Hw2NIt0b3WIAAAAd/sasuke-naruto.gif"></div>
+
+                    <!-- Sakura -->
+                    <div class="roster-slot" 
+                            style="background-image: url('https://media.indiedb.com/cache/images/groups/1/2/1897/thumb_620x2000/Sakura_idle.gif');"
+                            data-name="Sakura Haruno" 
+                            data-desc="Status: Combat Stance Idle."
+                            data-sprite="https://media.indiedb.com/cache/images/groups/1/2/1897/thumb_620x2000/Sakura_idle.gif"></div>
+
+                    <!-- Empty slots for grid look adding to the MKWarehouse Vibe -->
+                    <div class="roster-slot"></div><div class="roster-slot"></div><div class="roster-slot"></div><div class="roster-slot"></div>
+                    <div class="roster-slot"></div><div class="roster-slot"></div><div class="roster-slot"></div><div class="roster-slot"></div>
+                    <div class="roster-slot"></div>
+                </div>
+
+                <!-- Right: Info Panel -->
+                <div class="roster-info-panel">
+                    <div class="roster-char-name">Naruto (Shippuden)</div>
+                    <div class="roster-char-desc">
+                        Status: Idle Animation (Extraído do game. Animação loop padrão.)
+                    </div>
+                    <!-- Big Sprite Display -->
+                    <div class="roster-char-sprite" style="background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3AxbHpjbzRhazdsNjU3Z252YzhmMzhjcG43ZXNnMGpyOW4yeDgzdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/pPhhD0jWdG8Y8/giphy.gif');"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- SCENE: JUTSUS (NATIVE VIDEO) -->
+        <main id="scene-jutsus" class="swf-scene">
+            <h2 class="scene-title">Arquivos de Vídeo (Ougi)</h2>
+            <p style="margin-bottom: 20px; color: #888;">Clique em uma miniatura para abrir o player nativo em Pop-up.</p>
+            
+            <div class="jutsu-list">
+                
+                <!-- Video 1 -->
+                <div class="jutsu-card" data-video="/media/ps2/ninja5br/intro.mp4">
+                    <div class="jutsu-name">Abertura UN5</div>
+                    <div class="jutsu-video-preview">
+                        <!-- We put a tiny silent loop or an image here as a preview -->
+                        <img src="/media/ps2/ninja5br/poster.png" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.5;" alt="Preview" />
+                        <div class="jutsu-play-icon">▶</div>
+                    </div>
+                </div>
+
+                <!-- Placeholder 2 -->
+                <div class="jutsu-card" data-video="#">
+                    <div class="jutsu-name">Odama Rasengan (Breve)</div>
+                    <div class="jutsu-video-preview" style="background:#222;">
+                        <span style="position: absolute; top:50%; width: 100%; text-align:center; color:#555; pointer-events:none;">Sem MP4</span>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- NATIVE VIDEO MODAL POPUP -->
+    <div id="swf-video-modal" class="swf-modal">
+        <video id="modal-video-player" class="swf-modal-video" controls autoplay>
+            <!-- Source is injected via JS -->
+            Seu navegador não suporta vídeos HTML5.
+        </video>
+        <button id="close-modal" class="swf-modal-close">Fechar Sistema</button>
+    </div>
+
+    <script type="text/javascript" src="/scripts/naruto_swf.js"></script>
+</body>
+</html>

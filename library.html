@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -29,6 +29,8 @@
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
     <script type="module" src="/scripts/navbar_auth.js"></script>
+    <script type="text/javascript" src="/scripts/router.js"></script>
+
     <style>
         .lib-view-controls {
             display: flex;
@@ -454,17 +456,18 @@
             <!-- Games Loaded Dynamically -->
             <div class="text-center" style="grid-column: 1/-1;">Carregando biblioteca...</div>
         </div>
-    </main>
 
-    <!-- Modal for details -->
-    <div id="game-modal" class="library-modal">
-        <div class="modal-content glass-panel">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <div id="modal-body">
-                <!-- Content injected here -->
+        <!-- Modal for details -->
+        <div id="game-modal" class="library-modal">
+            <div class="modal-content glass-panel">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div id="modal-body">
+                    <!-- Content injected here -->
+                </div>
             </div>
         </div>
-    </div>
+    </main>
+
 
     <!-- Footer -->
     <footer>

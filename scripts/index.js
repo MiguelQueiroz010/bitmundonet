@@ -412,10 +412,19 @@ async function loadSiteConfig() {
   }
 }
 
+// Export & expose initIndexPage for AJAX routing
+export function initIndexPage() {
+  if (typeof loadpb === 'function') loadpb();
+  loadArticlesFromFirestore();
+  loadRecentGallery();
+  loadSiteConfig();
+}
+window.initIndexPage = initIndexPage;
+
 // Add to onload chain
 const originalOnload = window.onload;
 window.onload = function () {
   if (originalOnload) originalOnload();
-  loadRecentGallery();
-  loadSiteConfig();
+  initIndexPage();
 };
+

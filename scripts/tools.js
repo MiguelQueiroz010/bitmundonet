@@ -6,17 +6,26 @@ var toolArray = [];
 var currentView = 'name';
 
 async function loadTools() {
-    const db = await dbPromise;
+    const container = document.getElementById("alphabet-list");
+    if (!container) return;
+
+    if (toolArray.length > 0) {
+        renderTools();
+    }
+
     try {
+        const db = await dbPromise;
         const querySnapshot = await getDocs(collection(db, "tools"));
         toolArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderTools();
     } catch (error) {
         console.error("Error loading tools from Firestore:", error);
-        const container = document.getElementById("alphabet-list");
-        if (container) container.innerHTML = "<li><p>Erro ao carregar ferramentas.</p></li>";
+        if (container && toolArray.length === 0) {
+            container.innerHTML = "<li><p style='padding: 1rem;'>Erro ao carregar ferramentas.</p></li>";
+        }
     }
 }
+
 
 function renderTools() {
     var toolList = document.getElementById("alphabet-list");
@@ -120,4 +129,10 @@ window.switchView = (mode) => {
     renderTools();
 };
 
-document.addEventListener('DOMContentLoaded', loadTools);
+window.initToolsPage = loadTools;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadTools);
+} else {
+    loadTools();
+}

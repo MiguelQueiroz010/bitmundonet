@@ -8,16 +8,26 @@ var currentLibraryView = 'name';
 // parseArticleTags removed - now imported from utils.js
 
 async function loadLibrary() {
-    const db = await dbPromise;
+    const container = document.getElementById("library-container");
+    if (!container) return;
+
+    if (gamesData.length > 0) {
+        renderLibrary();
+    } else {
+        container.innerHTML = `<div class="text-center" style="grid-column: 1/-1; padding: 2rem; color: rgba(255,255,255,0.5);">Carregando biblioteca...</div>`;
+    }
+
     try {
+        const db = await dbPromise;
         const querySnapshot = await getDocs(collection(db, "library"));
         gamesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
             .filter(game => game.active !== false && game.active !== "false");
         renderLibrary();
     } catch (err) {
         console.error("Erro ao carregar biblioteca do Firestore:", err);
-        const container = document.getElementById("library-container");
-        if (container) container.innerHTML = "<p>Erro ao carregar a biblioteca.</p>";
+        if (container && gamesData.length === 0) {
+            container.innerHTML = "<p style='text-align:center;'>Erro ao carregar a biblioteca.</p>";
+        }
     }
 }
 
@@ -62,7 +72,11 @@ function renderLibrary() {
             card.className = "game-card animate-fade-in";
             card.onclick = () => {
                 if (game.altPageUrl && game.altPageUrl.trim() !== '') {
-                    window.location.href = game.altPageUrl;
+                    if (window.AJAXRouter && game.altPageUrl.startsWith('/')) {
+                        window.AJAXRouter.navigate(game.altPageUrl);
+                    } else {
+                        window.location.href = game.altPageUrl;
+                    }
                 } else {
                     openModal(game.id);
                 }
@@ -88,8 +102,22 @@ function openModal(id) {
     const game = gamesData.find(g => g.id == id);
     if (!game) return;
 
-    const modal = document.getElementById("game-modal");
+    let modal = document.getElementById("game-modal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "game-modal";
+        modal.className = "library-modal";
+        modal.innerHTML = `
+            <div class="modal-content glass-panel">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div id="modal-body"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
     const body = document.getElementById("modal-body");
+
 
     body.innerHTML = `
         <div class="wiki-header" style="margin-bottom: 2rem;">
@@ -264,4 +292,11 @@ window.onclick = function (event) {
     if (event.target == modal) window.closeModal();
 };
 
-document.addEventListener('DOMContentLoaded', loadLibrary);
+window.initLibraryPage = loadLibrary;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadLibrary);
+} else {
+    loadLibrary();
+}
+

@@ -1526,3 +1526,37 @@ footer p {
         font-size: 0.65rem;
     }
 }
+
+/* Page AJAX Router Transition Styles */
+#pjax-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary, #3b82f6), var(--accent, #8b5cf6), var(--highlight, #facc15));
+    box-shadow: 0 0 10px var(--primary, #3b82f6);
+    z-index: 10000;
+    transition: width 0.3s ease, opacity 0.4s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#pjax-progress-bar.active {
+    opacity: 1;
+}
+
+.pjax-container {
+    transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+}
+
+.pjax-fade-out {
+    opacity: 0 !important;
+    transform: translateY(6px) !important;
+}
+
+.pjax-fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+

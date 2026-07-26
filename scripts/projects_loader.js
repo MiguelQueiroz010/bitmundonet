@@ -2,10 +2,52 @@ import { dbPromise } from './db-context.js';
 import { doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { parseArticleTags } from "./utils.js";
 import { initReactions } from "./reactions_manager.js";
+import { initComments } from "./comments_loader.js";
 
 /**
  * Projects Loader Script (Firestore Version)
  */
+
+window.toggleFolder = function (el) {
+    if (!el) return;
+    const dirItem = el.closest ? el.closest('.dir-item') : el.parentElement;
+    if (dirItem) {
+        dirItem.classList.toggle('open');
+    }
+};
+
+let videoPlaying = true;
+window.toggle_video = function (e) {
+    if (e) e.stopPropagation();
+    const video = document.getElementById("project-video-player");
+    const iframe = document.getElementById("project-video-iframe");
+    const playIcon = document.getElementById("play-icon");
+    const pauseIcon = document.getElementById("pause-icon");
+
+    if (video) {
+        if (video.paused) {
+            video.play();
+            if (playIcon) playIcon.style.display = "none";
+            if (pauseIcon) pauseIcon.style.display = "block";
+        } else {
+            video.pause();
+            if (playIcon) playIcon.style.display = "block";
+            if (pauseIcon) pauseIcon.style.display = "none";
+        }
+    } else if (iframe) {
+        videoPlaying = !videoPlaying;
+        const command = videoPlaying ? 'playVideo' : 'pauseVideo';
+        iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: command,
+            args: []
+        }), '*');
+
+        if (playIcon) playIcon.style.display = videoPlaying ? "none" : "block";
+        if (pauseIcon) pauseIcon.style.display = videoPlaying ? "block" : "none";
+    }
+};
+
 
 async function loadProjects() {
     const db = await dbPromise;
@@ -44,7 +86,7 @@ function renderProjectCard(p) {
         status === 'Em Progresso' ? 'status-wip' : 'status-mod';
 
     return `
-        <div class="project-card" onclick="location.href='/project_view.html?id=${id}'">
+        <div class="project-card" onclick="if(window.AJAXRouter){window.AJAXRouter.navigate('/project_view.html?id=${id}')}else{location.href='/project_view.html?id=${id}'}">
             <span class="project-status ${statusClass}">${status}</span>
             <img src="${thumbnail}" alt="${title}" class="project-image">
             <div class="project-overlay">
@@ -56,6 +98,7 @@ function renderProjectCard(p) {
             </div>
         </div>
     `;
+
 }
 
 async function initListing() {
@@ -92,24 +135,83 @@ async function initListing() {
     }
 }
 
+let isProjectLoading = false;
+
+/**
+ * Loads project details via AJAX without reloading the page.
+ */
+async function loadProjectAjax(projectId, updateHistory = true) {
+    if (!projectId || isProjectLoading) return;
+    isProjectLoading = true;
+
+    const projectContainer = document.getElementById('project-container');
+    if (projectContainer) {
+        projectContainer.classList.add('project-fade-out');
+    }
+
+    try {
+        console.log("Loading project via AJAX:", projectId);
+        const project = await loadProjectById(projectId);
+
+        if (!project) {
+            console.error("Project not found:", projectId);
+            if (projectContainer) {
+                projectContainer.innerHTML = `<div style="padding: 5rem; text-align: center;">
+                    <h1>Projeto não encontrado</h1>
+                    <p>Verifique se o ID "${projectId}" está correto no banco de dados.</p>
+                    <a href="/" style="color: var(--primary);">Voltar para Início</a>
+                </div>`;
+            }
+            return;
+        }
+
+        renderProjectDetail(project);
+
+        // Note: history.pushState is handled by the AJAX router when navigating via links.
+        // updateHistory=true here means we're loading directly (e.g., from popstate).
+        if (updateHistory) {
+            const newUrl = `/project_view.html?id=${encodeURIComponent(projectId)}`;
+            if (window.location.href !== new URL(newUrl, window.location.origin).href) {
+                history.pushState({ projectId: projectId }, project.title || "Projeto", newUrl);
+            }
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Load other projects suggestions
+        loadOtherProjectsSuggestions(projectId);
+
+    } catch (error) {
+        console.error("Error in loadProjectAjax:", error);
+    } finally {
+        if (projectContainer) {
+            setTimeout(() => {
+                projectContainer.classList.remove('project-fade-out');
+            }, 100);
+        }
+        isProjectLoading = false;
+    }
+}
+
+// Expose to window scope for onclick handlers
+window.loadProjectAjax = loadProjectAjax;
+
+// Note: popstate is handled globally by router.js, which calls initProjectsPage().
+// initProjectsPage() -> boot() -> initDetail() -> loadProjectAjax() handles route changes.
+
 async function initDetail() {
     const params = new URLSearchParams(window.location.search);
     const projectId = params.get('id');
     if (!projectId) return;
 
-    console.log("Initializing project detail for:", projectId);
-    const project = await loadProjectById(projectId);
+    await loadProjectAjax(projectId, false);
+}
 
-    if (!project) {
-        console.error("Project not found:", projectId);
-        document.body.innerHTML = `<div style="padding: 5rem; text-align: center;">
-            <h1>Projeto não encontrado</h1>
-            <p>Verifique se o ID "${projectId}" está correto no banco de dados.</p>
-            <a href="/" style="color: var(--primary);">Voltar para Início</a>
-        </div>`;
-        return;
-    }
-
+/**
+ * Renders the project details into the DOM
+ */
+function renderProjectDetail(project) {
+    const projectId = project.id;
     const title = project.title || "";
     const summary = project.subtitle || "";
     const desc = project.description || "";
@@ -141,11 +243,15 @@ async function initDetail() {
         setTimeout(() => {
             progressFill.style.width = `${percentInt}%`;
             animateValue(percentText, 0, percentInt, 2000);
-        }, 500);
+        }, 300);
     }
 
     const videoPlayer = document.getElementById('project-video-player');
     const heroHead = document.getElementById('project-head');
+
+    // Remove old iframe if present
+    const oldIframe = document.getElementById('project-video-iframe');
+    if (oldIframe) oldIframe.remove();
 
     if (video && heroHead) {
         const embedUrl = getEmbedUrl(video);
@@ -160,13 +266,14 @@ async function initDetail() {
                         style="pointer-events: none;">
                 </iframe>
             `);
-            if (videoPlayer) videoPlayer.remove();
+            if (videoPlayer) videoPlayer.style.display = 'none';
 
             // Keep control button visible
             const toggleBtn = document.getElementById('video-toggle');
             if (toggleBtn) toggleBtn.style.display = 'flex';
         } else {
             // Normal MP4 video
+            if (videoPlayer) videoPlayer.style.display = 'block';
             const videoSource = document.getElementById('video-source');
             if (videoSource) videoSource.src = video;
             if (videoPlayer) {
@@ -382,6 +489,45 @@ async function initDetail() {
     if (document.getElementById('project-reactions')) {
         initReactions(projectId, 'project-reactions');
     }
+
+    // Initialize Comments
+    if (document.getElementById('comments-container')) {
+        initComments(projectId, 'comments-container', 'comment-form');
+    }
+}
+
+/**
+ * Loads suggestion cards for other projects into the bottom section
+ */
+async function loadOtherProjectsSuggestions(currentProjectId) {
+    const container = document.getElementById('other-projects-container');
+    if (!container) return;
+
+    try {
+        const allProjects = await loadProjects();
+        const otherProjects = allProjects.filter(p => p.id !== currentProjectId).slice(0, 4);
+
+        if (otherProjects.length === 0) {
+            const section = document.getElementById('other-projects-section');
+            if (section) section.style.display = 'none';
+            return;
+        }
+
+        const section = document.getElementById('other-projects-section');
+        if (section) section.style.display = 'block';
+
+        container.innerHTML = otherProjects.map(p => `
+            <div class="other-project-card" onclick="window.loadProjectAjax('${p.id}')">
+                <img src="${p.thumbnail || p.cover || ''}" alt="${p.title || ''}" class="other-project-thumb">
+                <div>
+                    <h3 class="other-project-title">${p.title || ''}</h3>
+                    <span class="other-project-platform">${p.platform || ''}</span>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.warn("Failed to load other projects suggestions:", e);
+    }
 }
 
 /**
@@ -459,6 +605,8 @@ function boot() {
     }
 }
 
+window.initProjectsPage = boot;
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
 } else {
@@ -466,4 +614,5 @@ if (document.readyState === 'loading') {
 }
 
 // Exports for other modules if needed
-export { loadProjects, loadProjectById, renderProjectCard };
+export { loadProjects, loadProjectById, renderProjectCard, boot as initProjectsPage };
+

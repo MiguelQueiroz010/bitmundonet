@@ -5,7 +5,7 @@
 
 async function getStaticConfig() {
     // Detect if we are running in a local environment (Live Server, etc)
-    const isLocal = ['localhost', '127.0.0.1', '172.'].some(ip => location.hostname.includes(ip));
+    const isLocal = ['localhost:8080', '127.0.0.1', '172.'].some(ip => location.hostname.includes(ip));
 
     // If local, we DON'T try to import the file to avoid the 404 network error log.
     // The file only exists after the GitHub Actions build/deploy.
@@ -30,7 +30,7 @@ function isPlaceholder(config) {
 }
 
 export async function getFirebaseConfig() {
-    const isLocal = ['localhost', '127.0.0.1', '172.25.0.1', '192.168.1.22', '172.27.192.1', '172.31.0.1'].some(ip => location.hostname.includes(ip));
+    const isLocal = ['localhost', '127.0.0.1', '172.26.80.1', '192.168.1.22', '172.27.192.1', '172.31.0.1'].some(ip => location.hostname.includes(ip));
 
     // SÓ aceita config do localStorage se for ambiente local
     if (isLocal) {

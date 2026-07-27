@@ -1,7 +1,6 @@
 
 
-var howMany = 40
-var quote = new Array(howMany + 1)
+var quote = []
 
 quote[0] = "O SENHOR é a minha força e o meu cântico; ele me foi por salvação; este é o meu Deus; portanto, eu o louvarei; ele é o Deus de meu pai; por isso, o exaltarei.<br>(Êxodo 15:2)"
 
@@ -159,14 +158,11 @@ quote[76] = "E disse-lhes: Eu sou o Senhor, e não há outro; fora de mim não h
 
 quote[77] = "E disse-lhes: Eu sou o Senhor, e não mudo; por isso vós, ó filhos de Jacó, não sois consumidos.<br>(Malaquias 3:6)"
 
-function rndnumber() {
-    var randscript = -1
-    while (randscript < 0 || randscript > howMany || isNaN(randscript)) {
-        randscript = parseInt(Math.random() * (howMany + 1))
-    }
-    return randscript
+var quo = Math.floor(Math.random() * quote.length);
+var quox = quote[quo];
+var bibleDiv = document.getElementById('bible');
+if (bibleDiv) {
+    bibleDiv.innerHTML = quox;
+} else {
+    document.write(quox);
 }
-quo = rndnumber()
-quox = quote[quo]
-document.write(quox)
-//-->

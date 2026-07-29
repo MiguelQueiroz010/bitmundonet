@@ -2012,15 +2012,17 @@ window.saveArticleChanges = async (id) => {
         // Disparo de notificação Push via GitHub Actions
         if (data.selected) {
             if (confirm("O artigo está público! Deseja enviar uma notificação push para os assinantes?")) {
-                const token = localStorage.getItem('gh_pat_token') || prompt("Insira seu GitHub Personal Access Token (PAT) para disparar a notificação:");
+                let token = localStorage.getItem('gh_pat_token') || prompt("Insira seu GitHub Personal Access Token (PAT) para disparar a notificação:");
                 if (token) {
+                    token = token.trim();
                     localStorage.setItem('gh_pat_token', token);
                     try {
                         const res = await fetch('https://api.github.com/repos/MiguelQueiroz010/bitmundonet/actions/workflows/send-fcm-push.yml/dispatches', {
                             method: 'POST',
                             headers: {
                                 'Accept': 'application/vnd.github.v3+json',
-                                'Authorization': `token ${token}`
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
                             },
                             body: JSON.stringify({
                                 ref: 'master',
@@ -2033,11 +2035,14 @@ window.saveArticleChanges = async (id) => {
                         if (res.ok) {
                             showNotification("🔔 Push disparado com sucesso pelo GitHub Actions!", "success");
                         } else {
-                            const errData = await res.json();
-                            showNotification("Erro ao disparar push: " + (errData.message || res.status), "error");
+                            if (res.status === 401 || res.status === 403) {
+                                localStorage.removeItem('gh_pat_token');
+                            }
+                            const errData = await res.json().catch(() => ({}));
+                            showNotification("Erro ao disparar push: " + (errData.message || `HTTP ${res.status}`), "error");
                         }
                     } catch (e) {
-                        showNotification("Erro de rede ao disparar push.", "error");
+                        showNotification("Erro de rede ao disparar push: " + e.message, "error");
                     }
                 }
             }

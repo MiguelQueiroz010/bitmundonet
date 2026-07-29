@@ -1858,6 +1858,13 @@ window.addNewArticle = () => {
                 🔄 Reverter para Conteúdo Simples
             </button>
 
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="art-selected" style="width: auto;">
+                    Publicar (Tornar Visível)
+                </label>
+            </div>
+
             <div style="display: flex; gap: 1rem; margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
                 <button class="save-btn" style="flex: 1;" onclick="saveArticleChanges(null)">Criar no DB</button>
             </div>
@@ -1895,6 +1902,13 @@ window.editArticle = async (id) => {
                     <label>Data</label>
                     <input type="text" id="art-date" value="${a.date || ''}">
                 </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="art-selected" style="width: auto;" ${a.selected ? 'checked' : ''}>
+                    Publicar (Tornar Visível)
+                </label>
             </div>
 
             <div id="topics-container" style="margin-top: 2rem; display: ${a.topics ? 'block' : 'none'};">
@@ -1965,12 +1979,16 @@ window.saveArticleChanges = async (id) => {
     const dateInput = document.getElementById('art-date');
     const date = dateInput ? dateInput.value : new Date().toLocaleDateString('pt-BR');
 
+    const selectedInput = document.getElementById('art-selected');
+    const selected = selectedInput ? selectedInput.checked : false;
+
     const data = {
         title: titleInput.value,
         author: author,
         category: document.getElementById('art-category').value,
         date: date,
-        sortDate: parseDate(date)
+        sortDate: parseDate(date),
+        selected: selected
     };
 
     // Handle Topics if active
@@ -1990,6 +2008,41 @@ window.saveArticleChanges = async (id) => {
     try {
         await setDoc(doc(db, "articles", newId), data, { merge: true });
         showNotification("✅ Salvo com sucesso!", "success");
+        
+        // Disparo de notificação Push via GitHub Actions
+        if (data.selected) {
+            if (confirm("O artigo está público! Deseja enviar uma notificação push para os assinantes?")) {
+                const token = localStorage.getItem('gh_pat_token') || prompt("Insira seu GitHub Personal Access Token (PAT) para disparar a notificação:");
+                if (token) {
+                    localStorage.setItem('gh_pat_token', token);
+                    try {
+                        const res = await fetch('https://api.github.com/repos/MiguelQueiroz010/bitmundonet/actions/workflows/send-fcm-push.yml/dispatches', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/vnd.github.v3+json',
+                                'Authorization': `token ${token}`
+                            },
+                            body: JSON.stringify({
+                                ref: 'master',
+                                inputs: {
+                                    title: `Novo Artigo: ${data.title}`,
+                                    body: 'Venha conferir a novidade na BitMundo!'
+                                }
+                            })
+                        });
+                        if (res.ok) {
+                            showNotification("🔔 Push disparado com sucesso pelo GitHub Actions!", "success");
+                        } else {
+                            const errData = await res.json();
+                            showNotification("Erro ao disparar push: " + (errData.message || res.status), "error");
+                        }
+                    } catch (e) {
+                        showNotification("Erro de rede ao disparar push.", "error");
+                    }
+                }
+            }
+        }
+
         loadArticles();
     } catch (e) { showNotification("Erro: " + e.message, "error"); }
 };

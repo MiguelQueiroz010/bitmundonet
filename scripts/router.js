@@ -120,7 +120,9 @@
     if (!newDoc || !newDoc.head) return;
 
     // 1. Sync <link rel="stylesheet">
-    const newLinks = newDoc.querySelectorAll('head link[rel="stylesheet"]');
+    const newLinks = Array.from(newDoc.querySelectorAll('head link[rel="stylesheet"]'));
+    const oldLinks = Array.from(document.querySelectorAll('head link[rel="stylesheet"]'));
+
     newLinks.forEach(link => {
       const href = link.getAttribute('href');
       if (href && !document.querySelector(`head link[href="${href}"]`)) {
@@ -128,6 +130,16 @@
         newLink.rel = 'stylesheet';
         newLink.href = href;
         document.head.appendChild(newLink);
+      }
+    });
+
+    oldLinks.forEach(oldLink => {
+      const href = oldLink.getAttribute('href');
+      if (href) {
+        const existsInNew = newLinks.some(newLink => newLink.getAttribute('href') === href);
+        if (!existsInNew) {
+          oldLink.remove();
+        }
       }
     });
 
@@ -257,6 +269,10 @@
 
       // Sync head stylesheets and page styles
       syncHeadStyles(newDoc);
+      
+      // Sync body attributes
+      document.body.className = newDoc.body.className;
+      document.body.id = newDoc.body.id;
 
       const newContainer = getContainer(newDoc);
 
@@ -282,6 +298,7 @@
       } else {
         // Fallback if structure differs
         document.body.innerHTML = newDoc.body.innerHTML;
+        executeContainerScripts(document.body);
       }
 
       if (pushHistory) {

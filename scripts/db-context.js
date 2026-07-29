@@ -1,15 +1,24 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+import { getMessaging } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js";
 import { getFirebaseConfig } from "./firebase-manager.js";
 
 async function initFirebase() {
     const firebaseConfig = await getFirebaseConfig();
     const app = initializeApp(firebaseConfig, "bitmundo-public");
+    let messaging = null;
+    try {
+        messaging = getMessaging(app);
+    } catch(e) {
+        console.warn("Firebase Messaging is not supported in this browser.");
+    }
+
     return {
         app,
         db: getFirestore(app),
-        auth: getAuth(app)
+        auth: getAuth(app),
+        messaging
     };
 }
 
@@ -19,3 +28,4 @@ const firebaseInstance = initFirebase();
 export const dbPromise = firebaseInstance.then(f => f.db);
 export const authPromise = firebaseInstance.then(f => f.auth);
 export const fbAppPromise = firebaseInstance.then(f => f.app);
+export const messagingPromise = firebaseInstance.then(f => f.messaging);

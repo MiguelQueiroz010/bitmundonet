@@ -177,6 +177,10 @@
                 <a href="/about.html" class="nav-item" id="about_box">
                     <img src="/media/info.png" alt="Info"> Saiba Mais
                 </a>
+                <a href="#" class="nav-item" onclick="import('/scripts/notifications.js').then(m => m.requestNotificationPermission())" id="notify-btn" title="Ativar Notificações">
+                    <span style="font-size: 1.2rem; filter: sepia(1) saturate(5) hue-rotate(340deg);">🔔</span> 
+                    Notificações
+                </a>
             </div>
 
             <div id="navbar-auth-container"></div>
@@ -211,6 +215,11 @@
         </a>
         <a href="/about.html" class="nav-item">
             <img src="/media/info.png"> Saiba Mais
+        </a>
+        
+        <a href="#" class="nav-item" onclick="import('/scripts/notifications.js').then(m => m.requestNotificationPermission())">
+            <span style="font-size: 1.2rem; margin-right: 0.2rem; filter: sepia(1) saturate(5) hue-rotate(340deg);">🔔</span> 
+            Receber Alertas
         </a>
         
         <a href="#support" class="nav-item">

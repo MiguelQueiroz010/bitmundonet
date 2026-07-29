@@ -1,0 +1,34 @@
+name: Send FCM Push Notification
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Título da Notificação'
+        required: true
+        default: 'Novo Artigo Publicado!'
+      body:
+        description: 'Corpo/Texto da Notificação'
+        required: true
+
+jobs:
+  send-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Run Push Script
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+          TITLE: ${{ github.event.inputs.title }}
+          BODY: ${{ github.event.inputs.body }}
+        run: node tools/send_fcm.js

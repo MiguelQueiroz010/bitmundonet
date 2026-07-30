@@ -35,3 +35,24 @@ messaging.onBackgroundMessage((payload) => {
 
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+// Manipulador do clique na notificação (Abre o site https://bitraiden.org)
+self.addEventListener('notificationclick', (event) => {
+    console.log('[firebase-messaging-sw.js] Notificação clicada pelo usuário:', event);
+    event.notification.close();
+
+    const targetUrl = (event.notification.data && event.notification.data.url) || 'https://bitraiden.org';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (let client of windowClients) {
+                if (client.url.includes('bitraiden.org') && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
+});

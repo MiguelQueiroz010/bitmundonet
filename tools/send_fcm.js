@@ -23,11 +23,13 @@ const db = admin.firestore();
 
 async function sendPush() {
     const title = process.env.TITLE || "Novo Artigo!";
-    const body = process.env.BODY || "Venha conferir a novidade na BitMundo.";
+    const body = process.env.BODY || "Venha conferir a novidade!";
+    const clickUrl = process.env.URL || "https://bitraiden.org";
 
     console.log(`🚀 [send_fcm.js] Iniciando disparo de notificação FCM...`);
     console.log(`📌 Título: "${title}"`);
     console.log(`📌 Corpo: "${body}"`);
+    console.log(`🔗 Link ao clicar: "${clickUrl}"`);
     
     try {
         const snapshot = await db.collection('subscribers').get();
@@ -71,7 +73,7 @@ async function sendPush() {
                     renotify: true
                 },
                 fcmOptions: {
-                    link: "https://bitmundo.net/"
+                    link: clickUrl
                 }
             },
             tokens: tokens,

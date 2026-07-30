@@ -15,13 +15,14 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    console.log('[firebase-messaging-sw.js] Recebida mensagem em segundo plano: ', payload);
     
-    // Customize notification here
-    const notificationTitle = payload.notification ? payload.notification.title : 'Nova Notificação';
+    // Suporte tanto para payload.notification quanto payload.data
+    const notificationTitle = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || 'Nova Notificação BitMundo';
     const notificationOptions = {
-        body: payload.notification ? payload.notification.body : 'Você tem uma nova mensagem.',
-        icon: '/assets/images/favicon.ico'
+        body: (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || 'Novo conteúdo publicado no site!',
+        icon: '/fav/favicon-32x32.png',
+        data: payload.data || {}
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);

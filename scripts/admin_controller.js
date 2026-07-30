@@ -2017,6 +2017,7 @@ window.saveArticleChanges = async (id) => {
                     token = token.trim();
                     localStorage.setItem('gh_pat_token', token);
                     try {
+                        console.log("[Push Notification] 🚀 Enviando disparo de evento workflow_dispatch para o GitHub...");
                         const res = await fetch('https://api.github.com/repos/MiguelQueiroz010/bitmundonet/actions/workflows/send-fcm-push.yml/dispatches', {
                             method: 'POST',
                             headers: {
@@ -2032,16 +2033,20 @@ window.saveArticleChanges = async (id) => {
                                 }
                             })
                         });
+                        console.log("[Push Notification] Status HTTP retornado da API GitHub:", res.status);
                         if (res.ok) {
+                            console.log("[Push Notification] ✅ Evento disparado com sucesso no GitHub Actions!");
                             showNotification("🔔 Push disparado com sucesso pelo GitHub Actions!", "success");
                         } else {
                             if (res.status === 401 || res.status === 403) {
                                 localStorage.removeItem('gh_pat_token');
                             }
                             const errData = await res.json().catch(() => ({}));
+                            console.error("[Push Notification] ❌ Erro da API GitHub:", res.status, errData);
                             showNotification("Erro ao disparar push: " + (errData.message || `HTTP ${res.status}`), "error");
                         }
                     } catch (e) {
+                        console.error("[Push Notification] 💥 Erro de rede ao requisitar GitHub API:", e);
                         showNotification("Erro de rede ao disparar push: " + e.message, "error");
                     }
                 }

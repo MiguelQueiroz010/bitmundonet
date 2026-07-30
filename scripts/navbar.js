@@ -143,3 +143,6 @@ function dropdown() {
     dropdownMenu.style.paddingTop = "2rem";
   }
 }
+
+// Automatically initialize push notification prompt/sync on site access
+import('/scripts/notifications.js').catch(() => {});

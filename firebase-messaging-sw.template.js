@@ -17,11 +17,19 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Recebida mensagem em segundo plano: ', payload);
     
-    // Suporte tanto para payload.notification quanto payload.data
-    const notificationTitle = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || 'Nova Notificação BitMundo';
+    // Se a mensagem já possui o nó 'notification', o navegador já exibe a notificação nativa automaticamente
+    if (payload.notification) {
+        console.log('[firebase-messaging-sw.js] Notificação exibida nativamente pelo navegador.');
+        return;
+    }
+
+    // Fallback caso a mensagem venha apenas com payload.data
+    const notificationTitle = (payload.data && payload.data.title) || 'Nova Notificação BitMundo';
     const notificationOptions = {
-        body: (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || 'Novo conteúdo publicado no site!',
+        body: (payload.data && payload.data.body) || 'Novo conteúdo publicado no site!',
         icon: '/fav/favicon-32x32.png',
+        tag: 'bitmundo-news',
+        renotify: true,
         data: payload.data || {}
     };
 

@@ -36,15 +36,17 @@ async function sendPush() {
             return;
         }
 
-        const tokens = [];
+        const rawTokens = [];
         snapshot.forEach(doc => {
             const data = doc.data();
             if (data.token) {
-                tokens.push(data.token);
+                rawTokens.push(data.token);
             }
         });
 
-        console.log(`📱 [send_fcm.js] Encontrados ${tokens.length} tokens de assinantes no banco.`);
+        // Remove tokens duplicados para evitar disparos repetidos
+        const tokens = Array.from(new Set(rawTokens));
+        console.log(`📱 [send_fcm.js] Encontrados ${tokens.length} assinantes únicos no banco.`);
 
         if (tokens.length === 0) {
             console.warn("⚠️ [send_fcm.js] Nenhum token válido extraído da coleção 'subscribers'.");
@@ -58,21 +60,19 @@ async function sendPush() {
             },
             webpush: {
                 headers: {
-                    Urgency: "high"
+                    Urgency: "high",
+                    TTL: "86400"
                 },
                 notification: {
                     title: title,
                     body: body,
-                    icon: "/fav/favicon-32x32.png",
-                    click_action: "https://bitmundo.net/"
+                    icon: "https://bitmundo.net/fav/favicon-32x32.png",
+                    tag: "bitmundo-news",
+                    renotify: true
                 },
                 fcmOptions: {
                     link: "https://bitmundo.net/"
                 }
-            },
-            data: {
-                title: title,
-                body: body
             },
             tokens: tokens,
         };

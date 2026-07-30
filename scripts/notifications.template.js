@@ -4,68 +4,141 @@ import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-
 
 const VAPID_KEY = "BJENeOUoc4hul9JCb7PgKhDsTeTTXFCOpY2kR_MB5Mb1rxSs5QhPT2_Z2OlpqxHXZUmAqK9jOIUMshDi6ku41RE";
 
+export async function registerFcmTokenSilently() {
+    try {
+        const messaging = await messagingPromise;
+        const db = await dbPromise;
+
+        if (!messaging || !db) return;
+
+        let swRegistration = null;
+        if ('serviceWorker' in navigator) {
+            try {
+                swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            } catch (e) {}
+        }
+
+        const tokenOptions = { vapidKey: VAPID_KEY };
+        if (swRegistration) {
+            tokenOptions.serviceWorkerRegistration = swRegistration;
+        }
+
+        const currentToken = await getToken(messaging, tokenOptions);
+        if (currentToken) {
+            await setDoc(doc(db, "subscribers", currentToken), {
+                token: currentToken,
+                date: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            }, { merge: true });
+            console.log("[Notifications] ✅ Token sincronizado no Firestore com sucesso.");
+        }
+    } catch (e) {
+        console.warn("[Notifications] Alerta ao sincronizar token silenciosamente:", e.message);
+    }
+}
+
 export async function requestNotificationPermission() {
     console.log("[Notifications] Solicitando permissão de notificação no navegador...");
     const permission = await Notification.requestPermission();
     console.log("[Notifications] Status da permissão do navegador:", permission);
 
     if (permission === 'granted') {
-        try {
-            console.log("[Notifications] Aguardando inicialização do Firebase Messaging e Firestore...");
-            const messaging = await messagingPromise;
-            const db = await dbPromise;
-
-            if (!messaging) {
-                console.error("[Notifications] Firebase Messaging não suportado ou desativado neste navegador.");
-                alert("Seu navegador não suporta notificações push.");
-                return;
-            }
-
-            console.log("[Notifications] Registrando/Verificando Service Worker (/firebase-messaging-sw.js)...");
-            let swRegistration = null;
-            if ('serviceWorker' in navigator) {
-                try {
-                    swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                    console.log("[Notifications] Service Worker registrado com sucesso:", swRegistration);
-                } catch (swErr) {
-                    console.warn("[Notifications] Alerta ao registrar Service Worker:", swErr.message);
-                }
-            }
-
-            console.log("[Notifications] Solicitando token FCM...");
-            const tokenOptions = { vapidKey: VAPID_KEY };
-            if (swRegistration) {
-                tokenOptions.serviceWorkerRegistration = swRegistration;
-            }
-
-            const currentToken = await getToken(messaging, tokenOptions);
-            if (currentToken) {
-                console.log("[Notifications] Token FCM obtido com sucesso:", currentToken);
-
-                // Salva no Firestore na coleção 'subscribers'
-                try {
-                    await setDoc(doc(db, "subscribers", currentToken), {
-                        token: currentToken,
-                        date: new Date().toISOString(),
-                        userAgent: navigator.userAgent
-                    }, { merge: true });
-
-                    console.log("[Notifications] ✅ Token registrado com sucesso no Firestore na coleção 'subscribers'!");
-                    alert("🔔 Notificações ativadas! Você será avisado sobre novos artigos.");
-                } catch (fsErr) {
-                    console.error("[Notifications] ❌ Erro de Firestore ao salvar token (verifique as Regras de Segurança do Firestore):", fsErr);
-                    alert("⚠️ Permissão concedida, mas houve erro ao salvar no banco (Firestore): " + fsErr.message);
-                }
-            } else {
-                console.warn("[Notifications] ⚠️ Nenhum token FCM retornado pelo Firebase.");
-                alert("⚠️ Não foi possível obter o token de notificação.");
-            }
-        } catch (e) {
-            console.error("[Notifications] 💥 Erro ao obter/salvar o token FCM:", e);
-            alert("❌ Erro ao ativar notificações: " + e.message);
-        }
-    } else {
-        console.warn("[Notifications] ⚠️ Permissão de notificação negada ou desativada no navegador.");
-        alert("⚠️ Notificações foram bloqueadas nas configurações do seu navegador.");
+        await registerFcmTokenSilently();
+        alert("🔔 Notificações ativadas! Você será avisado sobre novos artigos.");
+    } else if (permission === 'denied') {
+        console.warn("[Notifications] Permissão negada pelo usuário.");
     }
+}
+
+export function showNotificationPromptBanner() {
+    if (document.getElementById('fcm-prompt-banner')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'fcm-prompt-banner';
+    banner.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        max-width: 360px;
+        background: rgba(18, 18, 24, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        backdrop-filter: blur(10px);
+        z-index: 99999;
+        font-family: inherit;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        animation: fcmSlideUp 0.4s ease-out;
+    `;
+
+    banner.innerHTML = `
+        <style>
+            @keyframes fcmSlideUp {
+                from { transform: translateY(100px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        </style>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.5rem;">🔔</span>
+            <div style="font-size: 0.95rem; font-weight: 600; line-height: 1.3;">
+                Deseja receber notificações sobre novos artigos e novidades do BitMundo?
+            </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+            <button id="fcm-banner-dismiss" style="
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #ccc;
+                padding: 6px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.85rem;
+            ">Agora não</button>
+            <button id="fcm-banner-accept" style="
+                background: var(--primary, #0070f3);
+                border: none;
+                color: #fff;
+                padding: 6px 14px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 0.85rem;
+            ">Ativar Notificações</button>
+        </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    document.getElementById('fcm-banner-dismiss').addEventListener('click', () => {
+        localStorage.setItem('fcm_banner_dismissed', Date.now().toString());
+        banner.remove();
+    });
+
+    document.getElementById('fcm-banner-accept').addEventListener('click', async () => {
+        banner.remove();
+        await requestNotificationPermission();
+    });
+}
+
+export async function initNotificationsOnSiteAccess() {
+    if (!('Notification' in window)) return;
+
+    if (Notification.permission === 'granted') {
+        await registerFcmTokenSilently();
+    } else if (Notification.permission === 'default') {
+        const dismissedAt = localStorage.getItem('fcm_banner_dismissed');
+        if (!dismissedAt || (Date.now() - parseInt(dismissedAt, 10)) > 24 * 60 * 60 * 1000) {
+            setTimeout(showNotificationPromptBanner, 1500);
+        }
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNotificationsOnSiteAccess);
+} else {
+    initNotificationsOnSiteAccess();
 }

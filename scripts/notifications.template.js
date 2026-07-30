@@ -6,16 +6,35 @@ const VAPID_KEY = "BJENeOUoc4hul9JCb7PgKhDsTeTTXFCOpY2kR_MB5Mb1rxSs5QhPT2_Z2Olpq
 
 export async function registerFcmTokenSilently() {
     try {
+        console.log("[Notifications] 🔄 Iniciando processo de geração/sincronização do token FCM...");
         const messaging = await messagingPromise;
         const db = await dbPromise;
 
-        if (!messaging || !db) return;
+        if (!db) {
+            console.error("[Notifications] ❌ Conexão com o Firestore (db) está nula. Configure as credenciais do Firebase!");
+            return;
+        }
+
+        if (!messaging) {
+            console.error("[Notifications] ❌ Firebase Messaging não está disponível neste navegador ou ambiente.");
+            return;
+        }
 
         let swRegistration = null;
         if ('serviceWorker' in navigator) {
             try {
-                swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            } catch (e) {}
+                const isLocalEnv = ['localhost', '127.0.0.1', '172.'].some(ip => location.hostname.includes(ip));
+                const swScript = isLocalEnv ? '/firebase-messaging-sw.template.js' : '/firebase-messaging-sw.js';
+
+                await navigator.serviceWorker.register(swScript)
+                    .catch(() => navigator.serviceWorker.register('/firebase-messaging-sw.template.js'));
+
+                // Aguarda obrigatoriamente o Service Worker ficar no estado ATIVO (active worker)
+                swRegistration = await navigator.serviceWorker.ready;
+                console.log("[Notifications] ✅ Service Worker ATIVO com sucesso:", swRegistration.scope);
+            } catch (e) {
+                console.warn("[Notifications] ⚠️ Alerta ao aguardar Service Worker:", e.message);
+            }
         }
 
         const tokenOptions = { vapidKey: VAPID_KEY };
@@ -23,17 +42,24 @@ export async function registerFcmTokenSilently() {
             tokenOptions.serviceWorkerRegistration = swRegistration;
         }
 
+        console.log("[Notifications] 🔑 Solicitando token FCM do Google Firebase...");
         const currentToken = await getToken(messaging, tokenOptions);
         if (currentToken) {
+            console.log("[Notifications] 📲 Token FCM gerado:", currentToken);
+            console.log("[Notifications] 💾 Salvando token no Firestore na coleção 'subscribers'...");
+
             await setDoc(doc(db, "subscribers", currentToken), {
                 token: currentToken,
                 date: new Date().toISOString(),
                 userAgent: navigator.userAgent
             }, { merge: true });
-            console.log("[Notifications] ✅ Token sincronizado no Firestore com sucesso.");
+
+            console.log("[Notifications] 🎉 SUCESSO! Token gravado no Firestore na coleção 'subscribers'!");
+        } else {
+            console.warn("[Notifications] ⚠️ O Firebase não retornou um token FCM. Verifique as chaves VAPID e Service Worker.");
         }
     } catch (e) {
-        console.warn("[Notifications] Alerta ao sincronizar token silenciosamente:", e.message);
+        console.error("[Notifications] 💥 ERRO ao obter/salvar o token FCM no Firestore:", e);
     }
 }
 

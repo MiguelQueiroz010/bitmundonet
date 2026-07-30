@@ -1,6 +1,7 @@
 # Firebase Config
 scripts/firebase-config.js
 scripts/firebase-config.example.js
+scripts/notifications.js
 
 # node modules
 node_modules/

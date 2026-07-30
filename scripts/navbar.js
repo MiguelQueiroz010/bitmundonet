@@ -145,4 +145,9 @@ function dropdown() {
 }
 
 // Automatically initialize push notification prompt/sync on site access
-import('/scripts/notifications.js').catch(() => {});
+const isLocalEnv = ['localhost', '127.0.0.1', '172.'].some(ip => location.hostname.includes(ip));
+const scriptToImport = isLocalEnv ? '/scripts/notifications.template.js' : '/scripts/notifications.js';
+
+import(scriptToImport)
+    .catch(() => import('/scripts/notifications.template.js'))
+    .catch(() => {});

@@ -1,4 +1,4 @@
-import { messagingPromise, dbPromise } from "./db-context.js";
+import { messagingPromise, dbPromise, authPromise } from "./db-context.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
@@ -9,6 +9,7 @@ export async function registerFcmTokenSilently() {
         console.log("[Notifications] 🔄 Iniciando processo de geração/sincronização do token FCM...");
         const messaging = await messagingPromise;
         const db = await dbPromise;
+        const auth = await authPromise;
 
         if (!db) {
             console.error("[Notifications] ❌ Conexão com o Firestore (db) está nula. Configure as credenciais do Firebase!");
@@ -48,11 +49,20 @@ export async function registerFcmTokenSilently() {
             console.log("[Notifications] 📲 Token FCM gerado:", currentToken);
             console.log("[Notifications] 💾 Salvando token no Firestore na coleção 'subscribers'...");
 
-            await setDoc(doc(db, "subscribers", currentToken), {
+            const userEmail = auth && auth.currentUser ? auth.currentUser.email : null;
+
+            const subscriberData = {
                 token: currentToken,
                 date: new Date().toISOString(),
                 userAgent: navigator.userAgent
-            }, { merge: true });
+            };
+
+            if (userEmail) {
+                subscriberData.email = userEmail;
+                console.log("[Notifications] 👤 E-mail do usuário vinculado ao token:", userEmail);
+            }
+
+            await setDoc(doc(db, "subscribers", currentToken), subscriberData, { merge: true });
 
             console.log("[Notifications] 🎉 SUCESSO! Token gravado no Firestore na coleção 'subscribers'!");
         } else {

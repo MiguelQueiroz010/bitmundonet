@@ -1,0 +1,27 @@
+name: Scheduled 2-Day Subscriber Report
+
+on:
+  schedule:
+    # Executa a cada 2 dias às 12:00 UTC (09:00 Horário de Brasília)
+    - cron: '0 12 */2 * *'
+  workflow_dispatch: # Permite disparar manualmente pela aba Actions no GitHub
+
+jobs:
+  send-subscriber-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Run Subscriber Report Script
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+        run: node tools/send_subscriber_report.js

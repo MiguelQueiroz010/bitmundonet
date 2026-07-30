@@ -1,6 +1,7 @@
 import { messagingPromise, dbPromise, authPromise } from "./db-context.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
 const VAPID_KEY = "BJENeOUoc4hul9JCb7PgKhDsTeTTXFCOpY2kR_MB5Mb1rxSs5QhPT2_Z2OlpqxHXZUmAqK9jOIUMshDi6ku41RE";
 
@@ -47,24 +48,41 @@ export async function registerFcmTokenSilently() {
         const currentToken = await getToken(messaging, tokenOptions);
         if (currentToken) {
             console.log("[Notifications] 📲 Token FCM gerado:", currentToken);
-            console.log("[Notifications] 💾 Salvando token no Firestore na coleção 'subscribers'...");
 
-            const userEmail = auth && auth.currentUser ? auth.currentUser.email : null;
+            const saveSubscriberDoc = async (user) => {
+                const userEmail = (user && user.email) ? user.email.toLowerCase().trim() : (auth && auth.currentUser && auth.currentUser.email ? auth.currentUser.email.toLowerCase().trim() : null);
+                // Se a pessoa estiver logada, o ID do documento no Firestore será o e-mail dela. Senão, será o próprio token.
+                const docId = userEmail || currentToken;
 
-            const subscriberData = {
-                token: currentToken,
-                date: new Date().toISOString(),
-                userAgent: navigator.userAgent
+                const subscriberData = {
+                    token: currentToken,
+                    date: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                };
+
+                if (userEmail) {
+                    subscriberData.email = userEmail;
+                    console.log(`[Notifications] 👤 E-mail do usuário vinculado (ID do Documento: "${docId}")`);
+                } else {
+                    console.log(`[Notifications] 🌐 Visitante anônimo (ID do Documento: "${docId.substring(0, 15)}...")`);
+                }
+
+                await setDoc(doc(db, "subscribers", docId), subscriberData, { merge: true });
+                console.log(`[Notifications] 🎉 SUCESSO! Registro salvo no Firestore em 'subscribers/${docId}'!`);
             };
 
-            if (userEmail) {
-                subscriberData.email = userEmail;
-                console.log("[Notifications] 👤 E-mail do usuário vinculado ao token:", userEmail);
+            // Salva imediatamente com estado atual de Auth
+            await saveSubscriberDoc(auth ? auth.currentUser : null);
+
+            // Escuta mudanças de Login/Auth para atualizar o documento do Firestore com o e-mail assim que logar
+            if (auth) {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user && user.email) {
+                        console.log("[Notifications] 🔑 Login de usuário detectado. Atualizando documento no Firestore com e-mail:", user.email);
+                        await saveSubscriberDoc(user);
+                    }
+                });
             }
-
-            await setDoc(doc(db, "subscribers", currentToken), subscriberData, { merge: true });
-
-            console.log("[Notifications] 🎉 SUCESSO! Token gravado no Firestore na coleção 'subscribers'!");
         } else {
             console.warn("[Notifications] ⚠️ O Firebase não retornou um token FCM. Verifique as chaves VAPID e Service Worker.");
         }

@@ -4,49 +4,11 @@
  * - Leitura e gerenciamento de permissões do File System
  * - Acionamento de stream de I/O em chunks para poupar RAM
  * - Animação UI
- *
- * ─────────────────────────────────────────────────────────
- * NOTA (fix mobile / Edge Android e Chrome Android):
- * A File System Access API (showOpenFilePicker, showSaveFilePicker,
- * showDirectoryPicker) NÃO existe no Chromium para Android — só no
- * Chromium desktop. É por isso que "Selecionar ISO" não fazia nada:
- * a chamada lançava TypeError, engolido pelo catch (só tratava
- * AbortError). Este arquivo detecta o suporte e usa fallback:
- *   - Seleção de arquivo -> <input type="file"> dinâmico
- *   - Pasta de trabalho/saída -> OPFS (navigator.storage.getDirectory())
- *     que implementa a MESMA interface de FileSystemDirectoryHandle,
- *     então ISO9660.PatchISO/BuildISO não precisam mudar nada.
- *   - Download final -> Blob URL + <a download> a partir do arquivo
- *     já montado no OPFS (sem carregar tudo na RAM de uma vez).
- * ─────────────────────────────────────────────────────────
  */
 
 import { decryptFileToHandle } from "./IUP/crypto_stuff.js";
 import { ISO9660 } from './IUP/iso9660.js';
 import { IOextent } from './IUP/io_extent.js';
-import { pickFileViaExplorer } from './file_explorer.js';
-
-// ═══════════════════════════════════════════════════════
-// FEATURE DETECTION — File System Access API
-// ═══════════════════════════════════════════════════════
-const supportsOpenPicker = typeof window.showOpenFilePicker === 'function';
-const supportsSavePicker = typeof window.showSaveFilePicker === 'function';
-const supportsDirPicker = typeof window.showDirectoryPicker === 'function';
-const supportsFSA = supportsOpenPicker && supportsSavePicker && supportsDirPicker;
-const supportsOPFS = !!(navigator.storage && navigator.storage.getDirectory);
-
-if (!supportsFSA) {
-  console.warn(
-    "[RaidenPatcher] File System Access API indisponível neste navegador " +
-    "(comum em Android). Usando fallback: <input type='file'> + OPFS."
-  );
-  if (!supportsOPFS) {
-    console.error(
-      "[RaidenPatcher] OPFS (navigator.storage.getDirectory) também indisponível. " +
-      "Este navegador não tem suporte mínimo para rodar o patcher."
-    );
-  }
-}
 
 // Handles dos arquivos locais
 let isoFileHandle = null;
@@ -76,174 +38,17 @@ const labelDebugFolder = document.getElementById('label-debug-folder');
 const btnApplyDebug = document.getElementById('btn-apply-debug');
 
 // ═══════════════════════════════════════════════════════
-// HELPERS DE FALLBACK (mobile / sem File System Access API)
-// ═══════════════════════════════════════════════════════
-
-/**
- * Abre um <input type="file"> "invisível" e resolve com o File escolhido.
- * NÃO usar `accept` restritivo em mobile: o SAF do Android costuma filtrar
- * por MIME e esconder .iso/.rpt/.xml que não reconhece, gerando o mesmo
- * sintoma de "não consigo selecionar o arquivo".
- *
- * ATENÇÃO: isso ainda passa pelo chooser nativo do Android (ACTION_OPEN_DOCUMENT
- * / "Abrir de"), que tem um bug conhecido de overflow de inteiro 32-bit para
- * arquivos > 2GB (fica cinza/inelegível). Para arquivos potencialmente grandes
- * (ISO de PS2), use pickFileViaExplorer() de file_explorer.js em vez desta
- * função — ela usa webkitdirectory (ACTION_OPEN_DOCUMENT_TREE), que não passa
- * por esse bug.
- */
-function pickFileFallback() {
-  return new Promise((resolve, reject) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
-    document.body.appendChild(input);
-
-    let settled = false;
-    const cleanup = () => { if (input.parentNode) input.parentNode.removeChild(input); };
-
-    input.addEventListener('change', () => {
-      settled = true;
-      const f = input.files && input.files[0];
-      cleanup();
-      if (f) resolve(f);
-      else reject(Object.assign(new Error('Nenhum arquivo selecionado'), { name: 'AbortError' }));
-    }, { once: true });
-
-    // 'cancel' não é suportado em todos os navegadores, mas ajuda quando existe
-    input.addEventListener('cancel', () => {
-      settled = true;
-      cleanup();
-      reject(Object.assign(new Error('Seleção cancelada'), { name: 'AbortError' }));
-    }, { once: true });
-
-    // Fallback de segurança: se o usuário voltar sem escolher nada e o
-    // browser não disparar 'cancel', libera o foco da UI mesmo assim.
-    window.addEventListener('focus', function onFocusBack() {
-      window.removeEventListener('focus', onFocusBack);
-      setTimeout(() => {
-        if (!settled && !(input.files && input.files.length)) {
-          cleanup();
-          reject(Object.assign(new Error('Seleção cancelada'), { name: 'AbortError' }));
-        }
-      }, 400);
-    }, { once: true });
-
-    input.click();
-  });
-}
-
-/**
- * Abre um <input type="file" webkitdirectory> e resolve com a FileList
- * inteira (cada File tem .webkitRelativePath com o caminho relativo).
- * Suportado no Chromium Android (Chrome/Edge) via picker do SAF.
- */
-function pickFolderFallback() {
-  return new Promise((resolve, reject) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.webkitdirectory = true;
-    input.multiple = true;
-    input.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
-    document.body.appendChild(input);
-
-    const cleanup = () => { if (input.parentNode) input.parentNode.removeChild(input); };
-
-    input.addEventListener('change', () => {
-      const files = Array.from(input.files || []);
-      cleanup();
-      if (files.length) resolve(files);
-      else reject(Object.assign(new Error('Nenhuma pasta selecionada'), { name: 'AbortError' }));
-    }, { once: true });
-
-    input.click();
-  });
-}
-
-/** Raiz do Origin Private File System (sandbox interno do navegador). */
-async function getOPFSRoot() {
-  if (!supportsOPFS) {
-    throw new Error('OPFS indisponível — este navegador não pode rodar o patcher sem File System Access API.');
-  }
-  return await navigator.storage.getDirectory();
-}
-
-/** Recria (limpa) um diretório dentro do OPFS para uma nova execução. */
-async function freshOPFSDir(root, name) {
-  try { await root.removeEntry(name, { recursive: true }); } catch (_) { /* não existia, ok */ }
-  return await root.getDirectoryHandle(name, { create: true });
-}
-
-/**
- * Copia uma FileList (de webkitdirectory) para dentro de um
- * FileSystemDirectoryHandle (tipicamente um diretório OPFS), preservando
- * a estrutura relativa de subpastas. O primeiro segmento do
- * webkitRelativePath (a própria pasta raiz escolhida) é descartado,
- * pois destDirHandle já representa essa raiz.
- */
-async function materializeFileListInto(fileList, destDirHandle, onFile) {
-  for (const file of fileList) {
-    const relPath = file.webkitRelativePath || file.name;
-    const parts = relPath.split('/');
-    const nameOnly = parts.pop();
-
-    let dir = destDirHandle;
-    for (let i = 1; i < parts.length; i++) {
-      if (parts[i]) dir = await dir.getDirectoryHandle(parts[i], { create: true });
-    }
-
-    const fh = await dir.getFileHandle(nameOnly, { create: true });
-    const writable = await fh.createWritable();
-    await file.stream().pipeTo(writable);
-    if (onFile) onFile(file, relPath);
-  }
-  return destDirHandle;
-}
-
-/**
- * Dispara o download de um FileSystemFileHandle (ex.: gerado no OPFS)
- * como se fosse "Salvar Como", usando Blob URL + <a download>.
- * O Android entrega o arquivo na pasta Downloads normalmente.
- */
-async function downloadFileHandle(fileHandle, suggestedName) {
-  const file = await fileHandle.getFile();
-  const url = URL.createObjectURL(file);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = suggestedName;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  // dá tempo do browser iniciar o download antes de revogar a URL
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-}
-
-// ═══════════════════════════════════════════════════════
 // UI & EVENTOS DE SELEÇÃO
 // ═══════════════════════════════════════════════════════
 
 btnSelectIso.addEventListener('click', async () => {
   try {
-    if (supportsFSA) {
-      const [handle] = await window.showOpenFilePicker({
-        types: [{ description: 'Arquivos ISO', accept: { 'application/octet-stream': ['.iso'] } }],
-        multiple: false
-      });
-      isoFileHandle = handle;
-      isoFile = await isoFileHandle.getFile();
-    } else {
-      // ISO pode passar de 2GB: o chooser nativo do Android (GetContent)
-      // tem overflow de int32 acima desse tamanho e recusa o arquivo.
-      // O explorer próprio usa webkitdirectory (ACTION_OPEN_DOCUMENT_TREE),
-      // que enumera a pasta inteira sem esse bug.
-      isoFileHandle = null;
-      isoFile = await pickFileViaExplorer({
-        title: 'Selecionar ISO',
-        hintExt: '.iso',
-        validateIso: true
-      });
-    }
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'Arquivos ISO', accept: { 'application/octet-stream': ['.iso'] } }],
+      multiple: false
+    });
+    isoFileHandle = handle;
+    isoFile = await isoFileHandle.getFile();
 
     labelIso.textContent = isoFile.name;
     btnSelectIso.classList.add('loaded');
@@ -255,17 +60,12 @@ btnSelectIso.addEventListener('click', async () => {
 
 btnSelectPatch.addEventListener('click', async () => {
   try {
-    if (supportsFSA) {
-      const [handle] = await window.showOpenFilePicker({
-        types: [{ description: 'Patch Raiden (.rpt, .xml)', accept: { 'application/octet-stream': ['.rpt', '.xml'] } }],
-        multiple: false
-      });
-      patchFileHandle = handle;
-      patchFile = await patchFileHandle.getFile();
-    } else {
-      patchFileHandle = null;
-      patchFile = await pickFileFallback();
-    }
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'Patch Raiden (.rpt, .xml)', accept: { 'application/octet-stream': ['.rpt', '.xml'] } }],
+      multiple: false
+    });
+    patchFileHandle = handle;
+    patchFile = await patchFileHandle.getFile();
 
     labelPatch.textContent = patchFile.name;
     btnSelectPatch.classList.add('loaded');
@@ -291,24 +91,8 @@ if (btnToggleDebugUi) {
 if (btnSelectDebugFolder) {
   btnSelectDebugFolder.addEventListener('click', async () => {
     try {
-      if (supportsFSA) {
-        debugDirHandle = await window.showDirectoryPicker({ mode: 'read' });
-        labelDebugFolder.textContent = debugDirHandle.name;
-      } else {
-        const files = await pickFolderFallback();
-        const rootName = (files[0].webkitRelativePath || files[0].name).split('/')[0] || 'debug_folder';
-
-        const opfsRoot = await getOPFSRoot();
-        const mirrorDir = await freshOPFSDir(opfsRoot, 'raiden_debug_mirror');
-
-        labelDebugFolder.textContent = `${rootName} (copiando ${files.length} arquivos p/ sandbox...)`;
-        await materializeFileListInto(files, mirrorDir);
-
-        debugDirHandle = mirrorDir;
-        // preserva o nome "de exibição" da pasta original mesmo sendo um mirror OPFS
-        debugDirHandle._displayName = rootName;
-        labelDebugFolder.textContent = rootName;
-      }
+      debugDirHandle = await window.showDirectoryPicker({ mode: 'read' });
+      labelDebugFolder.textContent = debugDirHandle.name;
       btnSelectDebugFolder.classList.add('loaded');
       btnApplyDebug.disabled = false;
     } catch (e) {
@@ -321,26 +105,16 @@ if (btnApplyDebug) {
   btnApplyDebug.addEventListener('click', async () => {
     if (!debugDirHandle) return;
     try {
-      const displayName = debugDirHandle._displayName || debugDirHandle.name;
-      const suggestedName = 'Rebuilt_' + displayName + '.iso';
+      const saveHandle = await window.showSaveFilePicker({
+        suggestedName: 'Rebuilt_' + debugDirHandle.name + '.iso',
+        types: [{ description: 'ISO File', accept: { 'application/octet-stream': ['.iso'] } }]
+      });
 
       animOverlay.style.display = 'block';
       startAnim();
 
-      if (supportsFSA) {
-        const saveHandle = await window.showSaveFilePicker({
-          suggestedName,
-          types: [{ description: 'ISO File', accept: { 'application/octet-stream': ['.iso'] } }]
-        });
-        const writableStream = await saveHandle.createWritable();
-        await executeDebugFolderBuild(debugDirHandle, writableStream);
-      } else {
-        const opfsRoot = await getOPFSRoot();
-        const outputHandle = await opfsRoot.getFileHandle('raiden_debug_output.iso', { create: true });
-        const writableStream = await outputHandle.createWritable();
-        await executeDebugFolderBuild(debugDirHandle, writableStream);
-        await downloadFileHandle(outputHandle, suggestedName);
-      }
+      const writableStream = await saveHandle.createWritable();
+      await executeDebugFolderBuild(debugDirHandle, writableStream);
     } catch (e) {
       if (e.name !== 'AbortError') console.error("Erro na remontagem debug:", e);
       animOverlay.style.display = 'none';
@@ -374,32 +148,19 @@ btnApplyPatch.addEventListener('click', async () => {
   if (!isoFile || !patchFile) return;
 
   try {
+    const saveHandle = await window.showSaveFilePicker({
+      suggestedName: 'Patched_Raiden.iso',
+      types: [{ description: 'ISO File', accept: { 'application/octet-stream': ['.iso'] } }]
+    });
+
+    alert("Agora selecione a MESMA PASTA onde você quer salvar a ISO, para que os arquivos temporários sejam extraídos lá.");
+    const workDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+
     animOverlay.style.display = 'block';
     startAnim();
 
-    if (supportsFSA) {
-      const saveHandle = await window.showSaveFilePicker({
-        suggestedName: 'Patched_Raiden.iso',
-        types: [{ description: 'ISO File', accept: { 'application/octet-stream': ['.iso'] } }]
-      });
-
-      alert("Agora selecione a MESMA PASTA onde você quer salvar a ISO, para que os arquivos temporários sejam extraídos lá.");
-      const workDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-
-      const writableStream = await saveHandle.createWritable();
-      await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle);
-    } else {
-      // Sem File System Access API (Android): pasta de trabalho e saída
-      // vivem no OPFS (sandbox interno, sem prompt de permissão), e ao
-      // final o resultado é entregue via download comum.
-      const opfsRoot = await getOPFSRoot();
-      const workDirHandle = await freshOPFSDir(opfsRoot, 'raiden_workdir');
-      const outputHandle = await opfsRoot.getFileHandle('Patched_Raiden.iso', { create: true });
-      const writableStream = await outputHandle.createWritable();
-
-      await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle);
-      await downloadFileHandle(outputHandle, 'Patched_Raiden.iso');
-    }
+    const writableStream = await saveHandle.createWritable();
+    await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle);
   } catch (e) {
     if (e.name !== 'AbortError') console.error("Erro ao aplicar patch:", e);
     animOverlay.style.display = 'none';
@@ -421,7 +182,7 @@ async function executeStreamingPatch(origIsoFile, patchFile, writableStream, wor
     updateStatusUI(2); setProgressUI(20);
     const password = "bit.raiden";
 
-    const patchXmlHandle = await workDirHandle.getFileHandle(patchFile.name, { create: true });
+    const patchXmlHandle = await workDirHandle.getFileHandle(patchFile.name);
 
     try {
       await decryptFileToHandle(password, patchFile, patchXmlHandle, (progress) => {
@@ -466,10 +227,8 @@ async function executeDebugFolderBuild(debugDirHandle, writableStream) {
     updateStatusUI(4); setProgressUI(20);
     console.log("Iniciando reconstrução direta ISO9660+UDF a partir da pasta...");
 
-    const volumeSeed = (debugDirHandle._displayName || debugDirHandle.name || 'RAIDEN_DEBUG');
-
     await ISO9660.BuildISO(debugDirHandle, writableStream, {
-        volumeLabel: volumeSeed.toUpperCase().replace(/[^A-Z0-9_]/g, '_').substring(0, 32) || "RAIDEN_DEBUG",
+        volumeLabel: debugDirHandle.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_').substring(0, 32) || "RAIDEN_DEBUG",
         onProgress: (status, progMsg) => {
             console.log(progMsg);
             if (status === 4) updateStatusUI(4);
@@ -743,7 +502,7 @@ requestAnimationFrame(loop);
 /**
  * Extrai o patch RPTP diretamente para uma subpasta "patch_files".
  * @param {FileSystemFileHandle} patchFileHandle - O arquivo .rpt.
- * @param {FileSystemDirectoryHandle} baseDirHandle - A pasta escolhida pelo usuário (ou OPFS no fallback mobile).
+ * @param {FileSystemDirectoryHandle} baseDirHandle - A pasta escolhida pelo usuário.
  */
 async function scanPatchMetadata(patchFileHandle, baseDirHandle) {
   // 1. Criar a subpasta dentro da pasta escolhida

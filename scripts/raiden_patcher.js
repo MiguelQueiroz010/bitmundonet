@@ -24,6 +24,7 @@
 import { decryptFileToHandle } from "./IUP/crypto_stuff.js";
 import { ISO9660 } from './IUP/iso9660.js';
 import { IOextent } from './IUP/io_extent.js';
+import { pickFileViaExplorer } from './file_explorer.js';
 
 // ═══════════════════════════════════════════════════════
 // FEATURE DETECTION — File System Access API
@@ -83,6 +84,13 @@ const btnApplyDebug = document.getElementById('btn-apply-debug');
  * NÃO usar `accept` restritivo em mobile: o SAF do Android costuma filtrar
  * por MIME e esconder .iso/.rpt/.xml que não reconhece, gerando o mesmo
  * sintoma de "não consigo selecionar o arquivo".
+ *
+ * ATENÇÃO: isso ainda passa pelo chooser nativo do Android (ACTION_OPEN_DOCUMENT
+ * / "Abrir de"), que tem um bug conhecido de overflow de inteiro 32-bit para
+ * arquivos > 2GB (fica cinza/inelegível). Para arquivos potencialmente grandes
+ * (ISO de PS2), use pickFileViaExplorer() de file_explorer.js em vez desta
+ * função — ela usa webkitdirectory (ACTION_OPEN_DOCUMENT_TREE), que não passa
+ * por esse bug.
  */
 function pickFileFallback() {
   return new Promise((resolve, reject) => {
@@ -225,8 +233,16 @@ btnSelectIso.addEventListener('click', async () => {
       isoFileHandle = handle;
       isoFile = await isoFileHandle.getFile();
     } else {
+      // ISO pode passar de 2GB: o chooser nativo do Android (GetContent)
+      // tem overflow de int32 acima desse tamanho e recusa o arquivo.
+      // O explorer próprio usa webkitdirectory (ACTION_OPEN_DOCUMENT_TREE),
+      // que enumera a pasta inteira sem esse bug.
       isoFileHandle = null;
-      isoFile = await pickFileFallback();
+      isoFile = await pickFileViaExplorer({
+        title: 'Selecionar ISO',
+        hintExt: '.iso',
+        validateIso: true
+      });
     }
 
     labelIso.textContent = isoFile.name;

@@ -11,6 +11,10 @@
     <!-- CSS Base do Site -->
     <link rel="stylesheet" href="/css/style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" 
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
+        crossorigin="anonymous">
+</script>
     
     <style>
         /* Painel Base */
@@ -254,6 +258,28 @@
                 <p id="space-lbl">Patcher utilizará streaming nativo para economizar sua memória RAM.</p>
                 <p id="storage-lbl" style="color:var(--text-muted);"></p>
             </div>
+
+            <!-- Painel de Debug / Remontagem Direta -->
+            <div id="debug-section" style="margin-top: 1.5rem; padding: 1.2rem; border: 1px dashed rgba(0, 150, 255, 0.3); border-radius: var(--radius-sm); background: rgba(0,0,0,0.3);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <label style="color: #3af; font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="chk-debug-mode" style="accent-color: #06f;" />
+                        🔧 Modo Debug (Remontar ISO direto de pasta local)
+                    </label>
+                    <button id="btn-toggle-debug-ui" style="background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.85rem;" title="Ocultar Painel Debug">✖ Ocultar</button>
+                </div>
+                
+                <div id="debug-controls" style="display: none; flex-direction: column; gap: 1rem; align-items: center; margin-top: 1rem;">
+                    <button id="btn-select-debug-folder" class="btn-select" style="min-width: 280px; border-color: #ff9900; color: #ff9900; background: rgba(255, 153, 0, 0.1);">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        <span id="label-debug-folder">Selecionar Pasta Local para Remontar</span>
+                    </button>
+                    <button id="btn-apply-debug" class="btn-abrir-hog" style="background: linear-gradient(135deg, #ff9900, #ff5500); border-color: #ffaa00;" disabled>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        Remontar ISO9660+UDF da Pasta
+                    </button>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -319,5 +345,26 @@
     <script type="module" src="/scripts/navbar_auth.js"></script>
     <!-- Script de Funcionalidades da Ferramenta -->
     <script type="module" src="/scripts/raiden_patcher.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+          // Função para atualizar o status de armazenamento
+          function updateStorageStatus() {
+              if (navigator.storage && navigator.storage.estimate) {
+                  navigator.storage.estimate().then(estimate => {
+                      const used = estimate.usage;
+                      const quota = estimate.quota;
+                      const usedMB = (used / (1024 * 1024)).toFixed(2);
+                      const quotaMB = (quota / (1024 * 1024)).toFixed(2);
+                      $('#storage-lbl').text(`Uso de Armazenamento: ${usedMB} MB de ${quotaMB} MB`);
+                  });
+              } else {
+                  $('#storage-lbl').text('Informações de armazenamento não disponíveis.');
+              }
+          }
+
+          // Atualiza o status de armazenamento ao carregar a página
+          updateStorageStatus();
+      });
+    </script>
 </body>
 </html>

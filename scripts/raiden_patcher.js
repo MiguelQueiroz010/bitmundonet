@@ -15,6 +15,7 @@ let isoFileHandle = null;
 let patchFileHandle = null;
 let isoFile = null;
 let patchFile = null;
+let debugDirHandle = null;
 
 // Referências HTML
 const btnSelectIso = document.getElementById('btn-select-iso');
@@ -26,6 +27,15 @@ const spaceLbl = document.getElementById('space-lbl');
 const storageLbl = document.getElementById('storage-lbl');
 const animOverlay = document.getElementById('anim-overlay');
 const btnCloseAnim = document.getElementById('btn-close-anim');
+
+// Elementos de Debug
+const chkDebugMode = document.getElementById('chk-debug-mode');
+const debugSection = document.getElementById('debug-section');
+const debugControls = document.getElementById('debug-controls');
+const btnToggleDebugUi = document.getElementById('btn-toggle-debug-ui');
+const btnSelectDebugFolder = document.getElementById('btn-select-debug-folder');
+const labelDebugFolder = document.getElementById('label-debug-folder');
+const btnApplyDebug = document.getElementById('btn-apply-debug');
 
 // ═══════════════════════════════════════════════════════
 // UI & EVENTOS DE SELEÇÃO
@@ -65,6 +75,53 @@ btnSelectPatch.addEventListener('click', async () => {
   }
 });
 
+// Eventos do Modo Debug
+if (chkDebugMode) {
+  chkDebugMode.addEventListener('change', (e) => {
+    debugControls.style.display = e.target.checked ? 'flex' : 'none';
+  });
+}
+
+if (btnToggleDebugUi) {
+  btnToggleDebugUi.addEventListener('click', () => {
+    debugSection.style.display = 'none';
+  });
+}
+
+if (btnSelectDebugFolder) {
+  btnSelectDebugFolder.addEventListener('click', async () => {
+    try {
+      debugDirHandle = await window.showDirectoryPicker({ mode: 'read' });
+      labelDebugFolder.textContent = debugDirHandle.name;
+      btnSelectDebugFolder.classList.add('loaded');
+      btnApplyDebug.disabled = false;
+    } catch (e) {
+      if (e.name !== 'AbortError') console.error("Erro ao selecionar pasta debug:", e);
+    }
+  });
+}
+
+if (btnApplyDebug) {
+  btnApplyDebug.addEventListener('click', async () => {
+    if (!debugDirHandle) return;
+    try {
+      const saveHandle = await window.showSaveFilePicker({
+        suggestedName: 'Rebuilt_' + debugDirHandle.name + '.iso',
+        types: [{ description: 'ISO File', accept: { 'application/octet-stream': ['.iso'] } }]
+      });
+
+      animOverlay.style.display = 'block';
+      startAnim();
+
+      const writableStream = await saveHandle.createWritable();
+      await executeDebugFolderBuild(debugDirHandle, writableStream);
+    } catch (e) {
+      if (e.name !== 'AbortError') console.error("Erro na remontagem debug:", e);
+      animOverlay.style.display = 'none';
+    }
+  });
+}
+
 function formatBytes(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'], i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -76,7 +133,6 @@ function checkReady() {
     btnApplyPatch.disabled = false;
 
     const sizeTotal = isoFile.size + patchFile.size;
-    // Patcher requirement from C#: Needs space roughly equal to original ISO + patch + 2GB padding
     const spaceNeeded = isoFile.size + patchFile.size + 2147483648;
 
     storageLbl.innerHTML = `Peso Selecionado: <strong>${formatBytes(sizeTotal)}</strong> | Espaço de Trabalho Recomendado: <strong>${formatBytes(spaceNeeded)}</strong> livres em disco.`;
@@ -92,69 +148,37 @@ btnApplyPatch.addEventListener('click', async () => {
   if (!isoFile || !patchFile) return;
 
   try {
-    // 1. Pedir ao usuário para selecionar onde salvar a ISO
     const saveHandle = await window.showSaveFilePicker({
       suggestedName: 'Patched_Raiden.iso',
       types: [{ description: 'ISO File', accept: { 'application/octet-stream': ['.iso'] } }]
     });
 
-    // 1b. Pedir a pasta de trabalho (mesma pasta da ISO) para salvar arquivos temporários
     alert("Agora selecione a MESMA PASTA onde você quer salvar a ISO, para que os arquivos temporários sejam extraídos lá.");
     const workDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
 
-    // 2. Transitar a UI para a Animação
     animOverlay.style.display = 'block';
     startAnim();
 
-    // 3. Iniciar o Stream Writer (Permissão Solicitada neste ato via SO)
     const writableStream = await saveHandle.createWritable();
-
-    // Simular lógica do Worker sendo conectada nas msgs de UI da animação
     await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle);
-
   } catch (e) {
-    if (e.name !== 'AbortError') {
-      alert("Erro durante a escrita: " + e.message);
-    } else {
-      console.log("Usuário cancelou a seleção do local de destino da ISO.");
-    }
+    if (e.name !== 'AbortError') console.error("Erro ao aplicar patch:", e);
     animOverlay.style.display = 'none';
   }
 });
 
 btnCloseAnim.addEventListener('click', () => {
   animOverlay.style.display = 'none';
-  restartAnim(); // Reseta para a próxima vez
+  restartAnim();
 });
 
 /**
- * Procedimento real simulando o PatchISO assíncrono.
+ * Procedimento real de Patching ISO assíncrono.
  */
 async function executeStreamingPatch(origIsoFile, patchFile, writableStream, workDirHandle) {
-  try {
-
-    // FASE 0: MD5 Verification (Requisitado)
-    updateStatusUI(1); setProgressUI(5);
-    console.log("Iniciando Verificação MD5...");
-
-    const md5Hasher = IOextent.createMD5();
-    const isoReader = origIsoFile.stream().getReader();
-    let readForMD5 = 0;
-
-    //while (true) {
-    // const { done, value } = await isoReader.read();
-    // if (done) break;
-    //  md5Hasher.update(value);
-    //  readForMD5 += value.length;
-    //  setProgressUI(5 + (readForMD5 / origIsoFile.size) * 10);
-    // }
-    //const finalMd5 = md5Hasher.digest();
-    // console.log("MD5 Calculado:", finalMd5);
-    // No C#, aqui compararia com o MD5 esperado do RPT. Por enquanto permitimos seguir.
-
     updateStatusUI(1); setProgressUI(15);
 
-    // FASE 1: Decriptação do Patch RPT
+    // Decriptação do Patch RPT
     updateStatusUI(2); setProgressUI(20);
     const password = "bit.raiden";
 
@@ -170,54 +194,53 @@ async function executeStreamingPatch(origIsoFile, patchFile, writableStream, wor
       throw new Error("Não foi possível descriptografar o patch (.rpt).");
     }
     setProgressUI(30);
-    // FASE 2: Parsing/Scanning do XML do Patch no OPFS
+
+    // Parsing do XML do Patch
     updateStatusUI(3); setProgressUI(30);
     const patchInfo = await scanPatchMetadata(patchXmlHandle, workDirHandle);
-    console.log(`Encontrados ${patchInfo.length} arquivos no patch (Scanner OPFS).`);
+    console.log(`Encontrados ${patchInfo.length} arquivos no patch.`);
 
-    // FASE 3: Reconstrução ISO usando OPFS
+    // Reconstrução ISO9660+UDF
     updateStatusUI(4); setProgressUI(40);
     await ISO9660.PatchISO(origIsoFile,
       workDirHandle,
       writableStream, {
       onProgress: (status, progMsg) => {
         console.log(progMsg);
-        // Mapear status internos para a UI do Raiden
-        if (status === 2) updateStatusUI(3); // Extraindo
-        if (status === 4) updateStatusUI(4); // Reconstruindo
-        // O progresso aqui é uma fração 0-1
+        if (status === 2) updateStatusUI(3);
+        if (status === 4) updateStatusUI(4);
+        if (status === 5) updateStatusUI(5);
+        setProgressUI(Math.min(95, animProgress + 3));
       }
     });
 
-    await writableStream.close();
     setProgressUI(100);
     updateStatusUI(5);
-
-    // Por enquanto, seguimos o fluxo visual para validar a decriptação
-    updateStatusUI(4); setProgressUI(50);
-
-    // Simulação de escrita final
-    const reader = origIsoFile.stream().getReader();
-    let totalRead = 0;
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      await writableStream.write(value);
-      totalRead += value.length;
-      let prog = 50 + ((totalRead / origIsoFile.size) * 50);
-      setProgressUI(prog);
-      updateStatusUI(prog > 90 ? 5 : 4);
-    }
-
-    await writableStream.close();
-    setProgressUI(100);
     setTimeout(() => { triggerFinale(); }, 300);
     setTimeout(() => { btnCloseAnim.style.pointerEvents = 'auto'; btnCloseAnim.style.opacity = '1'; }, 2000);
+}
 
-  } catch (e) {
-    alert("Erro no processo de Patch: " + e.message);
-    animOverlay.style.display = 'none';
-  }
+/**
+ * Executa a reconstrução ISO9660+UDF diretamente de uma pasta escolhida no Modo Debug.
+ */
+async function executeDebugFolderBuild(debugDirHandle, writableStream) {
+    updateStatusUI(4); setProgressUI(20);
+    console.log("Iniciando reconstrução direta ISO9660+UDF a partir da pasta...");
+
+    await ISO9660.BuildISO(debugDirHandle, writableStream, {
+        volumeLabel: debugDirHandle.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_').substring(0, 32) || "RAIDEN_DEBUG",
+        onProgress: (status, progMsg) => {
+            console.log(progMsg);
+            if (status === 4) updateStatusUI(4);
+            if (status === 5) updateStatusUI(5);
+            setProgressUI(Math.min(95, animProgress + 5));
+        }
+    });
+
+    setProgressUI(100);
+    updateStatusUI(5);
+    setTimeout(() => { triggerFinale(); }, 300);
+    setTimeout(() => { btnCloseAnim.style.pointerEvents = 'auto'; btnCloseAnim.style.opacity = '1'; }, 2000);
 }
 
 

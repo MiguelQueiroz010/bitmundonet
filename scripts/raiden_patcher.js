@@ -44,7 +44,6 @@ const btnApplyDebug = document.getElementById('btn-apply-debug');
 btnSelectIso.addEventListener('click', async () => {
   try {
     const [handle] = await window.showOpenFilePicker({
-      types: [{ description: 'Arquivos ISO', accept: { 'application/octet-stream': ['.iso'] } }],
       multiple: false
     });
     isoFileHandle = handle;

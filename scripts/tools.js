@@ -86,7 +86,7 @@ function renderTools() {
                         <strong>Créditos:</strong> <span style="color:#4ade80">${tool.credit || tool.credits || ''}</span>
                     </p>
                     <div id="link" style="margin-top: 1.5rem;">
-                        <a href="${tool.url}" target="${tool.isOnline ? '_self' : '_blank'}" style="display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; transition: 0.2s;">
+                        <a href="${tool.url}" target="${tool.isOnline ? '_blank' : '_blank'}" style="display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; transition: 0.2s;">
                             ${tool.isOnline
                                 ? `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 6px rgba(96,165,250,0.6)); margin-bottom: 2px;">
                                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -135,4 +135,4 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadTools);
 } else {
     loadTools();
-}
+}

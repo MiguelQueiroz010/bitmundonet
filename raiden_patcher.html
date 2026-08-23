@@ -3,131 +3,577 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raiden Patcher - Web Edition</title>
-    
-    <meta name="description" content="Ferramenta baseada em Web para Patching de ISOs (PS2)" />
+    <title>Raiden Web Patcher — BitMundo</title>
+
+    <meta name="description" content="Aplique mods e patches em ISOs de PS2 diretamente no navegador, sem instalar nada. Suporte a streaming para economizar RAM." />
     <meta name="author" content="Bit.Raiden">
 
     <!-- CSS Base do Site -->
     <link rel="stylesheet" href="/css/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js" 
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
-        crossorigin="anonymous">
-</script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"></script>
+
     <style>
-        /* Painel Base */
-        .extractor-panel {
-            background: var(--bg-panel);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: var(--radius-md);
-            padding: 3rem;
-            max-width: 800px;
-            margin: 0 auto 3rem auto;
-            text-align: center;
-            box-shadow: var(--glass-shadow);
+        /* ══════════════════════════════════════════════════
+           DESIGN SYSTEM — Raiden Patcher
+        ══════════════════════════════════════════════════ */
+
+        :root {
+            --rp-blue:       #3af;
+            --rp-blue-dark:  #06f;
+            --rp-blue-dim:   rgba(51,170,255,0.15);
+            --rp-cyan:       #00e5ff;
+            --rp-gold:       #ffb700;
+            --rp-green:      #00ff88;
+            --rp-red:        #ff3b3b;
+            --rp-bg:         #020814;
+            --rp-card:       rgba(5,15,35,0.85);
+            --rp-card-glow:  rgba(51,170,255,0.08);
+            --rp-border:     rgba(51,170,255,0.25);
+            --rp-border-hi:  rgba(51,170,255,0.7);
+            --rp-text:       #c8dff8;
+            --rp-text-dim:   #4a6a8a;
+            --rp-radius:     12px;
+            --rp-radius-sm:  8px;
+        }
+
+        /* ── Page Background — estático (sem repaint de fixed) ── */
+        body {
+            background: #020814;
+        }
+        .rp-glow-orb {
+            position: absolute;
+            width: 700px; height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(0,50,180,0.18) 0%, transparent 70%);
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Main Container ── */
+        .rp-main {
             position: relative;
-            overflow: hidden;
+            z-index: 1;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 1.5rem 6rem;
+        }
+
+        /* ── Hero Header ── */
+        .rp-hero {
+            text-align: center;
+            padding: 3.5rem 0 2rem;
+        }
+        .rp-hero-badge {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
+            color: var(--rp-blue);
+            background: rgba(51,170,255,0.1);
+            border: 1px solid rgba(51,170,255,0.3);
+            border-radius: 99px;
+            padding: 0.3rem 1.2rem;
+            margin-bottom: 1.2rem;
+            text-transform: uppercase;
+        }
+        .rp-hero h1 {
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            letter-spacing: 0.06em;
+            background: linear-gradient(135deg, #fff 0%, #99ccff 40%, #3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.6rem;
+        }
+        .rp-hero-sub {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+            color: var(--rp-text-dim);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        /* ── Stepper ── */
+        .rp-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2.5rem 0 2rem;
+        }
+        .rp-step-item {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            align-items: center;
+            gap: 0.5rem;
         }
-
-        .files-container {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+        .rp-step-connector {
+            flex: 1;
+            height: 2px;
+            background: rgba(51,170,255,0.15);
+            max-width: 80px;
+            margin: 0 0.5rem 1.8rem;
         }
-
-        /* Botões */
-        .btn-select {
-            background: rgba(0, 150, 255, 0.1);
+        .rp-step-connector.active {
+            background: #06f;
+        }
+        .rp-step-dot {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            border: 2px solid rgba(51,170,255,0.25);
+            background: rgba(5,15,35,0.9);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--rp-text-dim);
+            transition: border-color 0.3s, color 0.3s;
+        }
+        .rp-step-item.active .rp-step-dot {
+            border-color: #3af;
             color: #3af;
-            border: 2px dashed #06f;
-            padding: 1.2rem 2rem;
-            font-size: 1.1rem;
-            border-radius: var(--radius-sm);
+        }
+        .rp-step-item.done .rp-step-dot {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        .rp-step-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.62rem;
+            letter-spacing: 0.1em;
+            color: var(--rp-text-dim);
+            text-transform: uppercase;
+            text-align: center;
+            max-width: 80px;
+            line-height: 1.3;
+            transition: color 0.3s;
+        }
+        .rp-step-item.active .rp-step-label,
+        .rp-step-item.done .rp-step-label { color: var(--rp-text); }
+
+        /* ── Cards ── */
+        .rp-card {
+            background: rgba(5,15,35,0.95);
+            border: 1px solid rgba(51,170,255,0.2);
+            border-radius: var(--rp-radius);
+            padding: 2rem;
+            margin-bottom: 1.2rem;
+        }
+        .rp-card.active-card {
+            border-color: rgba(51,170,255,0.55);
+        }
+        .rp-card.done-card {
+            border-color: rgba(0,255,136,0.35);
+        }
+        .rp-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .rp-card-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #3af;
+            background: rgba(51,170,255,0.08);
+            border: 1px solid rgba(51,170,255,0.25);
+            border-radius: 4px;
+            padding: 0.2rem 0.5rem;
+            letter-spacing: 0.08em;
+        }
+        .rp-card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.82rem, 2.2vw, 1rem);
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── File Drop Zones ── */
+        .rp-drop-zone {
+            border: 2px dashed rgba(51,170,255,0.25);
+            border-radius: var(--rp-radius-sm);
+            padding: 1.8rem 1.5rem;
+            text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: border-color 0.25s, background 0.25s;
+            background: rgba(0,10,30,0.4);
+        }
+        .rp-drop-zone:hover {
+            border-color: #3af;
+            background: rgba(51,170,255,0.04);
+        }
+        .rp-drop-zone.loaded {
+            border-color: #00ff88;
+            border-style: solid;
+            background: rgba(0,255,136,0.03);
+        }
+        .rp-drop-icon {
+            width: 44px; height: 44px;
+            margin: 0 auto 0.8rem;
+            color: var(--rp-text-dim);
+        }
+        .rp-drop-zone.loaded .rp-drop-icon { color: #00ff88; }
+        .rp-drop-text {
             font-family: 'Exo 2', sans-serif;
             font-weight: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.8rem;
+            font-size: 0.92rem;
+            color: var(--rp-text);
             text-transform: uppercase;
-            min-width: 250px;
+            letter-spacing: 0.08em;
+        }
+        .rp-drop-sub {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--rp-text-dim);
+            margin-top: 0.4rem;
+        }
+        .rp-drop-filename {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            color: #00ff88;
+            margin-top: 0.5rem;
+            word-break: break-all;
+        }
+
+        /* ── MD5 Bar ── */
+        .rp-md5-area {
+            margin-top: 1rem;
+            padding: 0.9rem 1.2rem;
+            background: rgba(0,5,20,0.6);
+            border: 1px solid rgba(51,170,255,0.1);
+            border-radius: var(--rp-radius-sm);
+            display: none;
+        }
+        .rp-md5-area.visible { display: block; }
+        .rp-md5-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            color: var(--rp-text-dim);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .rp-progress-bar-wrap {
+            width: 100%;
+            height: 3px;
+            background: rgba(51,170,255,0.1);
+            border-radius: 99px;
             overflow: hidden;
-            text-overflow: ellipsis;
+            margin-bottom: 0.5rem;
+        }
+        .rp-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #06f, #3af);
+            border-radius: 99px;
+            transition: width 0.4s linear;
+        }
+        .rp-md5-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: #3af;
+            word-break: break-all;
+        }
+        .rp-md5-value.computing { color: var(--rp-text-dim); font-style: italic; }
+        .rp-md5-value.done-val  { color: #00ff88; }
+        .rp-md5-value.error-val { color: #ff3b3b; }
+
+        /* ── Patch Summary Panel ── */
+        .rp-summary {
+            margin-top: 1rem;
+            padding: 1.1rem 1.4rem;
+            background: rgba(0,5,25,0.7);
+            border: 1px solid rgba(51,170,255,0.15);
+            border-left: 3px solid #3af;
+            border-radius: var(--rp-radius-sm);
+            display: none;
+        }
+        .rp-summary.visible { display: block; }
+        .rp-summary-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: #3af;
+            text-transform: uppercase;
+            margin-bottom: 0.9rem;
+        }
+        .rp-summary-grid {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 0.4rem 1.2rem;
+            align-items: start;
+        }
+        .rp-sum-key {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--rp-text-dim);
+            text-transform: uppercase;
             white-space: nowrap;
         }
-
-        .btn-select:hover {
-            background: rgba(0, 150, 255, 0.2);
-            border-color: #3af;
-            box-shadow: 0 0 15px rgba(51, 170, 255, 0.4);
-            transform: translateY(-2px);
+        .rp-sum-val {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.76rem;
+            color: var(--rp-text);
+            word-break: break-all;
         }
+        .rp-sum-val.match   { color: #00ff88; }
+        .rp-sum-val.nomatch { color: #ff3b3b; }
 
-        .btn-select.loaded {
-            background: rgba(0, 255, 100, 0.1);
-            border: 2px solid #0f0;
-            color: #0f0;
-        }
-
-        .btn-abrir-hog {
-            background: linear-gradient(135deg, #06f, #3af);
-            color: #fff;
-            border: 2px solid #3af;
-            padding: 1.2rem 2.5rem;
-            font-size: 1.3rem;
-            border-radius: var(--radius-lg);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Exo 2', sans-serif;
-            font-weight: 800;
+        /* MD5 match badge */
+        .rp-md5-badge {
             display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: 99px;
+            margin-top: 0.6rem;
+        }
+        .rp-md5-badge.match   { background: rgba(0,255,136,0.08); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
+        .rp-md5-badge.nomatch { background: rgba(255,59,59,0.08);  color: #ff3b3b; border: 1px solid rgba(255,59,59,0.3); }
+        .rp-md5-badge.pending { background: rgba(255,183,0,0.07);  color: #ffb700; border: 1px solid rgba(255,183,0,0.25); }
+
+        /* ── Resumo Block ── */
+        .rp-resumo-block {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            line-height: 1.75;
+            color: #d8eaff;
+            white-space: normal;
+            word-break: break-word;
+            letter-spacing: 0.01em;
+        }
+        .rp-resumo-fallback {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 0.4rem 1.2rem;
+        }
+        .rp-md5-target-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding-top: 0.9rem;
+            border-top: 1px solid rgba(51,170,255,0.1);
+        }
+        .rp-md5-target-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
+            color: var(--rp-text-dim);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .rp-md5-target-val {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            color: #3af;
+            word-break: break-all;
+            background: rgba(51,170,255,0.06);
+            border: 1px solid rgba(51,170,255,0.15);
+            border-radius: 4px;
+            padding: 0.15rem 0.5rem;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Firebase Counter ── */
+        .rp-firebase-counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            margin-top: 1rem;
+            padding: 0.6rem 1rem;
+            background: rgba(255,183,0,0.04);
+            border: 1px solid rgba(255,183,0,0.15);
+            border-radius: var(--rp-radius-sm);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: #ffb700;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .rp-firebase-counter.visible { opacity: 1; }
+
+        /* ── Apply Button ── */
+        .rp-btn-apply {
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.8rem;
+            width: 100%;
+            padding: 1.2rem 2rem;
+            border-radius: var(--rp-radius);
+            border: 2px solid #3af;
+            background: rgba(0,60,180,0.35);
+            color: #fff;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(51, 170, 255, 0.4);
-            margin: 0 auto;
-            width: fit-content;
+            cursor: pointer;
+            transition: border-color 0.25s, background 0.25s, transform 0.2s;
         }
-
-        .btn-abrir-hog:hover {
-            box-shadow: 0 0 25px rgba(51, 170, 255, 0.8);
-            transform: translateY(-5px) scale(1.05);
-            border-color: #FFF;
+        .rp-btn-apply:not(:disabled):hover {
+            border-color: #fff;
+            background: rgba(0,80,220,0.5);
+            transform: translateY(-2px);
         }
-
-        .btn-abrir-hog:disabled {
-            background: #555;
-            color: #888;
-            border-color: #666;
+        .rp-btn-apply:disabled {
+            border-color: rgba(51,170,255,0.15);
+            background: rgba(10,20,40,0.5);
+            color: var(--rp-text-dim);
             cursor: not-allowed;
-            pointer-events: none;
-            box-shadow: none;
+        }
+        .rp-btn-apply .btn-icon { flex-shrink: 0; }
+
+        /* ── Info Bar ── */
+        .rp-info-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .rp-info-chip {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--rp-text-dim);
+            background: rgba(51,170,255,0.04);
+            border: 1px solid rgba(51,170,255,0.1);
+            border-radius: 4px;
+            padding: 0.25rem 0.7rem;
         }
 
-        /* Animação FullScreen Container */
+        /* ── Debug Panel ── */
+        .rp-debug-panel {
+            margin-top: 1.5rem;
+            padding: 1.1rem 1.4rem;
+            border: 1px dashed rgba(255,153,0,0.2);
+            border-radius: var(--rp-radius-sm);
+            background: rgba(20,10,0,0.3);
+        }
+        .rp-debug-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .rp-debug-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            color: #ff9900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .rp-btn-icon-only {
+            background: transparent;
+            border: none;
+            color: var(--rp-text-dim);
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+        }
+        .rp-btn-icon-only:hover { color: var(--rp-text); }
+
+        @keyframes rp-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Modal ── */
+        .rp-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .rp-modal-backdrop.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .rp-modal {
+            background: #030d1f;
+            border: 1px solid rgba(255,59,59,0.45);
+            border-radius: var(--rp-radius);
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 0 60px rgba(255,59,59,0.2);
+            animation: rp-fade-in 0.3s ease;
+        }
+        .rp-modal-icon {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .rp-modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--rp-red);
+            text-align: center;
+            margin-bottom: 0.8rem;
+        }
+        .rp-modal-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--rp-text);
+            line-height: 1.7;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .rp-modal-btns {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+        }
+        .rp-modal-btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: var(--rp-radius-sm);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .rp-modal-btn.danger  { background: rgba(255,59,59,0.15); border: 1px solid rgba(255,59,59,0.5); color: var(--rp-red); }
+        .rp-modal-btn.danger:hover { background: rgba(255,59,59,0.3); }
+        .rp-modal-btn.cancel  { background: rgba(51,170,255,0.1); border: 1px solid rgba(51,170,255,0.3); color: var(--rp-blue); }
+        .rp-modal-btn.cancel:hover { background: rgba(51,170,255,0.2); }
+
+        /* ── Overlay Animação ── */
         #anim-overlay {
             position: fixed;
             inset: 0;
             z-index: 9999;
             background: #000;
-            display: none; /* Hide by default */
+            display: none;
             font-family: 'Share Tech Mono', monospace;
             overflow: hidden;
         }
-        
-        /* -------------------------------------
-           Estilos copiados de raiden-patch-animation.html
-           ------------------------------------- */
         #stage { position:relative; width:100vw; height:100vh; background:#000; overflow:hidden; }
         #mainCanvas { position:absolute; inset:0; z-index:2; }
         #ps2bg {
@@ -214,83 +660,187 @@
           pointer-events: none;
         }
         #btn-close-anim:hover { border-color:#3af; color:#3af; box-shadow:0 0 12px rgba(51,170,255,0.25); }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .rp-card { padding: 1.4rem 1rem; }
+            .rp-stepper { gap: 0; }
+            .rp-step-connector { max-width: 40px; }
+            .rp-step-label { font-size: 0.55rem; max-width: 60px; }
+            .rp-modal-btns { flex-direction: column; }
+        }
     </style>
 </head>
 
 <body>
-    <!-- Navbar (Componente Reutilizado) -->
+    <!-- Navbar -->
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <div w3-include-html="/navbar.html"></div>
     <script>w3IncludeHTML();</script>
 
-    <main class="container">
-        <!-- Cabeçalho -->
-        <div class="text-center mt-5 mb-5">
-             <h1 class="hero-title">Raiden Web Patcher</h1>
-             <p class="hero-subtitle">Aplicador de mods de ISO universal cross-platform (Client-Side Streaming)</p>
+    <!-- Page BG -->
+    <div class="rp-glow-orb"></div>
+
+    <main class="rp-main">
+
+        <!-- Hero -->
+        <div class="rp-hero">
+            <div class="rp-hero-badge">⚡ Client-Side Streaming · No Upload · Cross-Platform</div>
+            <h1>Raiden Web Patcher</h1>
+            <p class="rp-hero-sub">Aplicador de mods de ISO · Sem instalação · Direto no navegador</p>
         </div>
 
-        <!-- Painel Principal da Ferramenta -->
-        <section class="extractor-panel">
-            
-            <div class="files-container">
-                <button id="btn-select-iso" class="btn-select">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="12" cy="13" r="3"></circle></svg>
-                    <span id="label-iso">Selecionar ISO Base (Raw/Dump)</span>
-                </button>
-                
-                <button id="btn-select-patch" class="btn-select">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    <span id="label-patch">Selecionar Arquivo de Patch (.RPT)</span>
-                </button>
+        <!-- Stepper -->
+        <div class="rp-stepper" id="rp-stepper">
+            <div class="rp-step-item active" id="step-indicator-1">
+                <div class="rp-step-dot">01</div>
+                <div class="rp-step-label">ISO Base</div>
+            </div>
+            <div class="rp-step-connector" id="connector-1-2"></div>
+            <div class="rp-step-item" id="step-indicator-2">
+                <div class="rp-step-dot">02</div>
+                <div class="rp-step-label">Patch RPT</div>
+            </div>
+            <div class="rp-step-connector" id="connector-2-3"></div>
+            <div class="rp-step-item" id="step-indicator-3">
+                <div class="rp-step-dot">03</div>
+                <div class="rp-step-label">Aplicar</div>
+            </div>
+        </div>
+
+        <!-- ══ CARD 1: ISO Base ══ -->
+        <div class="rp-card active-card" id="card-step-1">
+            <div class="rp-card-header">
+                <span class="rp-card-num">STEP 01</span>
+                <span class="rp-card-title">Selecionar ISO Base</span>
             </div>
 
-            <!-- Botão de Ação -->
-            <button id="btn-apply-patch" class="btn-abrir-hog" disabled>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            <div class="rp-drop-zone" id="btn-select-iso">
+                <svg class="rp-drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <circle cx="12" cy="13" r="3"/>
+                </svg>
+                <div class="rp-drop-text">Selecionar ISO Base</div>
+                <div class="rp-drop-sub">Formato: .iso / .bin / dump raw de PS2</div>
+                <div class="rp-drop-filename" id="label-iso" style="display:none;"></div>
+            </div>
+
+            <!-- MD5 Progress -->
+            <div class="rp-md5-area" id="md5-area">
+                <div class="rp-md5-label">🔍 Verificação MD5</div>
+                <div class="rp-progress-bar-wrap">
+                    <div class="rp-progress-bar" id="md5-bar"></div>
+                </div>
+                <div class="rp-md5-value computing" id="md5-value">Calculando...</div>
+            </div>
+        </div>
+
+        <!-- ══ CARD 2: Patch RPT ══ -->
+        <div class="rp-card" id="card-step-2" style="opacity:0.45; pointer-events:none; transition:opacity 0.5s;">
+            <div class="rp-card-header">
+                <span class="rp-card-num">STEP 02</span>
+                <span class="rp-card-title">Selecionar Arquivo de Patch (.RPT)</span>
+            </div>
+
+            <div class="rp-drop-zone" id="btn-select-patch">
+                <svg class="rp-drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <div class="rp-drop-text">Selecionar Patch (.RPT)</div>
+                <div class="rp-drop-sub">Arquivo de patch criptografado Raiden</div>
+                <div class="rp-drop-filename" id="label-patch" style="display:none;"></div>
+            </div>
+
+            <!-- Resumo do Patch -->
+            <div class="rp-summary" id="patch-summary">
+                <div class="rp-summary-title">📋 Resumo do Patch</div>
+                <div class="rp-summary-grid" id="summary-grid">
+                    <!-- Preenchido por JS -->
+                </div>
+                <div id="md5-match-badge" style="margin-top:0.8rem;"></div>
+            </div>
+        </div>
+
+        <!-- ══ CARD 3: Aplicar ══ -->
+        <div class="rp-card" id="card-step-3" style="opacity:0.45; pointer-events:none; transition:opacity 0.5s;">
+            <div class="rp-card-header">
+                <span class="rp-card-num">STEP 03</span>
+                <span class="rp-card-title">Aplicar Patch</span>
+            </div>
+
+            <button id="btn-apply-patch" class="rp-btn-apply" disabled>
+                <svg class="btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
                 Gerar Disco Patcheado
             </button>
 
-            <!-- Status Memory Info -->
-            <div style="margin-top:20px; color:#aaa; font-size:0.9rem;">
-                <p id="space-lbl">Patcher utilizará streaming nativo para economizar sua memória RAM.</p>
-                <p id="storage-lbl" style="color:var(--text-muted);"></p>
+            <!-- Firebase Counter -->
+            <div class="rp-firebase-counter" id="firebase-counter">
+                <span>🔥</span>
+                <span id="firebase-counter-text">Carregando estatísticas...</span>
             </div>
 
-            <!-- Painel de Debug / Remontagem Direta -->
-            <div id="debug-section" style="margin-top: 1.5rem; padding: 1.2rem; border: 1px dashed rgba(0, 150, 255, 0.3); border-radius: var(--radius-sm); background: rgba(0,0,0,0.3);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <label style="color: #3af; font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                        <input type="checkbox" id="chk-debug-mode" style="accent-color: #06f;" />
-                        🔧 Modo Debug (Remontar ISO direto de pasta local)
-                    </label>
-                    <button id="btn-toggle-debug-ui" style="background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.85rem;" title="Ocultar Painel Debug">✖ Ocultar</button>
-                </div>
-                
-                <div id="debug-controls" style="display: none; flex-direction: column; gap: 1rem; align-items: center; margin-top: 1rem;">
-                    <button id="btn-select-debug-folder" class="btn-select" style="min-width: 280px; border-color: #ff9900; color: #ff9900; background: rgba(255, 153, 0, 0.1);">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                        <span id="label-debug-folder">Selecionar Pasta Local para Remontar</span>
-                    </button>
-                    <button id="btn-apply-debug" class="btn-abrir-hog" style="background: linear-gradient(135deg, #ff9900, #ff5500); border-color: #ffaa00;" disabled>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        Remontar ISO9660+UDF da Pasta
-                    </button>
-                </div>
+            <!-- Info -->
+            <div class="rp-info-bar" id="rp-info-bar">
+                <div class="rp-info-chip" id="space-lbl">Streaming nativo ativo — baixo consumo de RAM</div>
+                <div class="rp-info-chip" id="storage-lbl"></div>
             </div>
-        </section>
+        </div>
+
+        <!-- ══ Debug Panel ══ -->
+        <div class="rp-debug-panel" id="debug-section">
+            <div class="rp-debug-header">
+                <label class="rp-debug-label">
+                    <input type="checkbox" id="chk-debug-mode" style="accent-color:#ff9900;">
+                    🔧 Modo Debug — Remontar ISO de pasta local
+                </label>
+                <button class="rp-btn-icon-only" id="btn-toggle-debug-ui" title="Ocultar">✖ Ocultar</button>
+            </div>
+            <div id="debug-controls" style="display:none; flex-direction:column; gap:1rem; align-items:center; margin-top:1rem;">
+                <div class="rp-drop-zone" id="btn-select-debug-folder" style="border-color:rgba(255,153,0,0.4); min-width:280px; width:100%;">
+                    <svg class="rp-drop-icon" viewBox="0 0 24 24" fill="none" stroke="#ff9900" stroke-width="1.5">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <div class="rp-drop-text" style="color:#ff9900;">Pasta Local</div>
+                    <div class="rp-drop-filename" id="label-debug-folder" style="display:none;"></div>
+                </div>
+                <button id="btn-apply-debug" class="rp-btn-apply" style="background:linear-gradient(135deg,rgba(200,80,0,0.6),rgba(255,153,0,0.25));border-color:#ff9900;" disabled>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Remontar ISO9660+UDF
+                </button>
+            </div>
+        </div>
+
     </main>
 
-    <!-- Overlay Animação de Patch -->
+    <!-- ══ Modal MD5 Incompatível ══ -->
+    <div class="rp-modal-backdrop" id="modal-md5-mismatch">
+        <div class="rp-modal">
+            <div class="rp-modal-icon">⚠️</div>
+            <div class="rp-modal-title">MD5 Incompatível</div>
+            <div class="rp-modal-text" id="modal-md5-text">
+                O MD5 da ISO não corresponde ao esperado pelo patch.<br>
+                Aplicar mesmo assim pode gerar uma ISO corrompida ou não funcional.
+            </div>
+            <div class="rp-modal-btns">
+                <button class="rp-modal-btn cancel" id="modal-cancel-btn">Cancelar</button>
+                <button class="rp-modal-btn danger" id="modal-proceed-btn">Aplicar Mesmo Assim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Overlay Animação de Patch ══ -->
     <div id="anim-overlay">
         <div id="stage">
           <div id="ps2bg"></div>
           <canvas id="mainCanvas"></canvas>
           <div id="vignette"></div>
 
-          <!-- SVG Original PS2 Rings -->
           <svg id="raidenSVG" width="190" height="190" viewBox="0 0 190 190">
             <defs>
               <filter id="glow"><feGaussianBlur stdDeviation="3.5" result="blur"/>
@@ -306,11 +856,9 @@
             <path d="M103 44 L86 92 L99 92 L82 144 L116 84 L102 84 Z" fill="#3af" opacity="0.95" filter="url(#glow2)"/>
             <line x1="28" y1="138" x2="162" y2="138" stroke="rgba(51,170,255,0.35)" stroke-width="1"/>
           </svg>
-          
-          <!-- Raiden Teste GIF no centro -->
+
           <img id="raidenGifAnim" src="/assets/raiden_teste.gif" alt="Raiden Animation" />
 
-          <!-- Arco PS2 Ring -->
           <div id="ringWrap">
             <svg width="230" height="230" viewBox="0 0 230 230">
               <circle cx="115" cy="115" r="80" fill="none" stroke="rgba(20,50,130,0.35)" stroke-width="2.5"/>
@@ -341,30 +889,18 @@
         <script>w3IncludeHTML();</script>
     </footer>
 
-    <!-- Script Autenticador -->
+    <!-- Scripts -->
     <script type="module" src="/scripts/navbar_auth.js"></script>
-    <!-- Script de Funcionalidades da Ferramenta -->
     <script type="module" src="/scripts/raiden_patcher.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function() {
-          // Função para atualizar o status de armazenamento
-          function updateStorageStatus() {
-              if (navigator.storage && navigator.storage.estimate) {
-                  navigator.storage.estimate().then(estimate => {
-                      const used = estimate.usage;
-                      const quota = estimate.quota;
-                      const usedMB = (used / (1024 * 1024)).toFixed(2);
-                      const quotaMB = (quota / (1024 * 1024)).toFixed(2);
-                      $('#storage-lbl').text(`Uso de Armazenamento: ${usedMB} MB de ${quotaMB} MB`);
-                  });
-              } else {
-                  $('#storage-lbl').text('Informações de armazenamento não disponíveis.');
-              }
-          }
-
-          // Atualiza o status de armazenamento ao carregar a página
-          updateStorageStatus();
-      });
+    <script>
+      if (navigator.storage && navigator.storage.estimate) {
+        navigator.storage.estimate().then(e => {
+          const usedMB = (e.usage / 1048576).toFixed(1);
+          const quotaMB = (e.quota / 1048576).toFixed(0);
+          document.getElementById('storage-lbl').textContent =
+            `Cache: ${usedMB} MB / ${quotaMB} MB`;
+        });
+      }
     </script>
 </body>
 </html>

@@ -193,6 +193,51 @@ a.btn{text-decoration:none;color:inherit}
 #tabq{width:150px}
 .tabact{display:flex;gap:6px;flex-wrap:wrap}
 .btn:disabled{opacity:.5;cursor:default}
+/* pasta de trabalho */
+.tab.pin{border-style:dashed}
+.tab.sel{border-color:var(--accent);background:var(--accent-soft);border-style:solid}
+.tab.pin .tabb svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px}
+#view-folder{display:flex;flex-direction:column;gap:10px;min-height:0;flex:1}
+.fld-title{display:flex;align-items:baseline;gap:10px;flex:1 1 180px;min-width:0}
+.fld-title b{font:700 15px/1.2 var(--f-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fld-list{flex:1;min-height:200px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.fgh{position:sticky;top:0;z-index:1;background:var(--surface-2);border-bottom:1px solid var(--line);padding:6px 12px;font:600 11px/1.2 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.frow{display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.frow:hover{background:var(--surface-2)}
+.frow.open{background:var(--accent-soft)}
+.fname{border:0;background:transparent;padding:3px 0;text-align:left;cursor:pointer;font:500 13px/1.3 var(--f-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.fbadges{display:flex;gap:6px;flex:none;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.fb{font:600 11px/1 var(--f-mono);padding:3px 7px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.fb.ok{color:var(--ok);border-color:var(--ok)}
+.fb.fix{color:var(--mark);border-color:var(--mark)}
+.fb.fixed{color:var(--accent);border-color:var(--accent)}
+.fb.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* modo revisão */
+.btn.tog[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#rvbar{padding:8px 12px}
+#rvbar .lbl{font-weight:600;color:var(--ink)}
+#rvbar input[type=text]{width:170px}
+#rvbar select{width:auto}
+.rvstat{font:12px/1.4 var(--f-mono);color:var(--ink-2)}
+.rvsave{font:12px/1.4 var(--f-mono);color:var(--ink-3);flex:1 1 200px;min-width:0}
+.rvsave.warn{color:var(--mark)}
+.rvsave.err{color:var(--danger)}
+.rv{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
+.rv-ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rv-lbl{font:600 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-right:2px}
+.rvb.ok.on{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.rvb.fix.on{background:var(--mark);border-color:var(--mark);color:var(--surface)}
+textarea.rv-c{min-height:44px;resize:vertical;font:13px/1.5 var(--f-body)}
+.rvchip{font:600 11px/1 var(--f-mono);padding:4px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.rv-h{flex-basis:100%;font-size:12px}
+.rv-h summary{cursor:pointer;color:var(--ink-2)}
+.rv-e{margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);display:grid;gap:6px}
+.rv-m{font:11px/1.3 var(--f-mono);color:var(--ink-3)}
+.rv-t b{font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.rv-t pre{margin:3px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 var(--f-mono)}
+.entry.rv-ok .gutter{box-shadow:inset 4px 0 0 var(--ok)}
+.entry.rv-fix .gutter{box-shadow:inset 4px 0 0 var(--mark)}
+.entry.rv-fixed .gutter{box-shadow:inset 4px 0 0 var(--accent)}
 </style>
 
 <div id="app" data-view="entries">
@@ -226,7 +271,7 @@ a.btn{text-decoration:none;color:inherit}
             <b>Solte arquivos ou uma pasta aqui</b>
             <span>ou clique para escolher (um ou vários arquivos)</span>
           </label>
-          <div class="row" style="flex-wrap:wrap"><button type="button" class="btn sm" id="btn-dir">Abrir pasta</button><span class="hint">Cada arquivo de texto vira uma aba.</span></div>
+          <div class="row" style="flex-wrap:wrap"><button type="button" class="btn sm" id="btn-dir">Abrir pasta</button><span class="hint">A pasta abre numa guia com a lista de arquivos: clique num arquivo para abri-lo.</span></div>
           <p class="hint" id="fsaHint"></p>
           <div class="f">
             <label for="encIn">Codificação do arquivo</label>
@@ -412,7 +457,7 @@ a.btn{text-decoration:none;color:inherit}
     </aside>
 
     <main class="pane" id="pane-work">
-      <div class="tabbar"><div class="tabs" id="tabs-list"></div><input type="search" id="tabq" placeholder="Filtrar abas" aria-label="Filtrar abas" hidden><span class="tabact"><button type="button" class="btn sm" id="btn-new-tab">+ Aba</button><button type="button" class="btn sm" id="btn-mt-tabs">Traduzir todas as abas</button><button type="button" class="btn sm" id="btn-zip">Exportar .zip</button><button type="button" class="btn sm js-write" disabled>Gravar no arquivo</button><button type="button" class="btn sm" id="btn-write-all" disabled>Gravar todas</button></span></div>
+      <div class="tabbar"><div class="tabs" id="tabs-list"></div><input type="search" id="tabq" placeholder="Filtrar abas" aria-label="Filtrar abas" hidden><span class="tabact"><button type="button" class="btn sm tog" id="btn-review" aria-pressed="false" title="Revisar traduções: aprovar, pedir correção e comentar. As revisões ficam em revisions.json na pasta de trabalho.">Modo revisão</button><button type="button" class="btn sm" id="btn-new-tab">+ Aba</button><button type="button" class="btn sm" id="btn-mt-tabs">Traduzir todas as abas</button><button type="button" class="btn sm" id="btn-zip">Exportar .zip</button><button type="button" class="btn sm js-write" disabled>Gravar no arquivo</button><button type="button" class="btn sm" id="btn-write-all" disabled>Gravar todas</button></span></div>
       <section id="view-entries" aria-label="Entradas">
         <div class="bar">
           <div class="prog" aria-live="polite">
@@ -437,8 +482,33 @@ a.btn{text-decoration:none;color:inherit}
           <button type="button" class="btn" id="btn-mt-all">Traduzir tudo</button>
           <span class="meta-line" id="mtProg" hidden><span id="mtProgTxt" aria-live="polite"></span><button type="button" class="btn sm danger" id="btn-mt-cancel">Parar</button></span>
         </div>
+        <div class="bar" id="rvbar" hidden>
+          <span class="lbl">Modo revisão</span>
+          <input type="text" id="rv-by" placeholder="Seu nome (revisor)" aria-label="Nome do revisor" maxlength="60">
+          <label class="row"><span class="muted">Situação</span><select id="rv-filter" aria-label="Filtrar pela situação da revisão"><option value="all">Todas</option><option value="none">Sem revisão</option><option value="ok">Aprovadas</option><option value="fix">Corrigir</option><option value="fixed">Corrigidas</option></select></label>
+          <span class="rvstat" id="rvStat"></span>
+          <span class="rvsave" id="rvSave" aria-live="polite"></span>
+          <button type="button" class="btn sm" id="rv-save">Salvar revisions.json</button>
+        </div>
         <div id="list" class="invis"></div>
         <div class="pager" id="pager"></div>
+      </section>
+
+      <section id="view-folder" aria-label="Arquivos da pasta" hidden>
+        <div class="bar">
+          <div class="fld-title"><b id="fldName"></b><span class="muted mono" id="fldMeta" style="font-size:12px"></span></div>
+          <div class="search">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+            <input type="search" id="fldQ" placeholder="Filtrar arquivos pelo nome ou caminho" aria-label="Filtrar arquivos da pasta">
+          </div>
+          <button type="button" class="btn sm" id="fld-all">Marcar visíveis</button>
+          <button type="button" class="btn sm" id="fld-none">Limpar seleção</button>
+          <button type="button" class="btn sm primary" id="fld-open" disabled>Abrir selecionados</button>
+          <button type="button" class="btn sm" id="fld-refresh">Atualizar</button>
+          <button type="button" class="btn sm" id="fld-change">Trocar pasta</button>
+        </div>
+        <div class="fld-list" id="fldList"></div>
+        <p class="hint">Clique no nome de um arquivo para abri-lo. Para abrir vários de uma vez, marque as caixas e use “Abrir selecionados”: cada um vira uma aba.</p>
       </section>
 
       <section id="view-output" aria-label="Saída" hidden>
@@ -580,7 +650,7 @@ function reconcile(prev,next){
   next.forEach(function(n,i){
     let p=hit[i];
     if(!p&&sameLen&&!used.has(prev[i])){p=prev[i];used.add(p);}
-    if(p){n.tr=p.tr;n.done=p.done;n.brk=p.brk?{kind:p.brk.kind,text:p.brk.text}:null;}
+    if(p){n.tr=p.tr;n.done=p.done;n.brk=p.brk?{kind:p.brk.kind,text:p.brk.text}:null;if(p.rev)n.rev=JSON.parse(JSON.stringify(p.rev));}
   });
   return next;
 }
@@ -750,12 +820,12 @@ function reparse(keep,noStale){
   if(keep){
     /* guarda o trabalho feito para que mudar as regras de separação e voltar não perca traduções */
     S.entries.forEach(function(e){
-      if((e.tr&&e.tr.trim())||e.done||e.brk)S.memo[e.src]={tr:e.tr,done:e.done,brk:e.brk};else delete S.memo[e.src];
+      if((e.tr&&e.tr.trim())||e.done||e.brk||e.rev)S.memo[e.src]={tr:e.tr,done:e.done,brk:e.brk,rev:e.rev};else delete S.memo[e.src];
     });
     next=TT.reconcile(S.entries,next);
     next.forEach(function(n){
       var m=S.memo[n.src];
-      if(m&&!n.tr&&!n.done&&!n.brk){n.tr=m.tr;n.done=m.done;n.brk=m.brk?{kind:m.brk.kind,text:m.brk.text}:null;}
+      if(m&&!n.tr&&!n.done&&!n.brk&&!n.rev){n.tr=m.tr;n.done=m.done;n.brk=m.brk?{kind:m.brk.kind,text:m.brk.text}:null;n.rev=m.rev?JSON.parse(JSON.stringify(m.rev)):null;}
     });
   }else S.memo={};
   S.entries=next;
@@ -769,6 +839,7 @@ function filtered(){
   S.entries.forEach(function(e,i){
     if(S.filter==='todo'&&e.done)return;
     if(S.filter==='done'&&!e.done)return;
+    if(S.review&&S.rf&&S.rf!=='all'){var rst=(e.rev&&e.rev.status)||'';if(S.rf==='none'?rst!=='':rst!==S.rf)return;}
     if(q&&(e.src+'\n'+e.tr+'\n'+e.label).toLowerCase().indexOf(q)<0)return;
     res.push(i);
   });
@@ -798,7 +869,7 @@ function cardHtml(i){
   var srcHtml=e.src.split('\n').map(function(l,k,a){return esc(l)+(k<a.length-1?'<span class="nl" aria-hidden="true">↵</span>':'');}).join('\n');
   var b=e.brk||{kind:'inherit',text:''};
   var opts=BRK_OPTS.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===b.kind?' selected':'')+'>'+esc(o[1])+'</option>';}).join('');
-  return '<article class="entry'+(e.done?' done':'')+'" data-i="'+i+'">'+
+  return '<article class="entry'+(e.done?' done':'')+((S.review&&e.rev&&e.rev.status)?' rv-'+e.rev.status:'')+'" data-i="'+i+'">'+
     '<div class="gutter"><span class="idx" title="Entrada '+(i+1)+'">'+esc(e.label)+'</span>'+
     '<button type="button" class="chk-btn" data-act="done" aria-pressed="'+e.done+'" aria-label="Marcar como traduzida" title="Marcar como traduzida (Ctrl+Enter)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg></button></div>'+
     '<div class="eb">'+
@@ -812,7 +883,7 @@ function cardHtml(i){
         '<button type="button" class="btn sm ghost" data-act="copysrc" title="Copiar o original para a tradução">Copiar original</button>'+
         '<button type="button" class="btn sm ghost" data-act="clear">Limpar</button>'+
         '<a class="btn sm ghost" target="_blank" rel="noopener" href="'+esc(TT.googleUrl(e.src,S.cfg.mtSrc,S.cfg.mtTgt))+'" title="Abrir esta entrada no site do Google Tradutor">Google ↗</a></span></div>'+
-      '</section>'+
+      (S.review&&window.__TTxT_rvHtml?window.__TTxT_rvHtml(i):'')+'</section>'+
     '</div></article>';
 }
 function grow(t){t.style.height='auto';t.style.height=Math.max(t.scrollHeight+2,70)+'px';}
@@ -862,6 +933,7 @@ function renderStats(){
   if(comp&&S.complete===false&&!S.batch)chime();
   S.complete=comp;
   var sm=$('#tabs-list .tab.on small');if(sm)sm.textContent=d+'/'+n;
+  if(window.__TTxT_rvBar)window.__TTxT_rvBar();
 }
 function outText(){return TT.buildOutput(S.entries,S.cfg);}
 function renderOutput(){
@@ -968,9 +1040,11 @@ function setView(v){
   S.view=v;
   $('#app').dataset.view=v;
   $$('#nav button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===v));});
-  $('#view-entries').hidden=(v==='output');
+  $('#view-entries').hidden=(v==='output'||v==='folder');
   $('#view-output').hidden=(v!=='output');
+  var vf=$('#view-folder');if(vf)vf.hidden=(v!=='folder');
   if(v==='output')renderOutput();
+  if(window.__TTxT_viewChanged)window.__TTxT_viewChanged(v);
 }
 $('#nav').addEventListener('click',function(ev){
   var b=ev.target.closest('button[data-view]');if(b)setView(b.dataset.view);
@@ -1303,14 +1377,15 @@ function newDoc(o){return Object.assign({raw:'',fileName:'',fileBuf:null,encIn:S
 function snap(){var d=S.docs[S.cur];if(!d)return;DK.forEach(function(k){d[k]=S[k];});}
 function load(d){DK.forEach(function(k){S[k]=d[k];});}
 function ensureDocs(){if(!S.docs.length){S.docs=[newDoc()];S.cur=0;}snap();}
+var FOLDER=null;
 function renderTabs(){
   var q=($('#tabq').value||'').toLowerCase();
   $('#tabq').hidden=S.docs.length<7;
-  $('#tabs-list').innerHTML=S.docs.map(function(d,k){
+  $('#tabs-list').innerHTML=folderTabHtml()+S.docs.map(function(d,k){
     var cur=k===S.cur,ents=cur?S.entries:d.entries,nm=cur?S.name:d.name,pa=cur?S.path:d.path;
     if(q&&!cur&&(nm+' '+pa).toLowerCase().indexOf(q)<0)return '';
     var dn=ents.filter(function(e){return e.done;}).length;
-    return '<span class="tab'+(cur?' on':'')+'"><button type="button" class="tabb" data-tab="'+k+'" aria-pressed="'+cur+'" title="'+esc(pa||nm)+'">'+esc(nm)+' <small>'+dn+'/'+ents.length+'</small>'+((cur?S.handle:d.handle)?((cur?S.wdirty:d.wdirty)?' <b style="color:var(--mark)" title="Alterações ainda não gravadas no arquivo">●</b>':' <b style="color:var(--ok)" title="Vinculada ao arquivo (gravação direta)">✓</b>'):'')+'</button>'+
+    var onTab=cur&&S.view!=='folder';return '<span class="tab'+(onTab?' on':'')+'"><button type="button" class="tabb" data-tab="'+k+'" aria-pressed="'+onTab+'" title="'+esc(pa||nm)+'">'+esc(nm)+' <small>'+dn+'/'+ents.length+'</small>'+((cur?S.handle:d.handle)?((cur?S.wdirty:d.wdirty)?' <b style="color:var(--mark)" title="Alterações ainda não gravadas no arquivo">●</b>':' <b style="color:var(--ok)" title="Vinculada ao arquivo (gravação direta)">✓</b>'):'')+'</button>'+
       '<button type="button" class="tabx" data-close="'+k+'" aria-label="Fechar aba '+esc(nm)+'">×</button></span>';
   }).join('');
   var on=$('#tabs-list .tab.on');if(on&&on.scrollIntoView){try{on.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}}
@@ -1326,22 +1401,25 @@ function show(k,silent){
 }
 function activate(k,silent){if(!S.docs[k])return;snap();show(k,silent);}
 function closeTab(k){
-  snap();S.docs.splice(k,1);
+  snap();if(FOLDER&&FOLDER.revDirty)saveRevisions(false);
+  S.docs.splice(k,1);
   if(!S.docs.length)S.docs.push(newDoc());
   var nk=k<S.cur?S.cur-1:(k===S.cur?Math.min(k,S.docs.length-1):S.cur);
-  show(nk,true);toast('Aba fechada');
+  show(nk,true);toast('Aba fechada');if(S.view==='folder')renderFolder();
 }
 function busy(){return window.__TTxT_busy&&window.__TTxT_busy()&&!S.batch;}
 $('#tabs-list').addEventListener('click',function(ev){
+  if(ev.target.closest('[data-foldertab]')){A.setView('folder');return;}
   var x=ev.target.closest('[data-close]'),b=ev.target.closest('[data-tab]');
   if(!x&&!b)return;
   if(busy()){toast('Aguarde a tradução terminar ou clique em Parar.');return;}
-  if(x)closeTab(+x.dataset.close);else activate(+b.dataset.tab);
+  if(x)closeTab(+x.dataset.close);else{activate(+b.dataset.tab);if(S.view==='folder')A.setView('entries');}
 });
 $('#tabq').addEventListener('input',renderTabs);
 $('#btn-new-tab').addEventListener('click',function(){
   if(busy()){toast('Aguarde a tradução terminar ou clique em Parar.');return;}
   snap();S.docs.push(newDoc({name:'Nova aba'}));show(S.docs.length-1,true);
+  if(S.view==='folder')A.setView('entries');
   var p=$('#paste');if(p)p.focus();
 });
 window.__TTxT_tabs=renderTabs;
@@ -1372,7 +1450,7 @@ async function openFiles(items){
     var it=items[i],f=it.file,buf,raw;
     try{buf=await f.arrayBuffer();raw=decodeWith(buf,S.encIn);}catch(e){continue;}
     var d=newDoc({name:f.name.replace(/\.[^.]+$/,''),fileName:f.name,path:it.path||'',fileBuf:buf,encIn:S.encIn,raw:raw,handle:it.handle||null,parent:it.parent||null});
-    var r=TT.parse(raw,S.cfg);d.entries=r.entries;d.error=r.error;
+    var r=TT.parse(raw,S.cfg);d.entries=r.entries;d.error=r.error;applyRevs(d);
     var ex=S.docs.findIndex(function(x){return x.path&&x.path===d.path;});
     var replaceBlank=S.docs.length===1&&(!S.docs[0].raw.trim()||S.docs[0].sample);
     if(ex>=0){d.entries=TT.reconcile(S.docs[ex].entries,d.entries);S.docs[ex]=d;if(first<0)first=ex;}
@@ -1383,10 +1461,12 @@ async function openFiles(items){
   if(first<0){toast('Não consegui ler os arquivos.');return;}
   show(first);
   toast(n===1?A.fmt(S.entries.length)+' entradas em '+S.fileName:n+' arquivos abertos em abas');
+  if(S.view==='folder')A.setView('entries');
 }
 function fromInput(ev){
   var arr=Array.prototype.slice.call(ev.target.files||[]).map(function(f){return {file:f,path:f.webkitRelativePath||''};});
-  ev.target.value='';openFiles(arr);
+  ev.target.value='';
+  if(ev.target.id==='f-dir')setFolderFromItems(arr);else openFiles(arr);
 }
 $('#f-txt').addEventListener('change',fromInput);
 $('#f-dir').addEventListener('change',fromInput);
@@ -1422,17 +1502,22 @@ document.addEventListener('drop',async function(ev){
     for(var j=0;j<hp.length;j++){try{hs.push(await hp[j]);}catch(e){hs.push(null);}}
     hs=hs.filter(Boolean);
     if(hs.length){
+      var dirH=null;
       for(var j2=0;j2<hs.length;j2++){
         var hh=hs[j2];
         if(hh.kind==='file'){try{out.push({file:await hh.getFile(),path:hh.name,handle:hh,parent:null});}catch(e){}}
-        else if(hh.kind==='directory'){await walkDir(hh,hh.name,out,300);}
+        else if(hh.kind==='directory'&&!dirH){dirH=hh;}
       }
-      openFiles(out);return;
+      if(dirH)await setFolderFromHandle(dirH);
+      if(out.length)openFiles(out);
+      return;
     }
   }
   if(dt.items&&dt.items.length&&dt.items[0].webkitGetAsEntry){
     var ents=Array.prototype.map.call(dt.items,function(it){return it.webkitGetAsEntry&&it.webkitGetAsEntry();}).filter(Boolean);
+    var hasDir=ents.some(function(x){return x.isDirectory;});
     for(var i=0;i<ents.length;i++)await walk(ents[i],out);
+    if(hasDir){setFolderFromItems(out);return;}
   }else out=Array.prototype.map.call(dt.files,function(f){return {file:f,path:''};});
   openFiles(out);
 });
@@ -1446,7 +1531,8 @@ $('#btn-paste').addEventListener('click',usePasted);
 $('#paste').addEventListener('paste',function(){setTimeout(usePasted,0);});
 $('#btn-clear').addEventListener('click',function(){
   if(busy()){toast('Aguarde a tradução terminar ou clique em Parar.');return;}
-  S.docs=[newDoc()];S.cur=0;load(S.docs[0]);setRaw('',false);toast('Tudo limpo.');
+  snap();if(FOLDER&&FOLDER.revDirty)saveRevisions(false);
+  S.docs=[newDoc()];S.cur=0;load(S.docs[0]);setRaw('',false);toast('Tudo limpo.');if(S.view==='folder')A.setView('entries');
 });
 
 /* ---------- gravação direta no arquivo (Chrome, Edge e outros com File System Access) ---------- */
@@ -1474,9 +1560,8 @@ async function pickFiles(){
 }
 async function pickDir(){
   try{
-    var dh=await window.showDirectoryPicker({mode:'readwrite',id:'ttxt-dir'}),out=[];
-    await walkDir(dh,dh.name,out,300);
-    openFiles(out);
+    var dh=await window.showDirectoryPicker({mode:'readwrite',id:'ttxt-dir'});
+    try{await setFolderFromHandle(dh);}catch(e2){toast('Não consegui ler a pasta: '+((e2&&e2.message)||'erro'));}
   }catch(e){
     if(e&&e.name==='AbortError')return;
     $('#f-dir').click();
@@ -1578,13 +1663,14 @@ $('#btn-write-all').addEventListener('click',function(){
 document.addEventListener('keydown',function(ev){
   if((ev.ctrlKey||ev.metaKey)&&!ev.shiftKey&&!ev.altKey&&String(ev.key).toLowerCase()==='s'){
     ev.preventDefault();
+    if(S.review&&FOLDER)saveRevisions(true);
     if(S.handle)writeDocs([S.cur]);
     else toast('Esta aba não está vinculada a um arquivo. Abra o arquivo ou a pasta pelo botão da esquerda, ou arraste para cá.');
   }
 });
 window.addEventListener('beforeunload',function(ev){
   snap();
-  if(S.docs.some(function(d){return d.handle&&d.wdirty;})){ev.preventDefault();ev.returnValue='';}
+  if(S.docs.some(function(d){return d.handle&&d.wdirty;})||(FOLDER&&FOLDER.revDirty)){ev.preventDefault();ev.returnValue='';}
 });
 $('#w-bak').checked=LS.get('ttxt:bak')!=='0';
 $('#w-bak').addEventListener('change',function(ev){LS.set('ttxt:bak',ev.target.checked?'1':'0');});
@@ -1593,21 +1679,425 @@ $('#fsaHint').textContent=FSA
   :'Este navegador não permite gravar direto no arquivo. Use “Baixar .txt” na aba Saída.';
 updateWriteUI();
 
+/* ---------- pasta de trabalho: guia com a lista de arquivos ---------- */
+var REV_FILE='revisions.json';
+S.rf='all';
+S.review=LS.get('ttxt:review')==='1';
+function emptyRev(name){return {app:'TTxT',type:'revisions',version:1,folder:name||'',updated:'',files:{}};}
+function dirOf(p){var i=p.lastIndexOf('/');return i<0?'':p.slice(0,i);}
+function nat(a,b){return String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'});}
+function sortItems(items){items.sort(function(a,b){return nat(dirOf(a.path),dirOf(b.path))||nat(a.name,b.name);});return items;}
+async function listDir(dir,prefix,out,lim,root){
+  for await(var ent of dir.values()){
+    if(out.length>=lim)return;
+    if(ent.kind==='file'){
+      if(root&&ent.name===REV_FILE)continue;
+      if(TEXT_RE.test(ent.name))out.push({name:ent.name,path:prefix+'/'+ent.name,handle:ent,parent:dir});
+    }else if(ent.kind==='directory'){
+      if(ent.name.charAt(0)==='.'||ent.name==='node_modules')continue;
+      await listDir(ent,prefix+'/'+ent.name,out,lim,false);
+    }
+  }
+}
+function relKey(d){
+  if(!FOLDER||!d||!d.path)return '';
+  var pre=FOLDER.name+'/';
+  return d.path.indexOf(pre)===0?d.path.slice(pre.length):'';
+}
+async function setFolderFromHandle(dh){
+  if(FOLDER&&FOLDER.revDirty)await saveRevisions(false);
+  toast('Lendo a pasta…');
+  var items=[];await listDir(dh,dh.name,items,5000,true);
+  await startFolder(dh.name,dh,items,null);
+}
+async function setFolderFromItems(arr){
+  if(FOLDER&&FOLDER.revDirty)await saveRevisions(false);
+  var root='',items=[],revFile=null;
+  arr.forEach(function(it){var p=String(it.path||''),i=p.indexOf('/');if(!root&&i>0)root=p.slice(0,i);});
+  root=root||'Pasta';
+  arr.forEach(function(it){
+    var p=String(it.path||it.file.name);
+    if(p===root+'/'+REV_FILE){revFile=it.file;return;}
+    if(p.split('/').some(function(s){return s.charAt(0)==='.'||s==='node_modules';}))return;
+    if(TEXT_RE.test(it.file.name))items.push({name:it.file.name,path:p,file:it.file});
+  });
+  await startFolder(root,null,items,revFile);
+}
+async function loadRevFile(f){
+  var text=null;
+  try{
+    if(f)text=await f.text();
+    else if(FOLDER.dir){var fh=await FOLDER.dir.getFileHandle(REV_FILE);text=await (await fh.getFile()).text();}
+  }catch(e){
+    if(!(e&&e.name==='NotFoundError')){FOLDER.revBad=true;toast('Não consegui ler o revisions.json da pasta; ele não será sobrescrito.');}
+    return;
+  }
+  if(text==null||!text.trim())return;
+  try{
+    var o=JSON.parse(text);
+    if(!o||o.app!=='TTxT'||o.type!=='revisions'||!o.files||typeof o.files!=='object')throw new Error('bad');
+    FOLDER.data=o;
+  }catch(e){FOLDER.revBad=true;toast('O revisions.json desta pasta não é válido e não será sobrescrito.');}
+}
+async function startFolder(name,dir,items,revFile){
+  sortItems(items);
+  FOLDER={name:name,dir:dir,files:items,sel:new Set(),q:'',data:emptyRev(name),revBad:false,revDirty:false,revErr:'',revSavedAt:null,saving:false,again:false};
+  await loadRevFile(revFile);
+  snap();
+  S.docs.forEach(function(d){if(relKey(d))applyRevs(d);});
+  $('#fldQ').value='';
+  A.setView('folder');
+  renderFolder();
+  updateRvBar();
+  toast(items.length?items.length+' arquivo'+(items.length===1?'':'s')+' na pasta '+name:'Nenhum arquivo de texto na pasta.');
+}
+function folderTabHtml(){
+  if(!FOLDER)return '';
+  var sel=S.view==='folder';
+  return '<span class="tab pin'+(sel?' sel':'')+'"><button type="button" class="tabb" data-foldertab aria-pressed="'+sel+'" title="Arquivos da pasta '+esc(FOLDER.name)+'">'+
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.5V12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V6.5a1 1 0 0 0-1-1H8L6.5 4H3a1 1 0 0 0-1 1z"/></svg>'+
+    esc(FOLDER.name)+' <small>'+FOLDER.files.length+'</small></button></span>';
+}
+function countSt(list){var c={ok:0,fix:0,fixed:0};list.forEach(function(s){if(c[s]!==undefined)c[s]++;});return c;}
+function fileBadges(f,k){
+  var s='',c=null;
+  if(k!==undefined){
+    var ents=S.docs[k].entries,dn=ents.filter(function(x){return x.done;}).length;
+    s+='<span class="fb" title="Entradas traduzidas / total">'+dn+'/'+ents.length+'</span>';
+    c=countSt(ents.map(function(x){return (x.rev&&x.rev.status)||'';}));
+  }else{
+    var sec=FOLDER.data.files[f.path.slice(FOLDER.name.length+1)];
+    if(sec&&Array.isArray(sec.entries))c=countSt(sec.entries.map(function(r){return (r&&r.status)||'';}));
+  }
+  if(c){
+    if(c.ok)s+='<span class="fb ok" title="Aprovadas na revisão">✓ '+c.ok+'</span>';
+    if(c.fix)s+='<span class="fb fix" title="Pedem correção">✎ '+c.fix+'</span>';
+    if(c.fixed)s+='<span class="fb fixed" title="Corrigidas pelo revisor">corrigidas '+c.fixed+'</span>';
+  }
+  if(k!==undefined)s+='<span class="fb sel">aberto</span>';
+  return s;
+}
+function updateFldBtns(){
+  var n=FOLDER?FOLDER.sel.size:0,b=$('#fld-open');
+  b.textContent='Abrir selecionados'+(n?' ('+n+')':'');b.disabled=!n;
+}
+function renderFolder(){
+  var box=$('#fldList');
+  if(!FOLDER){box.innerHTML='<div class="empty"><b>Nenhuma pasta aberta</b><span>Use “Abrir pasta” no painel de origem.</span></div>';$('#fldName').textContent='';$('#fldMeta').textContent='';updateFldBtns();return;}
+  snap();
+  var q=FOLDER.q.trim().toLowerCase(),openMap={},html='',last=null,vis=0;
+  S.docs.forEach(function(d,k){if(d.path)openMap[d.path]=k;});
+  FOLDER.files.forEach(function(f,i){
+    if(q&&f.path.toLowerCase().indexOf(q)<0)return;
+    vis++;
+    var dr=dirOf(f.path).slice(FOLDER.name.length+1);
+    if(dr!==last){last=dr;html+='<div class="fgh">'+esc(dr||'raiz da pasta')+'</div>';}
+    var k=openMap[f.path];
+    html+='<div class="frow'+(k!==undefined?' open':'')+'" data-i="'+i+'">'+
+      '<input type="checkbox" data-fsel="'+i+'"'+(FOLDER.sel.has(i)?' checked':'')+' aria-label="Selecionar '+esc(f.name)+'">'+
+      '<button type="button" class="fname" data-fopen="'+i+'" title="'+esc(f.path)+'">'+esc(f.name)+'</button>'+
+      '<span class="fbadges">'+fileBadges(f,k)+'</span></div>';
+  });
+  box.innerHTML=html||'<div class="empty"><b>'+(FOLDER.files.length?'Nada encontrado':'Nenhum arquivo de texto')+'</b><span>'+(FOLDER.files.length?'Nenhum arquivo combina com o filtro.':'Esta pasta não tem arquivos de texto reconhecidos.')+'</span></div>';
+  $('#fldName').textContent=FOLDER.name;
+  $('#fldMeta').textContent=vis+(vis!==FOLDER.files.length?' de '+FOLDER.files.length:'')+' arquivo'+(FOLDER.files.length===1?'':'s');
+  updateFldBtns();
+}
+async function openFolderItems(fs){
+  var items=[];
+  for(var j=0;j<fs.length;j++){
+    var f=fs[j],file=f.file||null;
+    try{if(f.handle)file=await f.handle.getFile();}catch(e){file=null;}
+    if(file)items.push({file:file,path:f.path,handle:f.handle||null,parent:f.parent||null});
+  }
+  if(!items.length){toast('Não consegui ler o arquivo.');return;}
+  await openFiles(items);
+}
+async function openFolderFile(i){
+  var f=FOLDER&&FOLDER.files[i];if(!f)return;
+  if(busy()){toast('Aguarde a tradução terminar ou clique em Parar.');return;}
+  snap();
+  var k=S.docs.findIndex(function(d){return d.path===f.path;});
+  if(k>=0){activate(k);A.setView('entries');return;}
+  await openFolderItems([f]);
+}
+async function refreshFolder(){
+  if(!FOLDER)return;
+  if(!FOLDER.dir){toast('Para atualizar a lista, abra a pasta de novo.');return;}
+  try{
+    var items=[];await listDir(FOLDER.dir,FOLDER.name,items,5000,true);
+    FOLDER.files=sortItems(items);FOLDER.sel=new Set();
+    renderTabs();renderFolder();toast(items.length+' arquivo'+(items.length===1?'':'s')+' na pasta');
+  }catch(e){toast('Não consegui reler a pasta.');}
+}
+$('#fldList').addEventListener('click',function(ev){
+  if(ev.target.closest('input'))return;
+  var row=ev.target.closest('.frow');if(!row)return;
+  openFolderFile(+row.dataset.i);
+});
+$('#fldList').addEventListener('change',function(ev){
+  var c=ev.target.closest('[data-fsel]');if(!c||!FOLDER)return;
+  var i=+c.dataset.fsel;
+  if(c.checked)FOLDER.sel.add(i);else FOLDER.sel.delete(i);
+  updateFldBtns();
+});
+var fqT;
+$('#fldQ').addEventListener('input',function(ev){
+  clearTimeout(fqT);fqT=setTimeout(function(){if(FOLDER){FOLDER.q=ev.target.value;renderFolder();}},140);
+});
+$('#fld-all').addEventListener('click',function(){
+  if(!FOLDER)return;
+  var q=FOLDER.q.trim().toLowerCase();
+  FOLDER.files.forEach(function(f,i){if(!q||f.path.toLowerCase().indexOf(q)>=0)FOLDER.sel.add(i);});
+  renderFolder();
+});
+$('#fld-none').addEventListener('click',function(){if(FOLDER){FOLDER.sel.clear();renderFolder();}});
+$('#fld-open').addEventListener('click',async function(){
+  if(!FOLDER||!FOLDER.sel.size)return;
+  if(busy()){toast('Aguarde a tradução terminar ou clique em Parar.');return;}
+  snap();
+  var fs=Array.from(FOLDER.sel).sort(function(a,b){return a-b;}).map(function(i){return FOLDER.files[i];}).filter(Boolean);
+  var fresh=fs.filter(function(f){return !S.docs.some(function(d){return d.path===f.path;});});
+  if(fresh.length>30&&!confirm('Abrir '+fresh.length+' arquivos, cada um em uma aba?'))return;
+  FOLDER.sel.clear();
+  if(!fresh.length){
+    var k=S.docs.findIndex(function(d){return d.path===fs[0].path;});
+    if(k>=0){activate(k);A.setView('entries');}
+    return;
+  }
+  await openFolderItems(fresh);
+});
+$('#fld-refresh').addEventListener('click',refreshFolder);
+$('#fld-change').addEventListener('click',function(){$('#btn-dir').click();});
+
+/* ---------- modo revisão (revisions.json na pasta de trabalho) ---------- */
+var REV_ST={ok:1,fix:1,fixed:1};
+function cleanRev(o){
+  if(!o||typeof o!=='object')return null;
+  var edits=Array.isArray(o.edits)?o.edits.slice(-30).map(function(x){
+    x=x||{};return {at:String(x.at||''),by:String(x.by||''),from:String(x.from==null?'':x.from),to:String(x.to==null?'':x.to)};
+  }):[];
+  var r={status:REV_ST[o.status]?o.status:'',comment:String(o.comment||''),by:String(o.by||''),at:String(o.at||''),edits:edits};
+  return (r.status||r.comment||r.edits.length)?r:null;
+}
+function ensureRev(e){if(!e.rev)e.rev={status:'',comment:'',by:'',at:'',edits:[]};return e.rev;}
+function reviewer(){return ($('#rv-by').value||'').trim();}
+function stamp(r){r.by=reviewer();r.at=new Date().toISOString();}
+function fmtT(iso){try{return new Date(iso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}catch(e){return String(iso||'');}}
+function secFor(d){
+  var out=[];
+  d.entries.forEach(function(e){
+    var r=e.rev;if(!r)return;
+    if(!r.status&&!r.comment&&!(r.edits&&r.edits.length))return;
+    out.push({label:e.label,src:e.src,tr:e.tr,status:r.status||'',comment:r.comment||'',by:r.by||'',at:r.at||'',edits:r.edits||[]});
+  });
+  return out.concat(d.revOrphans||[]);
+}
+function applyRevs(d){
+  var k=relKey(d);if(!k)return;
+  d.revSync=true;
+  var sec=FOLDER.data.files[k],recs=(sec&&Array.isArray(sec.entries))?sec.entries:[];
+  var used=new Array(recs.length),byKey=new Map(),bySrc=new Map();
+  recs.forEach(function(r,ix){
+    if(!r||typeof r!=='object')return;
+    var kk=String(r.label)+'\u0000'+String(r.src),ks=String(r.src);
+    if(!byKey.has(kk))byKey.set(kk,[]);byKey.get(kk).push(ix);
+    if(!bySrc.has(ks))bySrc.set(ks,[]);bySrc.get(ks).push(ix);
+  });
+  function take(m,key){
+    var a=m.get(key);if(!a)return -1;
+    while(a.length){var ix=a.shift();if(!used[ix]){used[ix]=1;return ix;}}
+    return -1;
+  }
+  d.entries.forEach(function(e){
+    var ix=take(byKey,e.label+'\u0000'+e.src);
+    if(ix<0)ix=take(bySrc,e.src);
+    if(ix>=0&&!e.rev)e.rev=cleanRev(recs[ix]);
+  });
+  d.revOrphans=recs.filter(function(r,ix){return !used[ix]&&r&&typeof r==='object';});
+}
+function mergeSections(){
+  if(!FOLDER)return;
+  S.docs.forEach(function(d){
+    var k=relKey(d);if(!k||!d.revSync)return;
+    var sec=secFor(d);
+    if(sec.length)FOLDER.data.files[k]={entries:sec};else delete FOLDER.data.files[k];
+  });
+  FOLDER.data.updated=new Date().toISOString();FOLDER.data.folder=FOLDER.name;
+}
+function revDataForDownload(){
+  snap();
+  if(FOLDER){mergeSections();return FOLDER.data;}
+  var o=emptyRev('');
+  S.docs.forEach(function(d){var sec=secFor(d);if(sec.length)o.files[d.path||d.fileName||d.name]={entries:sec};});
+  o.updated=new Date().toISOString();
+  return o;
+}
+async function saveRevisions(manual){
+  snap();
+  if(!FOLDER){if(manual)saveFile(REV_FILE,JSON.stringify(revDataForDownload(),null,2),'application/json');return false;}
+  mergeSections();
+  if(!FOLDER.dir||FOLDER.revBad){
+    if(manual)saveFile(REV_FILE,JSON.stringify(FOLDER.data,null,2),'application/json');
+    return false;
+  }
+  if(FOLDER.saving){FOLDER.again=true;return false;}
+  FOLDER.saving=true;
+  var f=FOLDER,ok=false;
+  try{
+    if(!(await ensureRW(f.dir)))throw new Error('sem permissão de escrita na pasta');
+    var fh=await f.dir.getFileHandle(REV_FILE,{create:true}),w=await fh.createWritable();
+    try{await w.write(JSON.stringify(f.data,null,2));await w.close();}
+    catch(e){try{await w.abort();}catch(_){}throw e;}
+    f.revDirty=false;f.revErr='';f.revSavedAt=new Date();ok=true;
+    if(manual)toast('revisions.json salvo na pasta '+f.name);
+  }catch(e){
+    f.revErr=(e&&e.message)||'erro';
+    if(manual)toast('Não consegui salvar o revisions.json: '+f.revErr);
+  }
+  f.saving=false;
+  if(f.again){f.again=false;if(FOLDER===f&&f.revDirty)saveRevisions(false);}
+  updateRvBar();
+  return ok;
+}
+var rvT;
+function touchRev(){
+  var d=S.docs[S.cur];
+  if(d){snap();if(FOLDER&&relKey(d)&&!d.revSync)applyRevs(d);}
+  if(FOLDER&&d&&relKey(d)){
+    FOLDER.revDirty=true;FOLDER.revErr='';
+    clearTimeout(rvT);rvT=setTimeout(function(){saveRevisions(false);},900);
+  }
+  updateRvBar();
+  if(window.__TTxT_save)window.__TTxT_save();
+}
+function updateRvBar(){
+  if(!S.review)return;
+  var c={none:0,ok:0,fix:0,fixed:0};
+  S.entries.forEach(function(e){c[(e.rev&&e.rev.status)||'none']++;});
+  $('#rvStat').textContent='✓ '+c.ok+' · ✎ '+c.fix+' · corrigidas '+c.fixed+' · sem revisão '+c.none;
+  var el=$('#rvSave'),d=S.docs[S.cur],t='',cls='rvsave';
+  if(!FOLDER){t='Sem pasta de trabalho: abra uma pasta para gravar o revisions.json.';cls+=' warn';}
+  else if(FOLDER.revBad){t='O revisions.json da pasta é inválido e não será sobrescrito.';cls+=' err';}
+  else if(d&&!relKey(d)){t='Esta aba não está na pasta de trabalho; a revisão dela não vai para o revisions.json.';cls+=' warn';}
+  else if(!FOLDER.dir){t='Este navegador não grava na pasta. Use “Baixar revisions.json”.';cls+=' warn';}
+  else if(FOLDER.revErr){t='Não salvo: '+FOLDER.revErr+'. Clique em Salvar.';cls+=' err';}
+  else if(FOLDER.revDirty){t='Salvando…';}
+  else if(FOLDER.revSavedAt){var h=FOLDER.revSavedAt;t='revisions.json salvo às '+String(h.getHours()).padStart(2,'0')+':'+String(h.getMinutes()).padStart(2,'0')+' · '+FOLDER.name;}
+  else t='revisions.json em '+FOLDER.name;
+  el.textContent=t;el.className=cls;
+  $('#rv-save').textContent=(FOLDER&&FOLDER.dir&&!FOLDER.revBad)?'Salvar revisions.json':'Baixar revisions.json';
+}
+window.__TTxT_rvBar=updateRvBar;
+function rvCtl(e){
+  var r=e.rev||{},st=r.status||'',ed=r.edits||[];
+  var h='<span class="rv-lbl">Revisão</span>'+
+    '<button type="button" class="btn sm rvb ok'+(st==='ok'?' on':'')+'" data-rv="ok" aria-pressed="'+(st==='ok')+'" title="Aprovar esta tradução">✓ Aprovar</button>'+
+    '<button type="button" class="btn sm rvb fix'+(st==='fix'?' on':'')+'" data-rv="fix" aria-pressed="'+(st==='fix')+'" title="Pedir correção desta tradução">✎ Corrigir</button>';
+  if(st==='fixed')h+='<span class="rvchip" title="O revisor alterou a tradução">corrigida pelo revisor</span>';
+  if(st)h+='<button type="button" class="btn sm ghost" data-rv="reset" title="Voltar para sem revisão">Limpar</button>';
+  if(ed.length){
+    h+='<details class="rv-h"><summary>Alterações ('+ed.length+')</summary>'+
+      ed.map(function(x,k){
+        return '<div class="rv-e"><div class="rv-m">'+esc(fmtT(x.at))+(x.by?' · '+esc(x.by):'')+'</div>'+
+          '<div class="rv-t"><b>antes</b><pre>'+esc(x.from)+'</pre></div><div class="rv-t"><b>depois</b><pre>'+esc(x.to)+'</pre></div>'+
+          '<div><button type="button" class="btn sm ghost" data-rv="restore" data-k="'+k+'">Restaurar o “antes”</button></div></div>';
+      }).reverse().join('')+'</details>';
+  }
+  return h;
+}
+window.__TTxT_rvHtml=function(i){
+  var e=S.entries[i];if(!e)return '';
+  return '<div class="rv"><div class="rv-ctl">'+rvCtl(e)+'</div>'+
+    '<textarea class="rv-c" data-rv="comment" rows="2" placeholder="Comentário da revisão (opcional)" aria-label="Comentário da revisão da entrada '+esc(e.label)+'">\n'+esc((e.rev&&e.rev.comment)||'')+'</textarea></div>';
+};
+function updateRvCard(c,e){
+  var box=c.querySelector('.rv-ctl');if(box)box.innerHTML=rvCtl(e);
+  var st=(e.rev&&e.rev.status)||'';
+  ['ok','fix','fixed'].forEach(function(s){c.classList.toggle('rv-'+s,st===s);});
+}
+var lst=$('#list'),rvBefore=null;
+lst.addEventListener('click',function(ev){
+  var b=ev.target.closest('button[data-rv]');if(!b)return;
+  var c=b.closest('.entry');if(!c)return;
+  var i=+c.dataset.i,e=S.entries[i];if(!e)return;
+  var a=b.dataset.rv,r=ensureRev(e);
+  if(a==='ok'||a==='fix'){r.status=r.status===a?'':a;stamp(r);}
+  else if(a==='reset'){r.status='';stamp(r);}
+  else if(a==='restore'){
+    var x=r.edits[+b.dataset.k];if(!x||e.tr===x.from)return;
+    r.edits.push({at:new Date().toISOString(),by:reviewer(),from:e.tr,to:x.from});
+    if(r.edits.length>30)r.edits.shift();
+    e.tr=x.from;r.status='fixed';stamp(r);
+    A.refreshEntry(i);
+    if(window.__TTxT_edit)window.__TTxT_edit();
+    touchRev();return;
+  }
+  updateRvCard(c,e);touchRev();
+});
+lst.addEventListener('input',function(ev){
+  var t=ev.target;if(!t.dataset||t.dataset.rv!=='comment')return;
+  var c=t.closest('.entry'),e=c&&S.entries[+c.dataset.i];if(!e)return;
+  var r=ensureRev(e);r.comment=t.value;stamp(r);touchRev();
+});
+lst.addEventListener('focusin',function(ev){
+  if(!S.review)return;
+  var t=ev.target;if(!t.dataset||t.dataset.act!=='tr')return;
+  var c=t.closest('.entry'),e=c&&S.entries[+c.dataset.i];
+  if(e)rvBefore={i:+c.dataset.i,doc:S.cur,val:e.tr};
+});
+lst.addEventListener('focusout',function(ev){
+  if(!S.review||S.noAuto||!rvBefore)return;
+  var t=ev.target;if(!t.dataset||t.dataset.act!=='tr')return;
+  var b=rvBefore;rvBefore=null;
+  if(b.doc!==S.cur)return;
+  var e=S.entries[b.i];if(!e||e.tr===b.val)return;
+  var r=ensureRev(e);
+  r.edits.push({at:new Date().toISOString(),by:reviewer(),from:b.val,to:e.tr});
+  if(r.edits.length>30)r.edits.shift();
+  r.status='fixed';stamp(r);
+  var c=t.closest('.entry');if(c)updateRvCard(c,e);
+  touchRev();
+});
+function applyReviewUI(){
+  var on=!!S.review;
+  $('#rvbar').hidden=!on;$('#mtbar').hidden=on;
+  $('#btn-review').setAttribute('aria-pressed',String(on));
+  $('#app').classList.toggle('reviewing',on);
+  updateRvBar();
+}
+$('#btn-review').addEventListener('click',function(){
+  S.review=!S.review;LS.set('ttxt:review',S.review?'1':'0');
+  S.page=0;applyReviewUI();A.renderList();
+  toast(S.review?'Modo revisão ligado':'Modo revisão desligado');
+});
+$('#rv-by').value=LS.get('ttxt:reviewer')||'';
+$('#rv-by').addEventListener('input',function(ev){LS.set('ttxt:reviewer',ev.target.value);});
+$('#rv-filter').addEventListener('change',function(ev){S.rf=ev.target.value;S.page=0;A.renderList();});
+$('#rv-save').addEventListener('click',function(){saveRevisions(true);});
+/* no modo revisão a tradução automática não deve rodar sozinha */
+(function(){
+  var am=window.__TTxT_autoMt;
+  window.__TTxT_autoMt=function(){if(S.review)return;if(am)return am.apply(this,arguments);};
+})();
+window.__TTxT_viewChanged=function(v){renderTabs();if(v==='folder')renderFolder();};
+
 /* ---------- projeto ---------- */
 function projectObj(){
   snap();
   return {app:'TTxT',version:2,name:S.name,cur:S.cur,cfg:S.cfg,
-    docs:S.docs.map(function(d){return {name:d.name,fileName:d.fileName,path:d.path,raw:d.raw,sample:d.sample,entries:d.entries.map(function(e){return {tr:e.tr,done:e.done,brk:e.brk};})};})};
+    docs:S.docs.map(function(d){return {name:d.name,fileName:d.fileName,path:d.path,raw:d.raw,sample:d.sample,entries:d.entries.map(function(e){return {tr:e.tr,done:e.done,brk:e.brk,rev:e.rev||undefined};})};})};
 }
 function applyEntries(ents,saved){
   (saved||[]).forEach(function(x,i){
     var e=ents[i];if(!e||!x)return;
     e.tr=typeof x.tr==='string'?x.tr:'';e.done=!!x.done;
-    e.brk=x.brk&&typeof x.brk.kind==='string'?{kind:x.brk.kind,text:String(x.brk.text||'')}:null;
+    e.brk=x.brk&&typeof x.brk.kind==='string'?{kind:x.brk.kind,text:String(x.brk.text||'')}:null;e.rev=cleanRev(x.rev);
   });
 }
 function loadProject(o){
   if(!o||o.app!=='TTxT')throw new Error('bad');
+  snap();if(FOLDER&&FOLDER.revDirty)saveRevisions(false);
   var list=Array.isArray(o.docs)&&o.docs.length?o.docs:(typeof o.raw==='string'?[{name:o.name,fileName:o.fileName,raw:o.raw,sample:o.sample,entries:o.entries}]:null);
   if(!list)throw new Error('bad');
   S.cfg=TT.sanitize(o.cfg);
@@ -1776,7 +2266,7 @@ function loadSample(){
   if(d&&d.app==='TTxT'&&typeof d.raw==='string'&&d.raw){
     try{loadProject(d);}catch(e){loadSample();}
   }else loadSample();
-  ensureDocs();fillPaste();A.syncForm();A.renderAll();renderTabs();A.setView('entries');
+  ensureDocs();fillPaste();A.syncForm();A.renderAll();renderTabs();A.setView('entries');applyReviewUI();
 })();
 })();
 </script>

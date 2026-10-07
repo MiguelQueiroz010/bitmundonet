@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferramenta - Bit.Raiden</title>
+    <link rel="icon" type="image/png" href="/fav/favicon-32x32.png">
+    <meta name="robots" content="noindex, follow">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0a0b10;
+        }
+        #tool-frame {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="tool-frame" allow="fullscreen; clipboard-read; clipboard-write; autoplay"></iframe>
+
+    <!-- Apenas o botão voltar -->
+    <script src="/scripts/tool_back_button.js"></script>
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const toolSrc = params.get('src') || params.get('url') || '/tools.html';
+            const toolTitle = params.get('title');
+            if (toolTitle) {
+                document.title = toolTitle + " — Bit.Raiden";
+            }
+            const frame = document.getElementById('tool-frame');
+            frame.src = toolSrc;
+        })();
+    </script>
+</body>
+</html>

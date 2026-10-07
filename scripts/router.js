@@ -43,9 +43,17 @@
 
 
   // Check if link is an internal page link
-  function isInternalPageLink(urlStr, targetAttr) {
+  function isInternalPageLink(urlStr, targetAttr, anchor = null) {
     if (!urlStr || targetAttr === '_blank') return false;
     if (urlStr.startsWith('#') || urlStr.startsWith('javascript:') || urlStr.startsWith('mailto:') || urlStr.startsWith('tel:')) return false;
+
+    // Check anchor attributes and containers (standalone tools must bypass PJAX)
+    if (anchor) {
+      if (anchor.hasAttribute('data-no-pjax') || anchor.hasAttribute('data-standalone')) return false;
+      // All tool items in flow menu open directly as full pages
+      if (anchor.closest('.flow-menu-list') || anchor.closest('#mobile-tools-flow-items')) return false;
+      if (anchor.classList.contains('flow-menu-item') || anchor.classList.contains('mobile-flow-item')) return false;
+    }
 
     try {
       const url = new URL(urlStr, window.location.origin);
@@ -55,6 +63,11 @@
       const ignoreExts = ['.zip', '.rar', '.7z', '.bin', '.pkg', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.mp3', '.wav', '.pdf', '.xml', '.txt', '.swf'];
       const pathLower = url.pathname.toLowerCase();
       if (ignoreExts.some(ext => pathLower.endsWith(ext))) return false;
+
+      // Standalone tools must load as complete full pages, not PJAX swapped into index.html
+      if (pathLower.includes('/tools/fully/') || pathLower.includes('standalone') || pathLower === '/tool_view.html') {
+        return false;
+      }
 
       return true;
     } catch (e) {
@@ -327,7 +340,7 @@
     const href = anchor.getAttribute('href');
     const target = anchor.getAttribute('target');
 
-    if (isInternalPageLink(href, target)) {
+    if (isInternalPageLink(href, target, anchor)) {
       e.preventDefault();
       navigate(href, true);
     }

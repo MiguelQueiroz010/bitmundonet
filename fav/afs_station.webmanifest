@@ -1,0 +1,31 @@
+{
+  "name": "AFS Audio Station",
+  "short_name": "AFS Station",
+  "description": "Reprodutor, editor e conversor de áudio AFS / ADX para jogos retrô diretamente no navegador offline.",
+  "start_url": "/tools/Fully/AFS_STATION.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#141922",
+  "background_color": "#141922",
+  "icons": [
+    {
+      "src": "/fav/afs_station-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/fav/afs_station-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/media/tools/sony.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

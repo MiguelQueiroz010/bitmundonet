@@ -144,6 +144,207 @@ function dropdown() {
   }
 }
 
+// ══════════════════════════════════════════════════
+// FLOW MENU — NAVBAR FERRAMENTAS
+// ══════════════════════════════════════════════════
+
+const DEFAULT_NAVBAR_TOOLS = [
+  { title: "Raiden Web Patcher", url: "/raiden_patcher.html", icon: "⚡" },
+  { title: "HOG Extractor (DBZ)", url: "/hog_extractor.html", icon: "📦" },
+  { title: "AFS Audio Station", url: "/tools/Fully/AFS_STATION.html", icon: "🎵" },
+  { title: "TTxT Tradutor", url: "/tools/Fully/TTxT-standalone.html", icon: "📝" }
+];
+
+window.toggleMobileTools = function(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const group = document.getElementById('mobile-tools-group');
+  if (group) {
+    group.classList.toggle('open');
+  }
+};
+
+function escapeNavHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderNavbarFlowMenu(toolsList) {
+  const pcContainer = document.getElementById("tools-flow-items");
+  const mobileContainer = document.getElementById("mobile-tools-flow-items");
+
+  // Filter valid (non-empty) options and limit to max 7
+  const validTools = (toolsList || [])
+    .filter(t => t && typeof t.title === 'string' && t.title.trim() !== '' && typeof t.url === 'string' && t.url.trim() !== '')
+    .slice(0, 7);
+
+  if (pcContainer) {
+    if (validTools.length === 0) {
+      pcContainer.innerHTML = `
+        <div style="padding: 0.6rem 0.8rem; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-align: center;">
+          Nenhuma ferramenta configurada
+        </div>
+      `;
+    } else {
+      const curPath = window.location.pathname.toLowerCase();
+      pcContainer.innerHTML = validTools.map(t => {
+        const isImg = t.icon && (t.icon.startsWith('http://') || t.icon.startsWith('https://') || t.icon.startsWith('/'));
+        const iconMarkup = isImg
+          ? `<img src="${escapeNavHtml(t.icon)}" alt="" onerror="this.outerHTML='🛠️'">`
+          : `<span>${escapeNavHtml(t.icon || '🛠️')}</span>`;
+
+        const toolUrl = (t.url || '').toLowerCase();
+        const isActive = curPath === toolUrl || (toolUrl !== '/' && curPath.endsWith(toolUrl));
+
+        return `
+          <a href="${escapeNavHtml(t.url)}" class="flow-menu-item ${isActive ? 'active' : ''}" data-no-pjax="true">
+            <span class="flow-item-icon">${iconMarkup}</span>
+            <div class="flow-item-content">
+              <span class="flow-item-name">${escapeNavHtml(t.title)}</span>
+              <span class="flow-item-sub">Abrir ferramenta</span>
+            </div>
+            <span class="flow-item-arrow">→</span>
+          </a>
+        `;
+      }).join('');
+    }
+  }
+
+  if (mobileContainer) {
+    if (validTools.length === 0) {
+      mobileContainer.innerHTML = `
+        <div style="padding: 0.4rem 0.6rem; font-size: 0.75rem; color: rgba(255,255,255,0.4);">
+          Nenhuma ferramenta configurada
+        </div>
+      `;
+    } else {
+      const curPath = window.location.pathname.toLowerCase();
+      mobileContainer.innerHTML = validTools.map(t => {
+        const isImg = t.icon && (t.icon.startsWith('http://') || t.icon.startsWith('https://') || t.icon.startsWith('/'));
+        const iconMarkup = isImg
+          ? `<img src="${escapeNavHtml(t.icon)}" alt="" style="width: 18px; height: 18px; object-fit: contain;" onerror="this.outerHTML='🛠️'">`
+          : `<span>${escapeNavHtml(t.icon || '🛠️')}</span>`;
+
+        const toolUrl = (t.url || '').toLowerCase();
+        const isActive = curPath === toolUrl || (toolUrl !== '/' && curPath.endsWith(toolUrl));
+
+        return `
+          <a href="${escapeNavHtml(t.url)}" class="mobile-flow-item ${isActive ? 'active' : ''}" data-no-pjax="true">
+            <span class="flow-item-icon">${iconMarkup}</span>
+            <span>${escapeNavHtml(t.title)}</span>
+          </a>
+        `;
+      }).join('');
+    }
+  }
+}
+
+async function syncNavbarToolsFromFirestore() {
+  try {
+    const { dbPromise } = await import('/scripts/db-context.js');
+    const db = await dbPromise;
+    const { doc, getDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js");
+    const siteConfigRef = doc(db, "articles", "site_config_main");
+
+    // Real-time synchronization: updates without needing manual page refreshes
+    if (typeof onSnapshot === 'function') {
+      onSnapshot(siteConfigRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (Array.isArray(data.navbar_tools)) {
+            localStorage.setItem('bitmundo_navbar_tools', JSON.stringify(data.navbar_tools));
+            renderNavbarFlowMenu(data.navbar_tools);
+          }
+        }
+      }, (err) => {
+        console.warn("Firestore onSnapshot error:", err);
+      });
+    } else {
+      const snap = await getDoc(siteConfigRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        if (Array.isArray(data.navbar_tools)) {
+          localStorage.setItem('bitmundo_navbar_tools', JSON.stringify(data.navbar_tools));
+          renderNavbarFlowMenu(data.navbar_tools);
+        }
+      }
+    }
+  } catch (err) {
+    console.debug("Firestore sync info:", err);
+  }
+}
+
+window.initNavbarTools = function() {
+  const tryRender = () => {
+    const pcContainer = document.getElementById("tools-flow-items");
+    const mobileContainer = document.getElementById("mobile-tools-flow-items");
+    if (!pcContainer && !mobileContainer) return false;
+
+    // Render cached or default immediately
+    let initialTools = DEFAULT_NAVBAR_TOOLS;
+    const cached = localStorage.getItem('bitmundo_navbar_tools');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          initialTools = parsed;
+        }
+      } catch(e) {}
+    }
+
+    renderNavbarFlowMenu(initialTools);
+    syncNavbarToolsFromFirestore();
+    return true;
+  };
+
+  if (!tryRender()) {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (tryRender() || attempts > 100) {
+        clearInterval(interval);
+      }
+    }, 50);
+  }
+};
+
+// Global MutationObserver to instantly detect when navbar HTML is injected
+try {
+  const navObserver = new MutationObserver(() => {
+    const pc = document.getElementById("tools-flow-items");
+    if (pc && pc.children.length === 0) {
+      window.initNavbarTools();
+    }
+  });
+  navObserver.observe(document.documentElement, { childList: true, subtree: true });
+} catch(e) {}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', window.initNavbarTools);
+} else {
+  window.initNavbarTools();
+}
+
+// Auto-register PWA Service Worker globally for offline tool support
+try {
+  if (!document.querySelector('link[rel="manifest"]')) {
+    const m = document.createElement('link');
+    m.rel = 'manifest';
+    m.href = '/fav/site.webmanifest';
+    document.head.appendChild(m);
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
+  }
+} catch(e) {}
+
 // Automatically initialize push notification prompt/sync on site access
 const isLocalEnv = ['localhost', '127.0.0.1', '172.'].some(ip => location.hostname.includes(ip));
 const scriptToImport = isLocalEnv ? '/scripts/notifications.template.js' : '/scripts/notifications.js';

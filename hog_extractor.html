@@ -7,6 +7,7 @@
     
     <meta name="description" content="Ferramenta baseada em Web para extrair arquivos HOG" />
     <meta name="author" content="Bit.Raiden">
+    <link rel="manifest" href="/fav/hog_extractor.webmanifest" />
 
     <!-- Scripts da Base do Site (Navbar e Footer) -->
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
@@ -150,6 +151,11 @@
     <main class="container">
         <!-- Cabeçalho -->
         <div class="text-center mt-5 mb-5">
+             <div style="margin-bottom: 1.2rem;">
+                 <a href="/tools.html" style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; padding: 0.45rem 1.1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+                     ← Voltar a Ferramentas
+                 </a>
+             </div>
              <h1 class="hero-title">HOG Extractor</h1>
              <p class="hero-subtitle">Ferramenta em nuvem para extração de pacotes .HOG (Dragon Ball Z)</p>
         </div>
@@ -187,5 +193,6 @@
 
     <!-- Script de Funcionalidades da Ferramenta -->
     <script type="module" src="/scripts/hog_extractor.js"></script>
+    <script src="/scripts/tool_back_button.js"></script>
 </body>
 </html>

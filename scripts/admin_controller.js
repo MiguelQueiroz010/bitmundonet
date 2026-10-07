@@ -2712,6 +2712,7 @@ window.editTool = async (id) => {
                 <div class="form-group"><label>Alvo</label><input type="text" id="tool-target" value="${t.target || ''}"></div>
                 <div class="form-group"><label>Crédito</label><input type="text" id="tool-credit" value="${t.credit || ''}"></div>
                 <div class="form-group"><label>Ícone (URL)</label><input type="text" id="tool-icon" value="${t.icon || ''}"></div>
+                <div class="form-group"><label>Ícone do App (PNG 512x512)</label><input type="text" id="tool-appicon" value="${t.appIcon || ''}" placeholder="Deixe vazio para usar o Ícone URL/Emoji"></div>
                 <div class="form-group"><label>URL (Download ou Link)</label><input type="text" id="tool-url" value="${t.url || ''}"></div>
                 <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
                     <input type="checkbox" id="tool-online" style="width: 20px; height: 20px; cursor: pointer; border-radius: 4px;" ${t.isOnline ? 'checked' : ''}>
@@ -2737,6 +2738,7 @@ window.saveToolChanges = async (id) => {
         target: document.getElementById('tool-target').value,
         credit: document.getElementById('tool-credit').value,
         icon: document.getElementById('tool-icon').value,
+        appIcon: document.getElementById('tool-appicon') ? document.getElementById('tool-appicon').value : '',
         url: document.getElementById('tool-url').value,
         isOnline: document.getElementById('tool-online').checked || false,
         description: document.getElementById('tool-desc').value,
@@ -2887,6 +2889,138 @@ window.sortTools = (sortType) => {
     loadTools();
 };
 
+// ══════════════════════════════════════════════════
+// FLOW MENU ADMIN CONFIGURATION (UP TO 7 SLOTS)
+// ══════════════════════════════════════════════════
+window.loadNavbarToolsAdmin = async () => {
+    const grid = document.getElementById('navbar-tools-admin-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '<div style="color: rgba(255,255,255,0.6); padding: 1.5rem; text-align: center; font-size: 0.9rem;">⏳ Carregando opções salvas no Firebase Firestore...</div>';
+
+    let tools = [];
+    try {
+        const siteConfigRef = doc(db, "articles", "site_config_main");
+        const snap = await getDoc(siteConfigRef);
+        if (snap.exists() && Array.isArray(snap.data().navbar_tools)) {
+            tools = snap.data().navbar_tools;
+        }
+    } catch (e) {
+        console.warn("Erro ao buscar navbar_tools do Firebase:", e);
+    }
+
+    if (!tools || tools.length === 0) {
+        // Fallback local storage or defaults if first time
+        const cached = localStorage.getItem('bitmundo_navbar_tools');
+        if (cached) {
+            try { tools = JSON.parse(cached); } catch(e) {}
+        }
+    }
+
+    if (!tools || tools.length === 0) {
+        tools = [
+            { title: "Raiden Web Patcher", url: "/raiden_patcher.html", icon: "⚡" },
+            { title: "HOG Extractor (DBZ)", url: "/hog_extractor.html", icon: "📦" },
+            { title: "AFS Audio Station", url: "/tools/Fully/AFS_STATION.html", icon: "🎵" },
+            { title: "TTxT Tradutor", url: "/tools/Fully/TTxT-standalone.html", icon: "📝" }
+        ];
+    }
+
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+        const item = tools[i] || { title: '', url: '', icon: '', appIcon: '' };
+        html += `
+            <div class="card" style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 10px; margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                    <span style="font-weight: 700; font-size: 0.78rem; color: #60a5fa; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); padding: 2px 8px; border-radius: 4px;">
+                        Opção #${i + 1}
+                    </span>
+                    <button type="button" onclick="clearNavbarToolSlot(${i})" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 4px; color: #ef4444; font-size: 0.72rem; padding: 2px 8px; cursor: pointer; transition: all 0.2s;" title="Limpar este slot">
+                        ✕ Limpar
+                    </button>
+                </div>
+                <div class="form-group" style="margin-bottom: 0.65rem;">
+                    <label style="font-size: 0.75rem; margin-bottom: 0.25rem;">Nome / Título da Ferramenta</label>
+                    <input type="text" id="nav-tool-title-${i}" value="${(item.title || '').replace(/"/g, '&quot;')}" placeholder="Ex: Raiden Patcher (vazio = oculta)" style="font-size: 0.85rem; padding: 0.6rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.65rem;">
+                    <label style="font-size: 0.75rem; margin-bottom: 0.25rem;">URL / Caminho HTML</label>
+                    <input type="text" id="nav-tool-url-${i}" value="${(item.url || '').replace(/"/g, '&quot;')}" placeholder="Ex: /raiden_patcher.html" style="font-size: 0.85rem; padding: 0.6rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.65rem;">
+                    <label style="font-size: 0.75rem; margin-bottom: 0.25rem;">Emoji da Navbar</label>
+                    <input type="text" id="nav-tool-icon-${i}" value="${(item.icon || '').replace(/"/g, '&quot;')}" placeholder="Ex: ⚡, 🎮, 🎵, 📝" style="font-size: 0.85rem; padding: 0.6rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <label style="font-size: 0.75rem; margin-bottom: 0.25rem; color: #34d399;">Ícone PNG do Aplicativo (Instalação PWA)</label>
+                        <span style="font-size: 0.68rem; color: rgba(255,255,255,0.45);">Recomendado: 512x512 PNG</span>
+                    </div>
+                    <input type="text" id="nav-tool-appicon-${i}" value="${(item.appIcon || '').replace(/"/g, '&quot;')}" placeholder="Ex: /media/tools/rp_icon.png ou URL transparente (vazio = gera pelo emoji)" style="font-size: 0.85rem; padding: 0.6rem; border-color: rgba(52, 211, 153, 0.3);">
+                    <small style="font-size: 0.68rem; color: rgba(255,255,255,0.45); display: block; margin-top: 3px;">
+                        💡 Use <strong>PNG transparente de 512x512 px</strong> (ou mínimo 192x192 px) para ficar perfeitamente nítido na barra do Windows e tela do celular sem bordas pretas.
+                    </small>
+                </div>
+            </div>
+        `;
+    }
+    grid.innerHTML = html;
+};
+
+window.clearNavbarToolSlot = (index) => {
+    const t = document.getElementById(`nav-tool-title-${index}`);
+    const u = document.getElementById(`nav-tool-url-${index}`);
+    const ic = document.getElementById(`nav-tool-icon-${index}`);
+    const ap = document.getElementById(`nav-tool-appicon-${index}`);
+    if (t) t.value = '';
+    if (u) u.value = '';
+    if (ic) ic.value = '';
+    if (ap) ap.value = '';
+};
+
+window.saveNavbarToolsAdmin = async () => {
+    const saveBtns = document.querySelectorAll('.btn-save-nav-tools');
+    saveBtns.forEach(b => {
+        b.disabled = true;
+        b.dataset.origText = b.innerHTML;
+        b.innerHTML = '⏳ Salvando no Firebase...';
+    });
+
+    const tools = [];
+    for (let i = 0; i < 7; i++) {
+        const title = document.getElementById(`nav-tool-title-${i}`)?.value.trim() || '';
+        const url = document.getElementById(`nav-tool-url-${i}`)?.value.trim() || '';
+        const icon = document.getElementById(`nav-tool-icon-${i}`)?.value.trim() || '';
+        const appIcon = document.getElementById(`nav-tool-appicon-${i}`)?.value.trim() || '';
+        tools.push({ title, url, icon, appIcon });
+    }
+
+    try {
+        const siteConfigRef = doc(db, "articles", "site_config_main");
+        await setDoc(siteConfigRef, {
+            navbar_tools: tools,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+        localStorage.setItem('bitmundo_navbar_tools', JSON.stringify(tools));
+        
+        // Broadcast across open tabs/windows
+        if (typeof window.initNavbarTools === 'function') {
+            window.initNavbarTools();
+        }
+
+        showNotification("✅ Configurações das 7 opções salvas no Firebase com sucesso!", "success");
+    } catch (e) {
+        console.error("Erro ao salvar menu da navbar no Firebase:", e);
+        showNotification("❌ Erro ao salvar no Firebase: " + e.message, "error");
+    } finally {
+        saveBtns.forEach(b => {
+            b.disabled = false;
+            if (b.dataset.origText) b.innerHTML = b.dataset.origText;
+        });
+    }
+};
+
 // Add to window to make it accessible to inline onclick
 window.switchSection = (id, btn) => {
     document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
@@ -2903,7 +3037,10 @@ window.switchSection = (id, btn) => {
     if (id === 'projects') loadProjects();
     if (id === 'articles') loadArticles();
     if (id === 'library') loadLibrary();
-    if (id === 'tools') loadTools();
+    if (id === 'tools') {
+        loadTools();
+        loadNavbarToolsAdmin();
+    }
     if (id === 'comments') loadCommentsAdmin();
 };
 

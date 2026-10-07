@@ -1,8 +1,8 @@
 {
-    "name": "BitMundo Ferramentas",
-    "short_name": "BitMundo",
-    "description": "Ferramentas Web, utilitários de tradução, patches e áudio da BitMundo",
-    "start_url": "/tools.html",
+    "name": "BitRaiden - Projetos e Ferramentas",
+    "short_name": "Bit.Raiden",
+    "description": "Ferramentas Web, utilitários de tradução, patches e projetos RomHacking.",
+    "start_url": "/index.html",
     "scope": "/",
     "display": "standalone",
     "orientation": "any",

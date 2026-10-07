@@ -7,6 +7,7 @@
 
     <meta name="description" content="Aplique mods e patches em ISOs de PS2 diretamente no navegador, sem instalar nada. Suporte a streaming para economizar RAM." />
     <meta name="author" content="Bit.Raiden">
+    <link rel="manifest" href="/fav/raiden_patcher.webmanifest" />
 
     <!-- CSS Base do Site -->
     <link rel="stylesheet" href="/css/style.css" />
@@ -14,6 +15,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
             integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
             crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/scripts/navbar.js"></script>
 
     <style>
         /* ══════════════════════════════════════════════════
@@ -685,6 +687,11 @@
 
         <!-- Hero -->
         <div class="rp-hero">
+            <div style="margin-bottom: 1.2rem;">
+                <a href="/tools.html" style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(51,170,255,0.12); border: 1px solid rgba(51,170,255,0.3); color: var(--rp-blue); padding: 0.45rem 1.1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-decoration: none; font-family: 'Share Tech Mono', monospace; transition: all 0.2s;">
+                    ← VOLTAR A FERRAMENTAS
+                </a>
+            </div>
             <div class="rp-hero-badge">⚡ Client-Side Streaming · No Upload · Cross-Platform</div>
             <h1>Raiden Web Patcher</h1>
             <p class="rp-hero-sub">Aplicador de mods de ISO · Sem instalação · Direto no navegador</p>
@@ -890,6 +897,7 @@
     <!-- Scripts -->
     <script type="module" src="/scripts/navbar_auth.js"></script>
     <script type="module" src="/scripts/raiden_patcher.js"></script>
+    <script src="/scripts/tool_back_button.js"></script>
     <script>
       if (navigator.storage && navigator.storage.estimate) {
         navigator.storage.estimate().then(e => {

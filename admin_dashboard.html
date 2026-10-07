@@ -687,8 +687,36 @@
 
         <!-- Tools Section -->
         <section id="tools" class="dash-section">
+            <!-- Navbar Flow Menu Configuration Card -->
+            <div class="card" style="border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 0 25px rgba(59, 130, 246, 0.1); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 style="margin: 0; color: #60a5fa; display: flex; align-items: center; gap: 0.6rem;">
+                            <span>⚡</span> Flow Menu da Navbar (Até 7 Opções)
+                        </h3>
+                        <p style="font-size: 0.82rem; color: rgba(255,255,255,0.65); margin: 0.5rem 0 0; line-height: 1.4;">
+                            Configure até <strong>7 ferramentas em formato HTML (CSS/JS)</strong> para acesso direto no menu flutuante da Navbar.<br>
+                            💡 <em>Campos deixados vazios <u>não serão exibidos</u> no site. A opção padrão <strong>"Ver Tudo"</strong> (direcionando para /tools.html) é adicionada automaticamente.</em>
+                        </p>
+                    </div>
+                    <button type="button" class="save-btn btn-save-nav-tools" id="btn-save-navbar-tools" onclick="saveNavbarToolsAdmin()" style="background: #3b82f6; color: white;">
+                        💾 Salvar Menu da Navbar
+                    </button>
+                </div>
+
+                <div id="navbar-tools-admin-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1rem;">
+                    Carregando opções da Navbar...
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button type="button" class="save-btn btn-save-nav-tools" onclick="saveNavbarToolsAdmin()" style="background: #3b82f6; color: white;">
+                        💾 Salvar Menu da Navbar
+                    </button>
+                </div>
+            </div>
+
             <div class="card">
-                <h3>Gerenciar Ferramentas (Firestore)</h3>
+                <h3>Gerenciar Ferramentas do Catálogo (Firestore)</h3>
                 <div id="tools-list">Carregando...</div>
                 <button class="save-btn" style="background: #3b82f6; margin-top: 1rem;" onclick="addNewTool()">ADICIONAR NOVA FERRAMENTA</button>
             </div>

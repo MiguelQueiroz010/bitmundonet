@@ -1,0 +1,31 @@
+{
+  "name": "Raiden Web Patcher",
+  "short_name": "Raiden Patcher",
+  "description": "Aplique mods e patches em ISOs de PS2 diretamente no navegador offline.",
+  "start_url": "/raiden_patcher.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#020814",
+  "background_color": "#020814",
+  "icons": [
+    {
+      "src": "/fav/raiden_patcher-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/fav/raiden_patcher-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/media/tools/rp_icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

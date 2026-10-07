@@ -1,0 +1,31 @@
+{
+  "name": "HOG Extractor (DBZ)",
+  "short_name": "HOG Extractor",
+  "description": "Extraia arquivos de pacotes .hog de jogos DBZ diretamente no navegador offline.",
+  "start_url": "/hog_extractor.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0d1117",
+  "background_color": "#0d1117",
+  "icons": [
+    {
+      "src": "/fav/hog_extractor-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/fav/hog_extractor-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/media/tools/bms.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "TTxT Tradutor de Scripts",
+  "short_name": "TTxT",
+  "description": "Ferramenta de tradução, edição e controle de linhas para roteiros de jogos offline.",
+  "start_url": "/tools/Fully/TTxT-standalone.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0b0f16",
+  "background_color": "#0b0f16",
+  "icons": [
+    {
+      "src": "/fav/ttxt-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/fav/ttxt-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/media/tools/padplus.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

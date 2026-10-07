@@ -93,6 +93,360 @@
     color: white;
 }
 
+/* ══════════════════════════════════════════════════
+   FLOW MENU (Ferramentas - Desktop)
+   ══════════════════════════════════════════════════ */
+.nav-dropdown-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-dropdown-wrapper .nav-chevron {
+    transition: transform 0.25s ease;
+    margin-left: 4px;
+    opacity: 0.7;
+}
+
+.nav-dropdown-wrapper:hover .nav-chevron,
+.nav-dropdown-wrapper:focus-within .nav-chevron {
+    transform: rotate(180deg);
+    opacity: 1;
+}
+
+/* Manter o botão Ferramentas iluminado enquanto o menu estiver aberto */
+.nav-dropdown-wrapper:hover > .nav-item,
+.nav-dropdown-wrapper:focus-within > .nav-item,
+.nav-dropdown-wrapper.open > .nav-item {
+    background: rgba(255,255,255,0.1) !important;
+    color: var(--primary) !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+}
+
+.nav-flow-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    transform: translateY(-6px) scale(0.98);
+    width: 290px;
+    background: rgba(10, 11, 18, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: 14px;
+    padding: 0.75rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), 0 0 25px rgba(59, 130, 246, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.2s;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Hover bridge estável para não fechar o menu ao mover o mouse */
+.nav-flow-menu::before {
+    content: '';
+    position: absolute;
+    top: -16px;
+    left: -20px;
+    right: -20px;
+    height: 20px;
+    background: transparent;
+}
+
+/* Seta apontando exatamente para o botão Ferramentas */
+.nav-flow-menu::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 46px;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: rgba(10, 11, 18, 0.98);
+    border-left: 1px solid rgba(59, 130, 246, 0.35);
+    border-top: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.nav-dropdown-wrapper:hover .nav-flow-menu,
+.nav-dropdown-wrapper:focus-within .nav-flow-menu,
+.nav-dropdown-wrapper.open .nav-flow-menu {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.flow-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.2rem 0.4rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 0.4rem;
+}
+
+.flow-header-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.flow-header-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #60a5fa;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 0.15rem 0.45rem;
+    border-radius: 99px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.flow-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.flow-menu-list::-webkit-scrollbar {
+    width: 4px;
+}
+.flow-menu-list::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 4px;
+}
+
+.flow-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-main);
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.flow-menu-item:hover,
+.flow-menu-item:focus {
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #ffffff;
+    box-shadow: inset 0 0 12px rgba(59, 130, 246, 0.15);
+}
+
+.flow-menu-item.active {
+    background: rgba(59, 130, 246, 0.22);
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.flow-item-icon {
+    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+.flow-item-icon img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.flow-item-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.flow-item-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: none;
+}
+
+.flow-menu-item.active .flow-item-name {
+    color: #60a5fa;
+}
+
+.flow-item-sub {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    line-height: 1.1;
+    text-transform: none;
+}
+
+.flow-item-arrow {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.flow-menu-item:hover .flow-item-arrow,
+.flow-menu-item.active .flow-item-arrow {
+    color: var(--primary);
+    transform: translateX(3px);
+}
+
+.flow-menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0.4rem 0;
+}
+
+/* "Ver Tudo" Option */
+.flow-menu-all {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+}
+
+.flow-menu-all:hover,
+.flow-menu-all:focus {
+    background: rgba(59, 130, 246, 0.22);
+    border-color: #60a5fa;
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.35);
+}
+
+.flow-all-icon {
+    font-size: 1.15rem;
+    color: #60a5fa;
+    line-height: 1;
+}
+
+.flow-all-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.flow-all-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+}
+
+.flow-all-sub {
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.flow-all-arrow {
+    font-size: 0.95rem;
+    color: #60a5fa;
+    transition: transform 0.15s ease;
+}
+
+.flow-menu-all:hover .flow-all-arrow {
+    transform: translateX(4px);
+}
+
+/* ══════════════════════════════════════════════════
+   FLOW MENU (Mobile Accordion)
+   ══════════════════════════════════════════════════ */
+.mobile-tools-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.mobile-tools-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+}
+
+.mobile-chevron {
+    transition: transform 0.3s ease;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.mobile-tools-group.open .mobile-chevron {
+    transform: rotate(180deg);
+}
+
+.mobile-tools-sub {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(59, 130, 246, 0.3);
+    margin-left: 1rem;
+    margin-top: 0.2rem;
+}
+
+.mobile-tools-group.open .mobile-tools-sub {
+    max-height: 600px;
+}
+
+.mobile-flow-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 6px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+}
+
+.mobile-flow-item:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+}
+
+.mobile-flow-all {
+    margin-top: 0.3rem;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+    font-weight: 600;
+}
+
 /* Dropdown Menu (Mobile) */
 #dropdown {
     position: fixed;
@@ -130,10 +484,10 @@
     .banner-container { 
         height: 220px !important; 
     }
-    .logo-overlay {
+    .logo-overlay { 
         max-width: 85%;
     }
-    .nav-bar-strip {
+    .nav-bar-strip { 
         padding: 0 1rem;
     }
 }
@@ -171,9 +525,33 @@
                 <a href="/library.html" class="nav-item" id="library">
                     <img src="/media/library_icon.png" alt="Library"> Biblioteca
                 </a>
-                <a href="/tools.html" class="nav-item" id="tools">
-                    <img src="/media/tools_icon.png" alt="Tools"> Ferramentas
-                </a>
+
+                <!-- Ferramentas Dropdown Wrapper with Flow Menu -->
+                <div class="nav-dropdown-wrapper" id="tools-dropdown-wrapper">
+                    <a href="/tools.html" class="nav-item" id="tools" aria-haspopup="true">
+                        <img src="/media/tools_icon.png" alt="Tools"> Ferramentas
+                        <svg class="nav-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
+                    <div class="nav-flow-menu" id="tools-flow-menu">
+                        <div class="flow-menu-header">
+                            <span class="flow-header-title">Ferramentas Web</span>
+                            <span class="flow-header-badge">Online</span>
+                        </div>
+                        <div class="flow-menu-list" id="tools-flow-items">
+                            <!-- Injected dynamically via navbar.js: up to 7 items -->
+                        </div>
+                        <div class="flow-menu-divider"></div>
+                        <a href="/tools.html" class="flow-menu-all">
+                            <span class="flow-all-icon">⊞</span>
+                            <div class="flow-all-text">
+                                <span class="flow-all-title">Ver Tudo</span>
+                                <span class="flow-all-sub">Catálogo completo de ferramentas</span>
+                            </div>
+                            <span class="flow-all-arrow">➔</span>
+                        </a>
+                    </div>
+                </div>
+
                 <a href="/about.html" class="nav-item" id="about_box">
                     <img src="/media/info.png" alt="Info"> Saiba Mais
                 </a>
@@ -206,9 +584,24 @@
         <a href="/library.html" class="nav-item">
              <img src="/media/library_icon.png"> Biblioteca
         </a>
-        <a href="/tools.html" class="nav-item">
-            <img src="/media/tools_icon.png"> Ferramentas
-        </a>
+
+        <!-- Mobile Ferramentas Accordion Group -->
+        <div class="mobile-tools-group" id="mobile-tools-group">
+            <div class="nav-item mobile-tools-trigger" id="mobile-tools-trigger" onclick="toggleMobileTools(event)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <img src="/media/tools_icon.png" alt="Tools"> Ferramentas
+                </div>
+                <span class="mobile-chevron" id="mobile-tools-chevron">▼</span>
+            </div>
+            <div class="mobile-tools-sub" id="mobile-tools-sub">
+                <div id="mobile-tools-flow-items">
+                    <!-- Injected dynamically via navbar.js: up to 7 items -->
+                </div>
+                <a href="/tools.html" class="mobile-flow-item mobile-flow-all">
+                    <span>⊞</span> Ver Tudo (Página Completa)
+                </a>
+            </div>
+        </div>
         <a href="/about.html" class="nav-item">
             <img src="/media/info.png"> Saiba Mais
         </a>
@@ -235,4 +628,6 @@
 
 <script type="text/javascript" src="/scripts/navbar.js"></script>
 <script type="text/javascript" src="/scripts/router.js"></script>
+<!-- Self-boot navbar.js when injected dynamically via w3IncludeHTML/innerHTML -->
+<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" style="display:none;" onerror="" onload="(function(){ if (typeof window.initNavbarTools === 'function') { window.initNavbarTools(); } else if (!document.querySelector('script[src*=\'navbar.js\']')) { var s = document.createElement('script'); s.src = '/scripts/navbar.js'; document.head.appendChild(s); } })()">
 

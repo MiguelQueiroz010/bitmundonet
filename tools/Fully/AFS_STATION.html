@@ -60,6 +60,20 @@ td.c-id{font-family:var(--mono);color:var(--mut)}
 td.act{text-align:right;width:1%}
 td.act button{padding:2px 8px;margin-left:3px;background:transparent}
 body.hide-id .c-id{display:none}
+body.hide-lk .c-lk{display:none}
+td.c-lk{font-family:var(--mono);font-size:12.5px;color:var(--mut)}
+td.c-lk.no{color:#f2c14e}
+.tag.t-VAG{color:#f2a65a;border-color:#8a5a2b}
+.tag.t-SBK{color:#7fb7ff;border-color:#3d6aa8}
+.tools button.scei{display:none}
+body.mode-scei .tools button.scei{display:inline-block}
+dialog#dlgScei{max-width:900px}
+#dlgScei .body{padding:18px;max-height:78vh;overflow:auto}
+#dlgScei table{width:100%;border-collapse:collapse;font-size:12.5px}
+#dlgScei th,#dlgScei td{padding:3px 8px;border-bottom:1px solid var(--line);text-align:left}
+#dlgScei td.n,#dlgScei th:first-child{font-family:var(--mono)}
+#dlgScei td.n{text-align:right}
+#dlgScei h4{margin:14px 0 6px}
 .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border:1px solid var(--line2);color:var(--mut)}
 .tag.t-ADX{color:var(--acc);border-color:var(--acc-d)}
 .tag.t-AHX{color:var(--ahx);border-color:#5a4a99}
@@ -175,18 +189,22 @@ dialog.xl{max-width:1240px;max-height:calc(100vh - 24px);overflow:auto}
 #bViz[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
 </style>
 </head>
-<body class="hide-id">
+<body class="hide-id hide-lk">
 
 <header class="top">
   <div class="brand">
     <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1.5" y="1.5" width="37" height="37" rx="9" fill="#1d2430" stroke="#35404f"/><path d="M7 20h3l2-8 4 16 4-22 4 20 3-10h6" fill="none" stroke="#4fd1c5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <div><b>AFS Audio Station</b><small>Containers AFS v1 e v2, áudios ADX e AHX</small></div>
+    <div><b>AFS Audio Station</b><small>Containers AFS v1/v2 e SCEI (BIN + ELF), áudios ADX, AHX e VAG</small></div>
   </div>
   <div class="tools">
     <button id="bOpen" class="pri">Abrir AFS</button>
     <button id="bNew">Novo AFS</button>
     <button id="bList">Carregar filelist</button>
     <button id="bSaveList">Salvar filelist</button>
+    <button id="bElf" class="scei" title="Vincular o ELF do jogo: a tabela de bancos é atualizada ao exportar">Vincular ELF</button>
+    <button id="bScan" class="scei" title="Entradas do BIN e vínculos encontrados no ELF">Análise SCEI</button>
+    <button id="bExtTree" class="scei" title="Extrair os VAGs de todos os bancos, em pastas por programa (SCEIProg)">Extrair VAGs por pasta</button>
+    <button id="bExportElf" class="scei" title="Baixar o ELF com a tabela de bancos atualizada">Exportar ELF</button>
     <button id="bMix" title="Juntar, cortar e misturar trechos de vários áudios">Editor multitrilha</button>
     <button id="bViz" aria-pressed="true" title="Mostrar ondas de áudio no canto da tela enquanto toca">Ondas</button>
     <button id="bExport" class="pri">Exportar AFS</button>
@@ -213,6 +231,7 @@ dialog.xl{max-width:1240px;max-height:calc(100vh - 24px);overflow:auto}
         <option value="name">Nome</option>
         <option value="size">Tamanho</option>
         <option value="type">Tipo</option>
+        <option value="prog">Programa (pasta)</option>
         <option value="orig">Ordem original</option>
       </select>
       <span class="sep"></span>
@@ -228,7 +247,7 @@ dialog.xl{max-width:1240px;max-height:calc(100vh - 24px);overflow:auto}
       <table>
         <thead><tr>
           <th style="text-align:right">#</th><th>Nome</th><th class="c-id">ID</th><th>Tipo</th><th>Canais</th><th>Hz</th><th>Duração</th><th>Loop</th>
-          <th style="text-align:right">Offset orig.</th><th style="text-align:right">Tamanho</th><th></th>
+          <th class="c-lk" title="Posições da tabela do ELF que apontam para este banco">ELF</th><th style="text-align:right">Offset orig.</th><th style="text-align:right">Tamanho</th><th></th>
         </tr></thead>
         <tbody id="tb"></tbody>
       </table>
@@ -238,6 +257,7 @@ dialog.xl{max-width:1240px;max-height:calc(100vh - 24px);overflow:auto}
           <p>Arraste um .afs para esta janela ou use “Abrir AFS”. A versão (v1 ou v2) e a filelist interna são detectadas sozinhas.</p>
           <p>Sem filelist? Carregue um .txt com um nome por linha, ou deixe os nomes automáticos.</p>
           <p>Para começar do zero, use “Novo AFS” e importe áudios.</p>
+          <p>Sons VAG da SCEI: abra o BIN (ex.: SNDDATA.BIN), depois o ELF do jogo em “Vincular ELF”. Cada banco abre como um sub-container de VAGs, agrupados em pastas pela divisão do SCEIProg. A filelist aceita caminhos, como prog_003/nome.vag.</p>
         </div>
       </div>
     </div>
@@ -325,7 +345,7 @@ dialog.xl{max-width:1240px;max-height:calc(100vh - 24px);overflow:auto}
       <label>Início do loop (amostras)<input type="number" id="cvLs" value="0" min="0"></label>
       <label>Fim do loop (0 = até o fim)<input type="number" id="cvLe" value="0" min="0"></label>
     </div>
-    <div class="mut" style="font-size:12px">O início do loop é arredondado para múltiplos de 32 amostras, o tamanho de um quadro ADX.</div>
+    <div class="mut" style="font-size:12px" id="cvNote">O início do loop é arredondado para múltiplos de 32 amostras, o tamanho de um quadro ADX.</div>
     <div class="dact"><button value="cancel" class="ghost">Cancelar</button><button value="ok" class="pri">Converter</button></div>
   </form>
 </dialog>
@@ -351,7 +371,7 @@ dialog.xl{max-width:1240px;max-height:calc(100vh - 24px);overflow:auto}
         <label>Fim do loop (s)<input type="number" id="edLe" step="0.001" min="0" value="0"></label>
         <label style="justify-content:flex-end"><button type="button" id="edLoopSel">Loop = trecho</button></label>
       </div>
-      <div class="mut" style="font-size:12px">O ADX é recodificado a partir do trecho escolhido. Se “preencher com zeros” estiver marcado nas opções de exportação, o arquivo volta ao tamanho original.</div>
+      <div class="mut" style="font-size:12px"><span id="edFmt">O ADX</span> é recodificado a partir do trecho escolhido. Se “preencher com zeros” estiver marcado nas opções de exportação, o arquivo volta ao tamanho original.</div>
     </div>
     <div id="edAhx" class="mut" style="display:none;margin-top:12px;font-size:12.5px">AHX: o corte é feito sem recodificar, em múltiplos de 1152 amostras, por isso o início e o fim podem ficar até um quadro (cerca de 50 ms) mais largos que o escolhido. Ganho e fades não estão disponíveis para AHX.</div>
     <div class="dact"><button value="cancel" class="ghost">Cancelar</button><button value="ok" class="pri">Aplicar</button></div>
@@ -437,7 +457,16 @@ dialog.xl{max-width:1240px;max-height:calc(100vh - 24px);overflow:auto}
 
 <div id="viz" popover="manual" aria-hidden="true"><canvas id="vizCv"></canvas><button type="button" id="vizX" title="Desligar as ondas">×</button></div>
 <div id="toasts"></div>
-<div id="dropveil">Solte aqui: um .afs abre o container, outros arquivos viram novos itens</div>
+<dialog id="dlgScei">
+  <div class="body">
+    <h3>Análise SCEI</h3>
+    <div class="mut" id="scSum"></div>
+    <div id="scBody"></div>
+    <div class="dact"><button type="button" id="scTxt">Baixar relatório</button><button type="button" id="scClose" class="pri">Fechar</button></div>
+  </div>
+</dialog>
+<input type="file" id="fElf" accept=".elf,.bin,*/*" hidden>
+<div id="dropveil">Solte aqui: .afs, BIN SCEI ou ELF abrem ou vinculam; outros arquivos viram novos itens</div>
 <input type="file" id="fAFS" accept=".afs,.bin,*/*" hidden>
 <input type="file" id="fList" accept=".txt,.lst,.csv,text/plain" hidden>
 <input type="file" id="fRep" hidden>
@@ -450,7 +479,7 @@ const u32=(d,o)=>(d[o]|(d[o+1]<<8)|(d[o+2]<<16)|(d[o+3]<<24))>>>0;
 const w32=(d,o,v)=>{d[o]=v&255;d[o+1]=(v>>>8)&255;d[o+2]=(v>>>16)&255;d[o+3]=(v>>>24)&255;};
 const w16=(d,o,v)=>{d[o]=v&255;d[o+1]=(v>>>8)&255;};
 const alignUp=(v,a)=>a>1?Math.ceil(v/a)*a:v;
-const EXT={ADX:'.adx',AHX:'.ahx',HCA:'.hca',WAV:'.wav',OGG:'.ogg',AFS:'.afs',BIN:'.bin'};
+const EXT={ADX:'.adx',AHX:'.ahx',HCA:'.hca',WAV:'.wav',OGG:'.ogg',AFS:'.afs',BIN:'.bin',VAG:'.vag',VAGF:'.vag',SBK:'.sbk'};
 const latin1=(d,o,n)=>{let s='';for(let i=0;i<n;i++){const c=d[o+i];if(!c)break;s+=String.fromCharCode(c);}return s;};
 
 /* ---------- ADX / AHX ---------- */
@@ -474,6 +503,7 @@ function sniff(d){
     if((d[0]&0x7f)===0x48&&(d[1]&0x7f)===0x43&&(d[2]&0x7f)===0x41&&(d[3]&0x7f)===0) return 'HCA';
     const m=String.fromCharCode(d[0],d[1],d[2],d[3]);
     if(m==='RIFF') return 'WAV'; if(m==='OggS') return 'OGG';
+    if(m==='VAGp') return 'VAGF'; if(m==='IECS'&&hasTag(d,0,'SCEIVers')&&hasTag(d,0x10,'SCEIHead')) return 'SBK';
     if(m==='AFS2'||(m.slice(0,3)==='AFS'&&(d[3]===0||d[3]===0x20))) return 'AFS';
   }
   return 'BIN';
@@ -563,7 +593,7 @@ function parseAFS(d){
   const m=String.fromCharCode(d[0],d[1],d[2],d[3]);
   if(m==='AFS2') return parseV2(d);
   if(m.slice(0,3)==='AFS'&&(d[3]===0||d[3]===0x20)) return parseV1(d);
-  throw new Error('Assinatura AFS ou AFS2 não encontrada no início do arquivo.');
+  throw new Error('Assinatura AFS, AFS2 ou SCEIVers (banco SCEI) não encontrada no início do arquivo.');
 }
 function parseV1(d){
   const n=u32(d,4);
@@ -842,6 +872,249 @@ function ahxCutBytes(d,info,A,B){
   if(info.loop){const o=info.ver===3?0x18:0x24;out[o]=out[o+1]=out[o+2]=out[o+3]=0;}
   return out;
 }
+
+/* ---------- SCEI: VAG (PS-ADPCM), bancos SCEIVers e vínculos com o ELF ---------- */
+const SCEI_AL=0x800;
+const PS_COEF=[[0,0],[60,0],[115,-52],[98,-55],[122,-60]];
+/* os rótulos SCEI são gravados como dois inteiros de 4 letras em little-endian: "SCEIVers" fica "IECSsreV" no arquivo */
+const sceiTag=s=>{const a=[];for(let i=0;i<8;i+=4)for(let k=3;k>=0;k--)a.push(s.charCodeAt(i+k));return a;};
+const hasTag=(d,o,s)=>{if(o<0||o+8>d.length)return false;const t=sceiTag(s);for(let i=0;i<8;i++)if(d[o+i]!==t[i])return false;return true;};
+
+/* --- VAG --- */
+function vagLayout(d){
+  const nf=d.length>>4;let f0=0;
+  if(nf>0){let z=true;for(let i=0;i<16;i++)if(d[i]){z=false;break;}if(z)f0=1;}   // quadro inicial de silêncio
+  let ls=-1,le=-1,end=nf;
+  for(let f=f0;f<nf;f++){
+    const fl=d[f*16+1]&7;
+    if(fl===7){end=f;break;}                       // quadro final que só silencia a voz
+    if((fl&4)&&ls<0)ls=f;
+    if(fl&1){end=f+1;if(fl&2)le=f+1;break;}
+  }
+  return {f0,end,ls,le};
+}
+function vagInfo(d,sr){
+  const L=vagLayout(d),ns=Math.max(0,L.end-L.f0)*28;
+  const loop=L.le>=0?{start:Math.max(0,(L.ls>=0?L.ls-L.f0:0)*28),end:ns}:null;
+  return {type:'VAG',enc:0,ver:0,bs:16,bits:4,ch:1,sr:sr||44100,ns,dur:ns/(sr||44100),hp:0,loop,hs:0,encrypted:false};
+}
+function decodeVAG(d,sr){
+  const L=vagLayout(d),nf=Math.max(0,L.end-L.f0),out=new Float32Array(Math.max(1,nf*28));
+  let h1=0,h2=0,n=0;
+  for(let f=L.f0;f<L.end;f++){
+    const p=f*16,b0=d[p],s0=b0&15,sh=s0>12?9:s0,fi=Math.min(4,b0>>4),c0=PS_COEF[fi][0],c1=PS_COEF[fi][1];
+    for(let i=0;i<28;i++){
+      const by=d[p+2+(i>>1)];let nb=(i&1)?(by>>4):(by&15);if(nb>=8)nb-=16;
+      let s=((nb<<12)>>sh)+((c0*h1+c1*h2+32)>>6);
+      if(s>32767)s=32767;else if(s<-32768)s=-32768;
+      h2=h1;h1=s;out[n++]=s/32768;
+    }
+  }
+  return {chs:[out.subarray(0,Math.max(1,n))],sr:sr||44100,ns:n};
+}
+function vagMono(src){
+  if(!Array.isArray(src))return src;if(src.length===1)return src[0];
+  const n=src[0].length,o=new Float32Array(n);
+  for(let c=0;c<src.length;c++){const a=src[c];for(let i=0;i<n;i++)o[i]+=a[i]/src.length;}
+  return o;
+}
+/* codifica PCM mono em PS-ADPCM: quadro de silêncio, dados, e fim igual ao dos bancos originais
+   (sem loop: flag 1 e um quadro final 0x07; com loop: flags 2, início 6, fim 3) */
+function encodeVAG(src,sr,opt){
+  opt=opt||{};
+  const x=vagMono(src);let n=x.length,loop=null;
+  if(opt.loop){const ls=Math.max(0,Math.floor(opt.loop.start/28)*28),le=Math.min(n,opt.loop.end>0?opt.loop.end:n);if(le-ls>=56)loop={start:ls,end:le};}
+  if(loop)n=loop.end;
+  const nd=Math.max(1,Math.ceil(n/28)),out=new Uint8Array((1+nd+(loop?0:1))*16);
+  const s16=new Int32Array(nd*28);
+  for(let i=0;i<s16.length;i++){const v=i<x.length&&(loop||i<n)?x[i]:0;s16[i]=Math.max(-32768,Math.min(32767,Math.round(v*32767)));}
+  let h1=0,h2=0;const tq=new Int8Array(28),bq=new Int8Array(28),last=nd-1,k0=loop?Math.floor(loop.start/28):-1;
+  for(let f=0;f<nd;f++){
+    const base=f*28;let bErr=Infinity,bf=0,bs=0,bh1=0,bh2=0;
+    for(let fi=0;fi<5;fi++){
+      const c0=PS_COEF[fi][0],c1=PS_COEF[fi][1];
+      let mp=0,mn=0;
+      {let a=h1,b=h2;for(let i=0;i<28;i++){const x0=s16[base+i],r=x0-((c0*a+c1*b+32)>>6);if(r>mp)mp=r;if(-r>mn)mn=-r;b=a;a=x0;}}
+      const need=Math.max(mp/7,mn/8);
+      let s=need<=1?12:12-Math.ceil(Math.log2(need));s=Math.max(0,Math.min(12,s));
+      for(let sh=Math.max(0,s-1);sh<=Math.min(12,s+1);sh++){
+        const step=4096>>sh;let a=h1,b=h2,err=0;
+        for(let i=0;i<28;i++){
+          const x0=s16[base+i],pred=(c0*a+c1*b+32)>>6;
+          let q=Math.round((x0-pred)/step);if(q>7)q=7;else if(q<-8)q=-8;
+          let r=pred+q*step;if(r>32767)r=32767;else if(r<-32768)r=-32768;
+          const e=x0-r;err+=e*e;if(err>=bErr)break;
+          tq[i]=q;b=a;a=r;
+        }
+        if(err<bErr){bErr=err;bf=fi;bs=sh;bq.set(tq);bh1=a;bh2=b;}
+      }
+    }
+    h1=bh1;h2=bh2;
+    const p=(1+f)*16;let fl=0;
+    if(loop){fl=2;if(f===k0)fl=6;if(f===last)fl=3;}else if(f===last)fl=1;
+    out[p]=(bf<<4)|bs;out[p+1]=fl;
+    for(let i=0;i<28;i+=2)out[p+2+(i>>1)]=(bq[i]&15)|((bq[i+1]&15)<<4);
+  }
+  if(!loop){const p=(1+nd)*16;out[p+1]=7;for(let i=2;i<16;i++)out[p+i]=0x77;}
+  return out;
+}
+/* arquivo .vag comum (cabeçalho VAGp de 0x30 bytes) */
+function wrapVAGp(d,sr,name){
+  const out=new Uint8Array(0x30+d.length),dv=new DataView(out.buffer);
+  out.set([0x56,0x41,0x47,0x70],0);dv.setUint32(4,0x20);dv.setUint32(0xC,d.length);dv.setUint32(0x10,sr);
+  const nm=String(name||'').replace(/\.[^.]*$/,'');for(let i=0;i<Math.min(15,nm.length);i++)out[0x20+i]=nm.charCodeAt(i)&127;
+  out.set(d,0x30);return out;
+}
+function parseVAGp(d){
+  if(d.length<0x30||d[0]!==0x56||d[1]!==0x41||d[2]!==0x47||d[3]!==0x70)return null;
+  const be=o=>((d[o]<<24)|(d[o+1]<<16)|(d[o+2]<<8)|d[o+3])>>>0;
+  let sz=be(0xC);const sr=be(0x10);
+  if(!sz||0x30+sz>d.length)sz=d.length-0x30;
+  sz&=~15;
+  return {data:d.subarray(0x30,0x30+sz),sr:(sr>0&&sr<=65535)?sr:44100};
+}
+
+/* --- banco SCEI (cabeçalho + VAGI + Smpl + Sset + Prog + stream de VAGs) --- */
+function sceiBankLayout(d){
+  if(d.length<0x60||!hasTag(d,0,'SCEIVers')||!hasTag(d,0x10,'SCEIHead'))throw new Error('Cabeçalho SCEIVers/SCEIHead não encontrado.');
+  const L={sec:u32(d,0x1C),vs:u32(d,0x20),prog:u32(d,0x24),pset:u32(d,0x28),smpl:u32(d,0x2C),vagi:u32(d,0x30)};
+  if(L.vagi<0x50||!hasTag(d,L.vagi,'SCEIVagi'))throw new Error('Seção SCEIVagi não encontrada.');
+  if(!hasTag(d,L.smpl,'SCEISmpl')||!hasTag(d,L.pset,'SCEISset')||!hasTag(d,L.prog,'SCEIProg'))throw new Error('Seções SCEISmpl, SCEISset ou SCEIProg não encontradas.');
+  if(L.smpl!==L.vagi+u32(d,L.vagi+8)||L.pset!==L.smpl+u32(d,L.smpl+8)||L.prog!==L.pset+u32(d,L.pset+8)||L.sec!==L.prog+u32(d,L.prog+8))throw new Error('Seções do banco fora da ordem VAGI, Smpl, Sset, Prog.');
+  L.st=alignUp(L.sec,SCEI_AL);L.end=alignUp(L.st+L.vs,SCEI_AL);
+  if(L.st+L.vs>d.length)throw new Error('O stream de VAGs passa do fim dos dados do banco.');
+  return L;
+}
+function sceiBankHead(d){
+  try{if(!hasTag(d,0,'SCEIVers')||!hasTag(d,0x10,'SCEIHead'))return null;const v=u32(d,0x30);return {sec:u32(d,0x1C),vs:u32(d,0x20),n:hasTag(d,v,'SCEIVagi')?u32(d,v+12)+1:0};}catch(_){return null;}
+}
+function sceiSmplEntries(sm){
+  const out=[];if(sm.length<16)return out;
+  const cnt=u32(sm,12),first=16+(cnt+1)*4,seen=new Set();
+  for(let i=0;i<=cnt&&16+i*4+4<=sm.length;i++){const o=u32(sm,16+i*4);if(o!==0xFFFFFFFF&&o>=first&&o+2<=sm.length&&!seen.has(o)){seen.add(o);out.push(o);}}
+  return out;
+}
+/* programa (SCEIProg) -> tons -> amostra (SCEISmpl) -> VAG: cada programa tem 0x24 bytes de cabeçalho (nº de tons no byte 4)
+   seguidos de tons de 0x14 bytes; os 2 primeiros bytes de cada tom são o id da amostra */
+function sceiProgVags(prog,smpl){
+  const out=new Map();if(prog.length<16||smpl.length<16)return out;
+  const slot=new Map(),sc=u32(smpl,12);
+  for(let i=0;i<=sc&&16+i*4+4<=smpl.length;i++){const o=u32(smpl,16+i*4);if(o!==0xFFFFFFFF&&o+2<=smpl.length)slot.set(i,smpl[o]|(smpl[o+1]<<8));}
+  const pc=u32(prog,12);
+  for(let q=0;q<=pc&&16+q*4+4<=prog.length;q++){
+    const o=u32(prog,16+q*4);if(o===0xFFFFFFFF||o+0x24>prog.length)continue;
+    const nt=prog[o+4];
+    for(let t=0;t<nt&&o+0x24+t*0x14+2<=prog.length;t++){
+      const sid=prog[o+0x24+t*0x14]|(prog[o+0x25+t*0x14]<<8),v=slot.get(sid);
+      if(v==null)continue;let l=out.get(v);if(!l)out.set(v,l=[]);if(!l.includes(q))l.push(q);
+    }
+  }
+  return out;
+}
+const sceiProgFolder=(p,w)=>p==null?'':'prog_'+String(p).padStart(w||3,'0');
+function parseSceiBank(d){
+  const L=sceiBankLayout(d),n=u32(d,L.vagi+12)+1;
+  if(n<1||n>8192||L.vagi+16+n*12>d.length)throw new Error('Quantidade de VAGs inválida ('+n+').');
+  const inf=[];
+  for(let i=0;i<n;i++){const p=L.vagi+u32(d,L.vagi+16+4*i);inf.push({so:u32(d,p),sr:d[p+4]|(d[p+5]<<8),lp:d[p+6],es:d[p+7]});}
+  const vsz=u32(d,L.vagi+8),refs=new Set(),sm=d.slice(L.smpl,L.pset);
+  sceiSmplEntries(sm).forEach(o=>refs.add(sm[o]|(sm[o+1]<<8)));
+  const pgs=d.slice(L.prog,L.sec),pm=sceiProgVags(pgs,sm),progW=Math.max(3,String(pgs.length>=16?u32(pgs,12)+1:0).length);
+  const entries=inf.map((x,i)=>{
+    const nx=i+1<n?inf[i+1].so:L.vs;
+    if(nx<x.so||nx>L.vs||(nx-x.so)%16)throw new Error('Offsets dos VAGs fora de ordem ou desalinhados (VAG '+i+').');
+    return {data:d.subarray(L.st+x.so,L.st+nx),name:'',auto:true,afsId:null,date:null,origOff:x.so,origSize:nx-x.so,vag:{sr:x.sr,es:x.es},vagOrig:i,prog:pm.has(i)?Math.min(...pm.get(i)):null,progs:pm.get(i)||[]};
+  });
+  return {fmt:'sceibank',entries,meta:{pre:d.slice(0,L.vagi),vagiTag:d.slice(L.vagi,L.vagi+8),vagiPad:d.slice(L.vagi+16+n*12,L.vagi+vsz),smpl:sm,pset:d.slice(L.pset,L.prog),prog:d.slice(L.prog,L.sec),tail:d.slice(L.end),n,refs,progW,samples:sceiSmplEntries(sm).length,vs:L.vs,align:SCEI_AL}};
+}
+function buildSceiBank(es,meta){
+  const n=es.length;if(!n)throw new Error('O banco precisa ter ao menos um VAG.');
+  const datas=es.map(e=>{let d=e.data;if(d.length%16){const p=new Uint8Array(alignUp(d.length,16));p.set(d);d=p;}return d;});
+  let vs=0;const so=datas.map(d=>{const o=vs;vs+=d.length;return o;});
+  const vagi=meta.pre.length,vsz=alignUp(16+n*12,16),smpl=vagi+vsz,pset=smpl+meta.smpl.length,prog=pset+meta.pset.length,sec=prog+meta.prog.length;
+  const st=alignUp(sec,SCEI_AL),end=alignUp(st+vs,SCEI_AL),out=new Uint8Array(end+meta.tail.length).fill(0xFF);
+  out.set(meta.pre,0);w32(out,0x1C,sec);w32(out,0x20,vs);w32(out,0x24,prog);w32(out,0x28,pset);w32(out,0x2C,smpl);w32(out,0x30,vagi);
+  out.set(meta.vagiTag,vagi);w32(out,vagi+8,vsz);w32(out,vagi+12,n-1);
+  for(let i=0;i<n;i++){
+    w32(out,vagi+16+4*i,16+n*4+i*8);
+    const p=vagi+16+n*4+i*8,e=es[i];
+    w32(out,p,so[i]);w16(out,p+4,Math.max(1,Math.min(65535,Math.round((e.vag&&e.vag.sr)||(e.info&&e.info.sr)||44100))));
+    out[p+6]=(e.info&&e.info.loop)?1:0;out[p+7]=(e.vag&&e.vag.es!=null)?e.vag.es:0xFF;
+  }
+  for(let i=16+n*12;i<vsz;i++)out[vagi+i]=meta.vagiPad.length?meta.vagiPad[(i-16-n*12)%meta.vagiPad.length]:0xFF;
+  out.set(meta.smpl,smpl);out.set(meta.pset,pset);out.set(meta.prog,prog);
+  const map=new Map();es.forEach((e,i)=>{if(e.vagOrig!=null&&!map.has(e.vagOrig))map.set(e.vagOrig,i);});
+  let dangling=0;
+  sceiSmplEntries(meta.smpl).forEach(o=>{
+    const old=meta.smpl[o]|(meta.smpl[o+1]<<8),nw=map.get(old);
+    if(nw==null){dangling++;w16(out,smpl+o,0);}else w16(out,smpl+o,nw);
+  });
+  datas.forEach((d,i)=>out.set(d,st+so[i]));
+  out.set(meta.tail,end);
+  return {out,dangling};
+}
+
+/* --- container BIN com vários bancos (ex.: SNDDATA.BIN) --- */
+function parseSceiBin(d){
+  const starts=[];
+  for(let p=0;p+0x60<=d.length;p+=SCEI_AL)if(hasTag(d,p,'SCEIVers')&&hasTag(d,p+0x10,'SCEIHead'))starts.push(p);
+  if(!starts.length)throw new Error('Nenhum banco SCEIVers encontrado (procurei a cada 0x800 bytes).');
+  const entries=starts.map((s,i)=>{const e=i+1<starts.length?starts[i+1]:d.length;return {data:d.subarray(s,e),name:'',auto:true,afsId:null,date:null,origOff:s,origSize:e-s};});
+  return {fmt:'scei',entries,meta:{lead:d.slice(0,starts[0]),align:SCEI_AL,count:starts.length,size:d.length}};
+}
+function sceiBinLayout(es,meta){const offs=[];let pos=meta.lead.length;es.forEach(e=>{offs.push(pos);pos=alignUp(pos+e.data.length,SCEI_AL);});return {offs,total:pos};}
+function buildSceiBin(es,meta){
+  const L=sceiBinLayout(es,meta),out=new Uint8Array(L.total).fill(0xFF);
+  out.set(meta.lead,0);es.forEach((e,i)=>out.set(e.data,L.offs[i]));
+  return out;
+}
+
+/* --- vínculos no ELF: trincas de 12 bytes {offset, tamanho das seções, tamanho do stream}; slot vazio = FFFFFFFF x3 --- */
+function sceiFindLinks(elf,banks){
+  const dv=new DataView(elf.buffer,elf.byteOffset,elf.byteLength),key=new Map(),links=banks.map(()=>[]);
+  banks.forEach((b,i)=>{let l=key.get(b.off);if(!l)key.set(b.off,l=[]);l.push(i);});
+  for(let p=0;p+12<=elf.length;p+=4){
+    const c=key.get(dv.getUint32(p,true));if(!c)continue;
+    const s=dv.getUint32(p+4,true),v=dv.getUint32(p+8,true);
+    for(const i of c)if(banks[i].sec===s&&banks[i].vs===v)links[i].push(p);
+  }
+  return links;
+}
+function elfVA(elf,p){
+  if(elf.length<0x34||elf[0]!==0x7F||elf[1]!==0x45||elf[2]!==0x4C||elf[3]!==0x46)return null;
+  const phoff=u32(elf,0x1C),phsz=elf[0x2A]|(elf[0x2B]<<8),phn=elf[0x2C]|(elf[0x2D]<<8);
+  for(let i=0;i<phn;i++){
+    const q=phoff+i*phsz;if(q+32>elf.length)break;
+    const t=u32(elf,q),off=u32(elf,q+4),va=u32(elf,q+8),fs=u32(elf,q+16);
+    if(t===1&&fs>0&&p>=off&&p<off+fs)return (va+(p-off))>>>0;
+  }
+  return null;
+}
+function sceiTableRuns(elf,links){
+  const dv=new DataView(elf.buffer,elf.byteOffset,elf.byteLength);
+  const hits=[];links.forEach((ls,bi)=>ls.forEach(p=>hits.push({p,bi})));hits.sort((a,b)=>a.p-b.p);
+  const empty=p=>{const a=dv.getUint32(p,true),b=dv.getUint32(p+4,true),c=dv.getUint32(p+8,true);return (a===0xFFFFFFFF&&b===a&&c===a)||(a===0&&b===0&&c===0);};
+  const runs=[];
+  for(const h of hits){
+    let r=null;
+    for(let i=runs.length-1;i>=0;i--){if(runs[i].mod===h.p%12&&h.p>=runs[i].end){r=runs[i];break;}}
+    if(r){
+      let ok=(h.p-r.end)/12<=64;
+      for(let q=r.end;ok&&q<h.p;q+=12)if(!empty(q))ok=false;
+      if(!ok)r=null;
+    }
+    if(!r){r={start:h.p,end:h.p,mod:h.p%12,slots:[]};runs.push(r);}
+    for(let q=r.end;q<h.p;q+=12)r.slots.push({p:q,bi:-1});
+    r.slots.push({p:h.p,bi:h.bi});r.end=h.p+12;
+  }
+  return runs.map(r=>({start:r.start,end:r.end,va:elfVA(elf,r.start),slots:r.slots,filled:r.slots.filter(s=>s.bi>=0).length,empty:r.slots.filter(s=>s.bi<0).length}));
+}
+function sceiApplyLinks(elf,plan){
+  const out=elf.slice(),dv=new DataView(out.buffer,out.byteOffset,out.byteLength);
+  plan.forEach(x=>{dv.setUint32(x.p,x.off>>>0,true);dv.setUint32(x.p+4,x.sec>>>0,true);dv.setUint32(x.p+8,x.vs>>>0,true);});
+  return out;
+}
+
 /*PURE-END*/
 
 /* =====================  UI  ===================== */
@@ -859,12 +1132,190 @@ function toast(m,k){const t=document.createElement('div');t.className='toast '+(
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);}
 
 function mkEntry(data,name,x){
-  const e=Object.assign({uid:UID++,name:name||'',auto:!name,afsId:null,date:null,origOff:null,origSize:null},x||{});
+  const e=Object.assign({uid:UID++,name:name||'',auto:!name,afsId:null,date:null,origOff:null,origSize:null,vag:null,vagOrig:null,sc:null,sb:null,prog:null,progs:null,folder:null},x||{});
   setData(e,data);return e;
 }
-function setData(e,data){e.data=data;e.info=audioInfo(data);e.type=e.info?e.info.type:sniff(data);}
+function setData(e,data){
+  e.data=data;
+  if(e.vag){e.info=vagInfo(data,e.vag.sr);e.type='VAG';e.sb=null;return;}
+  e.info=audioInfo(data);e.type=e.info?e.info.type:sniff(data);
+  e.sb=e.type==='SBK'?sceiBankHead(data):null;
+}
 function eName(e,i){return e.auto?String(i).padStart(5,'0')+(EXT[e.type]||'.bin'):e.name;}
 function nextId(){let m=-1;S.entries.forEach(e=>{if(e.afsId!=null&&e.afsId>m)m=e.afsId;});return m+1;}
+
+/* ---------- SCEI: BIN com vários bancos, ELF e vínculos ---------- */
+const SC={elf:null,elfName:'',orig:[],scs:[],runs:[]};
+const isSub=e=>e.type==='AFS'||e.type==='SBK';
+function padTo(data,slot,e){const p=new Uint8Array(slot);if(e&&e.type==='SBK')p.fill(0xFF);p.set(data);return p;}
+function rootFrame(){return S.stack.length?S.stack[0]:S;}
+function parseTop(d){
+  if(hasTag(d,0,'SCEIVers')){
+    const r=parseSceiBin(d);
+    if(r.entries.length===1&&r.entries[0].origOff===0)return parseSceiBank(d);
+    return r;
+  }
+  return parseAFS(d);
+}
+/* fase 1: as entradas (bancos) do BIN já foram achadas por parseSceiBin; aqui guardamos os valores originais de cada uma */
+function sceiAttach(){
+  SC.orig=S.entries.map((e,i)=>{
+    const h=sceiBankHead(e.data);
+    e.sc=h?{i0:i,off:e.origOff,sec:h.sec,vs:h.vs,size:e.data.length,n:h.n,links:[]}:null;
+    return {uid:e.uid,sc:e.sc};
+  });
+  relinkScei();
+}
+/* fase 2: os vínculos. Cada banco é procurado no ELF pela trinca {offset, tamanho das seções, tamanho do stream} */
+function relinkScei(){
+  SC.scs=SC.orig.map(o=>o.sc).filter(Boolean);SC.runs=[];
+  SC.scs.forEach(s=>{s.links=[];});
+  if(!SC.elf||rootFrame().fmt!=='scei')return;
+  const links=sceiFindLinks(SC.elf,SC.scs.map(s=>({off:s.off,sec:s.sec,vs:s.vs})));
+  SC.scs.forEach((s,i)=>{s.links=links[i];});
+  SC.runs=sceiTableRuns(SC.elf,links);
+}
+async function attachElf(file,d){
+  if(rootFrame().fmt!=='scei'){toast('Abra primeiro o BIN SCEI (ex.: SNDDATA.BIN) e depois vincule o ELF.','warn');return;}
+  SC.elf=d;SC.elfName=file.name;relinkScei();render();
+  const ok=SC.scs.filter(s=>s.links.length).length,slots=SC.scs.reduce((a,s)=>a+s.links.length,0);
+  toast(`${file.name}: ${slots} posição(ões) de tabela apontam para ${ok} de ${SC.scs.length} bancos`+(SC.runs.length?` (${SC.runs.length} tabela(s)).`:'.')+(ok<SC.scs.length?` ${SC.scs.length-ok} sem vínculo.`:''),ok?'':'warn');
+}
+function sceiOpenedToast(name,r){
+  if(r.fmt==='sceibank'){toast(`${name}: banco SCEI com ${r.entries.length} VAGs.`);return;}
+  const ok=SC.elf?SC.scs.filter(s=>s.links.length).length:0;
+  toast(`${name}: ${r.entries.length} bancos SCEI encontrados.`+(SC.elf?` ${ok} deles têm posição na tabela do ELF já vinculado.`:' Use “Vincular ELF” para ler a tabela do jogo.'));
+}
+function lkCell(e){
+  if(S.fmt!=='scei')return '<td class="c-lk"></td>';
+  if(!e.sc)return '<td class="c-lk no" title="Banco novo ou duplicado: sem posição na tabela do ELF">novo</td>';
+  if(!SC.elf)return '<td class="c-lk" title="Vincule o ELF para localizar a tabela">?</td>';
+  const n=e.sc.links.length;
+  if(!n)return '<td class="c-lk no" title="Nenhuma posição da tabela do ELF aponta para este banco">sem elo</td>';
+  return `<td class="c-lk" title="${esc('Posições no ELF (offset no arquivo): '+e.sc.links.map(hex).join(', '))}">×${n}</td>`;
+}
+function sceiInfoRows(){
+  const m=S.meta;
+  if(S.fmt==='sceibank')return [['Programas com VAG (SCEIProg)',new Set(S.entries.map(e=>e.prog).filter(x=>x!=null)).size],['Amostras (SCEISmpl)',m.samples],['VAGs usados por amostras',m.refs.size],['Alinhamento do stream',hex(SCEI_AL)]];
+  const rows=[['Alinhamento',hex(SCEI_AL)],['ELF',SC.elf?SC.elfName:'não vinculado']];
+  if(SC.elf)rows.push(['Bancos com vínculo',SC.scs.filter(s=>s.links.length).length+' de '+SC.scs.length],['Tabelas no ELF',SC.runs.length]);
+  return rows;
+}
+function delGuard(){
+  const es=selected();
+  if(S.fmt==='sceibank'){
+    if(es.length>=S.entries.length){toast('O banco precisa manter ao menos um VAG.','warn');return false;}
+    const n=es.filter(e=>e.vagOrig!=null&&S.meta.refs.has(e.vagOrig)).length;
+    if(n&&!confirm(n+' VAG(s) selecionado(s) são usados por amostras do banco. As amostras que apontavam para eles passarão a usar o VAG 0. Remover mesmo assim?'))return false;
+  }else if(S.fmt==='scei'&&SC.elf){
+    const n=es.filter(e=>e.sc&&e.sc.links.length).length;
+    if(n&&!confirm(n+' banco(s) têm posições na tabela do ELF. Ao exportar, essas posições serão marcadas como vazias (FFFFFFFF). Remover mesmo assim?'))return false;
+  }
+  return true;
+}
+function exportElf(auto){
+  if(rootFrame().fmt!=='scei'){if(!auto)toast('Abra um BIN SCEI e vincule o ELF primeiro.','warn');return;}
+  if(!SC.elf){if(!auto)toast('Vincule o ELF antes de exportá-lo.','warn');return;}
+  while(S.stack.length)leaveSub(true);
+  const es=S.entries,L=sceiBinLayout(es,S.meta),plan=[],alive=new Set(es.map(e=>e.uid));let novos=0,movidos=0;
+  es.forEach((e,i)=>{
+    if(!e.sc){novos++;return;}
+    const h=sceiBankHead(e.data);if(!h)return;
+    if(L.offs[i]!==e.sc.off||h.sec!==e.sc.sec||h.vs!==e.sc.vs)movidos++;
+    e.sc.links.forEach(p=>plan.push({p,off:L.offs[i],sec:h.sec,vs:h.vs}));
+  });
+  let limpos=0;
+  SC.orig.forEach(o=>{if(!alive.has(o.uid)&&o.sc){o.sc.links.forEach(p=>{plan.push({p,off:0xFFFFFFFF,sec:0xFFFFFFFF,vs:0xFFFFFFFF});limpos++;});}});
+  const out=sceiApplyLinks(SC.elf,plan),ext=(SC.elfName.match(/\.[^.]+$/)||[''])[0],nm=baseName(SC.elfName)+'_mod'+ext;
+  const go=()=>{
+    download(new Blob([out],{type:'application/octet-stream'}),nm);
+    toast(`ELF exportado (${nm}): ${plan.length-limpos} posição(ões) gravadas para ${movidos} banco(s) alterado(s) ou movido(s)`+(limpos?`, ${limpos} limpa(s)`:'')+'.');
+  };
+  if(auto)setTimeout(go,500);else go();
+  if(novos)toast(novos+' banco(s) novo(s) ou duplicado(s) não têm posição na tabela do ELF; o jogo só os carrega quando receberem uma.','warn');
+}
+function sceiScan(){
+  const banks=SC.scs.map(s=>({i:s.i0,off:s.off,size:s.size,sec:s.sec,vs:s.vs,n:s.n,links:s.links.slice()}));
+  const runs=SC.runs.map(r=>{
+    const c=new Map();r.slots.forEach(x=>{if(x.bi>=0)c.set(x.bi,(c.get(x.bi)||0)+1);});
+    return {start:r.start,va:r.va,slots:r.slots.length,filled:r.filled,empty:r.empty,dups:[...c.entries()].filter(x=>x[1]>1).map(x=>SC.scs[x[0]].i0+' (×'+x[1]+')')};
+  });
+  return {banks,runs,orphans:banks.filter(b=>!b.links.length).map(b=>b.i)};
+}
+function sceiAnalysis(){
+  if(rootFrame().fmt!=='scei'){toast('Abra um BIN SCEI para ver a análise.','warn');return;}
+  const r=sceiScan(),slots=r.banks.reduce((a,b)=>a+b.links.length,0);
+  $('#scSum').textContent=r.banks.length+' bancos no BIN'+(SC.elf?`; ${slots} posições em ${r.runs.length} tabela(s) do ELF; ${r.orphans.length} banco(s) sem vínculo.`:'. ELF ainda não vinculado.');
+  let h='<h4>1. Entradas encontradas no BIN</h4><table><thead><tr><th>#</th><th>Offset</th><th>Tamanho</th><th>Seções</th><th>Stream</th><th>VAGs</th><th>Posições no ELF (offset no arquivo)</th></tr></thead><tbody>';
+  r.banks.forEach(b=>{h+=`<tr><td class="n">${b.i}</td><td class="n">${hex(b.off)}</td><td class="n">${hex(b.size)}</td><td class="n">${hex(b.sec)}</td><td class="n">${hex(b.vs)}</td><td class="n">${b.n}</td><td>${SC.elf?(b.links.length?b.links.map(hex).join(', '):'<span style="color:#f2c14e">sem vínculo</span>'):'?'}</td></tr>`;});
+  h+='</tbody></table>';
+  if(SC.elf){
+    h+='<h4>2. Tabelas encontradas no ELF</h4>';
+    h+=r.runs.length?'<table><thead><tr><th>Início (arquivo)</th><th>Endereço virtual</th><th>Posições</th><th>Com banco</th><th>Vazias</th><th>Bancos repetidos</th></tr></thead><tbody>'+r.runs.map(t=>`<tr><td class="n">${hex(t.start)}</td><td class="n">${t.va==null?'—':hex(t.va)}</td><td class="n">${t.slots}</td><td class="n">${t.filled}</td><td class="n">${t.empty}</td><td>${t.dups.length?esc(t.dups.join(', ')):'—'}</td></tr>`).join('')+'</tbody></table>':'<div class="mut">Nenhuma trinca {offset, seções, stream} encontrada no ELF.</div>';
+    h+='<h4>3. Bancos sem vínculo</h4><div class="mut">'+(r.orphans.length?r.orphans.join(', ')+'. Existem no BIN, mas nenhuma posição da tabela aponta para eles.':'Todos os bancos têm ao menos uma posição na tabela.')+'</div>';
+  }else h+='<div class="mut" style="margin-top:12px">Vincule o ELF para descobrir a tabela que aponta para estes bancos.</div>';
+  $('#scBody').innerHTML=h;$('#dlgScei').showModal();
+}
+function sceiReportDownload(){
+  const r=sceiScan(),L=[];
+  L.push('Análise SCEI','BIN: '+(rootFrame().srcName||'—'),'ELF: '+(SC.elf?SC.elfName:'não vinculado'),'','Entradas do BIN (#, offset, tamanho, seções, stream, VAGs, posições no ELF)');
+  r.banks.forEach(b=>L.push([b.i,hex(b.off),hex(b.size),hex(b.sec),hex(b.vs),b.n,b.links.map(hex).join(' ')||'-'].join('\t')));
+  if(SC.elf){
+    L.push('','Tabelas no ELF (início no arquivo, endereço virtual, posições, com banco, vazias, bancos repetidos)');
+    r.runs.forEach(t=>L.push([hex(t.start),t.va==null?'-':hex(t.va),t.slots,t.filled,t.empty,t.dups.join(' ')||'-'].join('\t')));
+    L.push('','Bancos sem vínculo: '+(r.orphans.join(', ')||'nenhum'));
+  }
+  download(new Blob([L.join('\r\n')+'\r\n'],{type:'text/plain'}),baseName(rootFrame().srcName||'scei')+'_analise.txt');
+}
+
+/* ---------- pastas pela divisão do SCEIProg, nomes e filelist ---------- */
+function folderOf(e){
+  if(S.fmt!=='sceibank')return '';
+  if(e.folder!=null)return e.folder;
+  return e.prog!=null?sceiProgFolder(e.prog,S.meta.progW):'';
+}
+function rowName(e,i){const n=eName(e,i);if(S.fmt!=='sceibank')return n;const f=folderOf(e);return f?f+'/'+n:n;}
+function progTip(e){
+  if(S.fmt!=='sceibank'||!e.progs||e.progs.length<2)return '';
+  return '  (usado também em: '+e.progs.filter(q=>q!==e.prog).map(q=>sceiProgFolder(q,S.meta.progW)).join(', ')+')';
+}
+/* nome digitado ou vindo da filelist: sem "/" só troca o nome; com "/" também define a pasta ("/nome.vag" = raiz) */
+function setPath(e,v){
+  v=String(v||'').trim();
+  if(S.fmt!=='sceibank'){e.name=v;e.auto=!v;return;}
+  v=v.replace(/\\/g,'/');
+  const k=v.lastIndexOf('/'),nm=k>=0?v.slice(k+1):v;
+  e.name=nm;e.auto=!nm;
+  if(k>=0){
+    const dir=v.slice(0,k).replace(/^\/+|\/+$/g,''),def=e.prog!=null?sceiProgFolder(e.prog,S.meta.progW):'';
+    e.folder=dir===def?null:dir;
+  }
+}
+function extractTree(){
+  if(S.fmt!=='scei'){toast('Volte ao BIN (Voltar e aplicar) para extrair todos os bancos.','warn');return;}
+  const conv=$('#oWav').checked,files=[],man=['banco\tvag\tprograma\tcaminho\toutros programas'],used=new Set();
+  let nb=0,nv=0,bad=0;
+  S.entries.forEach((be,bi)=>{
+    if(be.type!=='SBK')return;
+    let b;try{b=parseSceiBank(be.data);}catch(_){bad++;return;}
+    const bn=baseName(eName(be,bi)),W=b.meta.progW,vn=be.vn&&be.vn.length===b.entries.length?be.vn:null;nb++;
+    b.entries.forEach((v,vi)=>{
+      const x=vn?vn[vi]:null;
+      let nm=(x&&x.n)?x.n:String(vi).padStart(5,'0')+'.vag',data=v.data;
+      const fold=x&&x.f!=null?x.f:(v.prog!=null?sceiProgFolder(v.prog,W):'');
+      if(conv){try{const d=decodeVAG(data,v.vag.sr);data=wavFromChannels(d.chs,d.sr);nm=baseName(nm)+'.wav';}catch(_){}}
+      else data=wrapVAGp(data,v.vag.sr,nm);
+      const path=bn+'/'+(fold?fold+'/':'')+nm;let u=path,k=1;
+      while(used.has(u.toLowerCase()))u=baseName(path)+'_'+(k++)+(path.match(/\.[^./]+$/)||[''])[0];
+      used.add(u.toLowerCase());files.push({name:u,data});nv++;
+      man.push([bi,vi,v.prog==null?'-':v.prog,u,v.progs.filter(q=>q!==v.prog).join(' ')||'-'].join('\t'));
+    });
+  });
+  if(!files.length){toast('Nenhum banco legível para extrair.','warn');return;}
+  files.push({name:'_manifest.txt',data:new TextEncoder().encode(man.join('\r\n')+'\r\n')});
+  download(makeZip(files),baseName(S.srcName||'bin')+'_vags_por_pasta.zip');
+  toast(`${nv} VAGs de ${nb} bancos extraídos em pastas por programa.`+(bad?` ${bad} banco(s) ilegíveis ignorados.`:''));
+}
 
 /* histórico */
 function push(){S.hist.push(S.entries.map(e=>Object.assign({},e)));if(S.hist.length>60)S.hist.shift();}
@@ -879,6 +1330,11 @@ function undo(){
 function updateCols(){
   const v2=S.fmt==='afs2'&&$('#oFmt').value!=='afs1'||$('#oFmt').value==='afs2';
   document.body.classList.toggle('hide-id',!v2);
+  const rf=rootFrame().fmt,scm=S.fmt==='scei'||S.fmt==='sceibank';
+  document.body.classList.toggle('hide-lk',S.fmt!=='scei');
+  document.body.classList.toggle('mode-scei',rf==='scei');
+  $('#oFmt').disabled=scm;
+  $('#bExport').textContent=rf==='scei'?'Exportar BIN':rf==='sceibank'?'Exportar banco':'Exportar AFS';
   const eff=$('#oFmt').value==='keep'?S.fmt:$('#oFmt').value;
   $('#g1').classList.toggle('off',eff!=='afs1');
   $('#g2').classList.toggle('off',eff!=='afs2');
@@ -886,14 +1342,14 @@ function updateCols(){
 function render(){
   const tb=$('#tb'),f=S.filter.toLowerCase();let html='';
   S.entries.forEach((e,i)=>{
-    const nm=eName(e,i);
+    const nm=rowName(e,i);
     if(f&&!nm.toLowerCase().includes(f)&&String(i)!==f)return;
     const inf=e.info,sel=S.sel.has(e.uid);
     html+=`<tr data-u="${e.uid}" class="${sel?'sel':''}${S.cur&&S.cur.uid===e.uid?' cur':''}" ${f?'':'draggable="true"'}>
-<td class="c-i">${i}</td><td class="c-n" data-k="name" title="${esc(nm)}">${esc(nm)}</td><td class="c-id" data-k="id">${e.afsId==null?'':e.afsId}</td>
-<td><span class="tag t-${e.type}">${e.type}</span></td><td>${inf?inf.ch:''}</td><td>${inf?inf.sr:''}</td><td>${inf?fmtTime(inf.dur):''}</td><td>${inf&&inf.loop?'<span style="color:var(--loop)">sim</span>':''}</td>
-<td class="num">${e.origOff!=null?hex(e.origOff):'—'}</td><td class="num">${e.data.length}</td>
-<td class="act">${e.type==='AFS'?'<button data-a="open" title="Abrir sub-AFS">Abrir</button>':''}${inf&&canDecode(inf)?'<button data-a="edit" title="Editar áudio">✂</button>':''}<button data-a="play" title="Ouvir">▶</button><button data-a="dl" title="Baixar">⬇</button><button data-a="rep" title="Substituir">⇄</button></td></tr>`;
+<td class="c-i">${i}</td><td class="c-n" data-k="name" title="${esc(nm+progTip(e))}">${esc(nm)}</td><td class="c-id" data-k="id">${e.afsId==null?'':e.afsId}</td>
+<td><span class="tag t-${e.type}">${e.type}</span></td><td>${inf?inf.ch:(e.sb?e.sb.n+' VAGs':'')}</td><td>${inf?inf.sr:''}</td><td>${inf?fmtTime(inf.dur):''}</td><td>${inf&&inf.loop?'<span style="color:var(--loop)">sim</span>':''}</td>
+${lkCell(e)}<td class="num">${e.origOff!=null?hex(e.origOff):'—'}</td><td class="num">${e.data.length}</td>
+<td class="act">${isSub(e)?'<button data-a="open" title="Abrir como sub-container">Abrir</button>':''}${inf&&canDecode(inf)?'<button data-a="edit" title="Editar áudio">✂</button>':''}<button data-a="play" title="Ouvir">▶</button><button data-a="dl" title="Baixar">⬇</button><button data-a="rep" title="Substituir">⇄</button></td></tr>`;
   });
   tb.innerHTML=html;
   $('#empty').classList.toggle('show',!S.entries.length&&!S.srcName);
@@ -909,8 +1365,9 @@ function status(){
   $('#stSel').textContent=S.sel.size?S.sel.size+' selecionado(s)':'';
 }
 function infoCard(){
-  const m=S.meta,rows=[['Arquivo',S.srcName||'—'],['Formato',S.fmt==='afs2'?'AFS v2 (AFS2)':'AFS v1'],['Itens',S.entries.length]];
-  if(S.fmt==='afs1'){rows.push(['Filelist interna',m.hasList?'sim':'não'],['Alinhamento',hex(m.align||0x800)]);}
+  const m=S.meta,rows=[['Arquivo',S.srcName||'—'],['Formato',S.fmt==='afs2'?'AFS v2 (AFS2)':S.fmt==='scei'?'BIN SCEI (bancos SCEIVers)':S.fmt==='sceibank'?'Banco SCEI (VAGs)':'AFS v1'],['Itens',S.entries.length]];
+  if(S.fmt==='scei'||S.fmt==='sceibank')rows.push(...sceiInfoRows());
+  else if(S.fmt==='afs1'){rows.push(['Filelist interna',m.hasList?'sim':'não'],['Alinhamento',hex(m.align||0x800)]);}
   else rows.push(['Alinhamento',hex(m.align||0x20)],['Tam. do ID',(m.idSz||2)+' B'],['Tam. do offset',(m.offSz||4)+' B']);
   if(m.bad)rows.push(['Entradas fora do arquivo',m.bad]);
   $('#cInfo').innerHTML=rows.map(r=>`<span>${r[0]}</span><span title="${esc(r[1])}">${esc(r[1])}</span>`).join('');
@@ -921,20 +1378,22 @@ function idxOf(e){return S.entries.indexOf(e);}
 /* ---------- carregar / opções ---------- */
 function loadContainer(r,name){
   S.fmt=r.fmt;S.meta=r.meta;S.srcName=name;S.hist=[];S.sel.clear();S.cur=null;S.anchor=-1;
-  S.entries=r.entries.map(x=>mkEntry(x.data,x.name,{auto:x.auto,afsId:x.afsId,date:x.date,origOff:x.origOff,origSize:x.origSize}));
+  S.entries=r.entries.map(x=>mkEntry(x.data,x.name,{auto:x.auto,afsId:x.afsId,date:x.date,origOff:x.origOff,origSize:x.origSize,vag:x.vag||null,vagOrig:x.vagOrig==null?null:x.vagOrig,prog:x.prog==null?null:x.prog,progs:x.progs||null}));
+  if(r.fmt==='scei')sceiAttach();
   stopPlay();loadCurrent(null);
   const m=r.meta;
   $('#oFmt').value='keep';
   if(r.fmt==='afs1'){$('#oNames').checked=!!m.hasList;$('#oReserve').checked=m.reserve!==false;$('#oAlign1').value=(m.align||0x800).toString(16).toUpperCase();$('#oStart').value='';$('#oDates').value='keep';}
-  else{$('#oAlign2').value=(m.align||0x20).toString(16).toUpperCase();$('#oIdSz').value=String(m.idSz||2);$('#oRenum').checked=false;}
+  else if(r.fmt==='afs2'){$('#oAlign2').value=(m.align||0x20).toString(16).toUpperCase();$('#oIdSz').value=String(m.idSz||2);$('#oRenum').checked=false;}
   render();
 }
 async function openAFS(file){
+  {const h=new Uint8Array(await file.slice(0,4).arrayBuffer());if(h[0]===0x7F&&h[1]===0x45&&h[2]===0x4C&&h[3]===0x46){await attachElf(file,new Uint8Array(await file.arrayBuffer()));return;}}
   if(S.stack.length&&!confirm('Há sub-AFS abertos. Abrir outro container descarta o que não foi aplicado. Continuar?'))return;
   try{
     const d=new Uint8Array(await file.arrayBuffer());
-    const r=parseAFS(d);S.stack=[];loadContainer(r,file.name);
-    toast(`${file.name}: ${r.fmt==='afs2'?'AFS v2':'AFS v1'}, ${r.entries.length} itens${r.fmt==='afs1'?(r.meta.hasList?', filelist interna encontrada':', sem filelist interna'):''}.`);
+    const r=parseTop(d);S.stack=[];loadContainer(r,file.name);
+    if(r.fmt==='scei'||r.fmt==='sceibank')sceiOpenedToast(file.name,r);else toast(`${file.name}: ${r.fmt==='afs2'?'AFS v2':'AFS v1'}, ${r.entries.length} itens${r.fmt==='afs1'?(r.meta.hasList?', filelist interna encontrada':', sem filelist interna'):''}.`);
     if(r.meta.bad)toast(r.meta.bad+' entrada(s) apontam para fora do arquivo e foram cortadas.','warn');
   }catch(err){toast('Não foi possível abrir: '+err.message,'err');}
 }
@@ -948,19 +1407,25 @@ async function loadList(file){
   if(!S.entries.length){toast('Abra um AFS antes de carregar a filelist.','warn');return;}
   const r=parseList(await file.text());
   push();let n=0;
-  if(r.mapped){r.map.forEach((nm,i)=>{if(S.entries[i]){S.entries[i].name=nm;S.entries[i].auto=false;n++;}});}
-  else r.list.forEach((nm,i)=>{if(S.entries[i]){S.entries[i].name=nm;S.entries[i].auto=false;n++;}});
+  if(r.mapped){r.map.forEach((nm,i)=>{if(S.entries[i]){setPath(S.entries[i],nm);n++;}});}
+  else r.list.forEach((nm,i)=>{if(S.entries[i]){setPath(S.entries[i],nm);n++;}});
   if(S.fmt==='afs1')$('#oNames').checked=true;
   render();
   toast(`${n} nome(s) aplicados.`+(r.count!==S.entries.length?` A lista tem ${r.count} linhas e o container tem ${S.entries.length} itens.`:''),r.count!==S.entries.length?'warn':'');
 }
 function saveList(){
   if(!S.entries.length)return;
-  download(new Blob([S.entries.map((e,i)=>eName(e,i)).join('\r\n')+'\r\n'],{type:'text/plain'}),baseName(S.srcName||'afs')+'_filelist.txt');
+  download(new Blob([S.entries.map((e,i)=>rowName(e,i)).join('\r\n')+'\r\n'],{type:'text/plain'}),baseName(S.srcName||'afs')+'_filelist.txt');
 }
 
 /* ---------- exportar ---------- */
 function buildCurrent(){
+  if(S.fmt==='scei')return {out:buildSceiBin(S.entries,S.meta),fmt:'scei'};
+  if(S.fmt==='sceibank'){
+    const r=buildSceiBank(S.entries,S.meta);
+    if(r.dangling)toast(r.dangling+' amostra(s) apontavam para VAGs removidos e passaram a usar o VAG 0.','warn');
+    return {out:r.out,fmt:'sceibank'};
+  }
   const sel=$('#oFmt').value,fmt=sel==='keep'?S.fmt:sel,es=S.entries,names=es.map((e,i)=>eName(e,i));
   let out;
   if(fmt==='afs1'){
@@ -976,9 +1441,11 @@ function exportAFS(){
   if(S.stack.length){const n=S.stack.length;while(S.stack.length)leaveSub(true);toast(n+' nível(is) de sub-AFS aplicado(s) no AFS principal antes de exportar.');}
   if(!S.entries.length){toast('Não há itens para exportar.','warn');return;}
   const {out,fmt}=buildCurrent();
-  const nm=baseName(S.srcName||'novo')+(S.srcName&&S.srcName!=='novo.afs'?'_mod':'')+'.afs';
+  const scx=fmt==='scei'||fmt==='sceibank';
+  const nm=baseName(S.srcName||'novo')+(S.srcName&&S.srcName!=='novo.afs'?'_mod':'')+(scx?((S.srcName||'').match(/\.[^.]+$/)||['.bin'])[0]:'.afs');
   download(new Blob([out],{type:'application/octet-stream'}),nm);
-  toast(`Exportado ${nm}: ${fmt==='afs2'?'AFS v2':'AFS v1'}, ${fmtBytes(out.length)}.`);
+  toast(`Exportado ${nm}: ${fmt==='afs2'?'AFS v2':fmt==='afs1'?'AFS v1':fmt==='scei'?'BIN SCEI':'banco SCEI'}, ${fmtBytes(out.length)}.`);
+  if(fmt==='scei')exportElf(true);
 }
 
 /* ---------- sub-AFS (AFS dentro de AFS) ---------- */
@@ -988,28 +1455,31 @@ function applyOpts(o){OPT_IDS.forEach(id=>{const el=$('#'+id);if(el.type==='chec
 let lastOpen=0;
 function openSub(e){
   let r;
-  try{r=parseAFS(e.data);}catch(err){toast('Não foi possível abrir como AFS: '+err.message,'err');return;}
+  try{r=e.type==='SBK'?parseSceiBank(e.data):parseAFS(e.data);}catch(err){toast('Não foi possível abrir como container: '+err.message,'err');return;}
   const name=eName(e,idxOf(e));
   lastOpen=Date.now();
   stopPlay();
   S.stack.push({fmt:S.fmt,meta:S.meta,entries:S.entries,srcName:S.srcName,hist:S.hist,sel:new Set(S.sel),cur:S.cur,anchor:S.anchor,opts:snapOpts(),entryUid:e.uid});
   S.filter='';$('#search').value='';
   loadContainer(r,name);
-  toast(`Sub-AFS “${name}” aberto: ${r.fmt==='afs2'?'AFS v2':'AFS v1'}, ${r.entries.length} itens.`);
+  if(e.vn&&e.vn.length===S.entries.length){e.vn.forEach((x,i)=>{const t=S.entries[i];if(x.n){t.name=x.n;t.auto=false;}if(x.f!=null)t.folder=x.f;});render();}
+  toast(`${r.fmt==='sceibank'?'Banco':'Sub-AFS'} “${name}” aberto: ${r.fmt==='afs2'?'AFS v2':r.fmt==='afs1'?'AFS v1':'banco SCEI'}, ${r.entries.length} ${r.fmt==='sceibank'?'VAGs':'itens'}.`);
 }
 function leaveSub(apply){
   const f=S.stack.pop();if(!f)return;
   const bytes=apply?buildCurrent().out:null;
+  const vn=apply&&S.fmt==='sceibank'?S.entries.map(x=>({n:x.auto?'':x.name,f:x.folder==null?null:x.folder})):null;
   stopPlay();
   S.fmt=f.fmt;S.meta=f.meta;S.entries=f.entries;S.srcName=f.srcName;S.hist=f.hist;S.sel=f.sel;S.anchor=f.anchor;S.filter='';
   $('#search').value='';applyOpts(f.opts);
   const e=S.entries.find(x=>x.uid===f.entryUid);
+  if(vn&&e)e.vn=vn;
   S.cur=e||null;
   if(e){
     S.sel=new Set([e.uid]);
     if(apply){
       push();let data=bytes;const slot=e.origSize!=null?e.origSize:e.data.length;
-      if($('#oPad').checked&&data.length<slot){const p=new Uint8Array(slot);p.set(data);data=p;}
+      if($('#oPad').checked&&data.length<slot){data=padTo(data,slot,e);}
       setData(e,data);
     }
   }
@@ -1030,7 +1500,10 @@ function ensureCtx(){if(!ac){ac=new (window.AudioContext||window.webkitAudioCont
 function isConvertible(f,d){const t=sniff(d);if(t==='WAV'||t==='OGG')return true;if(t!=='BIN')return false;return /\.(mp3|flac|m4a|aac|opus|wma|weba|webm|aif|aiff|mp4)$/i.test(f.name);}
 function askConv(files,hint,pre){
   return new Promise(res=>{
-    const dlg=$('#dlgConv'),sr=$('#cvRate');
+    const dlg=$('#dlgConv'),sr=$('#cvRate'),vagMode=S.fmt==='sceibank';
+    $('#dlgConv h3').textContent=vagMode?'Converter para VAG (PS-ADPCM)':'Converter para ADX';
+    $('#cvCh').parentElement.style.display=vagMode?'none':'';$('#cvHp').parentElement.style.display=vagMode?'none':'';
+    $('#cvNote').textContent=vagMode?'O início do loop é arredondado para múltiplos de 28 amostras, o tamanho de um quadro PS-ADPCM. O VAG é sempre mono.':'O início do loop é arredondado para múltiplos de 32 amostras, o tamanho de um quadro ADX.';
     const rates=[8000,11025,16000,22050,24000,32000,44100,48000];
     if(hint.sr&&!rates.includes(hint.sr))rates.push(hint.sr);rates.sort((a,b)=>a-b);
     sr.innerHTML=rates.map(r=>`<option value="${r}">${r} Hz</option>`).join('');sr.value=String(hint.sr||44100);
@@ -1072,20 +1545,21 @@ async function convertToADX(file,d,o,decoded){
     const r0=buf.sampleRate,s=Math.max(0,Math.floor(o.range.start*r0)),e=Math.min(buf.length,Math.ceil(o.range.end*r0));
     if(e-s>=1){const nb=new AudioBuffer({length:e-s,numberOfChannels:buf.numberOfChannels,sampleRate:r0});for(let c=0;c<buf.numberOfChannels;c++)nb.copyToChannel(buf.getChannelData(c).subarray(s,e),c);buf=nb;}
   }
-  const ch=o.ch||Math.min(2,buf.numberOfChannels);
+  const ch=S.fmt==='sceibank'?1:(o.ch||Math.min(2,buf.numberOfChannels));
   const rb=await resample(buf,o.rate,ch);
   const chs=[];for(let c=0;c<rb.numberOfChannels;c++)chs.push(rb.getChannelData(c));
-  return encodeADX(chs,o.rate,{hp:o.hp,loop:o.loop});
+  return S.fmt==='sceibank'?encodeVAG(chs,o.rate,{loop:o.loop}):encodeADX(chs,o.rate,{hp:o.hp,loop:o.loop});
 }
 /* devolve [{name,data}] pronto para entrar no container */
 async function prepare(files,hint){
   const raw=[],conv=[];
   for(const f of files){
     const d=new Uint8Array(await f.arrayBuffer());
+    if(S.fmt==='sceibank'&&sniff(d)==='VAGF'){const v=parseVAGp(d);if(v){raw.push({f,d:v.data,sr:v.sr});continue;}}
     (isConvertible(f,d)?conv:raw).push({f,d});
   }
   const out=[];
-  raw.forEach(x=>out.push({name:x.f.name,data:x.d}));
+  raw.forEach(x=>out.push({name:x.f.name,data:x.d,sr:x.sr}));
   if(conv.length){
     let pre=null;
     if(conv.length===1){
@@ -1097,7 +1571,7 @@ async function prepare(files,hint){
     const o=await askConv(conv.map(x=>x.f),hint||{},pre);
     if(!o){if(!raw.length)return null;}
     else for(const x of conv){
-      try{out.push({name:baseName(x.f.name)+'.adx',data:await convertToADX(x.f,x.d,o,x.ab)});}
+      try{out.push({name:baseName(x.f.name)+(S.fmt==='sceibank'?'.vag':'.adx'),data:await convertToADX(x.f,x.d,o,x.ab),sr:S.fmt==='sceibank'?o.rate:undefined});}
       catch(err){toast(`Falha ao converter ${x.f.name}: o navegador não conseguiu decodificar o arquivo.`,'err');}
     }
   }
@@ -1108,9 +1582,10 @@ async function replaceWith(e,file){
   if(!it)return;
   push();
   let data=it[0].data;const slot=e.origSize!=null?e.origSize:e.data.length;
-  if($('#oPad').checked&&data.length<slot){const p=new Uint8Array(slot);p.set(data);data=p;}
-  if(data.length>slot&&e.origSize!=null)toast(`O novo áudio (${fmtBytes(data.length)}) é maior que o espaço original (${fmtBytes(slot)}). Exporte o AFS completo para reorganizar.`,'warn');
+  if($('#oPad').checked&&data.length<slot){data=padTo(data,slot,e);}
+  if(data.length>slot&&e.origSize!=null)toast(`O novo áudio (${fmtBytes(data.length)}) é maior que o espaço original (${fmtBytes(slot)}). Exporte o container para reorganizar.`,'warn');
   if(P.e===e)stopPlay();
+  if(it[0].sr&&e.vag)e.vag=Object.assign({},e.vag,{sr:it[0].sr});
   setData(e,data);
   render();if(S.cur===e)loadCurrent(e);
   toast(`“${eName(e,idxOf(e))}” substituído por ${it[0].name}.`);
@@ -1122,7 +1597,7 @@ async function importFiles(files){
   push();
   const sel=S.entries.map((e,i)=>S.sel.has(e.uid)?i:-1).filter(i=>i>=0);
   let at=sel.length?Math.max(...sel)+1:S.entries.length;
-  const ne=it.map(x=>mkEntry(x.data,x.name,{afsId:null}));
+  const ne=it.map(x=>mkEntry(x.data,x.name,{afsId:null,vag:S.fmt==='sceibank'?{sr:x.sr||(S.cur&&S.cur.info?S.cur.info.sr:44100),es:255}:null}));
   ne.forEach(e=>{e.afsId=null;});
   S.entries.splice(at,0,...ne);
   let id=nextId();ne.forEach(e=>{e.afsId=id++;});
@@ -1146,21 +1621,24 @@ function moveBlock(uids,target){ // target = índice de inserção no array orig
   rest.splice(Math.max(0,target-before),0,...mv);S.entries=rest;render();
 }
 function delSel(){
-  if(!S.sel.size)return;push();
+  if(!S.sel.size)return;
+  if(!delGuard())return;
+  push();
   S.entries=S.entries.filter(e=>!S.sel.has(e.uid));
   if(S.cur&&S.sel.has(S.cur.uid)){S.cur=null;stopPlay();loadCurrent(null);}
   S.sel.clear();render();
 }
 function dupSel(){
   if(!S.sel.size)return;push();const out=[],added=[];
-  S.entries.forEach(e=>{out.push(e);if(S.sel.has(e.uid)){const c=mkEntry(e.data,e.auto?'':e.name.replace(/(\.[^.]*)?$/,'_copia$1'),{afsId:null});c.auto=e.auto;out.push(c);added.push(c);}});
+  S.entries.forEach(e=>{out.push(e);if(S.sel.has(e.uid)){const c=mkEntry(e.data,e.auto?'':e.name.replace(/(\.[^.]*)?$/,'_copia$1'),{afsId:null,vag:e.vag?Object.assign({},e.vag):null,folder:S.fmt==='sceibank'?folderOf(e):null});c.auto=e.auto;out.push(c);added.push(c);}});
   S.entries=out;let id=nextId();added.forEach(c=>{c.afsId=id++;});render();
 }
 function sortBy(k){
   if(!k||!S.entries.length)return;push();
   const nm=new Map(S.entries.map((e,i)=>[e.uid,eName(e,i)]));
   const cmp={name:(a,b)=>nm.get(a.uid).localeCompare(nm.get(b.uid),undefined,{numeric:true}),size:(a,b)=>b.data.length-a.data.length,type:(a,b)=>a.type.localeCompare(b.type)||nm.get(a.uid).localeCompare(nm.get(b.uid),undefined,{numeric:true}),
-    orig:(a,b)=>(a.origOff==null?1e15:a.origOff)-(b.origOff==null?1e15:b.origOff)}[k];
+    orig:(a,b)=>(a.origOff==null?1e15:a.origOff)-(b.origOff==null?1e15:b.origOff),
+    prog:(a,b)=>((a.prog==null?1e9:a.prog)-(b.prog==null?1e9:b.prog))||((a.vagOrig==null?1e9:a.vagOrig)-(b.vagOrig==null?1e9:b.vagOrig))}[k];
   S.entries.sort(cmp);render();
 }
 function editCell(td,val,commit){
@@ -1173,8 +1651,9 @@ function editCell(td,val,commit){
 function extractList(es){
   const used=new Set(),conv=$('#oWav').checked,out=[];
   es.forEach(e=>{
-    let nm=eName(e,idxOf(e)),data=e.data;
+    let nm=rowName(e,idxOf(e)),data=e.data;
     if(conv&&e.info&&canDecode(e.info)){try{const d=getDecoded(e);data=wavFromChannels(d.chs,d.sr);nm=baseName(nm)+'.wav';}catch(_){}}
+    else if(e.type==='VAG')data=wrapVAGp(data,e.info.sr,nm.split('/').pop());
     let u=nm,k=1;while(used.has(u.toLowerCase())){u=baseName(nm)+'_'+(k++)+(nm.match(/\.[^.]+$/)||[''])[0];}
     used.add(u.toLowerCase());out.push({name:u,data});
   });
@@ -1183,7 +1662,7 @@ function extractList(es){
 function extractSel(){
   const es=selected();if(!es.length){toast('Selecione ao menos um item.','warn');return;}
   const l=extractList(es);
-  if(l.length===1)download(new Blob([l[0].data]),l[0].name);else download(makeZip(l),baseName(S.srcName||'afs')+'_selecao.zip');
+  if(l.length===1)download(new Blob([l[0].data]),l[0].name.split('/').pop());else download(makeZip(l),baseName(S.srcName||'afs')+'_selecao.zip');
 }
 function extractAll(){
   if(!S.entries.length)return;
@@ -1194,12 +1673,12 @@ function extractAll(){
 const P={gain:null,src:null,buf:null,e:null,t0:0,pos:0,playing:false,loop:false,raf:0,token:0};
 function canDecode(i){
   if(!i||i.encrypted)return false;
-  if(i.type==='AHX')return true;
+  if(i.type==='AHX'||i.type==='VAG')return true;
   return i.type==='ADX'&&(i.enc===3||i.enc===4)&&i.bs===18&&i.bits===4;
 }
 function getDecoded(e){
   let c=DEC.get(e.data);if(c)return c;
-  const r=e.info.type==='AHX'?decodeAHX(e.data,e.info):decodeADX(e.data,e.info);
+  const r=e.info.type==='VAG'?decodeVAG(e.data,e.info.sr):e.info.type==='AHX'?decodeAHX(e.data,e.info):decodeADX(e.data,e.info);
   const buf=new AudioBuffer({length:Math.max(1,r.ns),numberOfChannels:r.chs.length,sampleRate:r.sr});
   r.chs.forEach((a,i)=>buf.copyToChannel(a,i));
   c={buf,chs:r.chs,sr:r.sr};DEC.set(e.data,c);return c;
@@ -1275,7 +1754,7 @@ async function loadCurrent(e){
   if(e){
     const i=e.info,add=t=>chips.insertAdjacentHTML('beforeend',`<span class="chip">${esc(t)}</span>`);
     add(e.type);add(fmtBytes(e.data.length));
-    if(i){add(i.ch+' canal(is)');add(i.sr+' Hz');add(fmtTime(i.dur));add('v'+i.ver+', tipo '+i.enc);if(i.loop)add('loop '+i.loop.start+' a '+i.loop.end);}
+    if(i){add(i.ch+' canal(is)');add(i.sr+' Hz');add(fmtTime(i.dur));add(i.type==='VAG'?'PS-ADPCM':'v'+i.ver+', tipo '+i.enc);if(i.loop)add('loop '+i.loop.start+' a '+i.loop.end);}
     if(canDecode(i)){
       try{P.buf=getDecoded(e).buf;msg='';P.loop=!!i.loop;}catch(err){msg='Falha ao decodificar: '+err.message;}
     }    else if(i&&i.encrypted)msg='ADX criptografado: sem pré-escuta.';
@@ -1379,12 +1858,13 @@ function Preview(chs,sr){
 }
 
 /* ---------- editor de áudio (ADX / AHX) ---------- */
-function applyData(e,data,msg){
+function applyData(e,data,msg,vsr){
   push();
   const slot=e.origSize!=null?e.origSize:e.data.length;
-  if($('#oPad').checked&&data.length<slot){const p=new Uint8Array(slot);p.set(data);data=p;}
-  if(data.length>slot&&e.origSize!=null)toast(`O áudio (${fmtBytes(data.length)}) é maior que o espaço original (${fmtBytes(slot)}). Exporte o AFS completo para reorganizar.`,'warn');
+  if($('#oPad').checked&&data.length<slot){data=padTo(data,slot,e);}
+  if(data.length>slot&&e.origSize!=null)toast(`O áudio (${fmtBytes(data.length)}) é maior que o espaço original (${fmtBytes(slot)}). Exporte o container para reorganizar.`,'warn');
   if(P.e===e)stopPlay();
+  if(vsr&&e.vag)e.vag=Object.assign({},e.vag,{sr:vsr});
   setData(e,data);
   render();if(S.cur===e)loadCurrent(e);
   toast(`“${eName(e,idxOf(e))}” ${msg} (${fmtBytes(e.data.length)}).`);
@@ -1400,6 +1880,7 @@ function openEditor(e){
   $('#edInfo').textContent=`${inf.type}, ${inf.ch} canal(is), ${sr} Hz, ${fmtTime(dur)}`;
   $('#edAdx').style.display=isAHX?'none':'block';
   $('#edAhx').style.display=isAHX?'block':'none';
+  $('#edFmt').textContent=inf.type==='VAG'?'O VAG (PS-ADPCM mono)':'O ADX';
   ['edGain','edFi','edFo'].forEach(id=>{$('#'+id).value=id==='edGain'?'0':'0';});
   $('#edNorm').checked=false;
   const lp=inf.loop&&inf.loop.end>inf.loop.start?[inf.loop.start/sr,Math.min(inf.loop.end,total)/sr]:null;
@@ -1449,7 +1930,7 @@ function openEditor(e){
         ls=Math.max(0,Math.min(len-1,ls));le=Math.max(0,Math.min(len,le));
         if(le>ls+32)loop={start:ls,end:le};else toast('Loop fora do trecho ou curto demais: gravado sem loop.','warn');
       }
-      applyData(e,encodeADX(out,sr,{hp:inf.hp||500,loop}),'editado');
+      applyData(e,inf.type==='VAG'?encodeVAG(out,sr,{loop}):encodeADX(out,sr,{hp:inf.hp||500,loop}),'editado');
     }catch(err){toast('Falha ao aplicar: '+err.message,'err');}
   };
   dlg.returnValue='';dlg.addEventListener('close',onClose,{once:true});
@@ -1783,7 +2264,7 @@ function mxTargets(){
   const es=selected(),b=$('#mxRep');
   if(es.length===1){
     const n=eName(es[0],idxOf(es[0]));b.disabled=false;
-    b.textContent='Substituir “'+(n.length>22?n.slice(0,21)+'…':n)+'”';b.title='Grava o resultado como ADX no lugar de '+n;
+    b.textContent='Substituir “'+(n.length>22?n.slice(0,21)+'…':n)+'”';b.title='Grava o resultado como '+(es[0].type==='VAG'?'VAG':'ADX')+' no lugar de '+n;
   }else{b.disabled=true;b.textContent='Substituir item selecionado';b.title='Selecione um único item na lista do AFS para poder substituí-lo';}
 }
 
@@ -1925,18 +2406,19 @@ function mxToReplace(){
   const es=selected();
   if(es.length!==1){toast('Selecione exatamente um item na lista do AFS para substituir.','warn');return;}
   const mix=mxResult();if(!mix)return;
-  const e=es[0],data=encodeADX(mix.chs,mix.sr,{hp:(e.info&&e.info.hp)||500,loop:mxLoopOpt(mix)});
-  $('#dlgMix').close();applyData(e,data,'substituído pelo editor');
+  const e=es[0],isV=e.type==='VAG',data=isV?encodeVAG(mix.chs,mix.sr,{loop:mxLoopOpt(mix)}):encodeADX(mix.chs,mix.sr,{hp:(e.info&&e.info.hp)||500,loop:mxLoopOpt(mix)});
+  $('#dlgMix').close();applyData(e,data,'substituído pelo editor',isV?mix.sr:0);
 }
 function mxToNew(){
   const mix=mxResult();if(!mix)return;
-  const nm=(baseName($('#mxName').value.trim()||'mix')||'mix')+'.adx';
-  const data=encodeADX(mix.chs,mix.sr,{hp:500,loop:mxLoopOpt(mix)});
+  const isV=S.fmt==='sceibank';
+  const nm=(baseName($('#mxName').value.trim()||'mix')||'mix')+(isV?'.vag':'.adx');
+  const data=isV?encodeVAG(mix.chs,mix.sr,{loop:mxLoopOpt(mix)}):encodeADX(mix.chs,mix.sr,{hp:500,loop:mxLoopOpt(mix)});
   $('#dlgMix').close();
   push();
   const sel=S.entries.map((e,i)=>S.sel.has(e.uid)?i:-1).filter(i=>i>=0);
   const at=sel.length?Math.max(...sel)+1:S.entries.length;
-  const ne=mkEntry(data,nm,{afsId:null});
+  const ne=mkEntry(data,nm,{afsId:null,vag:isV?{sr:mix.sr,es:255}:null});
   S.entries.splice(at,0,ne);ne.afsId=nextId();
   S.sel=new Set([ne.uid]);S.anchor=ne.uid;S.cur=ne;
   if(!S.srcName)S.srcName='novo.afs';
@@ -2035,22 +2517,22 @@ tb.addEventListener('click',ev=>{
   if(b){
     const a=b.dataset.a;
     if(a==='play'){S.sel=new Set([u]);S.anchor=u;S.cur=e;refreshSel();playEntry(e);}
-    else if(a==='dl'){const l=extractList([e]);download(new Blob([l[0].data]),l[0].name);}
+    else if(a==='dl'){const l=extractList([e]);download(new Blob([l[0].data]),l[0].name.split('/').pop());}
     else if(a==='rep'){S.sel=new Set([u]);S.cur=e;refreshSel();pickReplace(e);}
     else if(a==='open'){openSub(e);}
     else if(a==='edit'){S.sel=new Set([u]);S.anchor=u;S.cur=e;refreshSel();openEditor(e);}
     return;
   }
   if(Date.now()-lastOpen<500)return;
-  if(e&&e.type==='AFS'&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey){openSub(e);return;}
+  if(e&&isSub(e)&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey){openSub(e);return;}
   selectRow(ev,u);
 });
 tb.addEventListener('dblclick',ev=>{
   const td=ev.target.closest('td'),tr=ev.target.closest('tr');if(!td||!tr)return;
   const e=S.entries.find(x=>x.uid===+tr.dataset.u);if(!e)return;
-  if(td.dataset.k==='name')editCell(td,eName(e,idxOf(e)),v=>{push();e.name=v;e.auto=!v;});
+  if(td.dataset.k==='name')editCell(td,rowName(e,idxOf(e)),v=>{push();setPath(e,v);});
   else if(td.dataset.k==='id')editCell(td,e.afsId==null?'':String(e.afsId),v=>{const n=parseInt(v);if(!isNaN(n)&&n>=0){push();e.afsId=n;}});
-  else if(!ev.target.closest('button')){if(e.type==='AFS')openSub(e);else playEntry(e);}
+  else if(!ev.target.closest('button')){if(isSub(e))openSub(e);else playEntry(e);}
 });
 tb.addEventListener('dragstart',ev=>{
   const tr=ev.target.closest('tr');if(!tr)return;const u=+tr.dataset.u;
@@ -2077,6 +2559,13 @@ $('#bNew').onclick=newAFS;
 $('#bList').onclick=()=>{$('#fList').value='';$('#fList').click();};
 $('#bSaveList').onclick=saveList;
 $('#bExport').onclick=exportAFS;
+$('#bElf').onclick=()=>{$('#fElf').value='';$('#fElf').click();};
+$('#fElf').onchange=ev=>{if(ev.target.files[0])openAFS(ev.target.files[0]);};
+$('#bScan').onclick=sceiAnalysis;
+$('#bExtTree').onclick=extractTree;
+$('#bExportElf').onclick=()=>exportElf(false);
+$('#scClose').onclick=()=>$('#dlgScei').close();
+$('#scTxt').onclick=sceiReportDownload;
 $('#bBack').onclick=()=>leaveSub(true);
 $('#bDiscard').onclick=()=>{if(confirm('Descartar as alterações deste sub-AFS?'))leaveSub(false);};
 $('#bRep').onclick=()=>{const es=selected();if(es.length!==1){toast('Selecione exatamente um item para substituir.','warn');return;}pickReplace(es[0]);};
@@ -2123,6 +2612,12 @@ window.addEventListener('dragover',ev=>{if(hasFiles(ev))ev.preventDefault();});
 window.addEventListener('drop',async ev=>{
   if(!hasFiles(ev))return;ev.preventDefault();dcount=0;veil.classList.remove('show');
   const files=[...ev.dataTransfer.files];if(!files.length)return;
+  const kinds=await Promise.all(files.map(async f=>{const h=new Uint8Array(await f.slice(0,8).arrayBuffer());return h[0]===0x7F&&h[1]===0x45&&h[2]===0x4C&&h[3]===0x46?'elf':hasTag(h,0,'SCEIVers')?'scei':'';}));
+  if(kinds.some(k=>k)){
+    const si=kinds.indexOf('scei');if(si>=0)await openAFS(files[si]);
+    const ei=kinds.indexOf('elf');if(ei>=0)await openAFS(files[ei]);
+    return;
+  }
   const head=new Uint8Array(await files[0].slice(0,4).arrayBuffer());
   const m=String.fromCharCode(...head);
   if(files.length===1&&(m==='AFS2'||m.slice(0,3)==='AFS'&&(head[3]===0||head[3]===0x20)))openAFS(files[0]);

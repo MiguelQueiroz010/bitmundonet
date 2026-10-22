@@ -4,6 +4,7 @@ import { getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy,
 import { getFirebaseConfig, saveLocalFirebaseConfig } from "./firebase-manager.js";
 import { saveLocalEmailJSConfig, clearLocalEmailJSConfig } from "./emailjs-manager.js";
 import { parseArticleTags, sanitizeString } from "./utils.js";
+import { openArticleStudio, upgradeTextarea, upgradeAllTopicTextareas, getTopicRawContent } from "./rich_editor.js";
 
 // Inject Emoji CSS
 if (!document.getElementById('emoji-picker-css')) {
@@ -1731,6 +1732,7 @@ window.previewArticle = async (id) => {
             <link rel="stylesheet" href="/css/projects.css">
             <style>
                 body { background: #0a0b10; overflow-x: hidden; margin: 0; padding: 2rem; }
+                .article-content p { margin: 0 0 1.5rem 0; line-height: 1.8; }
             </style>
         </head>
         <body>
@@ -1817,198 +1819,20 @@ window.previewLibrary = async (id) => {
     frameDoc.close();
 };
 
-window.addNewArticle = () => {
-    const html = `
-        <div class="modal-header">
-                <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">📰 Nova Postagem (Firestore)</h3>
-                <button class="save-btn" style="background: rgba(255, 255, 255, 0.39);" onclick="closeAdminModal()">✕ Fechar</button>
-            </div>
-
-            <div class="responsive-grid">
-                <div class="form-group">
-                    <label>Título</label>
-                    <input type="text" id="art-title">
-                </div>
-                <div class="form-group">
-                    <label>Categoria</label>
-                    <input type="text" id="art-category">
-                </div>
-            </div>
-
-            <!-- Topics Section (Visible by Default) -->
-            <div id="topics-container" style="margin-top: 2rem; display: block;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px dotted rgba(255,255,255,0.1); padding-bottom: 1rem;">
-                    <h4 style="color: var(--admin-primary); margin: 0;">📦 Tópicos Estruturados</h4>
-                    <button class="save-btn" style="padding: 0.5rem 1rem; font-size: 0.75rem; background: #10b981; color: #000;" onclick="addTopicRow()">+ Novo Tópico</button>
-                </div>
-                <div id="topics-list">
-                    <!-- Empty initially -->
-                </div>
-            </div>
-
-            <!-- Legacy Content Section (Hidden by Default) -->
-            <div class="form-group" style="margin-top: 2rem; display: none;" id="legacy-content-group">
-                <label>Conteúdo (Simples)</label>
-                <textarea id="art-content" style="height: 400px; font-family: monospace;"></textarea>
-            </div>
-
-            <!-- Toggle Button -->
-            <button class="save-btn" style="margin-top: 1.5rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.7rem; width: 100%; border: 1px dashed rgba(59, 130, 246, 0.3);" 
-                    onclick="toggleTopicSystem(true)">
-                🔄 Reverter para Conteúdo Simples
-            </button>
-
-            <div class="form-group" style="margin-top: 1.5rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="art-selected" style="width: auto;">
-                    Publicar (Tornar Visível)
-                </label>
-            </div>
-
-            <div style="display: flex; gap: 1rem; margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
-                <button class="save-btn" style="flex: 1;" onclick="saveArticleChanges(null)">Criar no DB</button>
-            </div>
-        `;
-    window.showModal(html);
-};
-
-window.editArticle = async (id) => {
-    const docSnap = await getDoc(doc(db, "articles", id));
-    if (!docSnap.exists()) return;
-    const a = docSnap.data();
-
-    const html = `
-        <div class="modal-header">
-                <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.5rem;">📰 Editando Artigo: ${a.title}</h3>
-                <button class="save-btn" style="background: rgba(255, 255, 255, 0.46);" onclick="closeAdminModal()">✕ Fechar</button>
-            </div>
-
-            <div class="responsive-grid">
-                <div class="form-group">
-                    <label>Título</label>
-                    <input type="text" id="art-title" value="${a.title || ''}">
-                    <!-- Hidden ID input for save handling -->
-                    <input type="hidden" id="art-id" value="${id}">
-                </div>
-                <div class="form-group">
-                    <label>Autor</label>
-                    <input type="text" id="art-author" value="${a.author || ''}">
-                </div>
-                <div class="form-group">
-                    <label>Categoria / Tags</label>
-                    <input type="text" id="art-category" value="${a.category || ''}">
-                </div>
-                <div class="form-group">
-                    <label>Data</label>
-                    <input type="text" id="art-date" value="${a.date || ''}">
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 1.5rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="art-selected" style="width: auto;" ${a.selected ? 'checked' : ''}>
-                    Publicar (Tornar Visível)
-                </label>
-            </div>
-
-            <div id="topics-container" style="margin-top: 2rem; display: ${a.topics ? 'block' : 'none'};">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px dotted rgba(255,255,255,0.1); padding-bottom: 1rem;">
-                    <h4 style="color: var(--admin-primary); margin: 0;">📦 Tópicos Estruturados</h4>
-                    <button class="save-btn" style="padding: 0.5rem 1rem; font-size: 0.75rem; background: #10b981; color: #000;" onclick="addTopicRow()">+ Novo Tópico</button>
-                </div>
-                <div id="topics-list">
-                    ${(a.topics || []).map(t => `
-                        <div class="topic-editor-row" style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                <strong style="color: #666; font-size: 0.7rem; text-transform: uppercase;">Tópico</strong>
-                                <button onclick="this.parentElement.parentElement.remove()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 1.2rem;">&times;</button>
-                            </div>
-                            <div class="form-group">
-                                <label>Título do Tópico</label>
-                                <input type="text" class="topic-title-input" value="${t.title || ''}" placeholder="Deixe vazio se não quiser subtítulo">
-                            </div>
-                            <div class="form-group">
-                                <label>Conteúdo</label>
-                                <textarea class="topic-content-input" style="height: 150px; font-family: monospace;">${t.content || ''}</textarea>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 2rem; display: ${a.topics ? 'none' : 'block'};" id="legacy-content-group">
-                <label>Conteúdo (Legado)</label>
-                <textarea id="art-content" style="height: 400px; font-family: monospace;">${a.content || ''}</textarea>
-            </div>
-
-            <button class="save-btn" style="margin-top: 1.5rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.7rem; width: 100%; border: 1px dashed rgba(59, 130, 246, 0.3);" 
-                    onclick="toggleTopicSystem(${!!a.topics})">
-                ${a.topics ? '🔄 Reverter para Conteúdo Simples' : '🚀 Converter para Sistema de Tópicos'}
-            </button>
- 
-            <div style="display: flex; gap: 1rem; margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
-                <button class="save-btn" style="flex: 2; padding: 1rem;" onclick="saveArticleChanges('${id}')">💾 Salvar Alterações no Firestore</button>
-                <button class="save-btn" style="flex: 1; background: rgba(239, 68, 68, 0.1); color: #ef4444;" onclick="deleteArticle('${id}')">🗑️ Excluir</button>
-            </div>
-        `;
-    window.showModal(html);
-};
-
-window.saveArticleChanges = async (id) => {
-    // 1. Determine ID
-    let newId = id;
-    const idInput = document.getElementById('art-id');
-    const titleInput = document.getElementById('art-title');
-
-    if (!newId) {
-        if (idInput) {
-            newId = idInput.value.trim();
-        }
-        // Fallback: Generate from Title if ID input is missing or empty
-        if (!newId && titleInput) {
-            newId = titleInput.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        }
+/**
+ * Salva os dados de um artigo no Firestore e gerencia notificações Push
+ */
+async function saveArticleData(articleId, data) {
+    if (!articleId) {
+        throw new Error("Não foi possível gerar um ID válido para o artigo. Verifique o título.");
     }
 
-    if (!newId) return alert("Erro: Não foi possível gerar um ID. Verifique o título.");
-
-    // 2. Determine Author & Date (Auto if missing)
-    const authorInput = document.getElementById('art-author');
-    const author = authorInput ? authorInput.value : "BitMundo";
-
-    const dateInput = document.getElementById('art-date');
-    const date = dateInput ? dateInput.value : new Date().toLocaleDateString('pt-BR');
-
-    const selectedInput = document.getElementById('art-selected');
-    const selected = selectedInput ? selectedInput.checked : false;
-
-    const data = {
-        title: titleInput.value,
-        author: author,
-        category: document.getElementById('art-category').value,
-        date: date,
-        sortDate: parseDate(date),
-        selected: selected
-    };
-
-    // Handle Topics if active
-    const topicsContainer = document.getElementById('topics-container');
-    if (topicsContainer && topicsContainer.style.display !== 'none') {
-        const topicRows = document.querySelectorAll('.topic-editor-row');
-        data.topics = Array.from(topicRows).map(row => ({
-            title: row.querySelector('.topic-title-input').value,
-            content: row.querySelector('.topic-content-input').value
-        }));
-        data.content = ""; // Clear legacy content when using topics
-    } else {
-        data.content = document.getElementById('art-content').value;
-        data.topics = null; // Clear topics when reverting to legacy
-    }
+    data.sortDate = parseDate(data.date);
 
     try {
-        await setDoc(doc(db, "articles", newId), data, { merge: true });
-        showNotification("✅ Salvo com sucesso!", "success");
-        
+        await setDoc(doc(db, "articles", articleId), data, { merge: true });
+        showNotification("✅ Artigo salvo com sucesso no Firestore!", "success");
+
         // Disparo de notificação Push via GitHub Actions
         if (data.selected) {
             if (confirm("O artigo está público! Deseja enviar uma notificação push para os assinantes?")) {
@@ -2053,14 +1877,100 @@ window.saveArticleChanges = async (id) => {
             }
         }
 
-        loadArticles();
-    } catch (e) { showNotification("Erro: " + e.message, "error"); }
+        if (typeof window.loadArticles === 'function') window.loadArticles();
+        return true;
+    } catch (e) {
+        showNotification("Erro: " + e.message, "error");
+        throw e;
+    }
+}
+
+window.addNewArticle = () => {
+    openArticleStudio({
+        article: {
+            title: '',
+            author: 'BitMundo',
+            category: 'Geral',
+            date: new Date().toLocaleDateString('pt-BR'),
+            selected: false,
+            topics: [{ title: '', content: '' }]
+        },
+        id: null,
+        onSave: async (payload, targetId) => {
+            return await saveArticleData(targetId, payload);
+        },
+        onDelete: null,
+        onClose: () => {
+            if (typeof window.loadArticles === 'function') window.loadArticles();
+        }
+    });
+};
+
+window.editArticle = async (id) => {
+    try {
+        const docSnap = await getDoc(doc(db, "articles", id));
+        if (!docSnap.exists()) {
+            showNotification("Postagem não encontrada no banco de dados.", "error");
+            return;
+        }
+        const a = docSnap.data();
+
+        // Se o artigo não tiver tópicos ou vier do sistema legado, cria o primeiro tópico
+        if (!a.topics || !Array.isArray(a.topics) || a.topics.length === 0) {
+            a.topics = [{ title: '', content: a.content || '' }];
+        }
+
+        openArticleStudio({
+            article: a,
+            id: id,
+            onSave: async (payload, targetId) => {
+                return await saveArticleData(targetId || id, payload);
+            },
+            onDelete: async (idToDelete) => {
+                if (confirm("Excluir postagem permanentemente?")) {
+                    await deleteDoc(doc(db, "articles", idToDelete));
+                    showNotification("Postagem excluída com sucesso!", "success");
+                    if (typeof window.loadArticles === 'function') window.loadArticles();
+                    return true;
+                }
+                return false;
+            },
+            onClose: () => {
+                if (typeof window.loadArticles === 'function') window.loadArticles();
+            }
+        });
+    } catch (err) {
+        console.error("Erro ao abrir artigo para edição:", err);
+        showNotification("Erro ao carregar artigo: " + err.message, "error");
+    }
+};
+
+window.saveArticleChanges = async (id) => {
+    // Mantido para compatibilidade com chamadas manuais se necessário
+    const titleInput = document.getElementById('art-title');
+    if (!titleInput) return;
+    const authorInput = document.getElementById('art-author');
+    const categoryInput = document.getElementById('art-category');
+    const dateInput = document.getElementById('art-date');
+    const selectedInput = document.getElementById('art-selected');
+
+    let newId = id || (titleInput.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''));
+    const data = {
+        title: titleInput.value,
+        author: authorInput ? authorInput.value : "BitMundo",
+        category: categoryInput ? categoryInput.value : "Geral",
+        date: dateInput ? dateInput.value : new Date().toLocaleDateString('pt-BR'),
+        selected: selectedInput ? selectedInput.checked : false
+    };
+
+    return await saveArticleData(newId, data);
 };
 
 window.deleteArticle = async (id) => {
     if (confirm("Excluir postagem permanentemente?")) {
         await deleteDoc(doc(db, "articles", id));
-        loadArticles();
+        showNotification("Postagem excluída!", "success");
+        if (typeof window.loadArticles === 'function') window.loadArticles();
     }
 };
 
@@ -3326,11 +3236,15 @@ window.addTopicRow = () => {
         </div>
         <div class="form-group">
             <label>Conteúdo</label>
-            <textarea class="topic-content-input" style="height: 150px; font-family: monospace;"></textarea>
+            <textarea class="topic-content-input" placeholder="Digite o conteúdo do tópico..."></textarea>
         </div>
     `;
 
     container.appendChild(newRow);
+
+    // Upgrade the new textarea to rich editor
+    const ta = newRow.querySelector('textarea.topic-content-input');
+    if (ta) upgradeTextarea(ta);
 };
 
 /**

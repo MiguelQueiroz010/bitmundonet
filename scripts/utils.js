@@ -53,11 +53,11 @@ export function parseArticleTags(text) {
     // 3. Image Tags Support
     // Style 1: (image style="..." = "url")caption(/image)
     html = html.replace(/\(image style="([^"]+)"\s*=\s*"([^"]+)"\)(.*?)\(\/image\)/gi,
-        '<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Image" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"><p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); font-style: italic; margin-top: 0.5rem; text-align: center;">$3</p></div>');
+        '\n\n<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Image" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"><p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); font-style: italic; margin-top: 0.5rem; text-align: center;">$3</p></div>\n\n');
 
     // Style 2: (image style="...")url(/image)
     html = html.replace(/\(image style="([^"]+)"\)([^)]*)\(\/image\)/gi,
-        '<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Image" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"></div>');
+        '\n\n<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Image" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"></div>\n\n');
 
     // 4. Flexible Formatting Tags (Independent Open/Close)
     // Support toggle style: (color="red")Text(color="blue")More Text(/color)
@@ -67,12 +67,27 @@ export function parseArticleTags(text) {
     html = html.replace(/\(\/font-size\)/gi, '</span>');
     html = html.replace(/\(strong\)/gi, '<strong>');
     html = html.replace(/\(\/strong\)/gi, '</strong>');
+    html = html.replace(/\(em\)/gi, '<em>');
+    html = html.replace(/\(\/em\)/gi, '</em>');
+    html = html.replace(/\(u\)/gi, '<u>');
+    html = html.replace(/\(\/u\)/gi, '</u>');
+    html = html.replace(/\(s\)/gi, '<s>');
+    html = html.replace(/\(\/s\)/gi, '</s>');
+    html = html.replace(/\(quote\)([\s\S]*?)\(\/quote\)/gi,
+        '\n\n<blockquote style="border-left: 3px solid var(--highlight, #f1a32e); margin: 1.5rem 0; padding: 0.8rem 1.2rem; background: rgba(255,255,255,0.03); border-radius: 0 8px 8px 0; font-style: italic;">$1</blockquote>\n\n');
+    html = html.replace(/\(callout\s*type\s*=\s*"([^"]+)"\)([\s\S]*?)\(\/callout\)/gi,
+        '\n\n<div class="article-callout callout-$1" style="margin: 1.5rem 0; padding: 1rem 1.2rem; border-radius: 8px; border-left: 4px solid var(--highlight, #f1a32e); background: rgba(255,255,255,0.04);">$2</div>\n\n');
 
-    // 5. Handle Line Breaks
-    return html.split('\n\n').map(p => {
-        if (p.trim().startsWith('<div') || p.trim().startsWith('<blockquote')) return p;
-        return `<p style="margin-bottom: 1.5rem;">${p.replace(/\n/g, '<br>')}</p>`;
-    }).join('');
+    // 5. Handle Line Breaks and Paragraphs
+    html = html.replace(/(\r\n|\r)/g, '\n');
+    return html.split(/\n\n/).map(chunk => {
+        const trimmed = chunk.trim();
+        if (!trimmed) return '<p style="margin-bottom: 1.5rem;"><br></p>';
+        if (trimmed.startsWith('<div') || trimmed.startsWith('<blockquote') || trimmed.startsWith('<ul') || trimmed.startsWith('<ol') || trimmed.startsWith('<hr')) {
+            return trimmed;
+        }
+        return `<p style="margin-bottom: 1.5rem;">${trimmed.replace(/\n/g, '<br>')}</p>`;
+    }).filter(Boolean).join('');
 }
 
 /**

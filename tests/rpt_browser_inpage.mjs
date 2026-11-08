@@ -25,12 +25,13 @@ async function read(dir, path) { const p = path.split('/'); let d = dir; for (co
 async function exists(dir, path) { try { await read(dir, path); return true; } catch { return false; } }
 async function listAll(dir, pre = '') { const o = []; for await (const [n, h] of dir.entries()) { if (h.kind === 'directory') o.push(...await listAll(h, pre + n + '/')); else o.push(pre + n); } return o.sort(); }
 
-export async function runAll(snippetUrl, opsUrl, sha256Url) {
+export async function runAll(snippetUrl, opsUrl, sha256Url, builderUrl) {
     const results = [];
     const test = async (name, fn) => { try { await fn(); results.push({ name, ok: true }); } catch (e) { results.push({ name, ok: false, err: String(e && e.stack || e) }); } };
     const S = await import(snippetUrl);                       // código extraído do raiden_patcher.js
     const O = await import(opsUrl);
     const H = await import(sha256Url);
+    const Bd = await import(builderUrl);
     const root = await navigator.storage.getDirectory();
 
     await test('SHA-256 próprio == crypto.subtle (vários tamanhos, 5 MB em pedaços)', async () => {
@@ -156,6 +157,52 @@ export async function runAll(snippetUrl, opsUrl, sha256Url) {
         if (dt > 20) throw new Error('lento: ' + dt.toFixed(1) + 's');
         const got = await read(filesDir, 'BIG.PSS'); if (got.length !== want.length || await sha(got) !== await sha(want)) throw new Error('resultado incorreto');
         results.push({ name: `   (info) 40 MB em ${dt.toFixed(2)} s`, ok: true });
+        await O.cleanupWorkDir(root, [d.name]);
+    });
+
+    await test('CRIAR → APLICAR (ciclo completo): árvore original x modificada → .rpt → extrair → aplicar → resultado == modificado', async () => {
+        const d = await newDir(root);
+        const origDir = await d.getDirectoryHandle('orig', { create: true }), modDir = await d.getDirectoryHandle('mod', { create: true });
+        const payloadDir = await d.getDirectoryHandle('payload', { create: true });
+        const rnd = (n) => { const b = new Uint8Array(n); for (let i = 0; i < n; i += 65536) crypto.getRandomValues(b.subarray(i, Math.min(i + 65536, n))); return b; };
+        const same = rnd(50000), movie = rnd(700000), elf = rnd(20000), text = rnd(30000), font = rnd(40000);
+        const movie2 = cat(movie.slice(0, 300000), enc.encode('LEGENDA EMBUTIDA PT-BR'), movie.slice(300000));       // inserção → delta
+        const elf2 = elf.slice(); elf2.set([1, 2, 3, 4], 0x100); elf2.set([9], 0x2000);                               // poucos bytes → inject
+        const text2 = rnd(30000);                                                                                     // sem relação → delta não compensa → replace
+        const novo = enc.encode('arquivo que só existe na versão do autor');
+        await put(origDir, 'SYS/SAME.BIN;1', same); await put(modDir, 'sys/same.bin', same);                          // idêntico (nome em outra caixa/;1)
+        await put(origDir, 'MOVIE/M1.PSS;1', movie); await put(modDir, 'MOVIE/M1.PSS', movie2);
+        await put(origDir, 'SLUS_213.73;1', elf); await put(modDir, 'SLUS_213.73', elf2);
+        await put(origDir, 'DATA/TEXT.DAT;1', text); await put(modDir, 'DATA/TEXT.DAT', text2);
+        await put(origDir, 'DATA/FONT.BIN;1', font); await put(modDir, 'DATA/FONT.BIN', font);                        // idêntico
+        await put(modDir, 'DATA/NOVO.TXT', novo);
+
+        const { ops, stats } = await Bd.analyzeTrees({ origFiles: await Bd.listFiles(origDir), modFiles: await Bd.listFiles(modDir), payloadDir });
+        if (stats.same !== 2 || stats.delta !== 1 || stats.inject !== 1 || stats.replace !== 2 || stats.fallback !== 1)
+            throw new Error('classificação inesperada: ' + JSON.stringify(stats));
+        for (const o of ops) if (o.path.includes('SAME') || o.path.includes('FONT')) throw new Error('arquivo idêntico entrou no patch: ' + o.path);
+        const deltaOp = ops.find(o => o.type === 'delta'); if (deltaOp.bytes > 2000) throw new Error('delta grande demais: ' + deltaOp.bytes);
+
+        const plain = await d.getFileHandle('plain.bin', { create: true });
+        await Bd.assemblePlainRpt({ ops, meta: { gameName: 'Jogo <&> "teste"', version: '1.0', author: 'eu', targetMd5: '', desc: 'linha1\nlinha2' }, payloadDir, plainHandle: plain });
+
+        // ── lado do usuário: usa o código REAL do patcher ──
+        const userDir = await d.getDirectoryHandle('user', { create: true });
+        const { xml } = await S.extractPatchPayload(plain, userDir);
+        const { meta, ops: parsed } = S.parseManifestXml(xml);
+        if (meta.gameName !== 'Jogo <&> "teste"' || meta.desc !== 'linha1\nlinha2') throw new Error('metadados: ' + JSON.stringify(meta));
+        const filesRoot = await d.getDirectoryHandle('isoUser', { create: true });                       // = ISO limpa do usuário, extraída
+        for (const f of await Bd.listFiles(origDir)) await put(filesRoot, f.parts.join('/'), new Uint8Array(await (await f.handle.getFile()).arrayBuffer()));
+        await O.applyOps({ ops: parsed, filesRoot, payloadRoot: await userDir.getDirectoryHandle('patch_ops') });
+        const patchFiles = await userDir.getDirectoryHandle('patch_files');                              // entradas v1 (nenhuma esperada)
+        if ((await listAll(patchFiles)).length) throw new Error('patch v2 não deveria ter entradas v1');
+        eq(await read(filesRoot, 'MOVIE/M1.PSS;1'), movie2, 'delta'); eq(await read(filesRoot, 'SLUS_213.73;1'), elf2, 'inject');
+        eq(await read(filesRoot, 'DATA/TEXT.DAT;1'), text2, 'replace (fallback)'); eq(await read(filesRoot, 'DATA/NOVO.TXT'), novo, 'replace (novo)');
+        eq(await read(filesRoot, 'SYS/SAME.BIN;1'), same, 'idêntico intocado'); eq(await read(filesRoot, 'DATA/FONT.BIN;1'), font, 'idêntico intocado 2');
+        // o patch não pode conter bytes do arquivo idêntico nem do original inteiro
+        const plainBytes = await read(d, 'plain.bin'); const seen = (needle) => { outer: for (let i = 0; i + 64 <= plainBytes.length; i++) { for (let k = 0; k < 64; k++) if (plainBytes[i + k] !== needle[k]) continue outer; return true; } return false; };
+        if (seen(same) || seen(font) || seen(movie)) throw new Error('o patch contém conteúdo original inalterado!');
+        results.push({ name: `   (info) patch de ${(plainBytes.length / 1024).toFixed(1)} KB para ${((movie2.length + elf2.length + text2.length + novo.length + same.length + font.length) / 1024).toFixed(0)} KB de arquivos`, ok: true });
         await O.cleanupWorkDir(root, [d.name]);
     });
 

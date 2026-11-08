@@ -9,9 +9,7 @@
  * - showSaveFilePicker para salvar o resultado
  */
 
-// AVISO: esta senha fica pública no código-fonte (site estático). Ela só ofusca o .rpt e mantém compatibilidade
-// com o criador de patches — NÃO é proteção. Nunca coloque no patch nada que precise ficar confidencial.
-const RPT_PASSWORD = "bit.raiden";
+import { RPT_PASSWORD } from './IUP/rpt_config.js';   // senha compartilhada com o criador de patches (ver aviso no arquivo)
 
 const MAX_MANIFEST_BYTES = 4 * 1024 * 1024;   // XML de metadados + operações
 const MAX_ENTRIES        = 20000;             // arquivos dentro do .rpt

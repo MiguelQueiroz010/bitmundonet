@@ -46,7 +46,19 @@ ele vem da ISO que o usuário fornece, e `delta`/`inject` só rodam se o SHA-256
 `path` é relativo à raiz da ISO, sem `..`, sem caminho absoluto, sem caracteres de controle. Nomes são comparados sem
 diferenciar maiúsculas e ignorando `;1`.
 
-## Gerando os deltas
+## Criando patches pelo site
+
+Na página do Raiden Patcher, aba **Criar patch**: escolha a ISO original e a versão modificada (ISO ou pasta de arquivos),
+analise, revise a lista e gere o `.rpt`. Para cada arquivo o criador escolhe sozinho:
+
+| Situação | Operação |
+|---|---|
+| idêntico ao original | nada (nunca entra no patch) |
+| mesmo tamanho, ≤ 4 KB de bytes alterados | `inject` |
+| modificado e o delta fica < 85% do arquivo novo | `delta` (verificado: o delta é aplicado ao original e o hash conferido) |
+| arquivo novo, ou delta não compensa | `replace` |
+
+## Gerando os deltas por linha de comando (alternativa)
 
 ```
 xdelta3 -e -9 -S none -f -s ORIGINAL.PSS NOVO.PSS m1.vcdiff

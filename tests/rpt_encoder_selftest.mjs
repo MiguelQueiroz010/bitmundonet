@@ -45,4 +45,16 @@ for (let i = 0; i < 60; i++) {                                           // fuzz
     await rt(s, t, { windowSize: 1 << 16, reach: 1 << 17 });
 }
 ok('fuzz: 60 pares aleatórios (substituição/inserção/remoção) com janelas pequenas');
+// alcance de busca: conteúdo deslocado além do alcance não casa; dentro do alcance casa
+{
+    const src = rnd(6_000_000), shifted = Buffer.concat([rnd(1_500_000), src]);          // tudo deslocado 1,5 MB
+    const short = await rt(src, shifted, { windowSize: 1 << 20, reach: 512 << 10 });
+    const wide = await rt(src, shifted, { windowSize: 1 << 20, reach: 2 << 20 });
+    assert.ok(short > 5_000_000, 'alcance curto deveria falhar em casar: ' + short);
+    assert.ok(wide < 1_700_000, 'alcance suficiente deveria casar quase tudo: ' + wide);
+    ok(`alcance: deslocamento de 1,5 MB → alcance 512 KB gera ${(short / 1e6).toFixed(1)} MB; alcance 2 MB gera ${(wide / 1e6).toFixed(2)} MB`);
+    const st = {}; const sink = { write: async () => {} };
+    await encodeVcdiff({ source: new Blob([src]), target: new Blob([shifted]), sink, stats: st, windowSize: 1 << 20, reach: 2 << 20 });
+    assert.ok(st.copied > 4_000_000 && st.copied + st.added === shifted.length); ok('stats: copied+added == tamanho do alvo');
+}
 console.log(`\n${n} grupos de teste passaram.`);

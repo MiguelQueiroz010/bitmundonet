@@ -643,102 +643,53 @@
         .rp-modal-btn.cancel  { background: rgba(51,170,255,0.1); border: 1px solid rgba(51,170,255,0.3); color: var(--rp-blue); }
         .rp-modal-btn.cancel:hover { background: rgba(51,170,255,0.2); }
 
-        /* ── Overlay Animação ── */
+        /* ── Painel compacto de progresso (sem canvas, sem tela cheia) ── */
         #anim-overlay {
             position: fixed;
-            inset: 0;
+            right: 1.2rem;
+            bottom: 1.2rem;
             z-index: 9999;
-            background: #000;
+            width: min(340px, calc(100vw - 2.4rem));
             display: none;
             font-family: 'Share Tech Mono', monospace;
-            overflow: hidden;
         }
-        #stage { position:relative; width:100vw; height:100vh; background:#000; overflow:hidden; }
-        #mainCanvas { position:absolute; inset:0; z-index:2; }
-        #ps2bg {
-          position:absolute; inset:0; z-index:1;
-          background: radial-gradient(ellipse at 50% 65%, #001845 0%, #000c2e 45%, #000000 100%);
-          opacity:0; transition:opacity 1s ease;
+        #stage {
+            display: grid;
+            grid-template-columns: 64px 1fr;
+            column-gap: 0.9rem;
+            row-gap: 0.15rem;
+            align-items: center;
+            padding: 0.9rem 1rem;
+            background: rgba(3,10,28,0.97);
+            border: 1px solid rgba(51,170,255,0.5);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.55), 0 0 18px rgba(51,170,255,0.15);
         }
-        #vignette {
-          position:absolute; inset:0; z-index:3; pointer-events:none;
-          background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.78) 100%);
-        }
-        #raidenSVG {
-          position:absolute; left:50%; top:50%;
-          transform:translate(-50%,-50%) scale(0);
-          z-index:10; opacity:0;
-          transition: transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
-          filter: drop-shadow(0 0 24px #3af) drop-shadow(0 0 55px #06f);
-        }
-        #raidenGifAnim {
-          position:absolute; left:50%; top:50%;
-          transform:translate(-50%,-50%) scale(0);
-          z-index:15; opacity:0;
-          transition: transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
-          border-radius: 5px;
-          pointer-events: none;
-        }
-        #ringWrap {
-          position:absolute; left:50%; top:50%;
-          transform:translate(-50%,-50%);
-          z-index:11; opacity:0; transition:opacity 0.5s ease;
-        }
-        #ringPath {
-          stroke-dasharray:502; stroke-dashoffset:502;
-          transition:stroke-dashoffset 0.12s linear;
-          filter:drop-shadow(0 0 5px #3af);
-        }
-        #statusWrap {
-          position:absolute; bottom:11%; left:0; right:0;
-          text-align:center; z-index:12; opacity:0; transition:opacity 0.5s ease;
-        }
-        #statusTitle {
-          font-family:'Orbitron',monospace; font-weight:900;
-          font-size:clamp(1rem,2.8vw,1.5rem); letter-spacing:0.35em; color:#fff;
-          text-shadow:0 0 16px #3af, 0 0 40px #06f; margin-bottom:8px;
-        }
-        #statusMsg { font-size:clamp(0.6rem,1.4vw,0.78rem); letter-spacing:0.22em; color:#5a9cc5; text-transform:uppercase; }
+        #ringWrap { grid-row: 1 / span 3; position: relative; width: 64px; height: 64px; }
+        #ringWrap svg { display: block; width: 64px; height: 64px; }
+        #ringPath { stroke-dasharray: 151; stroke-dashoffset: 151; transition: stroke-dashoffset 0.35s ease, stroke 0.3s; }
         #pctLabel {
-          font-family:'Orbitron',monospace; font-size:clamp(0.75rem,1.8vw,0.95rem);
-          font-weight:700; color:#3af; margin-top:6px; text-shadow:0 0 10px #3af;
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; color: #fff;
         }
-        #flawless {
-          position:absolute; inset:0; display:flex; flex-direction:column;
-          align-items:center; justify-content:center; z-index:20;
-          opacity:0; pointer-events:none;
-          background:radial-gradient(ellipse at center, rgba(0,30,100,0.6) 0%, rgba(0,0,0,0.94) 70%);
-          transition:opacity 0.3s ease;
-        }
-        #flawlessText {
-          font-family:'Orbitron',monospace; font-weight:900;
-          font-size:clamp(2.2rem,9vw,5.5rem); letter-spacing:0.12em;
-          background:linear-gradient(180deg,#ffffff 0%,#99ccff 35%,#2255ee 100%);
-          -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-          filter:drop-shadow(0 0 18px rgba(80,150,255,0.95));
-          transform:scale(3.5); opacity:0;
-          transition:transform 0.55s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
-        }
-        #victoryText {
-          font-family:'Orbitron',monospace; font-size:clamp(0.9rem,2.8vw,1.6rem);
-          font-weight:400; letter-spacing:0.55em; color:#88bbee; margin-top:10px;
-          opacity:0; transform:translateY(22px);
-          transition:opacity 0.45s ease, transform 0.45s ease;
-          text-shadow:0 0 18px #3366ff;
-        }
-        #isoReadyText {
-          font-size:clamp(0.62rem,1.3vw,0.82rem); letter-spacing:0.28em;
-          color:#446688; margin-top:22px; opacity:0; transition:opacity 0.5s ease;
-        }
+        #statusTitle { font-family: 'Orbitron', monospace; font-size: 0.66rem; letter-spacing: 0.16em; color: #3af; }
+        #miniBolt { display: inline-block; margin-right: 0.35rem; animation: rp-bolt 1.4s ease-in-out infinite; }
+        @keyframes rp-bolt { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+        @media (prefers-reduced-motion: reduce) { #miniBolt { animation: none; } #ringPath { transition: none; } }
+        #statusMsg { font-size: 0.7rem; color: #8fb8d8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #isoReadyText { display: none; font-size: 0.72rem; color: #0f8; line-height: 1.4; }
         #btn-close-anim {
-          position:absolute; bottom:7%; left:50%; transform:translateX(-50%);
-          z-index:25; opacity:0; background:transparent; border:1px solid #1a2a40;
-          color:#3a5060; font-family:'Share Tech Mono',monospace; font-size:0.72rem;
-          letter-spacing:0.18em; padding:9px 22px; cursor:pointer; text-transform:uppercase;
-          transition:all 0.2s, opacity 0.4s; border-radius:2px;
-          pointer-events: none;
+            display: none; grid-column: 1 / -1; margin-top: 0.7rem; padding: 0.55rem 0.8rem; cursor: pointer;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em;
+            background: rgba(51,170,255,0.08); border: 1px solid rgba(51,170,255,0.3); border-radius: 8px; color: #8fb8d8;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-        #btn-close-anim:hover { border-color:#3af; color:#3af; box-shadow:0 0 12px rgba(51,170,255,0.25); }
+        #btn-close-anim:hover { border-color: #3af; color: #3af; }
+        #anim-overlay.done #ringPath { stroke: #0f8; }
+        #anim-overlay.done #miniBolt { animation: none; }
+        #anim-overlay.done #statusMsg { display: none; }
+        #anim-overlay.done #isoReadyText { display: block; }
+        #anim-overlay.done #btn-close-anim { display: block; }
 
         /* ── Responsive ── */
         @media (max-width: 600px) {
@@ -1003,50 +954,20 @@
         </div>
     </div>
 
-    <!-- ══ Overlay Animação de Patch ══ -->
-    <div id="anim-overlay">
+    <!-- ══ Painel compacto de progresso do patch ══ -->
+    <div id="anim-overlay" role="status" aria-live="polite">
         <div id="stage">
-          <div id="ps2bg"></div>
-          <canvas id="mainCanvas"></canvas>
-          <div id="vignette"></div>
-
-          <svg id="raidenSVG" width="190" height="190" viewBox="0 0 190 190">
-            <defs>
-              <filter id="glow"><feGaussianBlur stdDeviation="3.5" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-              <filter id="glow2"><feGaussianBlur stdDeviation="6" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            <path d="M95 8 L12 138 L178 138 Z" fill="rgba(20,55,180,0.12)" stroke="#3af" stroke-width="1.8" opacity="0.88" filter="url(#glow)"/>
-            <ellipse cx="95" cy="138" rx="83" ry="11" fill="rgba(15,45,160,0.18)" stroke="#3af" stroke-width="1.8" opacity="0.8" filter="url(#glow)"/>
-            <line x1="95" y1="8"  x2="40"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
-            <line x1="95" y1="8"  x2="150" y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
-            <line x1="95" y1="8"  x2="95"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.3"/>
-            <path d="M103 44 L86 92 L99 92 L82 144 L116 84 L102 84 Z" fill="#3af" opacity="0.95" filter="url(#glow2)"/>
-            <line x1="28" y1="138" x2="162" y2="138" stroke="rgba(51,170,255,0.35)" stroke-width="1"/>
-          </svg>
-
           <div id="ringWrap">
-            <svg width="230" height="230" viewBox="0 0 230 230">
-              <circle cx="115" cy="115" r="80" fill="none" stroke="rgba(20,50,130,0.35)" stroke-width="2.5"/>
-              <circle id="ringPath" cx="115" cy="115" r="80" fill="none" stroke="#3af" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90 115 115)"/>
-              <circle cx="115" cy="115" r="74" fill="none" stroke="rgba(51,170,255,0.06)" stroke-width="1"/>
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="32" r="24" fill="none" stroke="rgba(51,170,255,0.18)" stroke-width="5"/>
+              <circle id="ringPath" cx="32" cy="32" r="24" fill="none" stroke="#3af" stroke-width="5" stroke-linecap="round" transform="rotate(-90 32 32)"/>
             </svg>
-          </div>
-
-          <div id="statusWrap">
-            <div id="statusTitle">APLICANDO PATCH</div>
-            <div id="statusMsg">Autenticando Permissões...</div>
             <div id="pctLabel">0%</div>
           </div>
-
-          <div id="flawless">
-            <div id="flawlessText">FLAWLESS</div>
-            <div id="victoryText">VICTORY</div>
-            <div id="isoReadyText">— ISO MODIFICADA. DISCO GRAVADO COM SUCESSO! —</div>
-          </div>
-
-          <button id="btn-close-anim">✖ Sair e Voltar ao Patcher</button>
+          <div id="statusTitle"><span id="miniBolt">⚡</span><span id="statusTitleText">APLICANDO PATCH</span></div>
+          <div id="statusMsg">Iniciando...</div>
+          <div id="isoReadyText">ISO gerada e gravada com sucesso!</div>
+          <button id="btn-close-anim" type="button">✖ Fechar</button>
         </div>
     </div>
 

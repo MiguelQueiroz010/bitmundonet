@@ -18,7 +18,6 @@ import { LIMITS, RPT_PAYLOAD_PREFIX } from './rpt_ops.js';
 const MAX_INJECT_RUNS = 2000;
 const MAX_INJECT_CHANGED = 4 * 1024;      // inject só para ajustes pequenos (os bytes "old" vão no patch)
 const MERGE_GAP = 8;
-const MAX_DELTA_IN_RAM = 256 * 1024 * 1024;
 const DELTA_WORTH = 0.85;                     // delta só vale se < 85% do arquivo novo
 const COMPRESS_LIMIT = 64 * 1024 * 1024;      // acima disso, replace vai sem compressão (vídeo já é comprimido)
 
@@ -55,6 +54,7 @@ async function scanDiff(a, b, onChunk) {
     return { identical: changed === 0, runs: overflow ? null : runs, changed };
 }
 
+const fmtMB = (n) => n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1048576).toFixed(1)} MB`;
 const hex = (u8) => [...u8].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
 
 async function writePayload(payloadDir, name, blob, codec) {
@@ -123,30 +123,49 @@ export async function analyzeTrees({ origFiles, modFiles, payloadDir, onProgress
             }
         }
 
-        // delta
-        const maxBytes = Math.min(Math.floor(mod.size * DELTA_WORTH), MAX_DELTA_IN_RAM);
-        const chunks = [];
-        let deltaOk = false;
+        // delta — gravado em disco (sem teto de RAM); arquivos grandes usam janelas e alcance maiores
+        const big = orig.size > 256 * 1024 * 1024;
+        const windowSize = big ? 16 * 1024 * 1024 : 4 * 1024 * 1024;
+        const reach = big ? 32 * 1024 * 1024 : 8 * 1024 * 1024;
+        const maxBytes = Math.floor(mod.size * DELTA_WORTH);
+        const tmpName = `${nextName()}.delta`;
+        const tmpHandle = await payloadDir.getFileHandle(tmpName, { create: true });
+        const tw = await tmpHandle.createWritable();
+        const enc = {}; let deltaOk = false;
         try {
-            await encodeVcdiff({ source: orig, target: mod, maxBytes,
-                sink: { write: async (u) => { chunks.push(u); } },
+            await encodeVcdiff({ source: orig, target: mod, maxBytes, stats: enc,
+                sink: { write: (u) => tw.write(u) },
+                windowSize, reach,
                 onProgress: (f) => prog(0.5 + f * 0.3, `Gerando delta: ${path}`) });
-            deltaOk = true;
-        } catch (e) { if (e.code !== 'DELTA_TOO_LARGE') throw e; }
+            await tw.close(); deltaOk = true;
+        } catch (e) {
+            try { await tw.abort(); } catch (_) {}
+            if (e.code !== 'DELTA_TOO_LARGE') { await payloadDir.removeEntry(tmpName).catch(() => {}); throw e; }
+        }
 
-        if (!deltaOk) { stats.fallback++; await doReplace('delta não compensa (arquivo muito diferente do original)'); continue; }
+        if (!deltaOk) {
+            await payloadDir.removeEntry(tmpName).catch(() => {});
+            const seen = enc.copied || 0, tot = (enc.copied || 0) + (enc.added || 0);
+            const pct = tot ? (100 * seen / tot) : 0;
+            stats.fallback++;
+            await doReplace(`delta não compensa: só ~${pct.toFixed(0)}% do trecho analisado coincide com o original (busca de ±${reach / 1048576} MB; ` +
+                `se o arquivo foi reempacotado/comprimido de novo, o conteúdo muda de lugar ou de forma)`);
+            continue;
+        }
 
         // Verificação: aplica o delta ao ORIGINAL e confere o hash do resultado esperado (garante que o patch funciona).
-        const deltaBlob = new Blob(chunks);
+        const deltaBlob = await tmpHandle.getFile();
         const srcSha256 = await sha256Blob(orig), sha256 = await sha256Blob(mod);
         const h = new Sha256();
         await applyVcdiff({ delta: deltaBlob, source: orig, sink: { write: async (u) => { h.update(u); } } });
-        if (h.digestHex() !== sha256) throw new Error(`Falha interna ao verificar o delta de "${path}". Nada foi gravado.`);
+        if (h.digestHex() !== sha256) { await payloadDir.removeEntry(tmpName).catch(() => {}); throw new Error(`Falha interna ao verificar o delta de "${path}". Nada foi gravado.`); }
 
         const name = nextName();
         const bytes = await writePayload(payloadDir, name, deltaBlob, 'deflate-raw');
+        await payloadDir.removeEntry(tmpName).catch(() => {});
+        const tot = (enc.copied || 0) + (enc.added || 0);
         ops.push({ type: 'delta', path, payloadName: name, codec: 'deflate-raw', srcSha256, sha256, size: mod.size, bytes,
-                   reason: `delta ${(bytes / 1024).toFixed(1)} KB de ${(mod.size / 1048576).toFixed(1)} MB` });
+                   reason: `delta ${fmtMB(bytes)} de ${fmtMB(mod.size)} (${tot ? (100 * (enc.copied || 0) / tot).toFixed(1) : 0}% igual ao original)` });
         stats.delta++; stats.payloadBytes += bytes;
         prog(1);
     }

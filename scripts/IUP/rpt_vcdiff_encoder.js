@@ -59,7 +59,8 @@ function hashAt(a, p) {
 function encodeWindow(seg, tgt) {
     const data = new ByteBuf(1024), inst = new ByteBuf(256), addr = new ByteBuf(256);
     const n = tgt.length;
-    const addRange = (s, e) => { if (e > s) { inst.byte(1); inst.varint(e - s); data.bytes(tgt, s, e); } };
+    let copied = 0, added = 0;
+    const addRange = (s, e) => { if (e > s) { inst.byte(1); inst.varint(e - s); data.bytes(tgt, s, e); added += e - s; } };
 
     let table = null, bits = 0;
     if (seg.length >= B && n >= B) {
@@ -71,7 +72,7 @@ function encodeWindow(seg, tgt) {
             if (table[idx] < 0) table[idx] = p;
         }
     }
-    if (!table) { addRange(0, n); return { data, inst, addr }; }
+    if (!table) { addRange(0, n); return { data, inst, addr, copied, added }; }
 
     const sh = 32 - bits;
     let i = 0, addStart = 0, h = hashAt(tgt, 0), valid = true;
@@ -88,7 +89,7 @@ function encodeWindow(seg, tgt) {
             while (s > addStart && c > 0 && tgt[s - 1] === seg[c - 1]) { s--; c--; len++; }
             addRange(addStart, s);
             inst.byte(19); inst.varint(len);       // COPY, tamanho explícito, modo SELF
-            addr.varint(c);
+            addr.varint(c); copied += len;
             i = s + len; addStart = i;
             if (i + B <= n) h = hashAt(tgt, i);
         } else {
@@ -97,7 +98,7 @@ function encodeWindow(seg, tgt) {
         }
     }
     addRange(addStart, n);
-    return { data, inst, addr };
+    return { data, inst, addr, copied, added };
 }
 
 /**
@@ -106,9 +107,10 @@ function encodeWindow(seg, tgt) {
  * @param {Blob} o.target  arquivo novo
  * @param {{write:Function}} o.sink
  * @param {number} [o.maxBytes]  se o delta passar disso, lança erro com code 'DELTA_TOO_LARGE'
+ * @param {{copied?:number,added?:number}} [o.stats]  acumula bytes do alvo cobertos por COPY (iguais ao original) e por ADD (novos)
  * @returns {Promise<number>} bytes de delta gerados
  */
-export async function encodeVcdiff({ source, target, sink, maxBytes = Infinity, onProgress,
+export async function encodeVcdiff({ source, target, sink, maxBytes = Infinity, onProgress, stats,
                                      windowSize = DEFAULT_WINDOW, reach = DEFAULT_REACH }) {
     let total = 0;
     const emit = async (u8) => {
@@ -125,7 +127,8 @@ export async function encodeVcdiff({ source, target, sink, maxBytes = Infinity, 
         const segPos = Math.max(0, pos - reach), segEnd = Math.min(srcSize, end + reach);
         const seg = segEnd > segPos ? new Uint8Array(await source.slice(segPos, segEnd).arrayBuffer()) : new Uint8Array(0);
 
-        const { data, inst, addr } = encodeWindow(seg, tgt);
+        const { data, inst, addr, copied, added } = encodeWindow(seg, tgt);
+        if (stats) { stats.copied = (stats.copied || 0) + copied; stats.added = (stats.added || 0) + added; }
         const ad = adler32(tgt);
         const head = new ByteBuf(64);
         head.varint(tgt.length); head.byte(0);

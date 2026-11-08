@@ -1,7 +1,7 @@
 /**
  * BitMundo Service Worker - Motor de Cache Offline Total para Ferramentas
  */
-const CACHE_NAME = 'bitmundo-tools-offline-v3';
+const CACHE_NAME = 'bitmundo-tools-offline-v5';
 
 // Recursos críticos da casca e ferramentas para pré-carregamento imediato
 const CORE_ASSETS = [
@@ -16,6 +16,18 @@ const CORE_ASSETS = [
   '/scripts/tool_back_button.js',
   '/scripts/navbar.js',
   '/scripts/raiden_patcher.js',
+  '/scripts/md5_worker.js',
+  '/scripts/IUP/crypto_stuff.js',
+  '/scripts/IUP/iso9660.js',
+  '/scripts/IUP/io_extent.js',
+  '/scripts/IUP/udf_osta.js',
+  '/scripts/IUP/rpt_ops.js',
+  '/scripts/IUP/rpt_vcdiff.js',
+  '/scripts/IUP/rpt_sha256.js',
+  '/scripts/IUP/rpt_config.js',
+  '/scripts/IUP/rpt_builder.js',
+  '/scripts/IUP/rpt_vcdiff_encoder.js',
+  '/scripts/raiden_creator.js',
   '/scripts/hog_extractor.js',
   '/fav/site.webmanifest',
   '/fav/raiden_patcher.webmanifest',

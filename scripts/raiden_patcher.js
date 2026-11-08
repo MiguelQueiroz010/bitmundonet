@@ -1,16 +1,22 @@
 /**
- * raiden_patcher.js  (v2)
- * Redesign completo com:
- * - Stepper UI (3 etapas)
- * - Worker MD5 em background (não trava UI)
- * - Parse de metadados do .RPT (GameName, Version, Author, TargetMD5, etc.)
- * - Verificação MD5 e modal de confirmação se incompatível
- * - Integração Firebase: contador de usos por patch
- * - showSaveFilePicker para salvar resultado
+ * raiden_patcher.js  (v3)
+ * - Stepper UI (3 etapas) e Worker MD5 em background (não trava a UI)
+ * - Patch .RPT v1 (arquivos inteiros) e v2 (operações replace / delta xdelta / inject — ver IUP/RPT_FORMAT.md)
+ * - delta/inject só são aplicados se o SHA-256 do arquivo da ISO do USUÁRIO bater: o patch nunca carrega
+ *   conteúdo original do jogo; ele só descreve como transformar o arquivo que o usuário já possui.
+ * - Pasta temporária própria (apagada ao final), validação de caminhos e limites contra patches corrompidos
+ * - Firebase: contador anônimo de usos por patch (sem nome de ISO)
+ * - showSaveFilePicker para salvar o resultado
  */
+
+import { RPT_PASSWORD } from './IUP/rpt_config.js';   // senha compartilhada com o criador de patches (ver aviso no arquivo)
+
+const MAX_MANIFEST_BYTES = 4 * 1024 * 1024;   // XML de metadados + operações
+const MAX_ENTRIES        = 20000;             // arquivos dentro do .rpt
 
 import { decryptBytes, decryptFileToHandle } from "./IUP/crypto_stuff.js";
 import { ISO9660 } from './IUP/iso9660.js';
+import { normalizeOps, applyOps, cleanupWorkDir, createPayloadFile, parseRelPath, RPT_PAYLOAD_PREFIX, LIMITS } from './IUP/rpt_ops.js';
 
 // ═══════════════════════════════════════════════════════
 // ESTADO GLOBAL
@@ -82,6 +88,7 @@ const btnToggleDebugUi   = document.getElementById('btn-toggle-debug-ui');
 const btnSelectDebugFolder = document.getElementById('btn-select-debug-folder');
 const labelDebugFolder   = document.getElementById('label-debug-folder');
 const btnApplyDebug      = document.getElementById('btn-apply-debug');
+const chkLegal           = document.getElementById('chk-legal-consent');
 
 // ═══════════════════════════════════════════════════════
 // STEPPER UI
@@ -224,6 +231,42 @@ btnSelectPatch.addEventListener('click', async () => {
 // LEITURA DE METADADOS DO PATCH
 // ═══════════════════════════════════════════════════════
 
+// Interpreta o XML do patch (metadados + <Ops>). Patches v1 não têm <Ops> e continuam funcionando.
+function parseManifestXml(xmlStr) {
+    const doc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+    // Em patches v2 um XML malformado é fatal; em v1 mantemos a tolerância antiga.
+    if (doc.querySelector('parsererror') && /<Ops[\s>]/.test(xmlStr))
+        throw new Error('O manifesto XML do patch está malformado.');
+
+    const get = (tag) => {
+        const el = doc.querySelector(tag);
+        return el ? el.textContent.trim() : null;
+    };
+    const a = (el, n) => el.getAttribute(n);
+    const raw = [...doc.querySelectorAll('Ops > Op')].map(el => ({
+        type: a(el, 'type'), path: a(el, 'path'), payload: a(el, 'payload'), codec: a(el, 'codec'),
+        sha256: a(el, 'sha256'), srcSha256: a(el, 'srcSha256'), size: a(el, 'size'),
+        patches: [...el.querySelectorAll('Patch')].map(p => ({ offset: a(p, 'offset'), old: a(p, 'old'), new: a(p, 'new') })),
+    }));
+
+    return {
+        meta: {
+            gameName:  get('GameName')  || get('Game')    || 'N/A',
+            version:   get('Version')   || get('Ver')     || 'N/A',
+            author:    get('Author')    || get('Creator') || 'N/A',
+            targetMd5: get('TargetMD5') || get('MD5')     || get('BaseMD5') || null,
+            desc:      get('Resumo')    || get('Description') || get('Desc') || null,
+        },
+        ops: normalizeOps(raw),   // lança erro se houver caminho/hash/tipo inválido
+    };
+}
+
+function countOps(ops) {
+    const s = { replace: 0, delta: 0, inject: 0 };
+    for (const o of ops) s[o.type]++;
+    return s;
+}
+
 async function loadPatchMetadata(file) {
     try {
         patchMeta = null;
@@ -234,18 +277,15 @@ async function loadPatchMetadata(file) {
         patchSummary.classList.add('visible');
         summaryGrid.innerHTML = `<span class="rp-sum-key" style="grid-column:1/-1;color:var(--rp-text-dim);font-style:italic;">⏳ Lendo patch...</span>`;
 
-        // AES-CBC exige descriptografar o arquivo completo (blocos de 16 bytes com padding PKCS7).
-        // Cortar em 64KB quebraria o padding do último bloco. Usamos decryptBytes na RAM.
-        // Para patches grandes (raro no header), lemos até 512KB — suficiente para o XML.
-        const MAX_HEADER = Math.min(file.size, 512 * 1024);
-        // Garante múltiplo de 16 (tamanho de bloco AES) para evitar erro de padding
+        // AES-CBC exige blocos de 16 bytes; lemos só o início (manifesto) e alinhamos ao bloco.
+        const MAX_HEADER  = Math.min(file.size, MAX_MANIFEST_BYTES + 4096);
         const alignedSize = Math.floor(MAX_HEADER / 16) * 16;
         const encBytes = new Uint8Array(await file.slice(0, alignedSize).arrayBuffer());
 
         let decBytes;
         try {
-            decBytes = await decryptBytes("bit.raiden", encBytes);
-        } catch(e) {
+            decBytes = await decryptBytes(RPT_PASSWORD, encBytes);
+        } catch (e) {
             console.warn("Não foi possível descriptografar o patch para ler metadados.", e);
             patchSummary.classList.remove('visible');
             return;
@@ -254,57 +294,27 @@ async function loadPatchMetadata(file) {
         // Verificar magic RPTP (primeiros 4 bytes após descriptografia)
         const magic = new TextDecoder().decode(decBytes.slice(0, 4));
         if (magic !== 'RPTP') {
-            console.warn('Magic RPTP não encontrado. Bytes iniciais:', Array.from(decBytes.slice(0,8)).map(b=>b.toString(16)));
-            summaryGrid.innerHTML = `<span class="rp-sum-key" style="grid-column:1/-1;color:var(--rp-red);">❌ Formato inválido — não é um patch RPT válido</span>`;
+            patchMeta = { invalid: 'Formato inválido — não é um patch RPT válido.' };
+            summaryGrid.innerHTML = `<span class="rp-sum-key" style="grid-column:1/-1;color:var(--rp-red);">❌ ${escHtml(patchMeta.invalid)}</span>`;
             return;
         }
 
         // Estrutura: [4 magic][2 reservado][XML string][0x00][arquivos...]
-        let xmlStart = 6;
-        let xmlEnd   = xmlStart;
+        const xmlStart = 6;
+        let xmlEnd = xmlStart;
         while (xmlEnd < decBytes.length && decBytes[xmlEnd] !== 0) xmlEnd++;
+        if (xmlEnd >= decBytes.length || xmlEnd - xmlStart > MAX_MANIFEST_BYTES)
+            throw new Error('Manifesto do patch ausente ou grande demais.');
 
         const xmlStr = new TextDecoder('utf-8').decode(decBytes.slice(xmlStart, xmlEnd));
-        console.log('[RPT] XML extraído:', xmlStr.substring(0, 300));
+        const { meta, ops } = parseManifestXml(xmlStr);
 
-        // Parse XML
-        const parser = new DOMParser();
-        const doc    = parser.parseFromString(xmlStr, 'application/xml');
-
-        const get = (tag) => {
-            const el = doc.querySelector(tag);
-            return el ? el.textContent.trim() : null;
-        };
-
-        // Contagem de entradas de arquivo no header já descriptografado
-        let fileCount = 0;
-        let p = xmlEnd + 1;
-        while (p + 8 < decBytes.length) {
-            const dv = new DataView(decBytes.buffer, decBytes.byteOffset + p, 8);
-            const fSize = Number(dv.getBigUint64(0, true));
-            p += 8;
-            let nameEnd = p;
-            while (nameEnd < decBytes.length && decBytes[nameEnd] !== 0) nameEnd++;
-            const fname = new TextDecoder().decode(decBytes.slice(p, nameEnd));
-            p = nameEnd + 1;
-            if (fname) fileCount++;
-            p += fSize;
-            if (fSize === 0 || fSize > 67108864) break;
-        }
-
-        patchMeta = {
-            gameName:  get('GameName')  || get('Game')    || 'N/A',
-            version:   get('Version')   || get('Ver')     || 'N/A',
-            author:    get('Author')    || get('Creator') || 'N/A',
-            targetMd5: get('TargetMD5') || get('MD5')     || get('BaseMD5') || null,
-            desc:      get('Resumo')    || get('Description') || get('Desc') || null,
-            fileCount,
-        };
-
+        patchMeta = { ...meta, ops, opsSummary: countOps(ops) };
         renderPatchSummary();
     } catch (e) {
         console.error('Erro ao ler metadados do patch:', e);
-        summaryGrid.innerHTML = `<span class="rp-sum-key" style="grid-column:1/-1;color:var(--rp-red);">❌ Erro ao ler patch: ${e.message}</span>`;
+        patchMeta = { invalid: e.message };   // bloqueia o botão de aplicar
+        summaryGrid.innerHTML = `<span class="rp-sum-key" style="grid-column:1/-1;color:var(--rp-red);">❌ Patch recusado: ${escHtml(e.message)}</span>`;
     }
 }
 
@@ -315,18 +325,30 @@ function renderPatchSummary() {
 
     // Bloco de Resumo — preserva quebras de linha do XML
     if (patchMeta.desc) {
-        // Substitui \n por <br> e preserva espaços de indentação
         const descHtml = escHtml(patchMeta.desc)
             .replace(/\n/g, '<br>')
             .replace(/  /g, '&nbsp;&nbsp;');
         html += `<div class="rp-resumo-block">${descHtml}</div>`;
     } else {
-        // Sem Resumo: mostra campos básicos
         html += `
             <div class="rp-resumo-fallback">
                 <span class="rp-sum-key">Jogo</span><span class="rp-sum-val">${escHtml(patchMeta.gameName)}</span>
                 <span class="rp-sum-key">Versão</span><span class="rp-sum-val">${escHtml(patchMeta.version)}</span>
                 <span class="rp-sum-key">Autor</span><span class="rp-sum-val">${escHtml(patchMeta.author)}</span>
+            </div>`;
+    }
+
+    // Operações do patch v2
+    const s = patchMeta.opsSummary;
+    if (s && (s.replace || s.delta || s.inject)) {
+        const parts = [];
+        if (s.delta)   parts.push(`${s.delta} delta`);
+        if (s.inject)  parts.push(`${s.inject} inject`);
+        if (s.replace) parts.push(`${s.replace} substituição${s.replace > 1 ? 'ões' : ''}`);
+        html += `
+            <div class="rp-md5-target-row">
+                <span class="rp-md5-target-label">OPERAÇÕES</span>
+                <code class="rp-md5-target-val">${escHtml(parts.join(' · '))}</code>
             </div>`;
     }
 
@@ -380,16 +402,23 @@ function checkReady() {
     if (!patchFile) return;
 
     setStepActive(3);
-    btnApplyPatch.disabled = false;
-    btnApplyPatch.classList.add('rp-pulse');
 
-    if (isoFile && patchFile) {
-        const sizeTotal   = isoFile.size + patchFile.size;
-        const spaceNeeded = isoFile.size + patchFile.size + 2147483648;
-        spaceLbl.textContent = `Streaming nativo ativo · ${formatBytes(sizeTotal)} selecionados`;
-        storageLbl.textContent = `Espaço recomendado: ${formatBytes(spaceNeeded)} livres`;
-    }
+    const invalid = !!patchMeta?.invalid;
+    // Sem a caixa de declaração no HTML (página antiga em cache) o botão permanece bloqueado.
+    const consent = !!chkLegal && chkLegal.checked;
+    btnApplyPatch.disabled = invalid || !consent;
+    btnApplyPatch.classList.toggle('rp-pulse', !btnApplyPatch.disabled);
+
+    const sizeTotal   = isoFile.size + patchFile.size;
+    const spaceNeeded = isoFile.size + patchFile.size + 2147483648;
+    if (invalid)        spaceLbl.textContent = 'Patch inválido — não pode ser aplicado';
+    else if (!chkLegal) spaceLbl.textContent = 'Página desatualizada — recarregue com Ctrl+F5';
+    else if (!consent)  spaceLbl.textContent = 'Marque a declaração acima para liberar o botão';
+    else                spaceLbl.textContent = `Streaming nativo ativo · ${formatBytes(sizeTotal)} selecionados`;
+    storageLbl.textContent = `Espaço recomendado: ${formatBytes(spaceNeeded)} livres`;
 }
+
+if (chkLegal) chkLegal.addEventListener('change', () => checkReady());
 
 // ═══════════════════════════════════════════════════════
 // APLICAR PATCH
@@ -397,6 +426,8 @@ function checkReady() {
 
 btnApplyPatch.addEventListener('click', async () => {
     if (!isoFile || !patchFile) return;
+    if (patchMeta?.invalid) { showErrorBanner(patchMeta.invalid); return; }
+    if (!chkLegal || !chkLegal.checked) return;
 
     // Verificar MD5 — se incompatível, mostrar modal
     if (patchMeta?.targetMd5 && isoMd5Done) {
@@ -407,6 +438,7 @@ btnApplyPatch.addEventListener('click', async () => {
         }
     }
 
+    let writableStream = null;
     try {
         const suggestedName = patchMeta?.gameName && patchMeta.gameName !== 'N/A'
             ? `${patchMeta.gameName.replace(/[^a-zA-Z0-9_\- ]/g,'_')}_Patched.iso`
@@ -417,29 +449,36 @@ btnApplyPatch.addEventListener('click', async () => {
             types: [{ description: 'ISO File', accept: { 'application/octet-stream': ['.iso'] } }]
         });
 
-        // Selecionar pasta de trabalho para extrair os arquivos do patch temporariamente.
-        // Instrução exibida via UI antes do picker abrir.
-        showInfoBanner('📁 Selecione a PASTA onde deseja salvar a ISO — arquivos temporários serão extraídos lá.');
+        // Os arquivos temporários ficam numa SUBPASTA própria ("raiden_tmp_…") criada e apagada pelo patcher;
+        // nada que já exista na pasta escolhida é tocado.
+        showInfoBanner('📁 Selecione uma PASTA com espaço livre. Será criada uma subpasta temporária, apagada ao terminar.');
         const workDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
         hideInfoBanner();
 
         animOverlay.style.display = 'block';
         startAnim();
 
-        const writableStream = await saveHandle.createWritable();
+        writableStream = await saveHandle.createWritable();
         let success = false;
         try {
-            await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle);
+            await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle, {
+                keepTemp: !!(chkDebugMode && chkDebugMode.checked),
+            });
             success = true;
         } finally {
-            recordPatchUsage(patchFile.name, isoFile.name, success).catch(() => {});
+            recordPatchUsage(patchFile.name, success).catch(() => {});
         }
     } catch (e) {
+        hideInfoBanner();
+        animOverlay.style.display = 'none';
+        restartAnim();                       // sem isso a animação não reinicia numa nova tentativa
+        if (writableStream) { try { await writableStream.abort(); } catch (_) { /* já fechado */ } }
         if (e.name !== 'AbortError') {
             console.error("Erro ao aplicar patch:", e);
-            hideInfoBanner();
+            showErrorBanner(e.name === 'QuotaExceededError'
+                ? 'Sem espaço em disco suficiente. Libere espaço ou escolha outra pasta e tente de novo.'
+                : (e.message || 'Falha ao aplicar o patch.'));
         }
-        animOverlay.style.display = 'none';
     }
 });
 
@@ -454,11 +493,12 @@ btnCloseAnim.addEventListener('click', () => {
 
 function showMd5Modal(actualMd5, expectedMd5) {
     return new Promise((resolve) => {
+        // expectedMd5 vem do patch (não confiável): sempre escapar antes de usar em innerHTML.
         modalText.innerHTML =
             `O MD5 da sua ISO:<br>
-             <code style="color:#3af;font-size:0.75rem;">${actualMd5 ?? 'Não calculado'}</code><br><br>
+             <code style="color:#3af;font-size:0.75rem;">${escHtml(actualMd5 ?? 'Não calculado')}</code><br><br>
              MD5 esperado pelo patch:<br>
-             <code style="color:#ffb700;font-size:0.75rem;">${expectedMd5}</code><br><br>
+             <code style="color:#ffb700;font-size:0.75rem;">${escHtml(expectedMd5)}</code><br><br>
              Aplicar em uma ISO incorreta pode gerar um disco corrompido.`;
 
         modalMd5.classList.add('open');
@@ -497,7 +537,7 @@ async function loadFirebaseCounter(gameName, patchFileName) {
     }
 }
 
-async function recordPatchUsage(patchFileName, isoFileName, success) {
+async function recordPatchUsage(patchFileName, success) {
     try {
         const { dbPromise } = await import('./db-context.js');
         const {
@@ -519,7 +559,6 @@ async function recordPatchUsage(patchFileName, isoFileName, success) {
         } else {
             await setDoc(ref, {
                 patchName: patchFileName,
-                isoName:   isoFileName,
                 count: 1,
                 successCount: success ? 1 : 0,
                 failCount:    success ? 0 : 1,
@@ -593,53 +632,72 @@ if (btnApplyDebug) {
 // ALGORITMO DE STREAMING E PATCHING
 // ═══════════════════════════════════════════════════════
 
-async function executeStreamingPatch(origIsoFile, patchFile, writableStream, workDirHandle) {
-    updateStatusUI(1); setProgressUI(15);
-
-    // ── 1. Descriptografar o .RPT para a pasta de trabalho ──────────────────
-    updateStatusUI(2); setProgressUI(20);
-    const password = "bit.raiden";
-
-    // Nome do arquivo decriptado: mesmo nome base mas com extensão .dec
-    const decName = patchFile.name.replace(/\.rpt$/i, '') + '_dec.bin';
-    // { create: true } garante que o arquivo é criado se não existir
-    const patchDecHandle = await workDirHandle.getFileHandle(decName, { create: true });
+async function executeStreamingPatch(origIsoFile, patchFile, writableStream, workDirHandle, { keepTemp = false } = {}) {
+    // Subpasta exclusiva desta execução (evita misturar sobras de execuções anteriores e nunca apaga dados do usuário).
+    const tmpName = `raiden_tmp_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const tmpDir  = await workDirHandle.getDirectoryHandle(tmpName, { create: true });
 
     try {
-        await decryptFileToHandle(password, patchFile, patchDecHandle, (progress) => {
-            setProgressUI(20 + progress * 10);
-        });
-        console.log('[RPT] Descriptografia concluída →', decName);
-    } catch (e) {
-        console.error("Falha na decriptação RPT.", e);
-        throw new Error("Não foi possível descriptografar o patch (.rpt): " + e.message);
-    }
-    setProgressUI(30);
+        updateStatusUI(1); setProgressUI(15);
 
-    // ── 2. Parsear o .dec para extrair os arquivos e metadados ───────────────
-    updateStatusUI(3); setProgressUI(30);
-    const patchInfo = await scanPatchMetadata(patchDecHandle, workDirHandle);
-    console.log(`[RPT] ${patchInfo.length} arquivos extraídos do patch.`);
-
-    // ── 3. Reconstrução ISO9660+UDF ──────────────────────────────────────────
-    updateStatusUI(4); setProgressUI(40);
-    await ISO9660.PatchISO(origIsoFile, workDirHandle, writableStream, {
-        onProgress: (status, progMsg) => {
-            console.log(progMsg);
-            if (status === 2) updateStatusUI(3);
-            if (status === 4) updateStatusUI(4);
-            if (status === 5) updateStatusUI(5);
-            setProgressUI(Math.min(95, animProgress + 3));
+        // ── 1. Descriptografar o .RPT para a subpasta temporária ──────────────────
+        updateStatusUI(2); setProgressUI(20);
+        const patchDecHandle = await tmpDir.getFileHandle('patch_dec.bin', { create: true });
+        try {
+            await decryptFileToHandle(RPT_PASSWORD, patchFile, patchDecHandle, (progress) => {
+                setProgressUI(20 + progress * 10);
+            });
+        } catch (e) {
+            console.error("Falha na decriptação RPT.", e);
+            throw new Error("Não foi possível descriptografar o patch (.rpt): " + e.message);
         }
-    });
+        setProgressUI(30);
 
-    setProgressUI(100);
-    updateStatusUI(5);
-    setTimeout(() => { triggerFinale(); }, 300);
-    setTimeout(() => {
-        btnCloseAnim.style.pointerEvents = 'auto';
-        btnCloseAnim.style.opacity = '1';
-    }, 2000);
+        // ── 2. Extrair arquivos (patch_files/) e conteúdos de operações (patch_ops/) ──
+        updateStatusUI(3); setProgressUI(30);
+        const { xml, entries } = await extractPatchPayload(patchDecHandle, tmpDir);
+        const { ops } = parseManifestXml(xml);
+        console.log(`[RPT] ${entries.length} arquivo(s) no patch, ${ops.length} operação(ões).`);
+
+        // Cache antigo (service worker) pode servir um iso9660.js sem o gancho beforeBuild: nesse caso os deltas seriam
+        // ignorados em silêncio e a ISO sairia "ok" mas sem a tradução. Falha antes de gravar qualquer coisa.
+        if (ops.length && !(ISO9660.HOOKS_VERSION >= 1))
+            throw new Error('Módulos em cache desatualizados. Recarregue a página com Ctrl+F5 e tente novamente.');
+
+        // ── 3. Reconstrução ISO9660+UDF ───────────────────────────────────────────
+        // beforeBuild roda DEPOIS de copiar os arquivos originais da ISO do usuário e ANTES de gravar a ISO final:
+        // é aqui que delta/inject transformam o arquivo original, com verificação de SHA-256.
+        updateStatusUI(4); setProgressUI(40);
+        await ISO9660.PatchISO(origIsoFile, tmpDir, writableStream, {
+            onProgress: (status, progMsg) => {
+                console.log(progMsg);
+                if (status === 2) updateStatusUI(3);
+                if (status === 4) updateStatusUI(4);
+                if (status === 5) updateStatusUI(5);
+                setProgressUI(Math.min(95, animProgress + 3));
+            },
+            beforeBuild: async (patchDir) => {
+                if (!ops.length) return;
+                const payloadRoot = await tmpDir.getDirectoryHandle('patch_ops', { create: true });
+                const { report } = await applyOps({
+                    ops, filesRoot: patchDir, payloadRoot,
+                    onProgress: (f, msg) => { setProgressUI(Math.max(animProgress, 55 + f * 20)); setStatusText(msg); },
+                });
+                console.log('[RPT] operações aplicadas e verificadas:', report);
+            },
+        });
+
+        setProgressUI(100);
+        updateStatusUI(5);
+        setTimeout(() => { triggerFinale(); }, 300);
+        setTimeout(() => {
+            btnCloseAnim.style.pointerEvents = 'auto';
+            btnCloseAnim.style.opacity = '1';
+        }, 2000);
+    } finally {
+        // Apaga sempre (sucesso ou erro): senão ficam GBs de arquivos extraídos da ISO na pasta do usuário.
+        if (!keepTemp) await cleanupWorkDir(workDirHandle, [tmpName]);
+    }
 }
 
 async function executeDebugFolderBuild(debugDirHandle, writableStream) {
@@ -663,97 +721,107 @@ async function executeDebugFolderBuild(debugDirHandle, writableStream) {
 }
 
 // ═══════════════════════════════════════════════════════
-// SCAN DE METADADOS DO PATCH (STREAMING)
+// EXTRAÇÃO DO PAYLOAD DO PATCH (STREAMING + VALIDAÇÃO)
 // ═══════════════════════════════════════════════════════
 
-async function scanPatchMetadata(patchFileHandle, baseDirHandle) {
-    const patchDir = await baseDirHandle.getDirectoryHandle("patch_files", { create: true });
-    const file     = await patchFileHandle.getFile();
-    const reader   = file.stream().getReader();
-
-    let { value: buffer, done } = await reader.read();
-    let offset = 0;
-
-    async function ensureBytes(n) {
-        while (buffer && (buffer.length - offset < n)) {
-            const { value: nextChunk, done: isDone } = await reader.read();
-            if (isDone) break;
-            const nb = new Uint8Array(buffer.length - offset + nextChunk.length);
-            nb.set(buffer.slice(offset));
-            nb.set(nextChunk, buffer.length - offset);
-            buffer = nb;
-            offset = 0;
+// Leitor sequencial sobre um ReadableStream, com limites e erro claro em arquivo truncado.
+class ByteStream {
+    constructor(stream) { this.r = stream.getReader(); this.buf = new Uint8Array(0); this.pos = 0; this.ended = false; }
+    async _more() {
+        if (this.ended) return false;
+        const { value, done } = await this.r.read();
+        if (done) { this.ended = true; return false; }
+        if (this.pos >= this.buf.length) { this.buf = value; this.pos = 0; }
+        else {
+            const rest = this.buf.length - this.pos;
+            const nb = new Uint8Array(rest + value.length);
+            nb.set(this.buf.subarray(this.pos)); nb.set(value, rest);
+            this.buf = nb; this.pos = 0;
+        }
+        return true;
+    }
+    async need(n) {
+        while (this.buf.length - this.pos < n) { if (!(await this._more())) return false; }
+        return true;
+    }
+    async take(n) {
+        if (!(await this.need(n))) throw new Error('Patch truncado ou corrompido.');
+        const out = this.buf.subarray(this.pos, this.pos + n);
+        this.pos += n;
+        return out;                       // view: use antes da próxima leitura
+    }
+    async cstring(max) {
+        const bytes = [];
+        for (;;) {
+            if (!(await this.need(1))) throw new Error('Patch truncado ou corrompido.');
+            const b = this.buf[this.pos++];
+            if (b === 0) return new Uint8Array(bytes);
+            if (bytes.length >= max) throw new Error('Patch inválido: campo de texto longo demais.');
+            bytes.push(b);
         }
     }
-
-    await ensureBytes(6);
-    const magic = new TextDecoder().decode(buffer.slice(offset, offset + 4));
-    if (magic !== "RPTP") throw new Error("Assinatura de patch inválida!");
-    offset += 6;
-
-    while (true) {
-        await ensureBytes(1);
-        if (buffer[offset++] === 0) break;
-    }
-
-    let filesFound = [];
-
-    while (true) {
-        await ensureBytes(8);
-        if (!buffer || buffer.length - offset < 8) break;
-
-        const sizeView = new DataView(buffer.buffer, buffer.byteOffset + offset, 8);
-        const fileSize = Number(sizeView.getBigUint64(0, true));
-        offset += 8;
-
-        let nameBytes = [];
-        while (true) {
-            await ensureBytes(1);
-            const byte = buffer[offset++] === 0 ? 0 : buffer[offset - 1];
-            if (byte === 0) break;
-            nameBytes.push(byte);
+    async copyTo(sink, n) {
+        let rem = n;
+        while (rem > 0) {
+            if (this.pos >= this.buf.length && !(await this._more())) throw new Error('Patch truncado: arquivo interno incompleto.');
+            const k = Math.min(rem, this.buf.length - this.pos);
+            await sink.write(this.buf.slice(this.pos, this.pos + k));
+            this.pos += k; rem -= k;
         }
-        const fileName = new TextDecoder().decode(new Uint8Array(nameBytes));
+    }
+    async release() { try { await this.r.cancel(); } catch (_) { /* já terminado */ } }
+}
 
-        if (fileName) {
-            const pathParts = fileName.split(/[\\\/]/);
-            const nameOnly  = pathParts.pop();
-            let currentDir  = patchDir;
+/**
+ * Lê o .rpt já descriptografado e grava:
+ *   - entradas normais        → tmpDir/patch_files/<caminho>   (substituem arquivos da ISO — comportamento v1)
+ *   - entradas "__rpt/..."    → tmpDir/patch_ops/<caminho>     (conteúdo de operações delta/replace do v2)
+ * Todo caminho vindo do patch é validado (sem "..", sem caracteres de controle, profundidade limitada).
+ */
+async function extractPatchPayload(patchDecHandle, tmpDir) {
+    const filesDir = await tmpDir.getDirectoryHandle('patch_files', { create: true });
+    const opsDir   = await tmpDir.getDirectoryHandle('patch_ops',   { create: true });
+    const file = await patchDecHandle.getFile();
+    const bs = new ByteStream(file.stream());
+    const entries = [];
+    let xml = '';
 
-            for (const part of pathParts) {
-                if (part.trim() !== "") {
-                    currentDir = await currentDir.getDirectoryHandle(part, { create: true });
-                }
+    try {
+        const head = await bs.take(6);
+        if (new TextDecoder().decode(head.subarray(0, 4)) !== 'RPTP') throw new Error('Assinatura de patch inválida!');
+
+        xml = new TextDecoder('utf-8').decode(await bs.cstring(MAX_MANIFEST_BYTES));
+
+        while (await bs.need(8)) {               // <8 bytes sobrando = fim (tolerância do formato v1)
+            const sz = await bs.take(8);
+            const big = new DataView(sz.buffer, sz.byteOffset, 8).getBigUint64(0, true);
+            if (big > BigInt(LIMITS.maxFileBytes)) throw new Error('Patch inválido: arquivo interno maior que 4 GiB.');
+            const size = Number(big);
+
+            const name = new TextDecoder().decode(await bs.cstring(LIMITS.maxPathChars));
+            if (entries.length >= MAX_ENTRIES) throw new Error('Patch inválido: arquivos demais.');
+
+            if (!name) { await bs.copyTo({ write: async () => {} }, size); continue; }   // entrada sem nome: ignora
+
+            const norm = name.replace(/\\/g, '/').replace(/\/{2,}/g, '/').replace(/^\/+/, '');
+            const isOp = norm.startsWith(RPT_PAYLOAD_PREFIX);
+            const parts = parseRelPath(isOp ? norm.slice(RPT_PAYLOAD_PREFIX.length) : norm, 'arquivo do patch');
+
+            const fh = await createPayloadFile(isOp ? opsDir : filesDir, parts);
+            const writable = await fh.createWritable();
+            try {
+                await bs.copyTo(writable, size);
+                await writable.close();
+            } catch (e) {
+                try { await writable.abort(); } catch (_) { /* já fechado */ }
+                throw e;
             }
-
-            const fHandle  = await currentDir.getFileHandle(nameOnly, { create: true });
-            const writable = await fHandle.createWritable();
-            let remaining  = fileSize;
-
-            while (remaining > 0) {
-                const available = buffer.length - offset;
-                const toWrite   = Math.min(available, remaining);
-
-                if (toWrite > 0) {
-                    await writable.write(buffer.slice(offset, offset + toWrite));
-                    offset   += toWrite;
-                    remaining -= toWrite;
-                }
-
-                if (remaining > 0) {
-                    const { value: nextChunk, done: isDone } = await reader.read();
-                    if (isDone) break;
-                    buffer = nextChunk;
-                    offset = 0;
-                }
-            }
-            await writable.close();
-            filesFound.push(fileName);
-
-            if (buffer) { buffer = buffer.slice(offset); offset = 0; }
+            entries.push(norm);
         }
+    } finally {
+        await bs.release();
     }
-    return filesFound;
+    return { xml, entries };
 }
 
 // ═══════════════════════════════════════════════════════
@@ -781,24 +849,37 @@ function slugify(str) {
         .substring(0, 64);
 }
 
-// Banner informativo temporário (substitui alert() por UI inline)
-let _infoBanner = null;
-function showInfoBanner(msg) {
+// Banner temporário (substitui alert() por UI inline). kind: 'info' | 'error'
+let _infoBanner = null, _bannerTimer = null;
+function showInfoBanner(msg, kind = 'info') {
     if (_infoBanner) _infoBanner.remove();
+    clearTimeout(_bannerTimer);
+    const err = kind === 'error';
     _infoBanner = document.createElement('div');
     _infoBanner.style.cssText = `
         position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-        z-index: 4000; background: rgba(5,15,40,0.97); border: 1px solid rgba(51,170,255,0.5);
-        border-radius: 10px; padding: 0.9rem 1.5rem;
+        z-index: 10000; background: ${err ? 'rgba(40,5,5,0.97)' : 'rgba(5,15,40,0.97)'};
+        border: 1px solid ${err ? 'rgba(255,59,59,0.6)' : 'rgba(51,170,255,0.5)'};
+        border-radius: 10px; padding: 0.9rem 1.5rem; cursor: pointer;
         font-family: 'Share Tech Mono', monospace; font-size: 0.82rem;
-        color: #c8dff8; letter-spacing: 0.08em; max-width: 90vw; text-align: center;
-        box-shadow: 0 0 30px rgba(51,170,255,0.2); animation: rp-fade-in 0.3s ease;
+        color: ${err ? '#ffd0d0' : '#c8dff8'}; letter-spacing: 0.08em; max-width: 90vw; text-align: center;
+        box-shadow: 0 0 30px ${err ? 'rgba(255,59,59,0.2)' : 'rgba(51,170,255,0.2)'}; animation: rp-fade-in 0.3s ease;
     `;
-    _infoBanner.textContent = msg;
+    _infoBanner.textContent = msg;               // textContent: nunca interpreta HTML
+    _infoBanner.addEventListener('click', hideInfoBanner);
     document.body.appendChild(_infoBanner);
 }
+function showErrorBanner(msg) {
+    showInfoBanner('⚠️ ' + msg + '  (clique para fechar)', 'error');
+    _bannerTimer = setTimeout(hideInfoBanner, 20000);
+}
 function hideInfoBanner() {
+    clearTimeout(_bannerTimer);
     if (_infoBanner) { _infoBanner.remove(); _infoBanner = null; }
+}
+function setStatusText(msg) {
+    const el = document.getElementById('statusMsg');
+    if (el) el.textContent = String(msg);
 }
 
 // ═══════════════════════════════════════════════════════

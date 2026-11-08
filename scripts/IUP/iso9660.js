@@ -595,17 +595,25 @@ function makeUdfFid(lba, isDir, isParent, name, targetFeLogicalLba) {
 
 export class ISO9660 {
 
+    /** Versão da API de ganchos (1 = options.beforeBuild em PatchISO). O patcher confere antes de aplicar um patch v2. */
+    static HOOKS_VERSION = 1;
+
     /**
      * PatchISO: O ponto de entrada principal.
      */
     static async PatchISO(sourceIsoFile, workDirHandle, outputStream, options = {}) {
-        const { onProgress } = options;
+        const { onProgress, beforeBuild } = options;
 
         try {
             const patchDir = await workDirHandle.getDirectoryHandle("patch_files");
 
             if (onProgress) onProgress(2, "A sincronizar ficheiros originais e modificados...");
             await ISO9660.ExtrairNaPasta(sourceIsoFile, patchDir, options);
+
+            // Gancho do formato RPT v2: aqui os arquivos ORIGINAIS da ISO do usuário já estão em patchDir,
+            // então operações delta/inject/replace podem transformá-los (com verificação de hash) antes da gravação.
+            // Se lançar erro, nada foi escrito em outputStream ainda.
+            if (typeof beforeBuild === 'function') await beforeBuild(patchDir);
 
             if (onProgress) onProgress(4, "A reconstruir estrutura ISO9660+UDF final...");
             const success = await ISO9660.BuildISO(patchDir, outputStream, { ...options, sourceIsoFile });

@@ -442,6 +442,83 @@
         }
         .rp-btn-apply .btn-icon { flex-shrink: 0; }
 
+        /* ── Abas Aplicar / Criar ── */
+        .rp-mode-tabs { display: flex; justify-content: center; gap: 0.6rem; margin: 0 auto 1.4rem; flex-wrap: wrap; }
+        .rp-tab {
+            font-family: 'Orbitron', monospace; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+            padding: 0.7rem 1.4rem; border-radius: 99px; cursor: pointer;
+            background: rgba(51,170,255,0.06); border: 1px solid var(--rp-border); color: var(--rp-text-dim); transition: all .2s;
+        }
+        .rp-tab:hover { color: var(--rp-text); border-color: var(--rp-border-hi); }
+        .rp-tab.active { color: #fff; background: var(--rp-blue-dim); border-color: var(--rp-border-hi); box-shadow: 0 0 18px rgba(51,170,255,0.25); }
+
+        /* ── Criador de patch ── */
+        .rp-field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.9rem; }
+        .rp-field label { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; color: var(--rp-text-dim); text-transform: uppercase; }
+        .rp-input {
+            width: 100%; box-sizing: border-box; padding: 0.65rem 0.8rem; border-radius: var(--rp-radius-sm);
+            background: rgba(2,8,20,0.8); border: 1px solid var(--rp-border); color: #fff;
+            font-family: 'Exo 2', sans-serif; font-size: 0.9rem;
+        }
+        .rp-input:focus { outline: none; border-color: var(--rp-border-hi); }
+        textarea.rp-input { min-height: 90px; resize: vertical; }
+        .rp-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+        @media (max-width: 600px) { .rp-field-row { grid-template-columns: 1fr; } }
+        .rp-radio-row { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.8rem; font-family: 'Exo 2', sans-serif; font-size: 0.85rem; color: var(--rp-text); }
+        .rp-radio-row label { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+        .rp-radio-row input { accent-color: #3af; }
+        .rp-cr-status { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: var(--rp-radius-sm); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 1.5; border: 1px solid var(--rp-border); color: var(--rp-text); }
+        .rp-cr-status.ok { border-color: rgba(0,255,136,0.4); color: var(--rp-green); }
+        .rp-cr-status.err { border-color: rgba(255,59,59,0.5); color: #ffd0d0; background: rgba(40,5,5,0.5); }
+        .rp-cr-status.info { border-color: rgba(51,170,255,0.4); }
+        .rp-cr-summary { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--rp-cyan); margin-bottom: 0.7rem; }
+        .rp-cr-warn { margin-bottom: 0.6rem; padding: 0.7rem 0.9rem; border-radius: var(--rp-radius-sm); background: rgba(255,183,0,0.07); border: 1px solid rgba(255,183,0,0.3); color: var(--rp-gold); font-size: 0.82rem; line-height: 1.5; }
+        .rp-cr-list { max-height: 320px; overflow: auto; border: 1px solid var(--rp-border); border-radius: var(--rp-radius-sm); }
+        .rp-cr-row { display: grid; grid-template-columns: 70px 1fr; gap: 0.2rem 0.7rem; padding: 0.5rem 0.7rem; border-bottom: 1px solid rgba(51,170,255,0.1); font-size: 0.78rem; }
+        .rp-cr-path { color: #fff; word-break: break-all; font-family: 'Share Tech Mono', monospace; }
+        .rp-cr-reason { grid-column: 2; color: var(--rp-text-dim); font-size: 0.72rem; }
+        .rp-cr-badge { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; text-align: center; border-radius: 4px; padding: 0.15rem 0.3rem; height: fit-content; }
+        .rp-cr-badge.delta { background: rgba(51,170,255,0.2); color: var(--rp-blue); }
+        .rp-cr-badge.inject { background: rgba(0,255,136,0.15); color: var(--rp-green); }
+        .rp-cr-badge.replace { background: rgba(255,183,0,0.18); color: var(--rp-gold); }
+
+        /* ── Aviso legal / consentimento ── */
+        .rp-legal {
+            margin-bottom: 1.2rem;
+            padding: 1rem 1.2rem;
+            background: rgba(255,183,0,0.04);
+            border: 1px solid rgba(255,183,0,0.2);
+            border-radius: var(--rp-radius-sm);
+        }
+        .rp-legal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.18em;
+            color: var(--rp-gold);
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+        .rp-legal-list {
+            margin: 0 0 0.9rem;
+            padding-left: 1.1rem;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: var(--rp-text);
+        }
+        .rp-legal-list li { margin-bottom: 0.3rem; }
+        .rp-consent {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            cursor: pointer;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #fff;
+        }
+        .rp-consent input { margin-top: 0.25rem; accent-color: #3af; width: 1.05rem; height: 1.05rem; flex-shrink: 0; }
+
         /* ── Info Bar ── */
         .rp-info-bar {
             display: flex;
@@ -697,6 +774,12 @@
             <p class="rp-hero-sub">Aplicador de mods de ISO · Sem instalação · Direto no navegador</p>
         </div>
 
+        <!-- Abas -->
+        <div class="rp-mode-tabs" role="tablist">
+            <button class="rp-tab active" id="tab-apply" role="tab" type="button">⚡ Aplicar patch</button>
+            <button class="rp-tab" id="tab-create" role="tab" type="button">🛠️ Criar patch</button>
+        </div>
+
         <!-- Stepper -->
         <div class="rp-stepper" id="rp-stepper">
             <div class="rp-step-item active" id="step-indicator-1">
@@ -756,7 +839,7 @@
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
                 <div class="rp-drop-text">Selecionar Patch (.RPT)</div>
-                <div class="rp-drop-sub">Arquivo de patch criptografado Raiden</div>
+                <div class="rp-drop-sub">Arquivo de patch Raiden (.rpt) — só são aplicadas alterações; o jogo original vem da sua ISO</div>
                 <div class="rp-drop-filename" id="label-patch" style="display:none;"></div>
             </div>
 
@@ -777,6 +860,21 @@
                 <span class="rp-card-title">Aplicar Patch</span>
             </div>
 
+            <!-- Aviso legal + declaração (o botão só habilita depois de marcar) -->
+            <div class="rp-legal" id="rp-legal">
+                <div class="rp-legal-title">⚖️ Antes de continuar</div>
+                <ul class="rp-legal-list">
+                    <li><b>Tudo roda no seu navegador.</b> Sua ISO e o patch não são enviados a nenhum servidor. Apenas um contador anônimo (nome do patch e se deu certo) é atualizado ao final.</li>
+                    <li><b>Este site não distribui jogos nem ISOs.</b> O patch contém só as alterações feitas pelo autor; o conteúdo original do jogo vem da ISO que você mesmo fornece, e o patch é recusado se o arquivo da sua ISO não for o esperado.</li>
+                    <li><b>Projeto de fãs, gratuito e não oficial.</b> Sem vínculo com as detentoras dos direitos; nomes e marcas pertencem aos respectivos donos.</li>
+                    <li>As regras sobre cópias de backup e modificação de software variam de país para país — confira a legislação do seu antes de usar.</li>
+                </ul>
+                <label class="rp-consent">
+                    <input type="checkbox" id="chk-legal-consent">
+                    <span>Declaro que possuo uma cópia legítima do jogo, que usarei a ISO gerada apenas para uso pessoal e que não vou distribuí-la.</span>
+                </label>
+            </div>
+
             <button id="btn-apply-patch" class="rp-btn-apply" disabled>
                 <svg class="btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -795,6 +893,70 @@
                 <div class="rp-info-chip" id="space-lbl">Streaming nativo ativo — baixo consumo de RAM</div>
                 <div class="rp-info-chip" id="storage-lbl"></div>
             </div>
+        </div>
+
+        <!-- ══ CRIADOR DE PATCH ══ -->
+        <div class="rp-card active-card" id="creator-section" style="display:none;">
+            <div class="rp-card-header">
+                <span class="rp-card-num">CRIAR</span>
+                <span class="rp-card-title">Criar patch (.RPT) a partir de uma ISO modificada</span>
+            </div>
+            <p style="font-family:'Exo 2',sans-serif;font-size:0.85rem;line-height:1.6;color:var(--rp-text);margin:0 0 1.2rem;">
+                Compare a ISO original com a sua versão modificada. O patch guarda <b>apenas as diferenças</b>
+                (deltas, pequenas trocas de bytes e arquivos criados por você) — arquivos idênticos ao original nunca entram nele.
+                Tudo é processado no seu navegador.
+            </p>
+
+            <div class="rp-drop-zone" id="btn-cr-orig">
+                <div class="rp-drop-text">1 · Selecionar ISO ORIGINAL</div>
+                <div class="rp-drop-sub">A cópia limpa do jogo (a mesma que o usuário final vai usar)</div>
+                <div class="rp-drop-filename" id="cr-orig-label" style="display:none;"></div>
+            </div>
+
+            <div class="rp-radio-row" style="margin-top:1.2rem;">
+                <label><input type="radio" name="cr-mod-mode" value="iso" checked> Versão modificada é uma ISO</label>
+                <label><input type="radio" name="cr-mod-mode" value="folder"> Versão modificada é uma pasta de arquivos</label>
+            </div>
+            <div class="rp-drop-zone" id="btn-cr-mod">
+                <div class="rp-drop-text" id="cr-mod-text">Selecionar ISO Modificada</div>
+                <div class="rp-drop-sub">2 · O resultado do seu trabalho (tradução, fonte, vídeos…)</div>
+                <div class="rp-drop-filename" id="cr-mod-label" style="display:none;"></div>
+            </div>
+
+            <div style="margin-top:1.4rem;">
+                <div class="rp-field"><label for="cr-name">Nome do jogo / projeto *</label><input class="rp-input" id="cr-name" maxlength="100" autocomplete="off"></div>
+                <div class="rp-field-row">
+                    <div class="rp-field"><label for="cr-version">Versão</label><input class="rp-input" id="cr-version" maxlength="30" autocomplete="off"></div>
+                    <div class="rp-field"><label for="cr-author">Autor / equipe</label><input class="rp-input" id="cr-author" maxlength="100" autocomplete="off"></div>
+                </div>
+                <div class="rp-field"><label for="cr-md5">MD5 da ISO original (opcional — 32 hex; avisa o usuário se a ISO dele for diferente)</label><input class="rp-input" id="cr-md5" maxlength="32" autocomplete="off" spellcheck="false"></div>
+                <div class="rp-field"><label for="cr-desc">Descrição / changelog (opcional)</label><textarea class="rp-input" id="cr-desc" maxlength="4000"></textarea></div>
+            </div>
+
+            <button id="btn-cr-analyze" class="rp-btn-apply" type="button" disabled>🔍 Analisar diferenças</button>
+
+            <div id="cr-progress" style="display:none;margin-top:1rem;">
+                <div class="rp-progress-bar-wrap"><div class="rp-progress-bar" id="cr-bar" style="width:0%"></div></div>
+                <div class="rp-md5-value" id="cr-prog-msg" style="margin-top:0.5rem;"></div>
+            </div>
+            <div id="cr-status" class="rp-cr-status" style="display:none;"></div>
+            <div id="cr-review" style="display:none;margin-top:1.2rem;"></div>
+
+            <div class="rp-legal" style="margin-top:1.4rem;">
+                <div class="rp-legal-title">⚖️ Antes de distribuir um patch</div>
+                <ul class="rp-legal-list">
+                    <li>Inclua <b>somente o que você criou</b>: textos traduzidos, fontes, dublagens, código e as diferenças (deltas).</li>
+                    <li><b>Nunca</b> distribua a ISO pronta, nem arquivos originais sem alteração, e não cobre pelo patch.</li>
+                    <li>Arquivos marcados como <b>replace</b> entram inteiros no patch — confirme que são conteúdo seu. Prefira <b>delta</b> para vídeos e áudios modificados.</li>
+                    <li>Algumas detentoras de direitos reagem a patches de fãs (cease &amp; desist). Isto não é aconselhamento jurídico; as regras variam por país.</li>
+                </ul>
+                <label class="rp-consent">
+                    <input type="checkbox" id="chk-creator-legal">
+                    <span>Declaro que o conteúdo do patch é de minha autoria (ou que tenho autorização), que ele não contém arquivos originais inalterados e que não o distribuirei junto com a ISO do jogo.</span>
+                </label>
+            </div>
+
+            <button id="btn-cr-generate" class="rp-btn-apply" type="button" disabled style="margin-top:1rem;">💾 Gerar arquivo .RPT</button>
         </div>
 
         <!-- ══ Debug Panel ══ -->
@@ -897,6 +1059,7 @@
     <!-- Scripts -->
     <script type="module" src="/scripts/navbar_auth.js"></script>
     <script type="module" src="/scripts/raiden_patcher.js"></script>
+    <script type="module" src="/scripts/raiden_creator.js"></script>
     <script src="/scripts/tool_back_button.js"></script>
     <script>
       if (navigator.storage && navigator.storage.estimate) {

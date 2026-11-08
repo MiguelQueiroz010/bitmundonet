@@ -127,6 +127,36 @@ window.__done = runAll(${JSON.stringify(base + '/__snippet.mjs')}, ${JSON.string
     console.log('  info pastas temporárias após análise: ' + JSON.stringify(tmpLeft));
     const bad3 = errs3.filter(m => /rpt_|raiden_|iso9660|does not provide an export|is not defined|before initialization|Cannot read/.test(m));
     if (bad3.length) { failed++; console.log('  FALHOU erros de JS:\n   ' + bad3.join('\n   ')); }
+    
+    // ── 4) painel compacto de progresso: código REAL do raiden_patcher.js sobre o DOM real ──
+    const p4 = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await p4.route('**/*', (route) => { const u = route.request().url(); if (u.startsWith(base)) return route.continue();
+        const js = (b) => route.fulfill({ status: 200, contentType: 'text/javascript', body: b });
+        if (/forge/.test(u)) return js('window.forge={};'); if (/w3data/.test(u)) return js('function w3IncludeHTML(){}'); if (/jquery/.test(u)) return js('window.$=function(){return {on(){},ready(){},css(){return this}}};');
+        if (/firebase|gstatic|googleapis/.test(u)) return js('export const initializeApp=()=>({}),getFirestore=()=>null,getAuth=()=>null,getMessaging=()=>null,doc=()=>null,getDoc=async()=>({exists:()=>false}),setDoc=async()=>{},updateDoc=async()=>{},increment=()=>0,serverTimestamp=()=>0,GoogleAuthProvider=class{},signInWithPopup=async()=>({}),signOut=async()=>{},onAuthStateChanged=()=>()=>{},collection=()=>null,getDocs=async()=>({docs:[],forEach(){}}),query=()=>null,where=()=>null,orderBy=()=>null,limit=()=>null,addDoc=async()=>({}),deleteDoc=async()=>{},onSnapshot=()=>()=>{},getToken=async()=>null,onMessage=()=>{},isSupported=async()=>false;'); return route.abort(); });
+    await p4.goto(base + '/raiden_patcher.html'); await p4.waitForSelector('#anim-overlay', { state: 'attached' });
+    const a0 = src.indexOf('// PAINEL DE PROGRESSO'); const panelCode = src.slice(src.lastIndexOf('// ═══', a0), src.length);
+    await p4.addScriptTag({ type: 'module', content: `const animOverlay = document.getElementById('anim-overlay'), btnCloseAnim = document.getElementById('btn-close-anim');\n${panelCode}\nwindow.__p = { startAnim, setProgressUI, updateStatusUI, triggerFinale, restartAnim };\nwindow.__pReady = true;` });
+    await p4.waitForFunction(() => window.__pReady);
+    const snap = () => p4.evaluate(() => { const r = document.getElementById('stage').getBoundingClientRect(); const ov = document.getElementById('anim-overlay');
+        return { shown: getComputedStyle(ov).display, w: Math.round(r.width), h: Math.round(r.height), pct: document.getElementById('pctLabel').textContent, off: document.getElementById('ringPath').style.strokeDashoffset,
+                 title: document.getElementById('statusTitleText').textContent, msg: document.getElementById('statusMsg').textContent, done: ov.classList.contains('done'),
+                 btn: getComputedStyle(document.getElementById('btn-close-anim')).display, ready: getComputedStyle(document.getElementById('isoReadyText')).display, canvas: document.querySelectorAll('canvas').length, vw: innerWidth, vh: innerHeight }; });
+    const fail = (m, o) => { failed++; console.log('  FALHOU painel: ' + m + ' ' + JSON.stringify(o)); };
+    await p4.evaluate(() => window.__p.startAnim()); await p4.evaluate(() => window.__p.updateStatusUI(2)); await p4.evaluate(() => window.__p.setProgressUI(42.7));
+    let r = await snap();
+    if (r.shown !== 'block' || r.pct !== '42%' || Math.abs(parseFloat(r.off) - 151 * (1 - 0.427)) > 0.01 || r.done || r.btn !== 'none' || r.canvas !== 0) fail('estado em andamento', r); else console.log('  ok  painel em andamento: ' + r.pct + ', "' + r.msg + '", sem canvas');
+    if (r.w > 360 || r.h > 130) fail('cartão deveria ser compacto (≤360x130)', r); else console.log(`  ok  cartão compacto: ${r.w}x${r.h}px numa janela de ${r.vw}x${r.vh} (${(100 * r.w * r.h / (r.vw * r.vh)).toFixed(1)}% da tela)`);
+    await p4.screenshot({ path: (process.env.SHOT_DIR || '/tmp') + '/painel_andamento.png' });
+    await p4.evaluate(() => { window.__p.setProgressUI(100); window.__p.triggerFinale(); });
+    r = await snap(); if (!r.done || r.title !== 'CONCLUÍDO' || r.btn !== 'block' || r.ready !== 'block' || r.pct !== '100%') fail('estado concluído', r); else console.log('  ok  painel concluído: título, mensagem de sucesso e botão Fechar');
+    await p4.waitForTimeout(700); await p4.screenshot({ path: (process.env.SHOT_DIR || '/tmp') + '/painel_concluido.png' });
+    { const fin = await p4.evaluate(() => ({ off: parseFloat(getComputedStyle(document.getElementById('ringPath')).strokeDashoffset), stroke: getComputedStyle(document.getElementById('ringPath')).stroke })); if (fin.off > 0.5 || !/0, ?255, ?136|rgb\(0, 255, 136\)/.test(fin.stroke)) fail('anel deveria fechar em verde após a transição', fin); else console.log('  ok  concluído: anel 100% e verde após a transição'); }
+    await p4.evaluate(() => window.__p.restartAnim()); r = await snap(); if (r.done || r.pct !== '0%' || r.title !== 'APLICANDO PATCH') fail('reset', r); else console.log('  ok  restartAnim volta ao estado inicial (nova tentativa funciona)');
+    const t0 = Date.now(); await p4.evaluate(() => { for (let i = 0; i <= 2000; i++) window.__p.setProgressUI(i / 20); }); console.log('  ok  2000 atualizações de progresso em ' + (Date.now() - t0) + ' ms (DOM só muda quando o % muda)');
+    await p4.setViewportSize({ width: 390, height: 780 }); await p4.evaluate(() => { window.__p.startAnim(); window.__p.setProgressUI(60); }); r = await snap();
+    if (r.w > 390 - 24) fail('em tela de celular o cartão deve caber', r); else console.log('  ok  celular 390px: cartão de ' + r.w + 'px cabe na tela');
+    await p4.screenshot({ path: (process.env.SHOT_DIR || '/tmp') + '/painel_celular.png' });
     } finally { await browser.close(); server.close(); }
 console.log(failed ? `\n${failed} FALHA(S)` : '\nTodos os testes de navegador passaram.');
 process.exit(failed ? 1 : 0);

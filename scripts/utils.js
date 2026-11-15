@@ -91,7 +91,10 @@ export function parseArticleTags(text) {
 }
 
 /**
- * Render structured topics into HTML
+ * Render structured topics into HTML.
+ * Topics now store HTML directly — no tag translation needed.
+ * Legacy content that still uses the old meta-language is detected and
+ * passed through parseArticleTags for backward compatibility.
  * @param {Array} topics - Array of {title, content} objects
  */
 export function renderTopics(topics) {
@@ -100,7 +103,10 @@ export function renderTopics(topics) {
         const titleHtml = (topic.title && topic.title.trim())
             ? `<h3 class="topic-title" style="color: var(--highlight); margin-top: 2.5rem; margin-bottom: 1.2rem; font-size: 1.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid var(--highlight); padding-left: 15px;">${topic.title}</h3>`
             : '';
-        const contentHtml = parseArticleTags(topic.content || "");
+        const raw = topic.content || "";
+        // Detect legacy meta-language tags — if present, convert them
+        const isLegacy = /\((strong|em|color|font-size|image|quote|callout|\/strong|\/em|\/color|\/font-size|\/image|\/quote|\/callout)\b/i.test(raw);
+        const contentHtml = isLegacy ? parseArticleTags(raw) : raw;
         return `<section class="article-topic" style="margin-bottom: 2rem;">${titleHtml}${contentHtml}</section>`;
     }).join('');
 }

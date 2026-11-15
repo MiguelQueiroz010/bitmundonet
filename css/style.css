@@ -287,6 +287,71 @@ h1, h2, h3, h4, .brand-font {
     line-height: 1.8;
 }
 
+.article-content p {
+    margin: 0 0 0.35rem 0;
+    line-height: 1.55;
+}
+
+.article-content p:last-child {
+    margin-bottom: 0;
+}
+
+.article-content p:empty,
+.article-content p:has(> br:only-child) {
+    min-height: 1.4em;
+    margin-bottom: 0.35rem;
+}
+
+.article-content figure {
+    margin: 1.5rem 0;
+}
+
+.article-content figure img {
+    border-radius: var(--radius-md, 8px);
+    max-width: 100%;
+    height: auto;
+}
+
+.article-content figure figcaption {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.article-content blockquote {
+    border-left: 3px solid var(--highlight, #f1a32e);
+    margin: 1.5rem 0;
+    padding: 0.8rem 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: #e5e5e7;
+}
+
+.article-content .article-callout {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--highlight, #f1a32e);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.article-content .callout-info {
+    border-left-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.article-content .callout-success {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.article-content .callout-danger {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
 .article-footer {
     margin-top: 1.5rem;
     padding-top: 1.5rem;

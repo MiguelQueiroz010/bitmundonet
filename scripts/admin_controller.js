@@ -4,7 +4,7 @@ import { getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy,
 import { getFirebaseConfig, saveLocalFirebaseConfig } from "./firebase-manager.js";
 import { saveLocalEmailJSConfig, clearLocalEmailJSConfig } from "./emailjs-manager.js";
 import { parseArticleTags, sanitizeString } from "./utils.js";
-import { openArticleStudio, upgradeTextarea, upgradeAllTopicTextareas, getTopicRawContent } from "./rich_editor.js";
+import { openArticleStudio, upgradeTextarea, upgradeAllTopicTextareas, getTopicRawContent, isLegacyFormat, normalizeToStrictHtml } from "./rich_editor.js?v=2.1";
 
 // Inject Emoji CSS
 if (!document.getElementById('emoji-picker-css')) {
@@ -299,6 +299,76 @@ window.fixArticleDates = async () => {
     } catch (e) {
         console.error("Erro ao corrigir datas:", e);
         showNotification("❌ Erro: " + e.message, "error");
+    }
+};
+
+// --- Utilitário de Migração do Banco: Meta-Linguagem Legada -> HTML Puro ---
+window.convertAllArticlesToHtml = async () => {
+    if (!confirm("Deseja converter TODAS as postagens do Firestore que utilizam o formato antigo de meta-tags para HTML puro?\n\nIsso atualizará os campos 'topics' e 'content' de cada post para HTML semântico com parágrafos limpos.")) {
+        return;
+    }
+
+    showNotification("🔄 Iniciando migração das postagens para HTML puro...", "info");
+
+    try {
+        const q = query(collection(db, "articles"));
+        const querySnapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        let count = 0;
+
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            let needsUpdate = false;
+            let updatedTopics = [];
+
+            // Se o post já possui tópicos estruturados
+            if (Array.isArray(data.topics) && data.topics.length > 0) {
+                updatedTopics = data.topics.map(t => {
+                    const originalContent = t.content || '';
+                    if (isLegacyFormat(originalContent) || !/<[a-z][\s\S]*>/i.test(originalContent)) {
+                        needsUpdate = true;
+                        return {
+                            title: t.title || '',
+                            content: normalizeToStrictHtml(originalContent)
+                        };
+                    }
+                    return t;
+                });
+            } else if (data.content) {
+                // Post legado que só possui o campo content
+                needsUpdate = true;
+                const converted = normalizeToStrictHtml(data.content);
+                updatedTopics = [{
+                    title: '',
+                    content: converted
+                }];
+            }
+
+            if (needsUpdate) {
+                const combinedHtml = updatedTopics.map(t => {
+                    const tTitle = t.title && t.title.trim() ? `<h3 class="topic-title" style="color: var(--highlight, #f1a32e); margin-top: 1.5rem; margin-bottom: 0.8rem; font-size: 1.35rem; font-weight: 700;">${t.title.trim()}</h3>` : '';
+                    return `${tTitle}${t.content || ''}`;
+                }).join('\n');
+
+                batch.update(doc(db, "articles", docSnap.id), {
+                    topics: updatedTopics,
+                    content: combinedHtml
+                });
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
+            showNotification(`✅ Sucesso! ${count} postagens convertidas e salvas em HTML puro no Firestore!`, "success");
+            loadArticles();
+        } else {
+            showNotification("✅ Todas as postagens já estão no formato HTML puro!", "success");
+        }
+
+    } catch (e) {
+        console.error("Erro na conversão para HTML puro:", e);
+        showNotification("❌ Erro ao converter artigos: " + e.message, "error");
     }
 };
 
@@ -1732,7 +1802,9 @@ window.previewArticle = async (id) => {
             <link rel="stylesheet" href="/css/projects.css">
             <style>
                 body { background: #0a0b10; overflow-x: hidden; margin: 0; padding: 2rem; }
-                .article-content p { margin: 0 0 1.5rem 0; line-height: 1.8; }
+                .article-content p { margin: 0 0 0.35rem 0; line-height: 1.55; }
+                .article-content p:last-child { margin-bottom: 0; }
+                .article-content p:empty, .article-content p:has(> br:only-child) { min-height: 1.4em; margin-bottom: 0.35rem; }
             </style>
         </head>
         <body>
@@ -1893,7 +1965,7 @@ window.addNewArticle = () => {
             category: 'Geral',
             date: new Date().toLocaleDateString('pt-BR'),
             selected: false,
-            topics: [{ title: '', content: '' }]
+            topics: [{ title: '', content: '<p><br></p>' }]
         },
         id: null,
         onSave: async (payload, targetId) => {

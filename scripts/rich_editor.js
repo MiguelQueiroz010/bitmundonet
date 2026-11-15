@@ -5,7 +5,7 @@
  * de tags customizadas do BitMundo.
  */
 
-import { parseArticleTags } from "./utils.js";
+// HTML puro — não precisa mais importar parseArticleTags
 
 /* ─── CSS Profissional do Studio ───────────────────────────────────── */
 const STUDIO_CSS = `
@@ -605,26 +605,28 @@ const STUDIO_CSS = `
     color: #ef4444;
 }
 
-/* Área Editável do Tópico (WYSIWYG) */
+/* Área Editável do Tópico (WYSIWYG Estilo Word) */
 .bm-topic-editor-body {
     min-height: 180px;
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem 2rem;
     color: #e5e5e7;
-    font-size: 0.96rem;
-    line-height: 1.85;
+    font-size: 1rem;
+    line-height: 1.55;
     outline: none;
     word-break: break-word;
     caret-color: #f1a32e;
 }
-.bm-topic-editor-body p,
-.bm-topic-editor-body div {
-    margin: 0;
-    padding: 0;
-    line-height: 1.85;
+.bm-topic-editor-body p {
+    margin: 0 0 0.35rem 0;
+    line-height: 1.55;
 }
-.bm-topic-editor-body p.has-gap,
-.bm-topic-editor-body div.has-gap {
-    margin-bottom: 1.25rem;
+.bm-topic-editor-body p:last-child {
+    margin-bottom: 0;
+}
+.bm-topic-editor-body p:empty,
+.bm-topic-editor-body p:has(> br:only-child) {
+    min-height: 1.4em;
+    margin-bottom: 0.35rem;
 }
 .bm-topic-editor-body:empty::before {
     content: attr(data-placeholder);
@@ -864,166 +866,207 @@ function injectStudioCSS() {
     studioCSSInjected = true;
 }
 
-/* ─── Conversões Raw ↔ Visual WYSIWYG ──────────────────────────────── */
+/* ─── Conversões Legacy → HTML (para artigos antigos com meta-linguagem) ── */
 
-function rawToVisual(raw) {
+/**
+ * Detecta se uma string usa a meta-linguagem legada do BitMundo.
+ */
+export function isLegacyFormat(str) {
+    if (!str) return false;
+    return /\((strong|em|color|font-size|image|quote|callout|\/strong|\/em|\/color|\/font-size|\/image|\/quote|\/callout)\b/i.test(str);
+}
+
+/**
+ * Converte conteúdo legado (meta-tags) para HTML puro.
+ * Usado apenas ao carregar artigos antigos que ainda não foram re-salvos.
+ */
+function legacyToHtml(raw) {
     if (!raw) return '';
     let html = raw;
 
     // (strong)...(/strong) → <b>
     html = html.replace(/\(strong\)([\s\S]*?)\(\/strong\)/gi, '<b>$1</b>');
-
-    // (em)...(/em) → <em>
     html = html.replace(/\(em\)([\s\S]*?)\(\/em\)/gi, '<em>$1</em>');
-
-    // (u)...(/u) → <u>
     html = html.replace(/\(u\)([\s\S]*?)\(\/u\)/gi, '<u>$1</u>');
-
-    // (s)...(/s) → <s>
     html = html.replace(/\(s\)([\s\S]*?)\(\/s\)/gi, '<s>$1</s>');
-
-    // (quote)...(/quote) → <blockquote>
     html = html.replace(/\(quote\)([\s\S]*?)\(\/quote\)/gi, '<blockquote>$1</blockquote>');
-
-    // (callout type="...") ... (/callout)
     html = html.replace(/\(callout\s*type\s*=\s*"([^"]+)"\)([\s\S]*?)\(\/callout\)/gi,
         '<div class="bm-callout-box $1" data-callout="$1">$2</div>');
-
-    // (color="red") ... (/color)
     html = html.replace(/\(color\s*=\s*"([^"]+)"\)([\s\S]*?)\(\/color\)/gi,
         '<span style="color:$1">$2</span>');
-
-    // (font-size="1.2em") ... (/font-size)
     html = html.replace(/\(font-size\s*=\s*"([^"]+)"\)([\s\S]*?)\(\/font-size\)/gi,
         '<span style="font-size:$1">$2</span>');
 
-    // Imagem com legenda: (image style="..." = "url")caption(/image)
+    // Imagens
     html = html.replace(/\(image style="([^"]*?)"\s*=\s*"([^"]+)"\)(.*?)\(\/image\)/gi,
         (_, style, url, cap) =>
-            `<img src="${url}" alt="${cap.trim()}" title="${cap.trim()}" data-caption="${cap.trim()}" data-imgstyle="${style}" style="${style}; max-width:100%; border-radius:8px;">`
+            `<div style="${style}; margin: 1.5rem 0;"><img src="${url}" alt="${cap.trim()}" style="max-width:100%; border-radius:8px;"><p style="font-size:0.85rem; color:rgba(255,255,255,0.5); font-style:italic; margin-top:0.5rem; text-align:center;">${cap.trim()}</p></div>`
     );
-
-    // Imagem sem legenda: (image style="...")url(/image)
     html = html.replace(/\(image style="([^"]*?)"\)([^(]*)\(\/image\)/gi,
         (_, style, url) =>
-            `<img src="${url.trim()}" alt="Imagem" data-imgstyle="${style}" style="${style}; max-width:100%; border-radius:8px;">`
+            `<div style="${style}; margin: 1.5rem 0;"><img src="${url.trim()}" alt="Imagem" style="max-width:100%; border-radius:8px;"></div>`
     );
 
-    // YouTube / Streamable
-    const ytPat = /([^\n<]*?:\s*)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+))([^\n]*)?/gi;
-    html = html.replace(ytPat, (match, prefix, url, id) => {
-        const rawStr = match.trim();
-        const label = prefix ? prefix.replace(/:$/, '').trim() : '';
-        return `<span class="bm-media-chip youtube" contenteditable="false" data-raw="${rawStr}">▶ YouTube${label ? ': ' + label : ''} <code>${id}</code></span>`;
+    // YouTube / Streamable — converter para embed direto
+    const ytPat = /(?:([^:<>\n]+):\s*)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+))(?:\s*:\s*([^<>\n]+))?/gi;
+    html = html.replace(ytPat, (match, prefix, url, id, suffix) => {
+        const embedUrl = `https://www.youtube.com/embed/${id}`;
+        let vTitle = (prefix || suffix || "").trim();
+        if (vTitle.length < 3 || vTitle.includes('http')) vTitle = "";
+        const titleHtml = vTitle ? `<p style="margin-bottom:0.8rem;font-weight:700;color:var(--highlight);font-size:1.1rem;border-left:3px solid var(--highlight);padding-left:12px;text-transform:uppercase;">${vTitle}</p>` : '';
+        return `<div class="video-container" style="margin:1rem 0 2.5rem;">${titleHtml}<div class="video-wrapper"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe></div></div>`;
     });
 
     html = html.replace(/(https?:\/\/streamable\.com\/([a-zA-Z0-9_-]+))/gi,
         (match, url, id) =>
-            `<span class="bm-media-chip youtube" contenteditable="false" data-raw="${match}">▶ Streamable <code>${id}</code></span>`
+            `<div class="video-container" style="margin:1rem 0 2.5rem;"><div class="video-wrapper"><iframe src="https://streamable.com/e/${id}" frameborder="0" allowfullscreen></iframe></div></div>`
     );
 
     // Discord
     html = html.replace(/(https?:\/\/(?:discord\.gg|discord\.com\/invite)\/([a-zA-Z0-9_-]+))/gi,
         (match, url, code) =>
-            `<span class="bm-media-chip discord" contenteditable="false" data-raw="${match}">💬 Discord <code>${code}</code></span>`
+            `<div class="discord-invite-card" style="margin:1.5rem 0;padding:1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border:1px solid rgba(88,101,242,0.4);background:rgba(88,101,242,0.1);border-radius:8px;flex-wrap:wrap;"><div style="display:flex;align-items:center;gap:1rem;"><strong style="color:#fff;">Discord</strong><span style="color:#9ca3af;font-family:monospace;font-size:0.8rem;">discord.gg/${code}</span></div><a href="https://discord.gg/${code}" target="_blank" style="background:#248046;color:#fff;padding:0.6rem 1.2rem;border-radius:4px;font-weight:700;text-decoration:none;font-size:0.8rem;">ENTRAR</a></div>`
     );
 
-    // Quebras de linha normais -> converte parágrafos em <p>
-    const paras = html.split(/\n{2,}/);
-    return paras.map(p => {
-        const trimmed = p.trim();
-        if (!trimmed) return '<p><br></p>';
-        if (trimmed.startsWith('<div') || trimmed.startsWith('<blockquote') || trimmed.startsWith('<hr')) {
-            return trimmed;
-        }
+    // Quebras de linha → parágrafos/brs
+    html = html.replace(/(\r\n|\r)/g, '\n');
+    html = html.split(/\n{2,}/).map(chunk => {
+        const trimmed = chunk.trim();
+        if (!trimmed) return '';
+        if (/^<(div|blockquote|ul|ol|hr|section|iframe|table|figure)/i.test(trimmed)) return trimmed;
         return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`;
-    }).join('');
+    }).filter(Boolean).join('');
+
+    return html;
 }
 
-function visualToRaw(editorEl) {
-    const clone = editorEl.cloneNode(true);
+/**
+ * Normaliza qualquer conteúdo (seja texto plano, legado ou HTML incompleto)
+ * para uma estrutura HTML semântica estrita baseada em <p>, mantendo parágrafos
+ * e quebras de linha (<br>) organizadas.
+ */
+export function normalizeToStrictHtml(input) {
+    if (!input || !input.trim()) {
+        return '<p><br></p>';
+    }
 
-    // 1. Chips de mídia → texto raw com quebras isoladas
-    clone.querySelectorAll('[data-raw]').forEach(el => {
-        const raw = el.getAttribute('data-raw') || '';
-        el.replaceWith(document.createTextNode('\n\n' + raw.trim() + '\n\n'));
-    });
+    let text = input.trim();
 
-    // 2. Imagens → tags customizadas isoladas
-    clone.querySelectorAll('img').forEach(img => {
-        const src = img.getAttribute('src') || '';
-        const cap = img.getAttribute('data-caption') || '';
-        const imgStyle = img.getAttribute('data-imgstyle') || 'text-align:center';
-        let tag;
-        if (cap) {
-            tag = `\n\n(image style="${imgStyle}" = "${src}")${cap}(/image)\n\n`;
-        } else {
-            tag = `\n\n(image style="${imgStyle}")${src}(/image)\n\n`;
+    // Se for formato legado de meta-tags, converte primeiro
+    if (isLegacyFormat(text)) {
+        text = legacyToHtml(text);
+    }
+
+    // Se não tiver nenhuma tag HTML, converte quebras em parágrafos e <br>
+    const hasHtmlTags = /<[a-z][\s\S]*>/i.test(text);
+    if (!hasHtmlTags) {
+        text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        const paragraphs = text.split(/\n{2,}/);
+        return paragraphs.map(p => {
+            const cleanP = p.trim();
+            if (!cleanP) return '<p><br></p>';
+            return `<p>${cleanP.replace(/\n/g, '<br>')}</p>`;
+        }).join('\n');
+    }
+
+    // Se tiver HTML mas texto solto ou <div> geradas pelo navegador, normaliza para <p>
+    const temp = document.createElement('div');
+    temp.innerHTML = text;
+
+    // Converte <div> genéricas de texto em <p>
+    temp.querySelectorAll('div').forEach(div => {
+        // Se for container de vídeo, card de discord ou callout, não mexe
+        if (div.classList.contains('video-container') ||
+            div.classList.contains('video-wrapper') ||
+            div.classList.contains('discord-invite-card') ||
+            div.classList.contains('article-callout') ||
+            div.classList.contains('bm-callout-box')) {
+            return;
         }
-        img.replaceWith(document.createTextNode(tag));
+        const p = document.createElement('p');
+        p.innerHTML = div.innerHTML || '<br>';
+        div.replaceWith(p);
     });
 
-    // 3. Callout boxes
-    clone.querySelectorAll('.bm-callout-box').forEach(el => {
-        const type = el.getAttribute('data-callout') || 'info';
-        el.replaceWith(document.createTextNode(`\n\n(callout type="${type}")${el.innerHTML}(/callout)\n\n`));
+    // Se houver nós de texto soltos na raiz, empacota em <p>
+    const fragment = document.createDocumentFragment();
+    let currentP = null;
+
+    Array.from(temp.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const val = node.nodeValue;
+            if (val && val.trim()) {
+                if (!currentP) currentP = document.createElement('p');
+                currentP.appendChild(node.cloneNode(true));
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const tag = node.tagName.toLowerCase();
+            const isBlock = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'blockquote', 'figure', 'section', 'hr', 'div'].includes(tag);
+            if (isBlock) {
+                if (currentP) {
+                    fragment.appendChild(currentP);
+                    currentP = null;
+                }
+                fragment.appendChild(node.cloneNode(true));
+            } else {
+                // Nó inline (ex: <b>, <span>, <a>) solto na raiz
+                if (!currentP) currentP = document.createElement('p');
+                currentP.appendChild(node.cloneNode(true));
+            }
+        }
     });
 
-    // 4. Citações (blockquote)
-    clone.querySelectorAll('blockquote').forEach(el => {
-        el.replaceWith(document.createTextNode(`\n\n(quote)${el.innerHTML}(/quote)\n\n`));
-    });
+    if (currentP) {
+        fragment.appendChild(currentP);
+    }
 
-    // 5. Linhas horizontais (hr)
-    clone.querySelectorAll('hr').forEach(el => {
-        el.replaceWith(document.createTextNode('\n\n----\n\n'));
-    });
+    if (fragment.childNodes.length > 0) {
+        temp.innerHTML = '';
+        temp.appendChild(fragment);
+    }
 
-    // 6. Negrito
-    clone.querySelectorAll('b, strong').forEach(el => {
-        el.replaceWith(document.createTextNode(`(strong)${el.innerHTML}(/strong)`));
-    });
+    return temp.innerHTML || '<p><br></p>';
+}
 
-    // Itálico
-    clone.querySelectorAll('i, em').forEach(el => {
-        el.replaceWith(document.createTextNode(`(em)${el.innerHTML}(/em)`));
-    });
-
-    // Sublinhado
-    clone.querySelectorAll('u').forEach(el => {
-        el.replaceWith(document.createTextNode(`(u)${el.innerHTML}(/u)`));
-    });
-
-    // Tachado
-    clone.querySelectorAll('s, strike, del').forEach(el => {
-        el.replaceWith(document.createTextNode(`(s)${el.innerHTML}(/s)`));
-    });
-
-    // Cores e tamanhos via span style
-    clone.querySelectorAll('span[style]').forEach(el => {
-        const style = el.getAttribute('style') || '';
-        const colorM = style.match(/color:\s*([^;]+)/);
-        const sizeM = style.match(/font-size:\s*([^;]+)/);
-        let inner = el.innerHTML;
-        if (sizeM) inner = `(font-size="${sizeM[1].trim()}")${inner}(/font-size)`;
-        if (colorM) inner = `(color="${colorM[1].trim()}")${inner}(/color)`;
-        el.replaceWith(document.createTextNode(inner));
-    });
-
-    // 7. Quebras de linha e blocos estruturais
-    clone.querySelectorAll('br').forEach(br => br.replaceWith(document.createTextNode('\n')));
-    clone.querySelectorAll('p, div, li, h1, h2, h3, h4, blockquote, hr').forEach(el => {
-        el.after(document.createTextNode('\n\n'));
-    });
-
-    return clone.textContent
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/\r\n/g, '\n')
-        .replace(/\n{4,}/g, '\n\n\n')
+/**
+ * Formata o código HTML com quebras de linha limpas para exibição e edição no modo Código/Raw
+ */
+function formatPrettyHtml(html) {
+    if (!html) return '';
+    return html
+        .replace(/<\/p>\s*<p>/gi, '</p>\n<p>')
+        .replace(/<\/div>\s*<div/gi, '</div>\n<div')
+        .replace(/<\/blockquote>\s*<p/gi, '</blockquote>\n<p')
+        .replace(/<\/p>\s*<blockquote/gi, '</p>\n<blockquote')
+        .replace(/<\/figure>\s*<p/gi, '</figure>\n<p')
+        .replace(/<\/p>\s*<figure/gi, '</p>\n<figure')
+        .replace(/<hr>\s*<p/gi, '<hr>\n<p>')
+        .replace(/<\/p>\s*<hr>/gi, '</p>\n<hr>')
         .trim();
+}
+
+/**
+ * Retorna o HTML do editor para salvar no banco.
+ * Garante que o conteúdo retornado seja HTML estrito sem nós de texto órfãos.
+ */
+function getEditorHtml(editorEl) {
+    const raw = editorEl.innerHTML;
+    // Se estiver praticamente vazio, retorna vazio
+    if (!raw || raw === '<p><br></p>' || raw === '<br>' || raw === '<p></p>') {
+        return '';
+    }
+    return normalizeToStrictHtml(raw);
+}
+
+/**
+ * Carrega conteúdo no editor garantindo que sempre seja HTML com parágrafos.
+ */
+function loadContentIntoEditor(editorEl, content) {
+    if (!content || !content.trim()) {
+        editorEl.innerHTML = '<p><br></p>';
+        return;
+    }
+    editorEl.innerHTML = normalizeToStrictHtml(content);
 }
 
 /* ─── Modal Genérico do Studio ─────────────────────────────────────── */
@@ -1245,6 +1288,24 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             </div>
             <span class="bm-tb-sep"></span>
 
+            <!-- Parágrafo & Espaçamento Estilo Word -->
+            <div class="bm-tb-group">
+                <select class="bm-tool-select" data-act="paragraph-spacing" title="Espaçamento entre Parágrafos (Estilo Word)" style="min-width: 135px;">
+                    <option value="0.35rem">📐 Espaço: Word (4px)</option>
+                    <option value="0">📐 Espaço: Zero (0px)</option>
+                    <option value="0.75rem">📐 Espaço: Médio (12px)</option>
+                    <option value="1.25rem">📐 Espaço: Amplo (20px)</option>
+                </select>
+                <select class="bm-tool-select" data-act="line-height" title="Entrelinhas" style="min-width: 110px; margin-left: 3px;">
+                    <option value="1.55">📏 Linha: 1.5x (Word)</option>
+                    <option value="1.25">📏 Linha: 1.25x</option>
+                    <option value="1.85">📏 Linha: 1.85x</option>
+                </select>
+                <button class="bm-tool-btn" data-act="outdent" title="Diminuir Recuo">⇤</button>
+                <button class="bm-tool-btn" data-act="indent" title="Aumentar Recuo">⇥</button>
+            </div>
+            <span class="bm-tb-sep"></span>
+
             <!-- Mídias & Elementos BitMundo -->
             <div class="bm-tb-group">
                 <button class="bm-tool-btn" data-act="insert-img" title="Inserir Imagem via URL">🖼️ Imagem</button>
@@ -1258,7 +1319,7 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             <!-- Modos e Ajuda -->
             <div class="bm-tb-group">
                 <button class="bm-tool-btn" data-act="clear-format" title="Limpar Formatação">🧹</button>
-                <button class="bm-tool-btn" data-act="toggle-raw" id="bm-btn-raw" title="Alternar entre modo visual e tags brutas BitMundo">&lt;/&gt; Raw</button>
+                <button class="bm-tool-btn" data-act="toggle-raw" id="bm-btn-raw" title="Alternar entre modo visual e código HTML">&lt;/&gt; HTML</button>
                 <button class="bm-tool-btn" data-act="help" title="Ajuda e Tags do BitMundo">❓</button>
             </div>
         </div>
@@ -1370,28 +1431,41 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
                 </div>
             </div>
             <div class="bm-topic-editor-body" contenteditable="true" data-placeholder="Escreva o conteúdo do tópico aqui... use a barra de ferramentas para formatar, inserir mídias, etc." spellcheck="true"></div>
-            <textarea class="bm-topic-raw-area" placeholder="Digite tags BitMundo brutas..."></textarea>
+            <textarea class="bm-topic-raw-area" placeholder="Edite o código HTML diretamente..."></textarea>
         `;
 
         const bodyEl = card.querySelector('.bm-topic-editor-body');
         const rawEl = card.querySelector('.bm-topic-raw-area');
         const subTitleInput = card.querySelector('.bm-topic-title-input');
 
-        bodyEl.innerHTML = rawToVisual(topic.content || '');
-        rawEl.value = topic.content || '';
+        loadContentIntoEditor(bodyEl, topic.content || '');
+        rawEl.value = formatPrettyHtml(bodyEl.innerHTML);
 
         if (isRawMode) {
             bodyEl.style.display = 'none';
             rawEl.style.display = 'block';
         }
 
-        // Foco e seleção
+        // Foco e seleção com garantia de parágrafos <p>
         bodyEl.addEventListener('focus', () => {
-            try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (_) {}
+            try {
+                document.execCommand('defaultParagraphSeparator', false, 'p');
+            } catch (e) {}
+            if (!bodyEl.innerHTML.trim() || bodyEl.innerHTML === '<br>') {
+                bodyEl.innerHTML = '<p><br></p>';
+            }
             focusedEditorEl = bodyEl;
             document.querySelectorAll('.bm-topic-card').forEach(c => c.classList.remove('focused'));
             card.classList.add('focused');
             updateActiveSidebarTopic(index);
+        });
+
+        bodyEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                try {
+                    document.execCommand('defaultParagraphSeparator', false, 'p');
+                } catch (err) {}
+            }
         });
 
         rawEl.addEventListener('focus', () => {
@@ -1401,11 +1475,12 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             updateActiveSidebarTopic(index);
         });
 
-        // Sincronização de conteúdo
+        // Sincronização de conteúdo — HTML puro e semântico em tempo real
         bodyEl.addEventListener('input', () => {
             isDirty = true;
-            topicsData[index].content = visualToRaw(bodyEl);
-            rawEl.value = topicsData[index].content;
+            const currentHtml = normalizeToStrictHtml(bodyEl.innerHTML);
+            topicsData[index].content = currentHtml;
+            rawEl.value = formatPrettyHtml(currentHtml);
             updateWordCount();
             schedulePreviewUpdate();
         });
@@ -1413,7 +1488,7 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
         rawEl.addEventListener('input', () => {
             isDirty = true;
             topicsData[index].content = rawEl.value;
-            bodyEl.innerHTML = rawToVisual(rawEl.value);
+            bodyEl.innerHTML = rawEl.value;
             updateWordCount();
             schedulePreviewUpdate();
         });
@@ -1469,7 +1544,7 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
                 const body = card.querySelector('.bm-topic-editor-body');
                 const raw = card.querySelector('.bm-topic-raw-area');
                 topicsData[idx].title = subTitle;
-                topicsData[idx].content = isRawMode ? raw.value : visualToRaw(body);
+                topicsData[idx].content = isRawMode ? raw.value : getEditorHtml(body);
             }
         });
     }
@@ -1526,7 +1601,8 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
     function updateWordCount() {
         let totalWords = 0;
         topicsData.forEach(t => {
-            const text = (t.content || '').replace(/\([^)]+\)/g, ' ').replace(/\s+/g, ' ').trim();
+            // Strip HTML tags for word counting
+            const text = (t.content || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
             if (text) totalWords += text.split(/\s+/).length;
         });
         counterEl.textContent = `${topicsData.length} tópicos • ${totalWords} palavras`;
@@ -1579,6 +1655,8 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             if (act === 'align-right') { execFormat('justifyRight'); return; }
             if (act === 'list-ul') { execFormat('insertUnorderedList'); return; }
             if (act === 'list-ol') { execFormat('insertOrderedList'); return; }
+            if (act === 'outdent') { execFormat('outdent'); return; }
+            if (act === 'indent') { execFormat('indent'); return; }
             if (act === 'clear-format') { execFormat('removeFormat'); return; }
 
             if (act === 'code') {
@@ -1633,13 +1711,25 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
                 const ed = getActiveEditor();
                 if (!ed) return;
                 ed.focus();
+
+                const fig = document.createElement('figure');
+                fig.setAttribute('style', `${res.style || 'text-align:center'}; margin: 1.5rem 0;`);
+                
                 const img = document.createElement('img');
                 img.src = res.url;
-                img.setAttribute('data-caption', res.caption || '');
-                img.setAttribute('data-imgstyle', res.style || 'text-align:center');
-                img.setAttribute('style', (res.style || 'text-align:center') + '; max-width:100%; border-radius:8px;');
                 img.alt = res.caption || 'Imagem';
-                insertBlockElementAtCursor(ed, img);
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '8px';
+                fig.appendChild(img);
+
+                if (res.caption && res.caption.trim()) {
+                    const cap = document.createElement('figcaption');
+                    cap.style.cssText = 'font-size: 0.85rem; color: rgba(255,255,255,0.6); font-style: italic; margin-top: 0.5rem; text-align: center;';
+                    cap.textContent = res.caption.trim();
+                    fig.appendChild(cap);
+                }
+
+                insertBlockElementAtCursor(ed, fig);
                 ed.dispatchEvent(new Event('input', { bubbles: true }));
                 return;
             }
@@ -1654,17 +1744,30 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
                 if (!ed) return;
                 ed.focus();
 
+                const isStreamable = res.url.includes('streamable.com');
                 let id = res.url;
-                const m = id.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|streamable\.com\/)([a-zA-Z0-9_-]+)/i);
+                const m = id.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/|streamable\.com\/(?:e\/)?)([a-zA-Z0-9_-]+)/i);
                 if (m) id = m[1];
 
-                const rawStr = res.title ? `${res.title}: ${res.url}` : res.url;
-                const chip = document.createElement('span');
-                chip.className = 'bm-media-chip youtube';
-                chip.contentEditable = 'false';
-                chip.setAttribute('data-raw', rawStr);
-                chip.innerHTML = `▶ YouTube${res.title ? ': ' + res.title : ''} <code>${id}</code>`;
-                insertBlockElementAtCursor(ed, chip);
+                const embedUrl = isStreamable
+                    ? `https://streamable.com/e/${id}`
+                    : `https://www.youtube.com/embed/${id}`;
+
+                const container = document.createElement('div');
+                container.className = 'video-container';
+                container.style.cssText = 'margin: 1.5rem 0 2rem; user-select: none;';
+
+                const titleHtml = res.title && res.title.trim()
+                    ? `<p style="margin-bottom: 0.8rem; font-weight: 700; color: var(--highlight, #f1a32e); font-size: 1.1rem; border-left: 3px solid var(--highlight, #f1a32e); padding-left: 12px; text-transform: uppercase;">${res.title.trim()}</p>`
+                    : '';
+
+                container.innerHTML = `
+                    ${titleHtml}
+                    <div class="video-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px;">
+                        <iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                `;
+                insertBlockElementAtCursor(ed, container);
                 ed.dispatchEvent(new Event('input', { bubbles: true }));
                 return;
             }
@@ -1682,12 +1785,22 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
                 const m = code.match(/discord\.(?:gg|com\/invite)\/([a-zA-Z0-9_-]+)/i);
                 if (m) code = m[1];
 
-                const chip = document.createElement('span');
-                chip.className = 'bm-media-chip discord';
-                chip.contentEditable = 'false';
-                chip.setAttribute('data-raw', `https://discord.gg/${code}`);
-                chip.innerHTML = `💬 Discord <code>${code}</code>`;
-                insertBlockElementAtCursor(ed, chip);
+                const card = document.createElement('div');
+                card.className = 'discord-invite-card';
+                card.style.cssText = 'margin: 1.5rem 0; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(88, 101, 242, 0.4); background: rgba(88, 101, 242, 0.1); border-radius: 8px; flex-wrap: wrap;';
+                card.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="background: #5865F2; padding: 8px; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="22" height="22" viewBox="0 0 127.14 96.36" fill="white"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.4,80.21a105.73,105.73,0,0,0,32.17,16.15,77.7,77.7,0,0,0,6.89-11.11,68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c3.39-29.09-5.46-52.74-23.74-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-weight: 700; color: #fff; font-size: 0.95rem;">Comunidade no Discord</p>
+                            <p style="margin: 0; font-size: 0.8rem; color: #9ca3af; font-family: monospace;">discord.gg/${code}</p>
+                        </div>
+                    </div>
+                    <a href="https://discord.gg/${code}" target="_blank" rel="noopener noreferrer" style="background: #248046; color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 700; text-decoration: none; font-size: 0.8rem; text-transform: uppercase;">ENTRAR NO SERVIDOR</a>
+                `;
+                insertBlockElementAtCursor(ed, card);
                 ed.dispatchEvent(new Event('input', { bubbles: true }));
                 return;
             }
@@ -1705,9 +1818,16 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
                 const ed = getActiveEditor();
                 if (!ed) return;
                 ed.focus();
+
+                const colors = {
+                    info: '#38bdf8',
+                    success: '#10b981',
+                    danger: '#ef4444'
+                };
+                const color = colors[res.type] || '#f1a32e';
                 const box = document.createElement('div');
-                box.className = `bm-callout-box ${res.type}`;
-                box.setAttribute('data-callout', res.type);
+                box.className = `article-callout callout-${res.type} bm-callout-box ${res.type}`;
+                box.style.cssText = `margin: 1.5rem 0; padding: 1rem 1.25rem; border-radius: 8px; border-left: 4px solid ${color}; background: rgba(255,255,255,0.05); color: #e5e5e7;`;
                 box.innerHTML = res.text || 'Destaque importante aqui...';
                 insertBlockElementAtCursor(ed, box);
                 ed.dispatchEvent(new Event('input', { bubbles: true }));
@@ -1717,15 +1837,17 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             if (act === 'toggle-raw') {
                 isRawMode = !isRawMode;
                 btnRaw.classList.toggle('active', isRawMode);
+                btnRaw.title = isRawMode ? "Alternar para modo Visual" : "Alternar para código HTML";
                 overlay.querySelectorAll('.bm-topic-card').forEach(card => {
                     const b = card.querySelector('.bm-topic-editor-body');
                     const r = card.querySelector('.bm-topic-raw-area');
                     if (isRawMode) {
-                        r.value = visualToRaw(b);
+                        const clean = normalizeToStrictHtml(b.innerHTML);
+                        r.value = formatPrettyHtml(clean);
                         b.style.display = 'none';
                         r.style.display = 'block';
                     } else {
-                        b.innerHTML = rawToVisual(r.value);
+                        loadContentIntoEditor(b, r.value);
                         r.style.display = 'none';
                         b.style.display = 'block';
                     }
@@ -1734,8 +1856,8 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             }
 
             if (act === 'help') {
-                await showStudioModal('❓ Guia de Tags BitMundo', [
-                    { id: 'h', label: 'Tags automáticas suportadas no BitMundo:', placeholder: '', value: '(strong)negrito(/strong) | (color="red")cor(/color) | (font-size="1.2em")tam(/font-size) | (quote)citação(/quote) | YouTube e Discord convertidos automaticamente.' }
+                await showStudioModal('❓ Guia do Editor BitMundo', [
+                    { id: 'h', label: 'O editor usa HTML puro — o que você formata é exatamente o que será salvo e exibido no site.', placeholder: '', value: 'Use a barra de ferramentas para formatar texto, inserir imagens, vídeos, citações e alertas. O botão </> HTML mostra o código fonte para edição avançada.' }
                 ]);
                 return;
             }
@@ -1778,6 +1900,67 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
         }
         this.value = '';
     });
+
+    // Seletor de Espaçamento de Parágrafo (Estilo Word)
+    const pSpacingSelect = overlay.querySelector('[data-act="paragraph-spacing"]');
+    if (pSpacingSelect) {
+        pSpacingSelect.addEventListener('change', function() {
+            const val = this.value;
+            const ed = getActiveEditor();
+            if (!ed || isRawMode) return;
+            ed.focus();
+
+            const sel = window.getSelection();
+            let applied = false;
+            if (sel && sel.anchorNode) {
+                let node = sel.anchorNode;
+                while (node && node !== ed) {
+                    if (node.tagName && node.tagName.toLowerCase() === 'p') {
+                        node.style.marginBottom = val;
+                        applied = true;
+                        break;
+                    }
+                    node = node.parentNode;
+                }
+            }
+            if (!applied) {
+                ed.querySelectorAll('p').forEach(p => {
+                    p.style.marginBottom = val;
+                });
+            }
+            ed.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
+    // Seletor de Entrelinhas (Line-height)
+    const lineHSelect = overlay.querySelector('[data-act="line-height"]');
+    if (lineHSelect) {
+        lineHSelect.addEventListener('change', function() {
+            const val = this.value;
+            const ed = getActiveEditor();
+            if (!ed || isRawMode) return;
+            ed.focus();
+
+            const sel = window.getSelection();
+            let applied = false;
+            if (sel && sel.anchorNode) {
+                let node = sel.anchorNode;
+                while (node && node !== ed) {
+                    if (node.tagName && ['p', 'div', 'blockquote', 'li'].includes(node.tagName.toLowerCase())) {
+                        node.style.lineHeight = val;
+                        applied = true;
+                        break;
+                    }
+                    node = node.parentNode;
+                }
+            }
+            if (!applied) {
+                ed.style.lineHeight = val;
+                ed.querySelectorAll('p').forEach(p => p.style.lineHeight = val);
+            }
+            ed.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
 
     // Paleta de Cores Popover
     const paletteTrigger = overlay.querySelector('#bm-palette-trigger');
@@ -1918,12 +2101,13 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
         const category = overlay.querySelector('#bm-art-category').value || 'Geral';
         const date = overlay.querySelector('#bm-art-date').value || '';
 
-        // Renderiza tópicos para HTML do BitMundo
+        // Renderiza tópicos para HTML — conteúdo já é HTML puro
         const topicsHtml = topicsData.map(topic => {
             const tTitle = topic.title && topic.title.trim()
                 ? `<h3 class="topic-title" style="color: var(--highlight, #f1a32e); margin-top: 2.2rem; margin-bottom: 1rem; font-size: 1.35rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid var(--highlight, #f1a32e); padding-left: 14px;">${topic.title}</h3>`
                 : '';
-            const tContent = parseArticleTags(topic.content || '');
+            // O conteúdo já é HTML puro — renderizar diretamente
+            const tContent = topic.content || '';
             return `<section class="article-topic" style="margin-bottom: 2.5rem;">${tTitle}${tContent}</section>`;
         }).join('');
 
@@ -1959,8 +2143,16 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
                                 margin: 0 auto;
                             }
                             .article-content p {
-                                margin: 0 0 1.5rem 0;
-                                line-height: 1.8;
+                                margin: 0 0 0.35rem 0;
+                                line-height: 1.55;
+                            }
+                            .article-content p:last-child {
+                                margin-bottom: 0;
+                            }
+                            .article-content p:empty,
+                            .article-content p:has(> br:only-child) {
+                                min-height: 1.4em;
+                                margin-bottom: 0.35rem;
                             }
                         </style>
                     </head>
@@ -2009,6 +2201,12 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             finalId = titleVal.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         }
 
+        // Combina o HTML de todos os tópicos para preencher o campo content (compatibilidade total no banco)
+        const combinedHtml = topicsData.map(t => {
+            const tTitle = t.title && t.title.trim() ? `<h3 class="topic-title" style="color: var(--highlight, #f1a32e); margin-top: 2rem; margin-bottom: 1rem; font-size: 1.35rem; font-weight: 700;">${t.title.trim()}</h3>` : '';
+            return `${tTitle}${t.content || ''}`;
+        }).join('\n');
+
         const payload = {
             title: titleVal,
             author: overlay.querySelector('#bm-art-author').value.trim() || 'BitMundo',
@@ -2016,7 +2214,7 @@ export function openArticleStudio({ article = {}, id = null, onSave = null, onDe
             date: overlay.querySelector('#bm-art-date').value.trim() || new Date().toLocaleDateString('pt-BR'),
             selected: chkPublished.checked,
             topics: topicsData,
-            content: "" // Limpa legado ao usar tópicos
+            content: combinedHtml
         };
 
         const saveBtn = overlay.querySelector('#bm-studio-btn-save');

@@ -473,6 +473,11 @@
         .rp-cr-status.info { border-color: rgba(51,170,255,0.4); }
         .rp-cr-summary { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--rp-cyan); margin-bottom: 0.7rem; }
         .rp-cr-warn { margin-bottom: 0.6rem; padding: 0.7rem 0.9rem; border-radius: var(--rp-radius-sm); background: rgba(255,183,0,0.07); border: 1px solid rgba(255,183,0,0.3); color: var(--rp-gold); font-size: 0.82rem; line-height: 1.5; }
+        .rp-cr-extra { margin-top: 1rem; border: 1px solid var(--rp-border); border-radius: var(--rp-radius-sm); padding: 0.2rem 1rem; background: rgba(51,170,255,0.03); }
+        .rp-cr-extra > summary { cursor: pointer; padding: 0.75rem 0; font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; letter-spacing: 0.08em; color: var(--rp-cyan); }
+        .rp-cr-extra[open] > summary { border-bottom: 1px solid var(--rp-border); margin-bottom: 0.9rem; }
+        .rp-cr-hint { font-family: 'Exo 2', sans-serif; font-size: 0.8rem; line-height: 1.55; color: var(--rp-text-dim); margin: 0 0 0.9rem; }
+        .rp-cr-extra .rp-btn-apply { margin-top: 0.4rem; }
         .rp-cr-list { max-height: 320px; overflow: auto; border: 1px solid var(--rp-border); border-radius: var(--rp-radius-sm); }
         .rp-cr-row { display: grid; grid-template-columns: 70px 1fr; gap: 0.2rem 0.7rem; padding: 0.5rem 0.7rem; border-bottom: 1px solid rgba(51,170,255,0.1); font-size: 0.78rem; }
         .rp-cr-path { color: #fff; word-break: break-all; font-family: 'Share Tech Mono', monospace; }
@@ -883,6 +888,59 @@
                 <div class="rp-field"><label for="cr-md5">MD5 da ISO original (opcional — 32 hex; avisa o usuário se a ISO dele for diferente)</label><input class="rp-input" id="cr-md5" maxlength="32" autocomplete="off" spellcheck="false"></div>
                 <div class="rp-field"><label for="cr-desc">Descrição / changelog (opcional)</label><textarea class="rp-input" id="cr-desc" maxlength="4000"></textarea></div>
             </div>
+
+            <!-- Metadados da ISO resultante (gravados no pós-processamento do Aplicar patch) -->
+            <details class="rp-cr-extra" id="cr-meta-box">
+                <summary>🏷️ Metadados da ISO resultante (opcional)</summary>
+                <p class="rp-cr-hint">Campos do descritor ISO9660 que serão gravados na ISO gerada para o usuário. Deixe em branco o que não quiser alterar. Somente ASCII, respeitando o tamanho máximo de cada campo.</p>
+                <div id="cr-meta-fields"></div>
+                <div class="rp-field-row" id="cr-meta-numbers"></div>
+                <label class="rp-consent" style="margin-top:0.2rem;">
+                    <input type="checkbox" id="cr-meta-now">
+                    <span>Gravar a data de modificação como o momento em que o patch for aplicado.</span>
+                </label>
+            </details>
+
+            <!-- Créditos / abertura -->
+            <details class="rp-cr-extra" id="cr-credits-box">
+                <summary>🎬 Créditos e abertura (opcional · experimental)</summary>
+                <div id="cr-credits-unavailable" class="rp-cr-warn" style="display:none;"></div>
+                <div id="cr-credits-body">
+                    <p class="rp-cr-hint">Antes do jogo iniciar, a ISO mostra seus créditos (e opcionalmente uma imagem ou um vídeo .PSS) e depois segue para o jogo normalmente. Depende do wrapper <code>raiden_wrapper.elf</code> compilado com o PS2SDK; sem ele esta opção fica desabilitada.</p>
+                    <div class="rp-field"><label for="cr-credits-text">Texto dos créditos (até 255 bytes)</label><textarea class="rp-input" id="cr-credits-text" style="min-height:70px;" autocomplete="off"></textarea></div>
+                    <div class="rp-radio-row">
+                        <label><input type="radio" name="cr-media-type" value="none" checked> Só texto</label>
+                        <label><input type="radio" name="cr-media-type" value="image"> Imagem de abertura</label>
+                        <label><input type="radio" name="cr-media-type" value="movie"> Vídeo .PSS</label>
+                    </div>
+                    <div class="rp-drop-zone" id="btn-cr-media" style="display:none;">
+                        <div class="rp-drop-text" id="cr-media-text">Selecionar imagem</div>
+                        <div class="rp-drop-sub" id="cr-media-sub">PNG ou JPG — será redimensionada para 640×448</div>
+                        <div class="rp-drop-filename" id="cr-media-label" style="display:none;"></div>
+                    </div>
+                    <div id="cr-credits-err" class="rp-cr-warn" style="display:none;"></div>
+                    <div class="rp-field" id="cr-media-duration-wrap" style="display:none;"><label for="cr-media-duration">Duração da imagem em segundos (0 = até apertar um botão)</label><input class="rp-input" id="cr-media-duration" type="number" min="0" max="3600" value="5"></div>
+                </div>
+            </details>
+
+            <!-- Ferramentas avulsas: trava com senha de uma ISO -->
+            <details class="rp-cr-extra" id="cr-lock-box">
+                <summary>🔒 Ferramentas de ISO: travar / destravar com senha</summary>
+                <p class="rp-cr-hint">Independente do patch: criptografa (AES-256) o ELF de boot da ISO — e arquivos extras da raiz, se você listar — para que ela não inicie até ser destravada. Destravar restaura a ISO <b>byte a byte</b>. Trabalhe numa <b>cópia</b>: a operação altera o arquivo escolhido no próprio lugar. <b>Sem a senha não há como recuperar a ISO.</b></p>
+                <div class="rp-drop-zone" id="btn-cr-lock-iso">
+                    <div class="rp-drop-text">Selecionar ISO (cópia de trabalho)</div>
+                    <div class="rp-drop-filename" id="cr-lock-label" style="display:none;"></div>
+                </div>
+                <div class="rp-field-row" style="margin-top:0.9rem;">
+                    <div class="rp-field"><label for="cr-lock-pass">Senha</label><input class="rp-input" id="cr-lock-pass" type="password" autocomplete="new-password"></div>
+                    <div class="rp-field"><label for="cr-lock-files">Arquivos extras a travar (opcional, separados por vírgula)</label><input class="rp-input" id="cr-lock-files" placeholder="IOPRP300.IMG" autocomplete="off" spellcheck="false"></div>
+                </div>
+                <div class="rp-radio-row" style="margin-top:0.2rem;">
+                    <button id="btn-cr-lock" class="rp-btn-apply" type="button" disabled>🔒 Travar</button>
+                    <button id="btn-cr-unlock" class="rp-btn-apply" type="button" disabled>🔓 Destravar</button>
+                </div>
+                <div id="cr-lock-status" class="rp-cr-status" style="display:none;"></div>
+            </details>
 
             <button id="btn-cr-analyze" class="rp-btn-apply" type="button" disabled>🔍 Analisar diferenças</button>
 

@@ -442,6 +442,83 @@
         }
         .rp-btn-apply .btn-icon { flex-shrink: 0; }
 
+        /* ── Abas Aplicar / Criar ── */
+        .rp-mode-tabs { display: flex; justify-content: center; gap: 0.6rem; margin: 0 auto 1.4rem; flex-wrap: wrap; }
+        .rp-tab {
+            font-family: 'Orbitron', monospace; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+            padding: 0.7rem 1.4rem; border-radius: 99px; cursor: pointer;
+            background: rgba(51,170,255,0.06); border: 1px solid var(--rp-border); color: var(--rp-text-dim); transition: all .2s;
+        }
+        .rp-tab:hover { color: var(--rp-text); border-color: var(--rp-border-hi); }
+        .rp-tab.active { color: #fff; background: var(--rp-blue-dim); border-color: var(--rp-border-hi); box-shadow: 0 0 18px rgba(51,170,255,0.25); }
+
+        /* ── Criador de patch ── */
+        .rp-field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.9rem; }
+        .rp-field label { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; color: var(--rp-text-dim); text-transform: uppercase; }
+        .rp-input {
+            width: 100%; box-sizing: border-box; padding: 0.65rem 0.8rem; border-radius: var(--rp-radius-sm);
+            background: rgba(2,8,20,0.8); border: 1px solid var(--rp-border); color: #fff;
+            font-family: 'Exo 2', sans-serif; font-size: 0.9rem;
+        }
+        .rp-input:focus { outline: none; border-color: var(--rp-border-hi); }
+        textarea.rp-input { min-height: 90px; resize: vertical; }
+        .rp-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+        @media (max-width: 600px) { .rp-field-row { grid-template-columns: 1fr; } }
+        .rp-radio-row { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.8rem; font-family: 'Exo 2', sans-serif; font-size: 0.85rem; color: var(--rp-text); }
+        .rp-radio-row label { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+        .rp-radio-row input { accent-color: #3af; }
+        .rp-cr-status { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: var(--rp-radius-sm); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 1.5; border: 1px solid var(--rp-border); color: var(--rp-text); }
+        .rp-cr-status.ok { border-color: rgba(0,255,136,0.4); color: var(--rp-green); }
+        .rp-cr-status.err { border-color: rgba(255,59,59,0.5); color: #ffd0d0; background: rgba(40,5,5,0.5); }
+        .rp-cr-status.info { border-color: rgba(51,170,255,0.4); }
+        .rp-cr-summary { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--rp-cyan); margin-bottom: 0.7rem; }
+        .rp-cr-warn { margin-bottom: 0.6rem; padding: 0.7rem 0.9rem; border-radius: var(--rp-radius-sm); background: rgba(255,183,0,0.07); border: 1px solid rgba(255,183,0,0.3); color: var(--rp-gold); font-size: 0.82rem; line-height: 1.5; }
+        .rp-cr-list { max-height: 320px; overflow: auto; border: 1px solid var(--rp-border); border-radius: var(--rp-radius-sm); }
+        .rp-cr-row { display: grid; grid-template-columns: 70px 1fr; gap: 0.2rem 0.7rem; padding: 0.5rem 0.7rem; border-bottom: 1px solid rgba(51,170,255,0.1); font-size: 0.78rem; }
+        .rp-cr-path { color: #fff; word-break: break-all; font-family: 'Share Tech Mono', monospace; }
+        .rp-cr-reason { grid-column: 2; color: var(--rp-text-dim); font-size: 0.72rem; }
+        .rp-cr-badge { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; text-align: center; border-radius: 4px; padding: 0.15rem 0.3rem; height: fit-content; }
+        .rp-cr-badge.delta { background: rgba(51,170,255,0.2); color: var(--rp-blue); }
+        .rp-cr-badge.inject { background: rgba(0,255,136,0.15); color: var(--rp-green); }
+        .rp-cr-badge.replace { background: rgba(255,183,0,0.18); color: var(--rp-gold); }
+
+        /* ── Aviso legal / consentimento ── */
+        .rp-legal {
+            margin-bottom: 1.2rem;
+            padding: 1rem 1.2rem;
+            background: rgba(255,183,0,0.04);
+            border: 1px solid rgba(255,183,0,0.2);
+            border-radius: var(--rp-radius-sm);
+        }
+        .rp-legal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.18em;
+            color: var(--rp-gold);
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+        .rp-legal-list {
+            margin: 0 0 0.9rem;
+            padding-left: 1.1rem;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: var(--rp-text);
+        }
+        .rp-legal-list li { margin-bottom: 0.3rem; }
+        .rp-consent {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            cursor: pointer;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #fff;
+        }
+        .rp-consent input { margin-top: 0.25rem; accent-color: #3af; width: 1.05rem; height: 1.05rem; flex-shrink: 0; }
+
         /* ── Info Bar ── */
         .rp-info-bar {
             display: flex;
@@ -566,102 +643,53 @@
         .rp-modal-btn.cancel  { background: rgba(51,170,255,0.1); border: 1px solid rgba(51,170,255,0.3); color: var(--rp-blue); }
         .rp-modal-btn.cancel:hover { background: rgba(51,170,255,0.2); }
 
-        /* ── Overlay Animação ── */
+        /* ── Painel compacto de progresso (sem canvas, sem tela cheia) ── */
         #anim-overlay {
             position: fixed;
-            inset: 0;
+            right: 1.2rem;
+            bottom: 1.2rem;
             z-index: 9999;
-            background: #000;
+            width: min(340px, calc(100vw - 2.4rem));
             display: none;
             font-family: 'Share Tech Mono', monospace;
-            overflow: hidden;
         }
-        #stage { position:relative; width:100vw; height:100vh; background:#000; overflow:hidden; }
-        #mainCanvas { position:absolute; inset:0; z-index:2; }
-        #ps2bg {
-          position:absolute; inset:0; z-index:1;
-          background: radial-gradient(ellipse at 50% 65%, #001845 0%, #000c2e 45%, #000000 100%);
-          opacity:0; transition:opacity 1s ease;
+        #stage {
+            display: grid;
+            grid-template-columns: 64px 1fr;
+            column-gap: 0.9rem;
+            row-gap: 0.15rem;
+            align-items: center;
+            padding: 0.9rem 1rem;
+            background: rgba(3,10,28,0.97);
+            border: 1px solid rgba(51,170,255,0.5);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.55), 0 0 18px rgba(51,170,255,0.15);
         }
-        #vignette {
-          position:absolute; inset:0; z-index:3; pointer-events:none;
-          background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.78) 100%);
-        }
-        #raidenSVG {
-          position:absolute; left:50%; top:50%;
-          transform:translate(-50%,-50%) scale(0);
-          z-index:10; opacity:0;
-          transition: transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
-          filter: drop-shadow(0 0 24px #3af) drop-shadow(0 0 55px #06f);
-        }
-        #raidenGifAnim {
-          position:absolute; left:50%; top:50%;
-          transform:translate(-50%,-50%) scale(0);
-          z-index:15; opacity:0;
-          transition: transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
-          border-radius: 5px;
-          pointer-events: none;
-        }
-        #ringWrap {
-          position:absolute; left:50%; top:50%;
-          transform:translate(-50%,-50%);
-          z-index:11; opacity:0; transition:opacity 0.5s ease;
-        }
-        #ringPath {
-          stroke-dasharray:502; stroke-dashoffset:502;
-          transition:stroke-dashoffset 0.12s linear;
-          filter:drop-shadow(0 0 5px #3af);
-        }
-        #statusWrap {
-          position:absolute; bottom:11%; left:0; right:0;
-          text-align:center; z-index:12; opacity:0; transition:opacity 0.5s ease;
-        }
-        #statusTitle {
-          font-family:'Orbitron',monospace; font-weight:900;
-          font-size:clamp(1rem,2.8vw,1.5rem); letter-spacing:0.35em; color:#fff;
-          text-shadow:0 0 16px #3af, 0 0 40px #06f; margin-bottom:8px;
-        }
-        #statusMsg { font-size:clamp(0.6rem,1.4vw,0.78rem); letter-spacing:0.22em; color:#5a9cc5; text-transform:uppercase; }
+        #ringWrap { grid-row: 1 / span 3; position: relative; width: 64px; height: 64px; }
+        #ringWrap svg { display: block; width: 64px; height: 64px; }
+        #ringPath { stroke-dasharray: 151; stroke-dashoffset: 151; transition: stroke-dashoffset 0.35s ease, stroke 0.3s; }
         #pctLabel {
-          font-family:'Orbitron',monospace; font-size:clamp(0.75rem,1.8vw,0.95rem);
-          font-weight:700; color:#3af; margin-top:6px; text-shadow:0 0 10px #3af;
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; color: #fff;
         }
-        #flawless {
-          position:absolute; inset:0; display:flex; flex-direction:column;
-          align-items:center; justify-content:center; z-index:20;
-          opacity:0; pointer-events:none;
-          background:radial-gradient(ellipse at center, rgba(0,30,100,0.6) 0%, rgba(0,0,0,0.94) 70%);
-          transition:opacity 0.3s ease;
-        }
-        #flawlessText {
-          font-family:'Orbitron',monospace; font-weight:900;
-          font-size:clamp(2.2rem,9vw,5.5rem); letter-spacing:0.12em;
-          background:linear-gradient(180deg,#ffffff 0%,#99ccff 35%,#2255ee 100%);
-          -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-          filter:drop-shadow(0 0 18px rgba(80,150,255,0.95));
-          transform:scale(3.5); opacity:0;
-          transition:transform 0.55s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
-        }
-        #victoryText {
-          font-family:'Orbitron',monospace; font-size:clamp(0.9rem,2.8vw,1.6rem);
-          font-weight:400; letter-spacing:0.55em; color:#88bbee; margin-top:10px;
-          opacity:0; transform:translateY(22px);
-          transition:opacity 0.45s ease, transform 0.45s ease;
-          text-shadow:0 0 18px #3366ff;
-        }
-        #isoReadyText {
-          font-size:clamp(0.62rem,1.3vw,0.82rem); letter-spacing:0.28em;
-          color:#446688; margin-top:22px; opacity:0; transition:opacity 0.5s ease;
-        }
+        #statusTitle { font-family: 'Orbitron', monospace; font-size: 0.66rem; letter-spacing: 0.16em; color: #3af; }
+        #miniBolt { display: inline-block; margin-right: 0.35rem; animation: rp-bolt 1.4s ease-in-out infinite; }
+        @keyframes rp-bolt { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+        @media (prefers-reduced-motion: reduce) { #miniBolt { animation: none; } #ringPath { transition: none; } }
+        #statusMsg { font-size: 0.7rem; color: #8fb8d8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #isoReadyText { display: none; font-size: 0.72rem; color: #0f8; line-height: 1.4; }
         #btn-close-anim {
-          position:absolute; bottom:7%; left:50%; transform:translateX(-50%);
-          z-index:25; opacity:0; background:transparent; border:1px solid #1a2a40;
-          color:#3a5060; font-family:'Share Tech Mono',monospace; font-size:0.72rem;
-          letter-spacing:0.18em; padding:9px 22px; cursor:pointer; text-transform:uppercase;
-          transition:all 0.2s, opacity 0.4s; border-radius:2px;
-          pointer-events: none;
+            display: none; grid-column: 1 / -1; margin-top: 0.7rem; padding: 0.55rem 0.8rem; cursor: pointer;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em;
+            background: rgba(51,170,255,0.08); border: 1px solid rgba(51,170,255,0.3); border-radius: 8px; color: #8fb8d8;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-        #btn-close-anim:hover { border-color:#3af; color:#3af; box-shadow:0 0 12px rgba(51,170,255,0.25); }
+        #btn-close-anim:hover { border-color: #3af; color: #3af; }
+        #anim-overlay.done #ringPath { stroke: #0f8; }
+        #anim-overlay.done #miniBolt { animation: none; }
+        #anim-overlay.done #statusMsg { display: none; }
+        #anim-overlay.done #isoReadyText { display: block; }
+        #anim-overlay.done #btn-close-anim { display: block; }
 
         /* ── Responsive ── */
         @media (max-width: 600px) {
@@ -695,6 +723,12 @@
             <div class="rp-hero-badge">⚡ Client-Side Streaming · No Upload · Cross-Platform</div>
             <h1>Raiden Web Patcher</h1>
             <p class="rp-hero-sub">Aplicador de mods de ISO · Sem instalação · Direto no navegador</p>
+        </div>
+
+        <!-- Abas -->
+        <div class="rp-mode-tabs" role="tablist">
+            <button class="rp-tab active" id="tab-apply" role="tab" type="button">⚡ Aplicar patch</button>
+            <button class="rp-tab" id="tab-create" role="tab" type="button">🛠️ Criar patch</button>
         </div>
 
         <!-- Stepper -->
@@ -756,7 +790,7 @@
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
                 <div class="rp-drop-text">Selecionar Patch (.RPT)</div>
-                <div class="rp-drop-sub">Arquivo de patch criptografado Raiden</div>
+                <div class="rp-drop-sub">Arquivo de patch Raiden (.rpt) — só são aplicadas alterações; o jogo original vem da sua ISO</div>
                 <div class="rp-drop-filename" id="label-patch" style="display:none;"></div>
             </div>
 
@@ -777,6 +811,21 @@
                 <span class="rp-card-title">Aplicar Patch</span>
             </div>
 
+            <!-- Aviso legal + declaração (o botão só habilita depois de marcar) -->
+            <div class="rp-legal" id="rp-legal">
+                <div class="rp-legal-title">⚖️ Antes de continuar</div>
+                <ul class="rp-legal-list">
+                    <li><b>Tudo roda no seu navegador.</b> Sua ISO e o patch não são enviados a nenhum servidor. Apenas um contador anônimo (nome do patch e se deu certo) é atualizado ao final.</li>
+                    <li><b>Este site não distribui jogos nem ISOs.</b> O patch contém só as alterações feitas pelo autor; o conteúdo original do jogo vem da ISO que você mesmo fornece, e o patch é recusado se o arquivo da sua ISO não for o esperado.</li>
+                    <li><b>Projeto de fãs, gratuito e não oficial.</b> Sem vínculo com as detentoras dos direitos; nomes e marcas pertencem aos respectivos donos.</li>
+                    <li>As regras sobre cópias de backup e modificação de software variam de país para país — confira a legislação do seu antes de usar.</li>
+                </ul>
+                <label class="rp-consent">
+                    <input type="checkbox" id="chk-legal-consent">
+                    <span>Declaro que possuo uma cópia legítima do jogo, que usarei a ISO gerada apenas para uso pessoal e que não vou distribuí-la.</span>
+                </label>
+            </div>
+
             <button id="btn-apply-patch" class="rp-btn-apply" disabled>
                 <svg class="btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -795,6 +844,70 @@
                 <div class="rp-info-chip" id="space-lbl">Streaming nativo ativo — baixo consumo de RAM</div>
                 <div class="rp-info-chip" id="storage-lbl"></div>
             </div>
+        </div>
+
+        <!-- ══ CRIADOR DE PATCH ══ -->
+        <div class="rp-card active-card" id="creator-section" style="display:none;">
+            <div class="rp-card-header">
+                <span class="rp-card-num">CRIAR</span>
+                <span class="rp-card-title">Criar patch (.RPT) a partir de uma ISO modificada</span>
+            </div>
+            <p style="font-family:'Exo 2',sans-serif;font-size:0.85rem;line-height:1.6;color:var(--rp-text);margin:0 0 1.2rem;">
+                Compare a ISO original com a sua versão modificada. O patch guarda <b>apenas as diferenças</b>
+                (deltas, pequenas trocas de bytes e arquivos criados por você) — arquivos idênticos ao original nunca entram nele.
+                Tudo é processado no seu navegador.
+            </p>
+
+            <div class="rp-drop-zone" id="btn-cr-orig">
+                <div class="rp-drop-text">1 · Selecionar ISO ORIGINAL</div>
+                <div class="rp-drop-sub">A cópia limpa do jogo (a mesma que o usuário final vai usar)</div>
+                <div class="rp-drop-filename" id="cr-orig-label" style="display:none;"></div>
+            </div>
+
+            <div class="rp-radio-row" style="margin-top:1.2rem;">
+                <label><input type="radio" name="cr-mod-mode" value="iso" checked> Versão modificada é uma ISO</label>
+                <label><input type="radio" name="cr-mod-mode" value="folder"> Versão modificada é uma pasta de arquivos</label>
+            </div>
+            <div class="rp-drop-zone" id="btn-cr-mod">
+                <div class="rp-drop-text" id="cr-mod-text">Selecionar ISO Modificada</div>
+                <div class="rp-drop-sub">2 · O resultado do seu trabalho (tradução, fonte, vídeos…)</div>
+                <div class="rp-drop-filename" id="cr-mod-label" style="display:none;"></div>
+            </div>
+
+            <div style="margin-top:1.4rem;">
+                <div class="rp-field"><label for="cr-name">Nome do jogo / projeto *</label><input class="rp-input" id="cr-name" maxlength="100" autocomplete="off"></div>
+                <div class="rp-field-row">
+                    <div class="rp-field"><label for="cr-version">Versão</label><input class="rp-input" id="cr-version" maxlength="30" autocomplete="off"></div>
+                    <div class="rp-field"><label for="cr-author">Autor / equipe</label><input class="rp-input" id="cr-author" maxlength="100" autocomplete="off"></div>
+                </div>
+                <div class="rp-field"><label for="cr-md5">MD5 da ISO original (opcional — 32 hex; avisa o usuário se a ISO dele for diferente)</label><input class="rp-input" id="cr-md5" maxlength="32" autocomplete="off" spellcheck="false"></div>
+                <div class="rp-field"><label for="cr-desc">Descrição / changelog (opcional)</label><textarea class="rp-input" id="cr-desc" maxlength="4000"></textarea></div>
+            </div>
+
+            <button id="btn-cr-analyze" class="rp-btn-apply" type="button" disabled>🔍 Analisar diferenças</button>
+
+            <div id="cr-progress" style="display:none;margin-top:1rem;">
+                <div class="rp-progress-bar-wrap"><div class="rp-progress-bar" id="cr-bar" style="width:0%"></div></div>
+                <div class="rp-md5-value" id="cr-prog-msg" style="margin-top:0.5rem;"></div>
+            </div>
+            <div id="cr-status" class="rp-cr-status" style="display:none;"></div>
+            <div id="cr-review" style="display:none;margin-top:1.2rem;"></div>
+
+            <div class="rp-legal" style="margin-top:1.4rem;">
+                <div class="rp-legal-title">⚖️ Antes de distribuir um patch</div>
+                <ul class="rp-legal-list">
+                    <li>Inclua <b>somente o que você criou</b>: textos traduzidos, fontes, dublagens, código e as diferenças (deltas).</li>
+                    <li><b>Nunca</b> distribua a ISO pronta, nem arquivos originais sem alteração, e não cobre pelo patch.</li>
+                    <li>Arquivos marcados como <b>replace</b> entram inteiros no patch — confirme que são conteúdo seu. Prefira <b>delta</b> para vídeos e áudios modificados.</li>
+                    <li>Algumas detentoras de direitos reagem a patches de fãs (cease &amp; desist). Isto não é aconselhamento jurídico; as regras variam por país.</li>
+                </ul>
+                <label class="rp-consent">
+                    <input type="checkbox" id="chk-creator-legal">
+                    <span>Declaro que o conteúdo do patch é de minha autoria (ou que tenho autorização), que ele não contém arquivos originais inalterados e que não o distribuirei junto com a ISO do jogo.</span>
+                </label>
+            </div>
+
+            <button id="btn-cr-generate" class="rp-btn-apply" type="button" disabled style="margin-top:1rem;">💾 Gerar arquivo .RPT</button>
         </div>
 
         <!-- ══ Debug Panel ══ -->
@@ -841,50 +954,20 @@
         </div>
     </div>
 
-    <!-- ══ Overlay Animação de Patch ══ -->
-    <div id="anim-overlay">
+    <!-- ══ Painel compacto de progresso do patch ══ -->
+    <div id="anim-overlay" role="status" aria-live="polite">
         <div id="stage">
-          <div id="ps2bg"></div>
-          <canvas id="mainCanvas"></canvas>
-          <div id="vignette"></div>
-
-          <svg id="raidenSVG" width="190" height="190" viewBox="0 0 190 190">
-            <defs>
-              <filter id="glow"><feGaussianBlur stdDeviation="3.5" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-              <filter id="glow2"><feGaussianBlur stdDeviation="6" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            <path d="M95 8 L12 138 L178 138 Z" fill="rgba(20,55,180,0.12)" stroke="#3af" stroke-width="1.8" opacity="0.88" filter="url(#glow)"/>
-            <ellipse cx="95" cy="138" rx="83" ry="11" fill="rgba(15,45,160,0.18)" stroke="#3af" stroke-width="1.8" opacity="0.8" filter="url(#glow)"/>
-            <line x1="95" y1="8"  x2="40"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
-            <line x1="95" y1="8"  x2="150" y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.4"/>
-            <line x1="95" y1="8"  x2="95"  y2="138" stroke="#1a5090" stroke-width="0.8" opacity="0.3"/>
-            <path d="M103 44 L86 92 L99 92 L82 144 L116 84 L102 84 Z" fill="#3af" opacity="0.95" filter="url(#glow2)"/>
-            <line x1="28" y1="138" x2="162" y2="138" stroke="rgba(51,170,255,0.35)" stroke-width="1"/>
-          </svg>
-
           <div id="ringWrap">
-            <svg width="230" height="230" viewBox="0 0 230 230">
-              <circle cx="115" cy="115" r="80" fill="none" stroke="rgba(20,50,130,0.35)" stroke-width="2.5"/>
-              <circle id="ringPath" cx="115" cy="115" r="80" fill="none" stroke="#3af" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90 115 115)"/>
-              <circle cx="115" cy="115" r="74" fill="none" stroke="rgba(51,170,255,0.06)" stroke-width="1"/>
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="32" r="24" fill="none" stroke="rgba(51,170,255,0.18)" stroke-width="5"/>
+              <circle id="ringPath" cx="32" cy="32" r="24" fill="none" stroke="#3af" stroke-width="5" stroke-linecap="round" transform="rotate(-90 32 32)"/>
             </svg>
-          </div>
-
-          <div id="statusWrap">
-            <div id="statusTitle">APLICANDO PATCH</div>
-            <div id="statusMsg">Autenticando Permissões...</div>
             <div id="pctLabel">0%</div>
           </div>
-
-          <div id="flawless">
-            <div id="flawlessText">FLAWLESS</div>
-            <div id="victoryText">VICTORY</div>
-            <div id="isoReadyText">— ISO MODIFICADA. DISCO GRAVADO COM SUCESSO! —</div>
-          </div>
-
-          <button id="btn-close-anim">✖ Sair e Voltar ao Patcher</button>
+          <div id="statusTitle"><span id="miniBolt">⚡</span><span id="statusTitleText">APLICANDO PATCH</span></div>
+          <div id="statusMsg">Iniciando...</div>
+          <div id="isoReadyText">ISO gerada e gravada com sucesso!</div>
+          <button id="btn-close-anim" type="button">✖ Fechar</button>
         </div>
     </div>
 
@@ -897,6 +980,7 @@
     <!-- Scripts -->
     <script type="module" src="/scripts/navbar_auth.js"></script>
     <script type="module" src="/scripts/raiden_patcher.js"></script>
+    <script type="module" src="/scripts/raiden_creator.js"></script>
     <script src="/scripts/tool_back_button.js"></script>
     <script>
       if (navigator.storage && navigator.storage.estimate) {

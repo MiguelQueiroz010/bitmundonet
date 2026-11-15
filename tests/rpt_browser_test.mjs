@@ -11,11 +11,20 @@ const src = fs.readFileSync(path.join(ROOT, 'scripts/raiden_patcher.js'), 'utf8'
 const cut = (from, to) => { const a = src.indexOf(from), b = src.indexOf(to, a); if (a < 0 || b < 0) throw new Error('marcador não encontrado: ' + from + ' / ' + to); return src.slice(a, b); };
 const snippetBody = cut('// Interpreta o XML do patch', 'async function loadPatchMetadata') + '\n' +
     cut('class ByteStream', '// ═══════════════════════════════════════════════════════\n// UTILITÁRIOS');
+const postBody = cut('// Seções opcionais do manifesto', 'function renderPatchSummary');
+// Wrapper FALSO (só cabeçalho ELF + os 4 marcadores) servido em /scripts/raiden_wrapper.elf: o .elf real depende do PS2SDK.
+let wrapperOn = true;   // o teste "sem wrapper" desliga isto (o servidor passa a responder 404)
+const FAKE_WRAPPER = (() => { const t = Buffer.alloc(4096); t.set([0x7f, 0x45, 0x4c, 0x46]); let p = 200; const mark = (m, extra) => { t.write(m, p, 'latin1'); p += m.length + extra; };
+    mark('RAIDENBOOT', 40); mark('RAIDENCREDIT', 256); mark('RAIDENHASH1', 2 + 40 * 2); mark('RAIDENMEDIA', 16); return t; })();
 const server = http.createServer((req, res) => {
     const u = new URL(req.url, 'http://x'); let p = decodeURIComponent(u.pathname);
     if (p === '/__blank') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<!doctype html><title>t</title>'); }
     if (p === '/__snippet.mjs') { res.writeHead(200, { 'content-type': 'text/javascript' }); return res.end(
         `import { normalizeOps, createPayloadFile, parseRelPath, RPT_PAYLOAD_PREFIX, LIMITS } from '/scripts/IUP/rpt_ops.js';\nconst MAX_MANIFEST_BYTES = 4*1024*1024, MAX_ENTRIES = 20000;\n${snippetBody}\nexport { parseManifestXml, countOps, extractPatchPayload, ByteStream };`); }
+    if (p === '/__post.mjs') { res.writeHead(200, { 'content-type': 'text/javascript' }); return res.end(
+        `import { parseRelPath, RPT_PAYLOAD_PREFIX } from '/scripts/IUP/rpt_ops.js';\nimport { sha256Blob } from '/scripts/IUP/rpt_sha256.js';\nimport * as ISOMETA from '/scripts/raiden_isometa.js';\n${postBody}\nexport { parsePostSections, applyPostProcess };`); }
+    if (p === '/scripts/raiden_wrapper.elf' && !wrapperOn) { res.writeHead(404); return res.end('nf'); }
+    if (p === '/scripts/raiden_wrapper.elf') { res.writeHead(200, { 'content-type': 'application/octet-stream' }); return res.end(FAKE_WRAPPER); }
     const f = path.join(ROOT, p === '/' ? 'index.html' : p);
     if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end('nf'); }
     res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
@@ -68,7 +77,7 @@ window.__done = runAll(${JSON.stringify(base + '/__snippet.mjs')}, ${JSON.string
     if (bad.length) { failed++; console.log('  FALHOU erros de JS ao carregar a página:\n   ' + bad.join('\n   ')); } else console.log('  ok  página real carregou o módulo raiden_patcher.js sem erros de JS (' + errs.length + ' erros ignorados de terceiros/stubs)');
 
     // ── 3) aba "Criar patch": ISOs reais (BuildISO do projeto) → analisar → revisão ──
-    const p3 = await browser.newPage(); const errs3 = [];
+    const p3 = await browser.newPage({ serviceWorkers: 'block' }); const errs3 = [];   // sem SW: o servidor de teste decide se o wrapper existe
     p3.on('pageerror', (e) => { errs3.push(e.message); console.log('  [p3 pageerror]', e.message); }); p3.on('console', (m) => { if (m.type() === 'error') console.log('  [p3 console]', m.text().slice(0, 200)); });
     await p3.route('**/*', (route) => {
         const u = route.request().url();
@@ -128,6 +137,67 @@ window.__done = runAll(${JSON.stringify(base + '/__snippet.mjs')}, ${JSON.string
     const bad3 = errs3.filter(m => /rpt_|raiden_|iso9660|does not provide an export|is not defined|before initialization|Cannot read/.test(m));
     if (bad3.length) { failed++; console.log('  FALHOU erros de JS:\n   ' + bad3.join('\n   ')); }
     
+    // ── 3b) metadados / créditos / trava: UI real da aba "Criar patch" ──
+    {
+        const dis = () => p3.evaluate(() => document.getElementById('btn-cr-generate').disabled);
+        const shown = (id) => p3.evaluate((i) => getComputedStyle(document.getElementById(i)).display !== 'none', id);
+        const chk = (cond, okMsg, badMsg) => { if (cond) console.log('  ok  ' + okMsg); else { failed++; console.log('  FALHOU ' + (badMsg || okMsg)); } };
+        await p3.click('#cr-meta-box > summary'); await p3.click('#cr-credits-box > summary');
+        const nFields = await p3.evaluate(() => document.querySelectorAll('#cr-meta-fields input').length);
+        chk(nFields === 9, 'UI: 9 campos de texto do ISO9660 gerados', `esperava 9 campos, veio ${nFields}`);
+        chk(await dis() === false, 'UI: com metadados vazios o botão Gerar continua liberado');
+        await p3.fill('#cr-meta-volumeId', 'ação');
+        chk(await dis() && await shown('cr-meta-err'), 'UI: volume não-ASCII bloqueia "Gerar" e mostra o erro', 'volume não-ASCII deveria bloquear');
+        await p3.fill('#cr-meta-volumeId', 'RAIDEN_MOD'); await p3.fill('#cr-meta-publisherId', 'BitMundo');
+        chk(!(await dis()) && !(await shown('cr-meta-err')), 'UI: metadados válidos liberam "Gerar" e escondem o erro');
+        chk(!(await shown('cr-credits-unavailable')) && await shown('cr-credits-body'), 'UI: com o wrapper disponível, créditos habilitados');
+        await p3.fill('#cr-credits-text', 'a'.repeat(300));
+        chk(await dis() && await shown('cr-credits-err'), 'UI: créditos acima de 255 bytes bloqueiam e explicam', 'créditos longos deveriam bloquear');
+        await p3.fill('#cr-credits-text', 'Traduzido por BitMundo.net');
+        await p3.check('input[name="cr-media-type"][value="image"]');
+        chk(await dis() && await shown('btn-cr-media') && await shown('cr-media-duration-wrap'), 'UI: escolher "Imagem" sem arquivo bloqueia e mostra o seletor', 'imagem sem arquivo deveria bloquear');
+        await p3.check('input[name="cr-media-type"][value="movie"]');
+        chk(await shown('btn-cr-media') && !(await shown('cr-media-duration-wrap')), 'UI: "Vídeo .PSS" mostra o seletor e esconde a duração');
+        await p3.check('input[name="cr-media-type"][value="none"]');
+        chk(!(await dis()) && !(await shown('btn-cr-media')), 'UI: "Só texto" libera de novo');
+
+        // pós-processamento sobre ISOs reais (módulo no navegador)
+        const U = { post: base + '/__post.mjs', builder: base + '/scripts/IUP/rpt_builder.js', isometa: base + '/scripts/raiden_isometa.js', iso: base + '/scripts/IUP/iso9660.js' };
+        await p3.addScriptTag({ type: 'module', content: `import { runPost, runPostNoWrapper, setupLockIso } from ${JSON.stringify(base + '/tests/rpt_post_inpage.mjs')};
+            window.__U = ${JSON.stringify({ ...U, wrapperUrl: base + '/scripts/raiden_wrapper.elf' })}; window.__runPost = () => runPost(window.__U); window.__runPostNW = () => runPostNoWrapper(window.__U); window.__setupLock = () => setupLockIso(window.__U); window.__postReady = true;` });
+        await p3.waitForFunction(() => window.__postReady, null, { timeout: 15000 });
+        const postRes = await p3.evaluate(() => window.__runPost());
+        for (const r of postRes) { console.log((r.ok ? '  ok  ' : '  FALHOU ') + r.name); if (!r.ok) { failed++; console.log(r.err.split('\n').slice(0, 5).join('\n')); } }
+
+        // wrapper ausente (404): créditos ignorados com aviso, ISO intacta
+        wrapperOn = false;
+        const nw = await p3.evaluate(() => window.__runPostNW()).finally(() => { wrapperOn = true; });
+        chk(nw.unchanged && nw.notes.length === 1 && /ignorados/.test(nw.notes[0]), 'sem o wrapper: créditos ignorados com aviso e a ISO não é alterada', 'sem wrapper: ' + JSON.stringify(nw));
+
+        // travar / destravar pela UI (ISO real com ELF; confirma o diálogo; destravar devolve a ISO byte a byte)
+        await p3.evaluate(() => window.__setupLock());
+        p3.on('dialog', (d) => d.accept());
+        const lockTxt = () => p3.evaluate(() => document.getElementById('cr-lock-status').textContent);
+        await p3.click('#cr-lock-box > summary'); await p3.click('#btn-cr-lock-iso');
+        await p3.waitForFunction(() => /não está travada/.test(document.getElementById('cr-lock-status').textContent), null, { timeout: 10000 });
+        const lb = () => p3.evaluate(() => ({ lock: document.getElementById('btn-cr-lock').disabled, unlock: document.getElementById('btn-cr-unlock').disabled }));
+        let b = await lb(); chk(b.lock && b.unlock, 'UI trava: sem senha os dois botões ficam bloqueados', JSON.stringify(b));
+        await p3.fill('#cr-lock-pass', 'senha-teste');
+        b = await lb(); chk(!b.lock && b.unlock, 'UI trava: ISO destravada + senha → só "Travar" habilita', JSON.stringify(b));
+        await p3.click('#btn-cr-lock');
+        await p3.waitForFunction(() => /ISO travada|❌/.test(document.getElementById('cr-lock-status').textContent), null, { timeout: 60000 });
+        chk(/ISO travada/.test(await lockTxt()), 'UI trava: travou a ISO (' + (await lockTxt()) + ')', 'travar falhou: ' + (await lockTxt()));
+        const lockedSha = await p3.evaluate(() => window.__sha());
+        chk(lockedSha !== await p3.evaluate(() => window.__sha0), 'UI trava: o arquivo realmente mudou (ELF criptografado)');
+        b = await lb(); chk(b.lock && b.unlock, 'UI trava: senha limpa após a operação (nada fica na tela)', JSON.stringify(b));
+        await p3.fill('#cr-lock-pass', 'senha-errada'); await p3.click('#btn-cr-unlock');
+        await p3.waitForFunction(() => /destravada|❌/.test(document.getElementById('cr-lock-status').textContent), null, { timeout: 60000 });
+        chk(/Senha incorreta/.test(await lockTxt()) && await p3.evaluate(() => window.__sha()) === lockedSha, 'UI trava: senha errada é recusada e o arquivo não muda', await lockTxt());
+        await p3.fill('#cr-lock-pass', 'senha-teste'); await p3.click('#btn-cr-unlock');
+        await p3.waitForFunction(() => /destravada/.test(document.getElementById('cr-lock-status').textContent), null, { timeout: 60000 });
+        chk(await p3.evaluate(async () => (await window.__sha()) === window.__sha0), 'UI trava: destravar restaura a ISO byte a byte (SHA-256 igual ao original)');
+    }
+
     // ── 4) painel compacto de progresso: código REAL do raiden_patcher.js sobre o DOM real ──
     const p4 = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     await p4.route('**/*', (route) => { const u = route.request().url(); if (u.startsWith(base)) return route.continue();

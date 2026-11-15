@@ -1,7 +1,7 @@
 /**
  * BitMundo Service Worker - Motor de Cache Offline Total para Ferramentas
  */
-const CACHE_NAME = 'bitmundo-tools-offline-v5';
+const CACHE_NAME = 'bitmundo-tools-offline-v6';
 
 // Recursos críticos da casca e ferramentas para pré-carregamento imediato
 const CORE_ASSETS = [
@@ -28,6 +28,8 @@ const CORE_ASSETS = [
   '/scripts/IUP/rpt_builder.js',
   '/scripts/IUP/rpt_vcdiff_encoder.js',
   '/scripts/raiden_creator.js',
+  '/scripts/raiden_isometa.js',
+  '/scripts/raiden_wrapper.elf',   // ainda pode não existir (precisa ser compilado com o PS2SDK): cache.add falha em silêncio
   '/scripts/hog_extractor.js',
   '/fav/site.webmanifest',
   '/fav/raiden_patcher.webmanifest',

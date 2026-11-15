@@ -193,6 +193,7 @@ function buildPostXml(meta) {
         if (a.length) x += `  <IsoMeta${a.join('')}/>\n`;
     }
     if (meta.credits) x += `  <Credits>${xmlEsc(meta.credits)}</Credits>\n`;
+    if (meta.failText) x += `  <FailText>${xmlEsc(meta.failText)}</FailText>\n`;
     const m = meta.media;
     if (m) {
         x += `  <Media type="${xmlEsc(m.type)}" payload="${RPT_PAYLOAD_PREFIX}${xmlEsc(m.payloadName)}" size="${m.size}" sha256="${xmlEsc(m.sha256)}"`

@@ -1,7 +1,7 @@
 /**
  * BitMundo Service Worker - Motor de Cache Offline Total para Ferramentas
  */
-const CACHE_NAME = 'bitmundo-tools-offline-v6';
+const CACHE_NAME = 'bitmundo-tools-offline-v7';
 
 // Recursos críticos da casca e ferramentas para pré-carregamento imediato
 const CORE_ASSETS = [

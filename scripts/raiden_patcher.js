@@ -324,8 +324,8 @@ async function loadPatchMetadata(file) {
 // O manifesto vem do patch (não confiável): tudo é validado aqui, antes de qualquer gravação.
 const MEDIA_MAX_BYTES = 64 * 1048576;
 function parsePostSections(xmlStr) {
-    const post = { isoMeta: null, credits: null, media: null };
-    if (!/<(IsoMeta|Credits|Media)[\s>\/]/.test(xmlStr)) return post;
+    const post = { isoMeta: null, credits: null, failText: null, media: null };
+    if (!/<(IsoMeta|Credits|FailText|Media)[\s>\/]/.test(xmlStr)) return post;
     const doc = new DOMParser().parseFromString(xmlStr, 'application/xml');
     if (doc.querySelector('parsererror')) throw new Error('O manifesto XML do patch está malformado.');
 
@@ -351,6 +351,13 @@ function parsePostSections(xmlStr) {
         const text = cr.textContent.trim();
         if (new TextEncoder().encode(text).length > 255) throw new Error('Patch inválido: texto de créditos acima de 255 bytes.');
         if (text) post.credits = text;
+    }
+
+    const ft = doc.querySelector('RPT > FailText');
+    if (ft) {
+        const text = ft.textContent.trim();
+        if (new TextEncoder().encode(text).length > 255) throw new Error('Patch inválido: mensagem de falha acima de 255 bytes.');
+        if (text) post.failText = text;
     }
 
     const md = doc.querySelector('RPT > Media');
@@ -388,13 +395,14 @@ async function applyPostProcess({ saveHandle, post, tmpDir }) {
         patches.push(...res.patches); notes.push(...res.warnings);
     }
 
-    if (post.credits !== null || post.media) {
+    if (post.credits !== null || post.failText !== null || post.media) {
         const tpl = await ISOMETA.fetchWrapperTemplate();
         if (!tpl) {
             notes.push('Este patch pede uma tela de créditos, mas o wrapper (raiden_wrapper.elf) não está disponível neste site; os créditos foram ignorados e a ISO mantém o boot original.');
         } else {
             const opts = {};
             if (post.credits !== null) opts.credits = post.credits;
+            if (post.failText !== null) opts.failText = post.failText;
             if (post.media) {
                 const opsDir = await tmpDir.getDirectoryHandle('patch_ops');
                 const mf = await (await opsDir.getFileHandle(post.media.payloadName)).getFile();
@@ -447,7 +455,7 @@ function renderPatchSummary() {
 
     // Pós-processamento incluído no patch (metadados da ISO / tela de créditos)
     const po = patchMeta.post;
-    if (po && (po.isoMeta || po.credits !== null || po.media)) {
+    if (po && (po.isoMeta || po.credits !== null || po.failText !== null || po.media)) {
         const parts = [];
         if (po.isoMeta) parts.push(`metadados da ISO${po.isoMeta.volumeId !== undefined ? ` (volume “${po.isoMeta.volumeId.trim()}”)` : ''}`);
         if (po.credits !== null) parts.push('créditos');
@@ -797,7 +805,7 @@ async function executeStreamingPatch(origIsoFile, patchFile, writableStream, wor
         });
 
         // ── 4. Pós-processamento (metadados do PVD / créditos) no arquivo já gravado ─────
-        if (saveHandle && (post.isoMeta || post.credits !== null || post.media)) {
+        if (saveHandle && (post.isoMeta || post.credits !== null || post.failText !== null || post.media)) {
             setProgressUI(Math.max(animProgress, 96)); setStatusText('Aplicando metadados e créditos…');
             try {
                 const notes = await applyPostProcess({ saveHandle, post, tmpDir });

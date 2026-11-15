@@ -304,6 +304,10 @@ const WH_MARK = 'RAIDENHASH1';  // + u16 count, N * (u32 lba, u32 size, 32 bytes
 //   u16 width, u16 height (só p/ imagem; 0 em filme), u16 durationSec (0 = tela de
 //   imagem some só ao apertar um botão; filme sempre toca inteiro), u8[1] reservado
 const WM_MARK = 'RAIDENMEDIA';
+const WF_MARK = 'RAIDENFAIL';   // + 1 byte len, até 255 bytes (Latin-1/ASCII): mensagem exibida (e que trava) quando a verificação de integridade falha
+const WK_MARK = 'RAIDENCAPS';   // + 1 byte de capacidades compiladas no wrapper: bit0 = reproduz filme .PSS. Opcional (wrappers antigos não têm)
+export const CAPS = { MOVIE: 1 };
+export const FAIL_TEXT_MAX = 255;
 export const MEDIA_TYPE = { NONE: 0, IMAGE: 1, MOVIE_PSS: 2 };
 const VOL_SPACE_OFF = 80; // Volume Space Size (PVD), 8 bytes both-endian
 
@@ -346,6 +350,20 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
     wrapper.fill(0, cOff, cOff + 256);
     wrapper[cOff] = bytes.length;
     wrapper.set(bytes, cOff + 1);
+  }
+
+  // Mensagem de falha de integridade (opcional)
+  if (opts.failText !== undefined) {
+    const fOff = requireMarker(wrapper, WF_MARK, 256);
+    const fb = new TextEncoder().encode(opts.failText);
+    if (fb.length > FAIL_TEXT_MAX) throw new Error('Mensagem de falha limitada a 255 bytes nesse template.');
+    wrapper.fill(0, fOff, fOff + 256);
+    wrapper[fOff] = fb.length;
+    wrapper.set(fb, fOff + 1);
+  }
+  if (opts.media?.type === 'movie') {
+    const kOff = findMarker(wrapper, WK_MARK);
+    if (kOff !== -1 && !(wrapper[kOff] & CAPS.MOVIE)) throw new Error('Este wrapper foi compilado sem suporte a filme (.PSS). Use imagem ou recompile com RAIDEN_WITH_MOVIE=1.');
   }
 
   // Hashes extras de integridade (arquivos-chave além do ELF, opcional)
@@ -443,7 +461,7 @@ export async function fetchWrapperTemplate(url = WRAPPER_URL) {
     if (!res.ok) return null;
     const u8 = new Uint8Array(await res.arrayBuffer());
     if (u8.length < 64 || u8[0] !== 0x7f || u8[1] !== 0x45 || u8[2] !== 0x4c || u8[3] !== 0x46) return null;
-    for (const m of [WB_MARK, WC_MARK, WH_MARK, WM_MARK]) if (findMarker(u8, m) === -1) return null;
+    for (const m of [WB_MARK, WC_MARK, WH_MARK, WM_MARK, WF_MARK]) if (findMarker(u8, m) === -1) return null;
     return u8;
   } catch (_) { return null; }
 }
@@ -455,6 +473,10 @@ export function readWrapperMarkers(wrapper) {
   if (bOff !== -1) out.boot = { lba: u32le(wrapper, bOff), size: u32le(wrapper, bOff + 4), sha256: wrapper.slice(bOff + 8, bOff + 40) };
   const cOff = findMarker(wrapper, WC_MARK);
   if (cOff !== -1) { const len = wrapper[cOff]; out.credits = new TextDecoder().decode(wrapper.slice(cOff + 1, cOff + 1 + len)); }
+  const fOff2 = findMarker(wrapper, WF_MARK);
+  if (fOff2 !== -1) out.failText = new TextDecoder().decode(wrapper.slice(fOff2 + 1, fOff2 + 1 + wrapper[fOff2]));
+  const kOff2 = findMarker(wrapper, WK_MARK);
+  if (kOff2 !== -1) out.caps = { movie: !!(wrapper[kOff2] & CAPS.MOVIE) };
   const hOff = findMarker(wrapper, WH_MARK);
   if (hOff !== -1) {
     const count = wrapper[hOff] | (wrapper[hOff + 1] << 8);

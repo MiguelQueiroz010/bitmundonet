@@ -15,7 +15,7 @@ const postBody = cut('// Seções opcionais do manifesto', 'function renderPatch
 // Wrapper FALSO (só cabeçalho ELF + os 4 marcadores) servido em /scripts/raiden_wrapper.elf: o .elf real depende do PS2SDK.
 let wrapperOn = true;   // o teste "sem wrapper" desliga isto (o servidor passa a responder 404)
 const FAKE_WRAPPER = (() => { const t = Buffer.alloc(4096); t.set([0x7f, 0x45, 0x4c, 0x46]); let p = 200; const mark = (m, extra) => { t.write(m, p, 'latin1'); p += m.length + extra; };
-    mark('RAIDENBOOT', 40); mark('RAIDENCREDIT', 256); mark('RAIDENHASH1', 2 + 40 * 2); mark('RAIDENMEDIA', 16); return t; })();
+    mark('RAIDENBOOT', 40); mark('RAIDENCREDIT', 256); mark('RAIDENHASH1', 2 + 40 * 2); mark('RAIDENMEDIA', 16); mark('RAIDENFAIL', 256); mark('RAIDENCAPS', 1); t[t.indexOf('RAIDENCAPS') + 10] = 1; return t; })();
 const server = http.createServer((req, res) => {
     const u = new URL(req.url, 'http://x'); let p = decodeURIComponent(u.pathname);
     if (p === '/__blank') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<!doctype html><title>t</title>'); }

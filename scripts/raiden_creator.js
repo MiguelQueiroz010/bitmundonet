@@ -138,6 +138,12 @@ function collectPost() {
         if (new TextEncoder().encode(text).length > 255) credErr = 'O texto dos créditos passa de 255 bytes.';
         else out.meta.credits = text;
     }
+    const ftext = ($('cr-fail-text')?.value ?? '').trim();
+    if (st.template && ftext) {
+        if (/[^\x20-\x7e\xa0-\xff]/.test(ftext)) credErr = credErr || 'A mensagem de falha só aceita caracteres Latin-1 (a fonte do PS2 não tem outros).';
+        else if (new TextEncoder().encode(ftext).length > 255) credErr = credErr || 'A mensagem de falha passa de 255 bytes.';
+        else out.meta.failText = ftext;
+    }
     if (st.template && st.mediaType !== 'none') {
         if (!st.media) credErr = credErr || 'Selecione o arquivo de imagem/vídeo de abertura ou escolha "Só texto".';
         else {
@@ -159,6 +165,15 @@ async function loadTemplateAvailability() {
     un.style.display = off ? '' : 'none';
     un.textContent = off ? '⚠️ O wrapper de créditos (scripts/raiden_wrapper.elf) ainda não foi compilado/publicado neste site, então créditos e abertura estão desabilitados. Compile scripts/credits_wrapper.c com o PS2SDK e coloque o .elf resultante em scripts/ para habilitar.' : '';
     body.style.display = off ? 'none' : '';
+    // wrapper sem suporte a filme (RAIDENCAPS bit0 = 0): desabilita a opção "Vídeo .PSS"
+    const mv = document.querySelector('input[name="cr-media-type"][value="movie"]');
+    if (mv && st.template) {
+        const caps = ISOMETA.readWrapperMarkers(st.template).caps;
+        const noMovie = caps && !caps.movie;
+        mv.disabled = !!noMovie;
+        if (mv.parentElement) mv.parentElement.title = noMovie ? 'Este wrapper foi compilado sem suporte a vídeo .PSS' : '';
+        if (noMovie && mv.checked) { const none = document.querySelector('input[name="cr-media-type"][value="none"]'); if (none) { none.checked = true; none.dispatchEvent(new Event('change')); } }
+    }
     updateButtons();
 }
 
@@ -337,6 +352,7 @@ function init() {
     for (const id of ['cr-name', 'cr-md5', 'chk-creator-legal']) { $(id).addEventListener('input', updateButtons); $(id).addEventListener('change', updateButtons); }
     buildMetaFields();
     $('cr-credits-text')?.addEventListener('input', updateButtons);
+    $('cr-fail-text')?.addEventListener('input', updateButtons);
     $('cr-media-duration')?.addEventListener('input', updateButtons);
     for (const r of document.querySelectorAll('input[name="cr-media-type"]')) r.addEventListener('change', () => {
         st.mediaType = r.value; st.media = null; $('cr-media-label').style.display = 'none';

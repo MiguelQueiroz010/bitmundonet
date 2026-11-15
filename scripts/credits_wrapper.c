@@ -213,7 +213,7 @@ typedef struct { uint32_t type, offset, vaddr, paddr, filesz, memsz, flags, alig
 /* Executa a partir de STUB_ADDR (cópia de bytes desta função): copia os segmentos PT_LOAD para os
  * endereços finais e salta para o entry. Sem chamadas/globais (precisa ser independente de posição).
  * Syscalls FlushCache (0x64) / ExecPS2 não confirmados em hardware — validar no PCSX2 e ajustar. */
-__attribute__((noinline)) static void stub_run(const uint8_t *elf) {
+__attribute__((noinline)) static void stub_run(const uint8_t *elf, char **argv) {
     const elf32_hdr *eh = (const elf32_hdr *)elf;
     const elf32_phdr *ph = (const elf32_phdr *)(elf + eh->phoff);
     for (unsigned i = 0; i < eh->phnum; i++) {
@@ -223,10 +223,32 @@ __attribute__((noinline)) static void stub_run(const uint8_t *elf) {
         for (uint32_t k = ph[i].filesz; k < ph[i].memsz; k++) d[k] = 0;
     }
     register uint32_t entry = eh->entry;
-    __asm__ volatile("li $3, 0x64\n li $4, 0\n syscall\n li $3, 0x64\n li $4, 2\n syscall\n jr %0\n nop\n" : : "r"(entry) : "$3", "$4");
+    register char **av = argv;
+    __asm__ volatile("li $3, 0x64\n li $4, 0\n syscall\n li $3, 0x64\n li $4, 2\n syscall\n li $4, 1\n move $5, %1\n jr %0\n nop\n" : : "r"(entry), "r"(av) : "$3", "$4", "$5");
+}
+
+/* Lê SYSTEM.CNF (via sceCdSearchFile, no diretório ISO9660 que o patch NÃO altera) e extrai o
+ * caminho BOOT2 ("cdrom0:\\SLUS_xxx.xx;1"). Serve de argv[0] para o jogo, como se o BIOS o tivesse
+ * lançado. Não é fatal se faltar: o ELF original é carregado por LBA (o registro de diretório do
+ * ELF aponta para este wrapper, então carregar por nome entraria em loop). */
+#define ARGV_ADDR ((char **)0x01FD1000)
+static void parse_system_cnf(void) {
+    sceCdlFILE f; char *out = (char *)ARGV_ADDR + 16; uint32_t n = 0;
+    ARGV_ADDR[0] = NULL; ARGV_ADDR[1] = NULL;
+    if (!sceCdSearchFile(&f, "\\SYSTEM.CNF;1") || f.size == 0 || f.size > SECTOR) return;
+    if (!read_sectors(f.lsn, 1, sbuf)) return;
+    sbuf[f.size < SECTOR ? f.size : SECTOR - 1] = 0;
+    char *p = strstr((char *)sbuf, "BOOT2");
+    if (!p || !(p = strchr(p, '='))) return;
+    p++; while (*p == ' ' || *p == '\t') p++;
+    while (*p && *p != '\r' && *p != '\n' && n < 200) out[n++] = *p++;
+    while (n && (out[n-1] == ' ' || out[n-1] == '\t')) n--;
+    out[n] = 0;
+    if (n) ARGV_ADDR[0] = out;
 }
 
 static void chainload(void) {
+    parse_system_cnf();
     if (!read_range(g_boot.lba, g_boot.size, ELF_BUF, NULL)) fail_screen();
     const elf32_hdr *eh = (const elf32_hdr *)ELF_BUF;
     if (eh->id[0] != 0x7f || eh->id[1] != 'E' || eh->machine != 8 || eh->phoff + eh->phnum * sizeof(elf32_phdr) > g_boot.size) fail_screen();
@@ -236,7 +258,7 @@ static void chainload(void) {
     SifExitRpc();
     memcpy(STUB_ADDR, (const void *)stub_run, STUB_COPY_BYTES);
     FlushCache(0); FlushCache(2);
-    ((void (*)(const uint8_t *))STUB_ADDR)(ELF_BUF);
+    ((void (*)(const uint8_t *, char **))STUB_ADDR)(ELF_BUF, ARGV_ADDR);
     for (;;) ;
 }
 

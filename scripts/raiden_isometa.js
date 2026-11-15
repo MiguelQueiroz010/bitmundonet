@@ -368,6 +368,7 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
 
   // Hashes extras de integridade (arquivos-chave além do ELF, opcional)
   const extra = opts.verifyFiles ?? [];
+  if (extra.length > 2) throw new Error('O wrapper reserva espaço para no máximo 2 arquivos extras de verificação.');
   if (extra.length) {
     const hOff = requireMarker(wrapper, WH_MARK, 2 + extra.length * 40);
     wrapper[hOff] = extra.length & 255; wrapper[hOff + 1] = (extra.length >> 8) & 255;

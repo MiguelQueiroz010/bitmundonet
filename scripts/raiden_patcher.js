@@ -17,6 +17,8 @@ const MAX_ENTRIES        = 20000;             // arquivos dentro do .rpt
 import { decryptBytes, decryptFileToHandle } from "./IUP/crypto_stuff.js";
 import { ISO9660 } from './IUP/iso9660.js';
 import { normalizeOps, applyOps, cleanupWorkDir, createPayloadFile, parseRelPath, RPT_PAYLOAD_PREFIX, LIMITS } from './IUP/rpt_ops.js';
+import { sha256Blob } from './IUP/rpt_sha256.js';
+import * as ISOMETA from './raiden_isometa.js';   // metadados do PVD / wrapper de créditos (pós-processamento)
 
 // ═══════════════════════════════════════════════════════
 // ESTADO GLOBAL
@@ -309,13 +311,112 @@ async function loadPatchMetadata(file) {
         const xmlStr = new TextDecoder('utf-8').decode(decBytes.slice(xmlStart, xmlEnd));
         const { meta, ops } = parseManifestXml(xmlStr);
 
-        patchMeta = { ...meta, ops, opsSummary: countOps(ops) };
+        patchMeta = { ...meta, ops, opsSummary: countOps(ops), post: parsePostSections(xmlStr) };
         renderPatchSummary();
     } catch (e) {
         console.error('Erro ao ler metadados do patch:', e);
         patchMeta = { invalid: e.message };   // bloqueia o botão de aplicar
         summaryGrid.innerHTML = `<span class="rp-sum-key" style="grid-column:1/-1;color:var(--rp-red);">❌ Patch recusado: ${escHtml(e.message)}</span>`;
     }
+}
+
+// Seções opcionais do manifesto aplicadas DEPOIS que a ISO é reconstruída (<IsoMeta>, <Credits>, <Media>).
+// O manifesto vem do patch (não confiável): tudo é validado aqui, antes de qualquer gravação.
+const MEDIA_MAX_BYTES = 64 * 1048576;
+function parsePostSections(xmlStr) {
+    const post = { isoMeta: null, credits: null, failText: null, media: null };
+    if (!/<(IsoMeta|Credits|FailText|Media)[\s>\/]/.test(xmlStr)) return post;
+    const doc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+    if (doc.querySelector('parsererror')) throw new Error('O manifesto XML do patch está malformado.');
+
+    const im = doc.querySelector('RPT > IsoMeta');
+    if (im) {
+        const changes = {};
+        for (const k of Object.keys(ISOMETA.ISO_FIELDS)) if (im.hasAttribute(k)) changes[k] = im.getAttribute(k);
+        const numbers = {};
+        for (const k of Object.keys(ISOMETA.ISO_NUM_FIELDS)) if (im.hasAttribute(k)) {
+            const raw = im.getAttribute(k);
+            if (!/^\d{1,5}$/.test(raw)) throw new Error(`Patch inválido: <IsoMeta ${k}> precisa ser um número.`);
+            numbers[k] = Number(raw);
+        }
+        const dates = {};
+        for (const k of ISOMETA.ISO_DATE_KEYS) if (im.hasAttribute(k)) dates[k] = im.getAttribute(k);
+        if (Object.keys(numbers).length) changes.numbers = numbers;
+        if (Object.keys(dates).length) changes.dates = dates;
+        if (Object.keys(changes).length) { ISOMETA.validateMetaChanges(changes); post.isoMeta = changes; }
+    }
+
+    const cr = doc.querySelector('RPT > Credits');
+    if (cr) {
+        const text = cr.textContent.trim();
+        if (new TextEncoder().encode(text).length > 255) throw new Error('Patch inválido: texto de créditos acima de 255 bytes.');
+        if (text) post.credits = text;
+    }
+
+    const ft = doc.querySelector('RPT > FailText');
+    if (ft) {
+        const text = ft.textContent.trim();
+        if (new TextEncoder().encode(text).length > 255) throw new Error('Patch inválido: mensagem de falha acima de 255 bytes.');
+        if (text) post.failText = text;
+    }
+
+    const md = doc.querySelector('RPT > Media');
+    if (md) {
+        const a = (n) => md.getAttribute(n);
+        const type = a('type');
+        if (type !== 'image' && type !== 'movie') throw new Error('Patch inválido: <Media type> deve ser "image" ou "movie".');
+        const payload = a('payload') || '';
+        if (!payload.startsWith(RPT_PAYLOAD_PREFIX)) throw new Error('Patch inválido: <Media payload> fora de __rpt/.');
+        const parts = parseRelPath(payload.slice(RPT_PAYLOAD_PREFIX.length), 'payload da mídia');
+        if (parts.length !== 1) throw new Error('Patch inválido: payload da mídia deve ser um arquivo na raiz de __rpt/.');
+        const size = Number(a('size')), width = Number(a('width') || 0), height = Number(a('height') || 0), durationSec = Number(a('durationSec') || 0);
+        if (!Number.isInteger(size) || size <= 0 || size > MEDIA_MAX_BYTES) throw new Error(`Patch inválido: mídia fora do limite (máx. ${MEDIA_MAX_BYTES / 1048576} MB).`);
+        if (!/^[0-9a-f]{64}$/i.test(a('sha256') || '')) throw new Error('Patch inválido: <Media sha256> ausente ou malformado.');
+        if (!Number.isInteger(durationSec) || durationSec < 0 || durationSec > 3600) throw new Error('Patch inválido: duração da mídia.');
+        if (type === 'image') {
+            if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 1024 || height > 1024) throw new Error('Patch inválido: resolução da imagem.');
+            if (size !== width * height * 4) throw new Error('Patch inválido: tamanho da imagem não bate com largura × altura × 4 (RGBA32).');
+        }
+        post.media = { type, payloadName: parts[0], size, sha256: a('sha256').toLowerCase(), width, height, durationSec };
+    }
+    return post;
+}
+
+// Aplica metadados / créditos no arquivo .iso JÁ gravado (a reconstrução muda os LBAs, então isso só pode rodar depois).
+// Devolve avisos não-fatais; lança erro se algo estiver errado (o chamador decide o que fazer com a ISO já pronta).
+async function applyPostProcess({ saveHandle, post, tmpDir }) {
+    const notes = [];
+    const file = await saveHandle.getFile();
+    const r = ISOMETA.blobReader(file);
+    const patches = [], appends = [];
+
+    if (post.isoMeta) {
+        const res = await ISOMETA.buildMetaPatches(r, post.isoMeta);
+        patches.push(...res.patches); notes.push(...res.warnings);
+    }
+
+    if (post.credits !== null || post.failText !== null || post.media) {
+        const tpl = await ISOMETA.fetchWrapperTemplate();
+        if (!tpl) {
+            notes.push('Este patch pede uma tela de créditos, mas o wrapper (raiden_wrapper.elf) não está disponível neste site; os créditos foram ignorados e a ISO mantém o boot original.');
+        } else {
+            const opts = {};
+            if (post.credits !== null) opts.credits = post.credits;
+            if (post.failText !== null) opts.failText = post.failText;
+            if (post.media) {
+                const opsDir = await tmpDir.getDirectoryHandle('patch_ops');
+                const mf = await (await opsDir.getFileHandle(post.media.payloadName)).getFile();
+                if (mf.size !== post.media.size) throw new Error('A mídia de abertura do patch está incompleta.');
+                if ((await sha256Blob(mf)).toLowerCase() !== post.media.sha256) throw new Error('A mídia de abertura do patch está corrompida (SHA-256 não confere).');
+                opts.media = { type: post.media.type, data: new Uint8Array(await mf.arrayBuffer()), width: post.media.width, height: post.media.height, durationSec: post.media.durationSec };
+            }
+            const res = await ISOMETA.buildCreditsWrapperPatches(r, tpl, opts);
+            patches.push(...res.patches); appends.push(...res.appends);
+        }
+    }
+
+    if (patches.length || appends.length) await ISOMETA.applyPatchesAndAppendsInPlace(saveHandle, patches, appends);
+    return notes;
 }
 
 function renderPatchSummary() {
@@ -348,6 +449,20 @@ function renderPatchSummary() {
         html += `
             <div class="rp-md5-target-row">
                 <span class="rp-md5-target-label">OPERAÇÕES</span>
+                <code class="rp-md5-target-val">${escHtml(parts.join(' · '))}</code>
+            </div>`;
+    }
+
+    // Pós-processamento incluído no patch (metadados da ISO / tela de créditos)
+    const po = patchMeta.post;
+    if (po && (po.isoMeta || po.credits !== null || po.failText !== null || po.media)) {
+        const parts = [];
+        if (po.isoMeta) parts.push(`metadados da ISO${po.isoMeta.volumeId !== undefined ? ` (volume “${po.isoMeta.volumeId.trim()}”)` : ''}`);
+        if (po.credits !== null) parts.push('créditos');
+        if (po.media) parts.push(po.media.type === 'movie' ? 'vídeo de abertura' : 'imagem de abertura');
+        html += `
+            <div class="rp-md5-target-row">
+                <span class="rp-md5-target-label">TAMBÉM APLICA</span>
                 <code class="rp-md5-target-val">${escHtml(parts.join(' · '))}</code>
             </div>`;
     }
@@ -463,6 +578,7 @@ btnApplyPatch.addEventListener('click', async () => {
         try {
             await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle, {
                 keepTemp: !!(chkDebugMode && chkDebugMode.checked),
+                saveHandle,
             });
             success = true;
         } finally {
@@ -632,7 +748,7 @@ if (btnApplyDebug) {
 // ALGORITMO DE STREAMING E PATCHING
 // ═══════════════════════════════════════════════════════
 
-async function executeStreamingPatch(origIsoFile, patchFile, writableStream, workDirHandle, { keepTemp = false } = {}) {
+async function executeStreamingPatch(origIsoFile, patchFile, writableStream, workDirHandle, { keepTemp = false, saveHandle = null } = {}) {
     // Subpasta exclusiva desta execução (evita misturar sobras de execuções anteriores e nunca apaga dados do usuário).
     const tmpName = `raiden_tmp_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     const tmpDir  = await workDirHandle.getDirectoryHandle(tmpName, { create: true });
@@ -657,6 +773,7 @@ async function executeStreamingPatch(origIsoFile, patchFile, writableStream, wor
         updateStatusUI(3); setProgressUI(30);
         const { xml, entries } = await extractPatchPayload(patchDecHandle, tmpDir);
         const { ops } = parseManifestXml(xml);
+        const post = parsePostSections(xml);   // valida <IsoMeta>/<Credits>/<Media> ANTES de gravar qualquer coisa
         console.log(`[RPT] ${entries.length} arquivo(s) no patch, ${ops.length} operação(ões).`);
 
         // Cache antigo (service worker) pode servir um iso9660.js sem o gancho beforeBuild: nesse caso os deltas seriam
@@ -686,6 +803,19 @@ async function executeStreamingPatch(origIsoFile, patchFile, writableStream, wor
                 console.log('[RPT] operações aplicadas e verificadas:', report);
             },
         });
+
+        // ── 4. Pós-processamento (metadados do PVD / créditos) no arquivo já gravado ─────
+        if (saveHandle && (post.isoMeta || post.credits !== null || post.failText !== null || post.media)) {
+            setProgressUI(Math.max(animProgress, 96)); setStatusText('Aplicando metadados e créditos…');
+            try {
+                const notes = await applyPostProcess({ saveHandle, post, tmpDir });
+                if (notes.length) showInfoBanner('ℹ️ ' + notes.join(' '));
+            } catch (e) {
+                // A ISO já está pronta e válida; só o toque final falhou. Não derruba o patch inteiro.
+                console.error('[RPT] pós-processamento falhou:', e);
+                showErrorBanner('ISO gerada, mas os metadados/créditos do patch não foram aplicados: ' + (e.message || e));
+            }
+        }
 
         setProgressUI(100);
         updateStatusUI(5);

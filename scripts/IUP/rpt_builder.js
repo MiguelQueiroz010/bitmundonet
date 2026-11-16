@@ -177,10 +177,35 @@ export async function analyzeTrees({ origFiles, modFiles, payloadDir, onProgress
 const xmlEsc = (s) => String(s ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+// Seções opcionais aplicadas DEPOIS que a ISO é reconstruída (ver "Pós-processamento" em RPT_FORMAT.md):
+//   <IsoMeta .../>   campos do Primary Volume Descriptor (atributos = chaves de ISO_FIELDS/numbers/dates)
+//   <Credits>…</Credits> + <Media …/>   tela de créditos (exige o wrapper .elf pré-compilado)
+// meta.isoMeta = { volumeId:'…', numbers:{volumeSetSize:2}, dates:{modified:'now'} }
+// meta.credits = 'texto'   meta.media = { type, payloadName, size, sha256, width, height, durationSec }
+function buildPostXml(meta) {
+    let x = '';
+    const im = meta.isoMeta;
+    if (im) {
+        const a = [];
+        for (const [k, v] of Object.entries(im)) if (typeof v === 'string') a.push(` ${k}="${xmlEsc(v)}"`);
+        for (const [k, v] of Object.entries(im.numbers || {})) a.push(` ${k}="${xmlEsc(v)}"`);
+        for (const [k, v] of Object.entries(im.dates || {})) a.push(` ${k}="${xmlEsc(v)}"`);
+        if (a.length) x += `  <IsoMeta${a.join('')}/>\n`;
+    }
+    if (meta.credits) x += `  <Credits>${xmlEsc(meta.credits)}</Credits>\n`;
+    if (meta.failText) x += `  <FailText>${xmlEsc(meta.failText)}</FailText>\n`;
+    const m = meta.media;
+    if (m) {
+        x += `  <Media type="${xmlEsc(m.type)}" payload="${RPT_PAYLOAD_PREFIX}${xmlEsc(m.payloadName)}" size="${m.size}" sha256="${xmlEsc(m.sha256)}"`
+           + ` width="${m.width || 0}" height="${m.height || 0}" durationSec="${m.durationSec || 0}"/>\n`;
+    }
+    return x;
+}
+
 export function buildManifestXml(meta, ops) {
     const t = (tag, v) => (v ? `  <${tag}>${xmlEsc(v)}</${tag}>\n` : '');
     let x = '<RPT>\n' + t('GameName', meta.gameName) + t('Version', meta.version) + t('Author', meta.author)
-          + t('TargetMD5', meta.targetMd5) + t('Resumo', meta.desc) + '  <Ops>\n';
+          + t('TargetMD5', meta.targetMd5) + t('Resumo', meta.desc) + buildPostXml(meta) + '  <Ops>\n';
     for (const o of ops) {
         const a = (n, v) => (v != null && v !== '' ? ` ${n}="${xmlEsc(v)}"` : '');
         if (o.type === 'inject') {
@@ -204,6 +229,7 @@ export async function assemblePlainRpt({ ops, meta, payloadDir, plainHandle, onP
         await w.write(enc.encode(buildManifestXml(meta, ops)));
         await w.write(new Uint8Array([0]));
         const withPayload = ops.filter(o => o.payloadName);
+        if (meta.media?.payloadName) withPayload.push({ payloadName: meta.media.payloadName });   // payload da mídia de abertura
         for (let i = 0; i < withPayload.length; i++) {
             const o = withPayload[i];
             const file = await (await payloadDir.getFileHandle(o.payloadName)).getFile();

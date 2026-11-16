@@ -1,231 +1,283 @@
 /*
- * credits_wrapper.c — esqueleto do "wrapper" de créditos + mídia de abertura
- * (imagem OU vídeo .PSS) + verificação de integridade, para ISOs patcheadas
- * pelo Raiden Patcher (BitMundo.net).
+ * raiden_wrapper — camada de segurança + créditos para ISOs de PS2 (BitMundo / Raiden Patcher).
  *
- * NÃO FOI COMPILADO NEM TESTADO neste ambiente (não há PS2SDK/ee-gcc nem rede
- * aqui). Precisa ser compilado uma única vez com o PS2SDK na sua máquina (ou
- * com o Claude Code Desktop/VSCode, que tem acesso ao seu toolchain local).
- * Depois de compilado, o .elf resultante vira o "template" que
- * buildCreditsWrapperPatches() em raiden_isometa.js reutiliza em todo patch —
- * ele não recompila nada, só sobrescreve os marcadores abaixo.
+ * ESTADO: escrito contra os headers do PS2SDK, mas AINDA NÃO COMPILADO e NÃO TESTADO em
+ * PS2/PCSX2. Veja scripts/README_WRAPPER.md (checklist) antes de publicar o .elf.
  *
- * Fluxo em tempo de boot:
- *   1. Confere do próprio disco os arquivos listados em RAIDENHASH1 (se houver)
- *      e o ELF original (RAIDENBOOT) via SHA-256.
- *   2. Se algo não bater: mostra aviso na tela e PARA (não executa o jogo).
- *   3. Se tudo bater: mostra os créditos (texto de RAIDENCREDIT) e, conforme
- *      RAIDENMEDIA.type:
- *        - NONE  (0): só o texto, por um tempo fixo curto.
- *        - IMAGE (1): desenha uma textura carregada direto do LBA/tamanho
- *                      gravados (ver formato esperado abaixo) por
- *                      RAIDENMEDIA.durationSec segundos (ou até um botão).
- *        - MOVIE (2): toca o vídeo .PSS gravado no LBA/tamanho indicados,
- *                      do início ao fim, depois segue.
- *   4. Lê o ELF original (LBA/tamanho de RAIDENBOOT) pra memória, resolve os
- *      program headers e salta pro entry point dele (chainload).
+ * Fluxo: init CDVD -> SHA-256 do ELF original (+ arquivos extras) -> falhou? mostra a mensagem
+ * e TRAVA -> créditos (texto) -> imagem (opcional) -> lê o ELF original do disco e executa.
  *
- * IMPORTANTE — escopo real deste arquivo:
- *   Isto é um ESQUELETO DE INTEGRAÇÃO, não um player de vídeo completo. Os
- *   pontos marcados com TODO precisam de código que não cabe reescrever do
- *   zero aqui com segurança (decodificação MPEG2/Sofdec via IPU é um projeto
- *   em si). Em vez de inventar uma implementação que pareceria pronta mas
- *   não seria testável, cada TODO explica exatamente qual peça falta e qual
- *   caminho a cena de homebrew do PS2 já documenta pra ela — você já trabalha
- *   com IDA Pro/Ghidra e o ecossistema PCSX2, então deve ter (ou saber achar)
- *   esse código de referência mais rápido do que eu tentando reconstruí-lo
- *   às cegas.
+ * Marcadores: o JS (raiden_isometa.js) procura estes textos no .elf e grava os dados logo após.
+ * Precisam ser `volatile` e NÃO-const (senão o GCC embute os valores e o patch não tem efeito).
+ * Os campos tag[] têm exatamente strlen(marcador) bytes, sem '\0' (o JS escreve logo depois).
  */
-
 #include <kernel.h>
 #include <sifrpc.h>
 #include <loadfile.h>
-#include <sbv_patches.h>
+#include <libcdvd.h>
+#include <libpad.h>
+#include <debug.h>
 #include <string.h>
 #include <stdint.h>
-#include <malloc.h>
-/* #include <gsKit.h>   -- desenho de texto/textura (créditos + tela de imagem) */
-/* #include <libmc.h>   -- não usado aqui, só se quiser permitir pular com botão */
-/* #include <libpad.h>  -- ler o pad pra permitir pular a tela de imagem/vídeo */
-/* #include <sha256.h>  -- alguma lib de SHA-256 para EE (ex. portar uma pequena, domínio público) */
-/* #include <libmpeg.h> ou equivalente -- decodificação MPEG2/Sofdec (ver MOVIE abaixo) */
 
-/* ───────── Marcadores — o offset de cada struct é achado pelo texto do
-   marcador em tempo de BUILD do patch (não em runtime); aqui eles só
-   precisam existir em algum lugar do binário, com espaço reservado. ───────── */
+#include <dma.h>
+#include <graph.h>
+#include <gs_psm.h>
+#include <gs_gp.h>
+#include <gif_tags.h>
+#include <packet.h>
 
-__attribute__((aligned(16)))
-static const struct {
-    char     magic[10];      /* "RAIDENBOOT" */
-    uint32_t orig_lba;
-    uint32_t orig_size;
-    uint8_t  orig_sha256[32];
-} g_boot_marker = { "RAIDENBOOT", 0, 0, {0} };
+#define USED __attribute__((used, aligned(16)))
 
-__attribute__((aligned(16)))
-static const struct {
-    char    magic[12];       /* "RAIDENCREDIT" */
-    uint8_t len;
-    char    text[255];
-} g_credit_marker = { "RAIDENCREDIT", 0, {0} };
+typedef struct __attribute__((packed)) { char tag[10]; uint32_t lba, size; uint8_t sha[32]; } boot_t;
+typedef struct __attribute__((packed)) { char tag[12]; uint8_t len; char text[255]; } text_t;
+typedef struct __attribute__((packed)) { char tag[10]; uint8_t len; char text[255]; } fail_t;
+typedef struct __attribute__((packed)) { uint32_t lba, size; uint8_t sha[32]; } hent_t;
+#define MAX_EXTRA 2 /* o JS só garante espaço para o que o template reserva; mantenha igual ao template */
+typedef struct __attribute__((packed)) { char tag[11]; uint16_t count; hent_t e[MAX_EXTRA]; } hash_t;
+typedef struct __attribute__((packed)) { char tag[11]; uint8_t type; uint32_t lba, size; uint16_t w, h, dur; uint8_t rsv; } media_t;
+typedef struct __attribute__((packed)) { char tag[10]; uint8_t caps; } caps_t;
 
-#define MAX_EXTRA_FILES 32
-__attribute__((aligned(16)))
-static const struct {
-    char     magic[11];      /* "RAIDENHASH1" */
-    uint16_t count;
-    struct { uint32_t lba, size; uint8_t sha256[32]; } files[MAX_EXTRA_FILES];
-} g_hash_marker = { "RAIDENHASH1", 0, {{0}} };
+volatile boot_t  g_boot  USED = { "RAIDENBOOT" };
+volatile text_t  g_cred  USED = { "RAIDENCREDIT" };
+volatile fail_t  g_fail  USED = { "RAIDENFAIL" };
+volatile hash_t  g_hash  USED = { "RAIDENHASH1" };
+volatile media_t g_media USED = { "RAIDENMEDIA" };
+#ifdef RAIDEN_WITH_MOVIE
+#error "Reproducao de .PSS ainda nao implementada (precisa demux MPEG-PS + libmpeg). Compile sem RAIDEN_WITH_MOVIE."
+#endif
+volatile caps_t  g_caps  USED = { "RAIDENCAPS", 0 }; /* bit0 = filme .PSS (desligado) */
 
-/* mediaType: 0 = nenhuma, 1 = imagem, 2 = vídeo .PSS (ver raiden_isometa.js) */
-#define RAIDEN_MEDIA_NONE  0
-#define RAIDEN_MEDIA_IMAGE 1
-#define RAIDEN_MEDIA_MOVIE 2
+#define SECTOR 2048
+#define MEDIA_IMAGE 1
+#define MAX_ELF_BYTES (12u * 1024u * 1024u)
+#define ELF_BUF   ((uint8_t *)0x01000000) /* ELF original é lido aqui, longe do 0x100000 do wrapper */
+#define STUB_ADDR ((uint8_t *)0x01FD0000) /* stub de relocação em memória alta */
+#define STUB_COPY_BYTES 1024              /* confira com objdump que stub_run cabe aqui */
 
-__attribute__((aligned(16)))
-static const struct {
-    char     magic[11];      /* "RAIDENMEDIA" */
-    uint8_t  type;
-    uint32_t lba;
-    uint32_t size;
-    uint16_t width;          /* só type==IMAGE */
-    uint16_t height;         /* só type==IMAGE */
-    uint16_t durationSec;    /* type==IMAGE: 0 = só sai com botão; type==MOVIE: ignorado (toca até o fim) */
-    uint8_t  reserved;
-} g_media_marker = { "RAIDENMEDIA", RAIDEN_MEDIA_NONE, 0, 0, 0, 0, 0, 0 };
+static uint8_t sbuf[64 * SECTOR] __attribute__((aligned(64)));
 
-#define SECTOR_SIZE 2048
-
-/* ───────── leitura crua de setores via libcdvd (ajuste aos nomes da sua versão) ───────── */
-static int read_sectors(uint32_t lba, uint32_t count, void *buf) {
-    /* Exemplo de uso típico (nomes podem variar por versão do PS2SDK):
-     *   sceCdRead(lba, count, buf, NULL);
-     *   while (sceCdSync(0)) {}
-     *   return sceCdGetError() == 0;
-     */
-    return 0; /* placeholder */
-}
-
-static int verify_one(uint32_t lba, uint32_t size, const uint8_t expected[32]) {
-    uint32_t sectors = (size + SECTOR_SIZE - 1) / SECTOR_SIZE;
-    uint8_t *buf = (uint8_t *)memalign(64, sectors * SECTOR_SIZE);
-    if (!buf) return 0;
-    int ok = read_sectors(lba, sectors, buf);
-    if (ok) {
-        uint8_t digest[32];
-        /* TODO: sha256(buf, size, digest); -- ligar a alguma implementação de
-         * SHA-256 para EE (existem várias portáveis de domínio público; não é
-         * um problema em aberto, só falta escolher/colar uma no seu projeto). */
-        ok = (memcmp(digest, expected, 32) == 0);
+/* ---------------- SHA-256 ---------------- */
+typedef struct { uint32_t h[8]; uint8_t buf[64]; uint32_t n; uint64_t total; } sha_t;
+static const uint32_t K[64] = {
+ 0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+ 0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+ 0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+ 0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2 };
+#define ROR(x,n) (((x) >> (n)) | ((x) << (32 - (n))))
+static void sha_block(sha_t *s, const uint8_t *p) {
+    uint32_t w[64], a, b, c, d, e, f, g, h, t1, t2; int i;
+    for (i = 0; i < 16; i++) w[i] = (uint32_t)p[4*i] << 24 | (uint32_t)p[4*i+1] << 16 | (uint32_t)p[4*i+2] << 8 | p[4*i+3];
+    for (; i < 64; i++) { uint32_t s0 = ROR(w[i-15],7) ^ ROR(w[i-15],18) ^ (w[i-15] >> 3), s1 = ROR(w[i-2],17) ^ ROR(w[i-2],19) ^ (w[i-2] >> 10); w[i] = w[i-16] + s0 + w[i-7] + s1; }
+    a=s->h[0]; b=s->h[1]; c=s->h[2]; d=s->h[3]; e=s->h[4]; f=s->h[5]; g=s->h[6]; h=s->h[7];
+    for (i = 0; i < 64; i++) {
+        t1 = h + (ROR(e,6) ^ ROR(e,11) ^ ROR(e,25)) + ((e & f) ^ (~e & g)) + K[i] + w[i];
+        t2 = (ROR(a,2) ^ ROR(a,13) ^ ROR(a,22)) + ((a & b) ^ (a & c) ^ (b & c));
+        h=g; g=f; f=e; e=d+t1; d=c; c=b; b=a; a=t1+t2;
     }
-    free(buf);
-    return ok;
+    s->h[0]+=a; s->h[1]+=b; s->h[2]+=c; s->h[3]+=d; s->h[4]+=e; s->h[5]+=f; s->h[6]+=g; s->h[7]+=h;
+}
+static void sha_init(sha_t *s) {
+    static const uint32_t iv[8] = {0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19};
+    memcpy(s->h, iv, sizeof iv); s->n = 0; s->total = 0;
+}
+static void sha_update(sha_t *s, const uint8_t *d, uint32_t len) {
+    s->total += len;
+    while (len) { uint32_t k = 64 - s->n; if (k > len) k = len; memcpy(s->buf + s->n, d, k); s->n += k; d += k; len -= k; if (s->n == 64) { sha_block(s, s->buf); s->n = 0; } }
+}
+static void sha_final(sha_t *s, uint8_t out[32]) {
+    uint64_t bits = s->total * 8; uint8_t pad = 0x80, L[8]; int i;
+    sha_update(s, &pad, 1); pad = 0; while (s->n != 56) sha_update(s, &pad, 1);
+    for (i = 0; i < 8; i++) L[i] = (uint8_t)(bits >> (56 - 8*i));
+    sha_update(s, L, 8);
+    for (i = 0; i < 8; i++) { out[4*i] = s->h[i] >> 24; out[4*i+1] = s->h[i] >> 16; out[4*i+2] = s->h[i] >> 8; out[4*i+3] = s->h[i]; }
 }
 
-static void show_credits_text(void) {
-    /* Desenhar g_credit_marker.text na tela com gsKit por alguns segundos.
-     * Ex.: gsKit_init_global(); ... gsKit_fontm_render_fast(...); ... */
+/* ---------------- CDVD ---------------- */
+/* Lê `count` setores de `lba` em `dst` (alinhado a 64). Até 5 tentativas. 1 = OK. */
+static int read_sectors(uint32_t lba, uint32_t count, void *dst) {
+    int tries;
+    for (tries = 0; tries < 5; tries++) {
+        sceCdRMode mode; mode.trycount = 16; mode.spindlctrl = SCECdSpinNom; mode.datapattern = SCECdSecS2048; mode.pad = 0;
+        if (sceCdRead(lba, count, dst, &mode)) {
+            sceCdSync(0);
+            if (sceCdGetError() == SCECdErNO) return 1;
+        }
+        sceCdStop(); sceCdSync(0);
+    }
+    return 0;
 }
 
-/*
- * show_image_screen() — tela de imagem de abertura.
- *
- * Formato esperado dos bytes em g_media_marker.lba/.size: RAW, sem cabeçalho,
- * já no layout que a GS consome diretamente (ex. RGBA32 ou indexed 8-bit +
- * CLUT), width x height = g_media_marker.width/.height. A conversão de
- * PNG/JPG pra esse raw é feita do LADO DO BUILD (no navegador, antes de
- * chamar buildCreditsWrapperPatches com opts.media), não aqui — o wrapper só
- * faz upload de textura e desenha um quad full-screen.
- *
- * TODO (gsKit): alocar a textura, gsKit_texture_send(buf, w, h, ...), montar
- * um prim_quad_texture cobrindo a tela e dar swap buffer. É o mesmo padrão
- * usado por qualquer "tela de splash" de homebrew PS2SDK — se você já tem um
- * splash screen em algum dos seus outros projetos OPL/PADEMU, o código de
- * upload de textura é reaproveitável quase 1:1.
- */
-static void show_image_screen(void) {
-    uint32_t sectors = (g_media_marker.size + SECTOR_SIZE - 1) / SECTOR_SIZE;
-    uint8_t *buf = (uint8_t *)memalign(64, sectors * SECTOR_SIZE);
-    if (!buf || !read_sectors(g_media_marker.lba, sectors, buf)) { if (buf) free(buf); return; }
-
-    /* TODO: gsKit upload + quad fullscreen com buf/width/height, manter na
-     * tela por g_media_marker.durationSec segundos (ou até um botão, se
-     * durationSec == 0 — ler o pad com libpad). */
-
-    free(buf);
+/* Lê [lba, lba+size): copia p/ dst (se != NULL) e/ou calcula SHA-256 (se sha_out != NULL). 1 = leitura OK. */
+static int read_range(uint32_t lba, uint32_t size, uint8_t *dst, uint8_t sha_out[32]) {
+    sha_t s; uint32_t done = 0; if (sha_out) sha_init(&s);
+    while (done < size) {
+        uint32_t left = size - done, secs = (left + SECTOR - 1) / SECTOR; if (secs > 64) secs = 64;
+        uint8_t *to = dst ? dst + done : sbuf;
+        if (!read_sectors(lba + done / SECTOR, secs, to)) return 0;
+        uint32_t take = secs * SECTOR; if (take > left) take = left;
+        if (sha_out) sha_update(&s, to, take);
+        done += take;
+    }
+    if (sha_out) sha_final(&s, sha_out);
+    return 1;
 }
 
-/*
- * play_movie_pss() — vídeo de abertura em .PSS (o formato Sofdec/MPEG2 nativo
- * do PS2, o mesmo usado pelas cutscenes dos jogos retail).
- *
- * ESTE É O PONTO ONDE SEJA HONESTO SOBRE O LIMITE DESTE ESQUELETO: decodificar
- * um stream Sofdec exige demultiplexar os pacotes MPEG-PS, alimentar o IPU
- * (Image Processing Unit) pra decodificação MPEG2 (DCT/IDCT em hardware) e
- * compor o resultado YCbCr->RGB na GS em sincronia com o VBlank e o áudio
- * ADPCM/VAG — não é um laço de "ler setor, mostrar frame" simples, e não é
- * algo que eu deva tentar reescrever às cegas aqui (o risco de entregar algo
- * que parece completo mas trava o IPU ou dessincroniza áudio/vídeo é real).
- *
- * O que já existe e documentado na cena pra isso:
- *   - O PS2SDK tem exemplos de uso do IPU (ipu.h / libmpeg-ps2 de projetos
- *     comunitários) especificamente para tocar .PSS/.STR fora do SDK da Sony.
- *   - Vários grupos de fan-translation (o tipo de trabalho que você já faz)
- *     publicam players .PSS standalone em C pro PS2SDK — dado seu histórico
- *     com IDA Pro/Ghidra em jogos de PS2, extrair ou portar um desses é bem
- *     mais confiável do que uma implementação nova e não testada.
- *
- * TODO (integração, uma vez que você tenha um player IPU/.PSS de referência):
- *   1. sceCdRead(g_media_marker.lba, ..., buf, NULL) em blocos (não dá pra
- *      carregar o filme inteiro de uma vez só em RAM geralmente).
- *   2. Alimentar o demuxer/IPU do seu player com esses blocos.
- *   3. Rodar o laço de decodificação até o fim do stream (g_media_marker.size
- *      bytes), sem tocar além do fim do bloco anexado (há dados do jogo ou
- *      fim de imagem logo depois).
- *   4. Seguir para chainload_original() ao fim do vídeo (ou se o player
- *      sinalizar erro de stream — não travar a tela nesse caso).
- */
-static void play_movie_pss(void) {
-    /* TODO: ver comentário acima. Placeholder: não decodifica nada ainda. */
+static int verify_all(void) {
+    uint8_t h[32]; uint32_t i, n;
+    if (g_boot.size == 0 || g_boot.size > MAX_ELF_BYTES) return 0;
+    if (!read_range(g_boot.lba, g_boot.size, NULL, h)) return 0;
+    if (memcmp(h, (const void *)g_boot.sha, 32)) return 0;
+    n = g_hash.count; if (n > MAX_EXTRA) return 0; /* contagem incoerente com o template => trata como falha */
+    for (i = 0; i < n; i++) {
+        if (!read_range(g_hash.e[i].lba, g_hash.e[i].size, NULL, h)) return 0;
+        if (memcmp(h, (const void *)g_hash.e[i].sha, 32)) return 0;
+    }
+    return 1;
 }
 
-static void show_tamper_warning(void) {
-    /* Tela de aviso: "Esta ISO foi modificada após o patch original —
-       conteúdo de BitMundo.net removido ou alterado." + travar aqui
-       (loop infinito) em vez de seguir pro jogo. */
-    for (;;) { /* trava propositalmente */ }
+/* ---------------- tempo / pad ---------------- */
+static void busy_wait(uint32_t units) { volatile uint32_t i; while (units--) for (i = 0; i < 300000; i++) ; } /* aproximado */
+
+static char padbuf[256] __attribute__((aligned(64)));
+static int pad_ready;
+static void pad_setup(void) {
+    SifLoadModule("rom0:SIO2MAN", 0, NULL);
+    SifLoadModule("rom0:PADMAN", 0, NULL);
+    if (padInit(0) == 1 && padPortOpen(0, 0, padbuf) == 1) pad_ready = 1;
+}
+static int pad_pressed(void) {
+    struct padButtonStatus b;
+    if (!pad_ready || padGetState(0, 0) != PAD_STATE_STABLE) return 0;
+    if (padRead(0, 0, &b) == 0) return 0;
+    return ((uint16_t)~b.btns) & (PAD_START | PAD_CROSS | PAD_CIRCLE);
+}
+static void wait_or_button(uint32_t tenths) { /* 0 = só botão */
+    uint32_t t = 0;
+    for (;;) { if (pad_pressed()) return; busy_wait(8); t++; if (tenths && t >= tenths) return; }
 }
 
-static void chainload_original(void) {
-    uint32_t sectors = (g_boot_marker.orig_size + SECTOR_SIZE - 1) / SECTOR_SIZE;
-    uint8_t *elf = (uint8_t *)memalign(64, sectors * SECTOR_SIZE);
-    if (!elf || !read_sectors(g_boot_marker.orig_lba, sectors, elf)) show_tamper_warning();
-
-    /* Parsing manual do ELF + LoadExecPS2 a partir de memória: é o padrão
-     * usado por "ELF loaders"/"chainloaders" de homebrew — ler e_entry,
-     * percorrer os program headers (PT_LOAD), copiar cada segmento pro
-     * endereço físico indicado (p_vaddr) e então pular pro e_entry (via uma
-     * rotina em asm que limpa o estado da EE antes do salto, como fazem os
-     * bootloaders do OPL/uLaunchELF — dá pra portar o mesmo trecho que você
-     * já deve ter visto no fork do OPL). */
+/* ---------------- telas de texto ---------------- */
+static void screen_text(const char *title, const char *body) {
+    init_scr(); scr_clear();
+    scr_printf("\n\n  %s\n\n  %s\n", title, body);
+}
+static void fail_screen(void) {
+    char msg[256]; uint32_t n = g_fail.len;
+    if (n == 0) strcpy(msg, "A verificacao de integridade dos arquivos do jogo falhou.");
+    else { memcpy(msg, (const void *)g_fail.text, n); msg[n] = 0; }
+    screen_text("RAIDEN - ERRO", msg);
+    for (;;) busy_wait(100); /* trava de propósito: não inicia um jogo possivelmente adulterado */
 }
 
-int main(int argc, char *argv[]) {
+/* ---------------- imagem: RGBA32 cru (alfa 0..128) -> framebuffer GS ---------------- */
+static qword_t gifbuf[8] __attribute__((aligned(64)));
+static void gif_send(void *p, int qwc) {
+    SyncDCache(p, (uint8_t *)p + qwc * 16);
+    dma_channel_send_normal(DMA_CHANNEL_GIF, p, qwc, 0, 0);
+    dma_wait_fast();
+}
+static int show_image(void) {
+    uint32_t w = g_media.w, h = g_media.h, bytes = w * h * 4, done = 0;
+    if (!w || !h || w > 640 || h > 448) return 0;
+    dma_channel_initialize(DMA_CHANNEL_GIF, NULL, 0);
+    dma_channel_fast_waits(DMA_CHANNEL_GIF);
+    graph_initialize(0, 640, 448, GS_PSM_32, 0, 0);
+
+    qword_t *q = gifbuf; /* BITBLTBUF/TRXPOS/TRXREG/TRXDIR via A+D: transferência host->GS no framebuffer 0 */
+    q->dw[0] = GIF_SET_TAG(4, 1, 0, 0, GIF_FLG_PACKED, 1); q->dw[1] = GIF_REG_AD; q++;
+    q->dw[0] = GS_SET_BITBLTBUF(0, 0, 0, 0, 10, GS_PSM_32); q->dw[1] = GS_REG_BITBLTBUF; q++;
+    q->dw[0] = GS_SET_TRXPOS(0, 0, (640 - w) / 2, (448 - h) / 2, 0); q->dw[1] = GS_REG_TRXPOS; q++;
+    q->dw[0] = GS_SET_TRXREG(w, h); q->dw[1] = GS_REG_TRXREG; q++;
+    q->dw[0] = GS_SET_TRXDIR(0); q->dw[1] = GS_REG_TRXDIR; q++;
+    gif_send(gifbuf, 5);
+
+    while (done < bytes) {
+        uint32_t left = bytes - done, secs = (left + SECTOR - 1) / SECTOR; if (secs > 16) secs = 16;
+        if (!read_sectors(g_media.lba + done / SECTOR, secs, sbuf)) return 0;
+        uint32_t take = secs * SECTOR; if (take > left) take = left;
+        uint32_t qw = take / 16; /* w*h*4 é múltiplo de 16 */
+        gifbuf[0].dw[0] = GIF_SET_TAG(qw, 0, 0, 0, GIF_FLG_IMAGE, 0); gifbuf[0].dw[1] = 0;
+        gif_send(gifbuf, 1);
+        gif_send(sbuf, qw);
+        done += take;
+    }
+    graph_enable_output();
+    return 1;
+}
+
+/* ---------------- chainload do ELF original ---------------- */
+typedef struct { uint8_t id[16]; uint16_t type, machine; uint32_t version, entry, phoff, shoff, flags; uint16_t ehsize, phentsize, phnum, shentsize, shnum, shstrndx; } elf32_hdr;
+typedef struct { uint32_t type, offset, vaddr, paddr, filesz, memsz, flags, align; } elf32_phdr;
+
+/* Executa a partir de STUB_ADDR (cópia de bytes desta função): copia os segmentos PT_LOAD para os
+ * endereços finais e salta para o entry. Sem chamadas/globais (precisa ser independente de posição).
+ * Syscalls FlushCache (0x64) / ExecPS2 não confirmados em hardware — validar no PCSX2 e ajustar. */
+__attribute__((noinline)) static void stub_run(const uint8_t *elf, char **argv) {
+    const elf32_hdr *eh = (const elf32_hdr *)elf;
+    const elf32_phdr *ph = (const elf32_phdr *)(elf + eh->phoff);
+    for (unsigned i = 0; i < eh->phnum; i++) {
+        if (ph[i].type != 1) continue;
+        volatile uint8_t *d = (volatile uint8_t *)ph[i].vaddr; const uint8_t *s = elf + ph[i].offset;
+        for (uint32_t k = 0; k < ph[i].filesz; k++) d[k] = s[k];
+        for (uint32_t k = ph[i].filesz; k < ph[i].memsz; k++) d[k] = 0;
+    }
+    register uint32_t entry = eh->entry;
+    register char **av = argv;
+    __asm__ volatile("li $3, 0x64\n li $4, 0\n syscall\n li $3, 0x64\n li $4, 2\n syscall\n li $4, 1\n move $5, %1\n jr %0\n nop\n" : : "r"(entry), "r"(av) : "$3", "$4", "$5");
+}
+
+/* Lê SYSTEM.CNF (via sceCdSearchFile, no diretório ISO9660 que o patch NÃO altera) e extrai o
+ * caminho BOOT2 ("cdrom0:\\SLUS_xxx.xx;1"). Serve de argv[0] para o jogo, como se o BIOS o tivesse
+ * lançado. Não é fatal se faltar: o ELF original é carregado por LBA (o registro de diretório do
+ * ELF aponta para este wrapper, então carregar por nome entraria em loop). */
+#define ARGV_ADDR ((char **)0x01FD1000)
+static void parse_system_cnf(void) {
+    sceCdlFILE f; char *out = (char *)ARGV_ADDR + 16; uint32_t n = 0;
+    ARGV_ADDR[0] = NULL; ARGV_ADDR[1] = NULL;
+    if (!sceCdSearchFile(&f, "\\SYSTEM.CNF;1") || f.size == 0 || f.size > SECTOR) return;
+    if (!read_sectors(f.lsn, 1, sbuf)) return;
+    sbuf[f.size < SECTOR ? f.size : SECTOR - 1] = 0;
+    char *p = strstr((char *)sbuf, "BOOT2");
+    if (!p || !(p = strchr(p, '='))) return;
+    p++; while (*p == ' ' || *p == '\t') p++;
+    while (*p && *p != '\r' && *p != '\n' && n < 200) out[n++] = *p++;
+    while (n && (out[n-1] == ' ' || out[n-1] == '\t')) n--;
+    out[n] = 0;
+    if (n) ARGV_ADDR[0] = out;
+}
+
+static void chainload(void) {
+    parse_system_cnf();
+    if (!read_range(g_boot.lba, g_boot.size, ELF_BUF, NULL)) fail_screen();
+    const elf32_hdr *eh = (const elf32_hdr *)ELF_BUF;
+    if (eh->id[0] != 0x7f || eh->id[1] != 'E' || eh->machine != 8 || eh->phoff + eh->phnum * sizeof(elf32_phdr) > g_boot.size) fail_screen();
+    const elf32_phdr *ph = (const elf32_phdr *)(ELF_BUF + eh->phoff);
+    for (unsigned i = 0; i < eh->phnum; i++) /* segmento não pode invadir o buffer do ELF nem o stub */
+        if (ph[i].type == 1 && ph[i].vaddr + ph[i].memsz > (uint32_t)ELF_BUF) fail_screen();
+    SifExitRpc();
+    memcpy(STUB_ADDR, (const void *)stub_run, STUB_COPY_BYTES);
+    FlushCache(0); FlushCache(2);
+    ((void (*)(const uint8_t *, char **))STUB_ADDR)(ELF_BUF, ARGV_ADDR);
+    for (;;) ;
+}
+
+int main(void) {
     SifInitRpc(0);
+    sceCdInit(SCECdINIT);
+    sceCdMmode(sceCdGetDiskType() >= SCECdPS2DVD ? SCECdMmodeDvd : SCECdMmodeCd);
 
-    int ok = verify_one(g_boot_marker.orig_lba, g_boot_marker.orig_size, g_boot_marker.orig_sha256);
-    for (int i = 0; ok && i < g_hash_marker.count; i++) {
-        ok = verify_one(g_hash_marker.files[i].lba, g_hash_marker.files[i].size, g_hash_marker.files[i].sha256);
+    if (!verify_all()) fail_screen();
+
+    pad_setup();
+    if (g_cred.len) {
+        char t[256]; memcpy(t, (const void *)g_cred.text, g_cred.len); t[g_cred.len] = 0;
+        screen_text("CREDITOS", t);
+        wait_or_button(40); /* ~4 s (aproximado) ou botão */
     }
-    if (!ok) show_tamper_warning(); /* não retorna */
+    if (g_media.type == MEDIA_IMAGE && show_image()) wait_or_button(g_media.dur * 10); /* dur=0 => só botão */
+    /* type==2 (filme .PSS): não suportado (g_caps bit0 = 0); o JS bloqueia esse caso. */
 
-    show_credits_text();
-    switch (g_media_marker.type) {
-        case RAIDEN_MEDIA_IMAGE: show_image_screen(); break;
-        case RAIDEN_MEDIA_MOVIE: play_movie_pss();    break;
-        case RAIDEN_MEDIA_NONE:  default:             break; /* só o texto */
-    }
-
-    chainload_original(); /* não retorna em caso de sucesso */
-    return 0; /* nunca deveria chegar aqui */
+    chainload();
+    return 0;
 }

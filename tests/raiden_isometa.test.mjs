@@ -249,3 +249,62 @@ function makeIso({ withJoliet = false, withIoprp = false } = {}) {
   await assert.rejects(M.buildLockPatches(M.bufferReader(iso), 'x', { iterations: 1000 }), /Application Use/);
   console.log('ok: protege Application Use existente');
 }
+
+// 4) validateMetaChanges (sem precisar de ISO) — usado para validar o manifesto de um patch antes de gravar
+{
+  assert.deepEqual(M.validateMetaChanges({}), []);
+  assert.equal(M.validateMetaChanges({ volumeId: 'meu jogo' }).length, 1);
+  assert.throws(() => M.validateMetaChanges({ volumeId: 'ação' }), /ASCII/);
+  assert.throws(() => M.validateMetaChanges({ publisherId: 'x'.repeat(129) }), /máximo de 128/);
+  assert.throws(() => M.validateMetaChanges({ volumeId: 42 }), /precisa ser texto/);
+  assert.throws(() => M.validateMetaChanges({ numbers: { volumeSetSize: -1 } }), /entre 0 e 65535/);
+  assert.throws(() => M.validateMetaChanges({ numbers: { volumeSetSize: 1.5 } }), /entre 0 e 65535/);
+  assert.throws(() => M.validateMetaChanges({ dates: { created: 'não é data' } }), /Data inválida/);
+  assert.doesNotThrow(() => M.validateMetaChanges({ dates: { modified: 'now', created: '2026-11-14T12:00:00Z', expires: '' } }));
+  assert.deepEqual(M.ISO_DATE_KEYS, ['created', 'modified', 'expires', 'effective']);
+  console.log('ok: validateMetaChanges (texto, tamanho, números, datas)');
+}
+
+// 5) fetchWrapperTemplate: só aceita um .elf que realmente pareça o wrapper; nunca lança
+{
+  const mkTpl = (marks) => {
+    const t = new Uint8Array(4096); t.set([0x7f, 0x45, 0x4c, 0x46]);
+    let p = 200; for (const m of marks) { t.set(new TextEncoder().encode(m), p); p += m.length + 60; }
+    return t;
+  };
+  const ALL = ['RAIDENBOOT', 'RAIDENCREDIT', 'RAIDENHASH1', 'RAIDENMEDIA', 'RAIDENFAIL'];
+  const realFetch = globalThis.fetch;
+  const serve = (res) => { globalThis.fetch = async () => res; };
+  try {
+    const good = mkTpl(ALL);
+    serve({ ok: true, arrayBuffer: async () => good.buffer });
+    const got = await M.fetchWrapperTemplate();
+    assert.ok(got instanceof Uint8Array && got.length === 4096);
+    serve({ ok: true, arrayBuffer: async () => mkTpl(ALL.slice(0, 3)).buffer });
+    assert.equal(await M.fetchWrapperTemplate(), null);               // falta um marcador
+    const notElf = mkTpl(ALL); notElf[0] = 0;
+    serve({ ok: true, arrayBuffer: async () => notElf.buffer });
+    assert.equal(await M.fetchWrapperTemplate(), null);               // sem cabeçalho ELF (ex.: página 404 em HTML)
+    serve({ ok: false, arrayBuffer: async () => good.buffer });
+    assert.equal(await M.fetchWrapperTemplate(), null);               // 404
+    globalThis.fetch = async () => { throw new Error('offline'); };
+    assert.equal(await M.fetchWrapperTemplate(), null);               // rede caiu
+  } finally { globalThis.fetch = realFetch; }
+  console.log('ok: fetchWrapperTemplate valida ELF + marcadores e nunca lança');
+}
+
+// --- mensagem de falha + capacidades ---
+{
+  const { iso } = makeIso();
+  const t = new Uint8Array(4096); let p = 200;
+  const mk = (s, n, init) => { t.set(new TextEncoder().encode(s), p); p += s.length; if (init) t[p] = init; p += n; };
+  mk('RAIDENBOOT', 40); mk('RAIDENCREDIT', 256); mk('RAIDENHASH1', 82); mk('RAIDENMEDIA', 16); mk('RAIDENFAIL', 256); mk('RAIDENCAPS', 1, 0);
+  const rd = () => M.bufferReader(iso);
+  const res = await M.buildCreditsWrapperPatches(rd(), t, { failText: 'Arquivos alterados! Reinstale.' });
+  const w = res.append.data.slice(0, res.wrapSize);
+  assert.equal(M.readWrapperMarkers(w).failText, 'Arquivos alterados! Reinstale.');
+  await assert.rejects(M.buildCreditsWrapperPatches(rd(), t, { failText: 'x'.repeat(256) }), /255/);
+  await assert.rejects(M.buildCreditsWrapperPatches(rd(), t, { media: { type: 'movie', data: new Uint8Array(10) } }), /sem suporte a filme/);
+  t[t.length - 1] = 0;
+  console.log('ok failText/caps');
+}

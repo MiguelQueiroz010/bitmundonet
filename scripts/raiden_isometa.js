@@ -44,6 +44,7 @@ const READONLY_NUM = {
 
 export const ISO_FIELDS = FIELDS;
 export const ISO_NUM_FIELDS = NUM_FIELDS;
+export const ISO_DATE_KEYS = Object.keys(DATES);
 
 // ───────────── leitores ─────────────
 export function blobReader(blob) {
@@ -145,18 +146,39 @@ export async function readIsoInfo(r) {
 // ───────────── edição de campos ─────────────
 // changes: { volumeId:'MEU_JOGO', publisherId:'...', numbers:{volumeSetSize:1}, dates:{ modified:'now' } }
 // campo de texto undefined = não mexe; '' = limpa (espaços). Número undefined = não mexe.
+// Valida um objeto "changes" SEM tocar em nenhuma ISO (serve para checar um manifesto de patch antes de gravar
+// qualquer coisa). Lança erro em valor inválido; devolve a lista de avisos não-fatais.
+export function validateMetaChanges(changes) {
+  const warnings = [];
+  for (const [k, f] of Object.entries(FIELDS)) {
+    const v = changes[k];
+    if (v === undefined) continue;
+    if (typeof v !== 'string') throw new Error(`${f.label}: valor precisa ser texto.`);
+    if (!/^[\x20-\x7e]*$/.test(v)) throw new Error(`${f.label}: só ASCII imprimível é aceito no ISO9660.`);
+    if (v.length > f.len) throw new Error(`${f.label}: máximo de ${f.len} caracteres (recebido ${v.length}).`);
+    if ((k === 'volumeId' || k === 'systemId') && !/^[A-Z0-9_. ]*$/.test(v)) warnings.push(`${f.label}: fora do conjunto estrito ISO9660 (A-Z, 0-9, _). Funciona na prática, mas ferramentas rígidas podem reclamar.`);
+  }
+  for (const [k, f] of Object.entries(NUM_FIELDS)) {
+    const v = changes.numbers?.[k];
+    if (v === undefined) continue;
+    if (!Number.isInteger(v) || v < 0 || v > 0xffff) throw new Error(`${f.label}: valor precisa ser um inteiro entre 0 e 65535 (recebido ${v}).`);
+  }
+  for (const k of Object.keys(DATES)) {
+    const v = changes.dates?.[k];
+    if (v !== undefined) encodeDate(v); // lança se a data for inválida
+  }
+  return warnings;
+}
+
 export async function buildMetaPatches(r, changes, opts = {}) {
   const { pvd, joliet } = await findDescriptors(r);
   const patches = [];
-  const warnings = [];
+  const warnings = validateMetaChanges(changes);
   const touchJoliet = joliet && opts.joliet !== false;
 
   for (const [k, f] of Object.entries(FIELDS)) {
     const v = changes[k];
     if (v === undefined) continue;
-    if (!/^[\x20-\x7e]*$/.test(v)) throw new Error(`${f.label}: só ASCII imprimível é aceito no ISO9660.`);
-    if (v.length > f.len) throw new Error(`${f.label}: máximo de ${f.len} caracteres (recebido ${v.length}).`);
-    if ((k === 'volumeId' || k === 'systemId') && !/^[A-Z0-9_. ]*$/.test(v)) warnings.push(`${f.label}: fora do conjunto estrito ISO9660 (A-Z, 0-9, _). Funciona na prática, mas ferramentas rígidas podem reclamar.`);
     patches.push({ offset: PVD_OFF + f.off, data: encodeStr(v, f.len, false) });
     if (touchJoliet && f.len >= 32 && k !== 'copyrightFile' && k !== 'abstractFile' && k !== 'biblioFile') {
       const jlen = f.len - (f.len % 2);
@@ -167,7 +189,6 @@ export async function buildMetaPatches(r, changes, opts = {}) {
   for (const [k, f] of Object.entries(NUM_FIELDS)) {
     const v = changes.numbers?.[k];
     if (v === undefined) continue;
-    if (!Number.isInteger(v) || v < 0 || v > 0xffff) throw new Error(`${f.label}: valor precisa ser um inteiro entre 0 e 65535 (recebido ${v}).`);
     const b = new Uint8Array(4); putBothEndianU16(b, 0, v);
     patches.push({ offset: PVD_OFF + f.off, data: b });
     if (touchJoliet) patches.push({ offset: joliet.lba * SECTOR + f.off, data: b });
@@ -254,7 +275,7 @@ async function findBootFile(r, pvd) {
   const text = ascii(await r.read(cnf.lba * SECTOR, Math.min(cnf.size, 4096)), 0, Math.min(cnf.size, 4096));
   const m = text.match(/BOOT2?\s*=\s*cdrom0:\\?([^;\s\r\n]+)/i);
   if (!m) throw new Error('Linha BOOT2 não encontrada no SYSTEM.CNF.');
-  const bootName = m[1].toUpperCase();
+  const bootName = m[1].replace(/^[\\/]+/, '').toUpperCase();   // aceita cdrom0:\SLUS e cdrom0:/SLUS
   if (bootName.includes('\\') || bootName.includes('/')) throw new Error('ELF de boot em subpasta não é suportado: ' + bootName);
   const elf = entries.find((e) => e.name === bootName && !e.isDir);
   if (!elf) throw new Error('ELF de boot não encontrado na raiz: ' + bootName);
@@ -283,6 +304,10 @@ const WH_MARK = 'RAIDENHASH1';  // + u16 count, N * (u32 lba, u32 size, 32 bytes
 //   u16 width, u16 height (só p/ imagem; 0 em filme), u16 durationSec (0 = tela de
 //   imagem some só ao apertar um botão; filme sempre toca inteiro), u8[1] reservado
 const WM_MARK = 'RAIDENMEDIA';
+const WF_MARK = 'RAIDENFAIL';   // + 1 byte len, até 255 bytes (Latin-1/ASCII): mensagem exibida (e que trava) quando a verificação de integridade falha
+const WK_MARK = 'RAIDENCAPS';   // + 1 byte de capacidades compiladas no wrapper: bit0 = reproduz filme .PSS. Opcional (wrappers antigos não têm)
+export const CAPS = { MOVIE: 1 };
+export const FAIL_TEXT_MAX = 255;
 export const MEDIA_TYPE = { NONE: 0, IMAGE: 1, MOVIE_PSS: 2 };
 const VOL_SPACE_OFF = 80; // Volume Space Size (PVD), 8 bytes both-endian
 
@@ -327,8 +352,23 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
     wrapper.set(bytes, cOff + 1);
   }
 
+  // Mensagem de falha de integridade (opcional)
+  if (opts.failText !== undefined) {
+    const fOff = requireMarker(wrapper, WF_MARK, 256);
+    const fb = new TextEncoder().encode(opts.failText);
+    if (fb.length > FAIL_TEXT_MAX) throw new Error('Mensagem de falha limitada a 255 bytes nesse template.');
+    wrapper.fill(0, fOff, fOff + 256);
+    wrapper[fOff] = fb.length;
+    wrapper.set(fb, fOff + 1);
+  }
+  if (opts.media?.type === 'movie') {
+    const kOff = findMarker(wrapper, WK_MARK);
+    if (kOff !== -1 && !(wrapper[kOff] & CAPS.MOVIE)) throw new Error('Este wrapper foi compilado sem suporte a filme (.PSS). Use imagem ou recompile com RAIDEN_WITH_MOVIE=1.');
+  }
+
   // Hashes extras de integridade (arquivos-chave além do ELF, opcional)
   const extra = opts.verifyFiles ?? [];
+  if (extra.length > 2) throw new Error('O wrapper reserva espaço para no máximo 2 arquivos extras de verificação.');
   if (extra.length) {
     const hOff = requireMarker(wrapper, WH_MARK, 2 + extra.length * 40);
     wrapper[hOff] = extra.length & 255; wrapper[hOff + 1] = (extra.length >> 8) & 255;
@@ -412,6 +452,21 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
   };
 }
 
+// Carrega o .elf do wrapper (compilado uma vez com o PS2SDK) e confere que parece mesmo um wrapper:
+// cabeçalho ELF + os quatro marcadores. Devolve null se não existir/for inválido (nunca lança), para a UI
+// poder desabilitar a opção de créditos em vez de gerar uma ISO que não inicia.
+export const WRAPPER_URL = '/scripts/raiden_wrapper.elf';
+export async function fetchWrapperTemplate(url = WRAPPER_URL) {
+  try {
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) return null;
+    const u8 = new Uint8Array(await res.arrayBuffer());
+    if (u8.length < 64 || u8[0] !== 0x7f || u8[1] !== 0x45 || u8[2] !== 0x4c || u8[3] !== 0x46) return null;
+    for (const m of [WB_MARK, WC_MARK, WH_MARK, WM_MARK, WF_MARK]) if (findMarker(u8, m) === -1) return null;
+    return u8;
+  } catch (_) { return null; }
+}
+
 // Útil para depurar/testar um wrapper já gravado, sem precisar do PS2.
 export function readWrapperMarkers(wrapper) {
   const out = {};
@@ -419,6 +474,10 @@ export function readWrapperMarkers(wrapper) {
   if (bOff !== -1) out.boot = { lba: u32le(wrapper, bOff), size: u32le(wrapper, bOff + 4), sha256: wrapper.slice(bOff + 8, bOff + 40) };
   const cOff = findMarker(wrapper, WC_MARK);
   if (cOff !== -1) { const len = wrapper[cOff]; out.credits = new TextDecoder().decode(wrapper.slice(cOff + 1, cOff + 1 + len)); }
+  const fOff2 = findMarker(wrapper, WF_MARK);
+  if (fOff2 !== -1) out.failText = new TextDecoder().decode(wrapper.slice(fOff2 + 1, fOff2 + 1 + wrapper[fOff2]));
+  const kOff2 = findMarker(wrapper, WK_MARK);
+  if (kOff2 !== -1) out.caps = { movie: !!(wrapper[kOff2] & CAPS.MOVIE) };
   const hOff = findMarker(wrapper, WH_MARK);
   if (hOff !== -1) {
     const count = wrapper[hOff] | (wrapper[hOff + 1] << 8);

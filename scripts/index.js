@@ -311,7 +311,7 @@ export async function loadRecentGallery() {
       slidesHtml += `
             <div class="mySlides fade ${activeClass}" style="${displayStyle}">
                 <div class="slide-content-wrapper">
-                    <a href="project_view.html?id=${p.id}">
+                    <a href="/projetos/${p.id}.html">
                         <img src="${p.cover || p.thumbnail}" alt="${p.title}" loading="lazy" style="width: 100%;">
                         <div class="slide-caption-overlay">
                             <div class="caption-content">

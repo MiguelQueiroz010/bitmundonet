@@ -907,6 +907,9 @@ h1, h2, h3, h4, .brand-font {
 }
 
 .project-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;

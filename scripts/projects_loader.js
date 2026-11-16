@@ -105,6 +105,12 @@ async function initListing() {
     const container = document.getElementById('projects-container');
     if (!container) return;
 
+    // If already pre-rendered statically by SSG, skip re-fetching
+    if (container.querySelector('.platform-section')) {
+        console.log("[Projects] Pre-rendered platform sections present, skipping client-side fetch.");
+        return;
+    }
+
     const projects = await loadProjects();
 
     // Group by platform
@@ -202,9 +208,33 @@ window.loadProjectAjax = loadProjectAjax;
 async function initDetail() {
     const params = new URLSearchParams(window.location.search);
     const projectId = params.get('id');
-    if (!projectId) return;
 
-    await loadProjectAjax(projectId, false);
+    // Backward compatibility: redirect old dynamic project_view.html?id=xyz to static page
+    if (projectId && window.location.pathname.includes('project_view.html')) {
+        window.location.replace(`/projetos/${encodeURIComponent(projectId)}.html`);
+        return;
+    }
+
+    const staticId = document.body.getAttribute('data-project-id');
+    const targetId = projectId || staticId;
+    if (!targetId) return;
+
+    // If already pre-rendered statically by SSG, initialize dynamic hooks without wiping DOM
+    const titleDisplay = document.getElementById('project-title-display');
+    if (titleDisplay && titleDisplay.textContent.trim() !== 'Carregando...') {
+        if (typeof window.initGallery === 'function') {
+            window.initGallery();
+        }
+        if (document.getElementById('project-reactions')) {
+            initReactions(targetId, 'project-reactions');
+        }
+        if (document.getElementById('comments-container')) {
+            initComments(targetId, 'comments-container', 'comment-form');
+        }
+        return;
+    }
+
+    await loadProjectAjax(targetId, false);
 }
 
 /**

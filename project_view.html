@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title id="page-title">BitMundo - Projeto</title>
 
+    <script>
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var id = params.get('id');
+            if (id) {
+                window.location.replace('/projetos/' + encodeURIComponent(id) + '.html');
+            }
+        })();
+    </script>
+
     <meta name="description" id="meta-desc" content="Detalhes do projeto BitMundo." />
     <meta name="keywords" id="meta-key" content="bitmundo, tradução, ps2, ps1, romhacking" />
 

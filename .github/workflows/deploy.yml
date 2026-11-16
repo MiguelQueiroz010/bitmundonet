@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - master # Ou a sua branch principal
+  workflow_dispatch: # Permite disparar manualmente pelo painel do GitHub Actions
+  schedule:
+    - cron: '0 6 * * *' # Executa todo dia às 06:00 UTC para sincronizar novos projetos do Firestore
 
 jobs:
   build-and-deploy:
@@ -12,6 +15,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
       - name: Inject Firebase Secrets
         run: |
@@ -40,6 +48,9 @@ jobs:
               -e "s/\${EMAILJS_TEMPLATE_ID}/${{ secrets.EMAILJS_TEMPLATE_ID }}/g" \
               -e "s/\${EMAILJS_PUBLIC_KEY}/${{ secrets.EMAILJS_PUBLIC_KEY }}/g" \
               scripts/emailjs-config.template.js > scripts/emailjs-config.js
+
+      - name: Build Static Site & SEO (SSG)
+        run: node scripts/build_static.js
 
       - name: Prepare Workspace (Ensure ignored files are published)
         run: rm -f .gitignore

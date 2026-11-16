@@ -1,0 +1,18 @@
+{
+  "name": "bitmundo-site",
+  "version": "2.0.0",
+  "description": "Bit.Raiden - RomHacking e Projetos de Tradução",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build_static.js",
+    "generate": "node scripts/build_static.js"
+  },
+  "keywords": [
+    "romhacking",
+    "translation",
+    "ps2",
+    "bitraiden"
+  ],
+  "author": "Bit.Raiden",
+  "license": "MIT"
+}

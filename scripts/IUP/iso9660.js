@@ -1,5 +1,6 @@
 import { IOextent } from './io_extent.js';
 import { UDFUtils } from './udf_osta.js';
+import { createIsoVfs } from './iso_vfs.js';
 
 export const Tipo_de_Descritor = {
     BootRecord: 0,
@@ -605,10 +606,14 @@ export class ISO9660 {
         const { onProgress, beforeBuild } = options;
 
         try {
-            const patchDir = await workDirHandle.getDirectoryHandle("patch_files");
+            const overlayDir = await workDirHandle.getDirectoryHandle("patch_files");
+            const scratchDir = await workDirHandle.getDirectoryHandle("vfs_scratch", { create: true });
 
-            if (onProgress) onProgress(2, "A sincronizar ficheiros originais e modificados...");
-            await ISO9660.ExtrairNaPasta(sourceIsoFile, patchDir, options);
+            // Em vez de extrair a ISO inteira para o disco (≈4 GB gravados + relidos), os arquivos originais são
+            // fatias da própria ISO; só os que o patch altera viram arquivos reais (em vfs_scratch).
+            // Arquivos que o patch traz em patch_files/ (formato v1) substituem os da ISO, como antes.
+            if (onProgress) onProgress(2, "A ler a estrutura da ISO...");
+            const patchDir = await ISO9660.MontarPastaVirtual(sourceIsoFile, { overlayDir, scratchDir });
 
             // Gancho do formato RPT v2: aqui os arquivos ORIGINAIS da ISO do usuário já estão em patchDir,
             // então operações delta/inject/replace podem transformá-los (com verificação de hash) antes da gravação.
@@ -1191,6 +1196,36 @@ export class ISO9660 {
         await writer.close();
         if (onProgress) onProgress(5, "Reconstrução ISO9660+UDF (Layout IUP PS2) concluída com sucesso!");
         return true;
+    }
+
+    /**
+     * Lê só a estrutura de diretórios da ISO e devolve uma pasta virtual (ver iso_vfs.js): os arquivos são fatias
+     * da ISO, nada é extraído para o disco. Mesmas regras de nome de ExtrairNaPasta.
+     * @param {Blob} isoFile
+     * @param {{overlayDir?:FileSystemDirectoryHandle, scratchDir?:FileSystemDirectoryHandle}} [o]
+     */
+    static async MontarPastaVirtual(isoFile, { overlayDir = null, scratchDir = null } = {}) {
+        const pvd = await Setor.readSector(isoFile, 16);
+        const rootLba = IOextent.readUInt(new DataView(pvd.DirectoryRecordRoot.buffer), 2, 32);
+        const rootSize = IOextent.readUInt(new DataView(pvd.DirectoryRecordRoot.buffer), 10, 32);
+        const seen = new Set();                                  // proteção contra diretórios que apontam uns para os outros
+
+        async function walk(lba, size) {
+            if (seen.has(lba)) return [];
+            seen.add(lba);
+            const data = new Uint8Array(await isoFile.slice(lba * 2048, (lba * 2048) + size).arrayBuffer());
+            const out = [];
+            for (const entry of Arquivo.lerPastas(data)) {
+                if (!entry.Name || entry.Name === "." || entry.Name === ".." || entry.Name === "\x00" ||
+                    entry.Name === "\x01" || entry.Name.length <= 1) continue;
+                const safeName = entry.Name.replace(/[<>:"/\\|?*]/g, '_').trim();
+                if (!safeName) continue;
+                if (entry.Flags.includes(RegrasArquivo.SubDiretorio)) out.push({ name: safeName, dir: true, children: await walk(entry.LBA, entry.Tamanho) });
+                else out.push({ name: safeName, lba: entry.LBA, size: entry.Tamanho });
+            }
+            return out;
+        }
+        return createIsoVfs({ isoFile, tree: await walk(rootLba, rootSize), overlayDir, scratchDir });
     }
 
     static async ExtrairNaPasta(isoFile, destHandle, options = {}) {

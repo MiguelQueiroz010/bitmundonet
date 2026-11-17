@@ -271,16 +271,14 @@ async function analyze() {
         st.tmpName = `raiden_tmp_create_${Date.now().toString(36)}`;
         st.tmpDir = await st.workDir.getDirectoryHandle(st.tmpName, { create: true });
 
-        progress(0.02, 'Extraindo a ISO original…');
-        const origDir = await st.tmpDir.getDirectoryHandle('orig', { create: true });
-        await ISO9660.ExtrairNaPasta(st.origIso, origDir, { onProgress: (_, m) => $('cr-prog-msg').textContent = m });
+        // As ISOs NÃO são mais extraídas para o disco: a comparação lê direto das ISOs (pasta virtual).
+        progress(0.02, 'Lendo a estrutura da ISO original…');
+        const origDir = await ISO9660.MontarPastaVirtual(st.origIso);
 
         let modFiles;
         if (st.modMode === 'iso') {
-            progress(0.2, 'Extraindo a ISO modificada…');
-            const modDir = await st.tmpDir.getDirectoryHandle('mod', { create: true });
-            await ISO9660.ExtrairNaPasta(st.modIso, modDir, { onProgress: (_, m) => $('cr-prog-msg').textContent = m });
-            modFiles = await listFiles(modDir);
+            progress(0.2, 'Lendo a estrutura da ISO modificada…');
+            modFiles = await listFiles(await ISO9660.MontarPastaVirtual(st.modIso));
         } else modFiles = await listFiles(st.modFolder);
 
         const origFiles = await listFiles(origDir);

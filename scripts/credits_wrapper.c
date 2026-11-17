@@ -210,10 +210,23 @@ static int show_image(void) {
 typedef struct { uint8_t id[16]; uint16_t type, machine; uint32_t version, entry, phoff, shoff, flags; uint16_t ehsize, phentsize, phnum, shentsize, shnum, shstrndx; } elf32_hdr;
 typedef struct { uint32_t type, offset, vaddr, paddr, filesz, memsz, flags, align; } elf32_phdr;
 
-/* Executa a partir de STUB_ADDR (cópia de bytes desta função): copia os segmentos PT_LOAD para os
- * endereços finais e salta para o entry. Sem chamadas/globais (precisa ser independente de posição).
- * Syscalls FlushCache (0x64) / ExecPS2 não confirmados em hardware — validar no PCSX2 e ajustar. */
+/* O crt0 do PS2SDK inicia o timer do sistema (InitTimer: handler INTC da causa 11/TIM2 apontando para
+ * TimerHandler_callback, DENTRO deste wrapper). Se ele continuar ativo quando os segmentos do jogo
+ * sobrescreverem 0x100000+, a próxima interrupção do T2 salta para lixo (UnkOp com a0=0x0b, v1=handler).
+ * EndTimer() remove o handler e para o T2. Rótulo via __asm__ para não conflitar com timer.h. */
+extern int raiden_end_timer(void) __asm__("EndTimer");
+
+/* Executa a partir de STUB_ADDR (cópia de bytes desta função): desliga o timer, copia os segmentos
+ * PT_LOAD para os endereços finais e salta para o entry. Sem globais (independente de posição); a única
+ * chamada é o `jal EndTimer` (alvo absoluto, ainda intacto neste ponto: roda ANTES da cópia).
+ * entry/argv ficam em $16/$17 (callee-saved): o syscall FlushCache devolve valor em $v0 e pode sujar
+ * os caller-saved, então não podem ficar em $2/$11. Syscall FlushCache (0x64) confirmado no libkernel. */
 __attribute__((noinline)) static void stub_run(const uint8_t *elf, char **argv) {
+    register const uint8_t *elf_s __asm__("$16") = elf;
+    register char **argv_s __asm__("$17") = argv;
+    __asm__ volatile("" : "+r"(elf_s), "+r"(argv_s));
+    raiden_end_timer();
+    elf = elf_s; argv = argv_s;
     const elf32_hdr *eh = (const elf32_hdr *)elf;
     const elf32_phdr *ph = (const elf32_phdr *)(elf + eh->phoff);
     for (unsigned i = 0; i < eh->phnum; i++) {
@@ -222,9 +235,9 @@ __attribute__((noinline)) static void stub_run(const uint8_t *elf, char **argv) 
         for (uint32_t k = 0; k < ph[i].filesz; k++) d[k] = s[k];
         for (uint32_t k = ph[i].filesz; k < ph[i].memsz; k++) d[k] = 0;
     }
-    register uint32_t entry = eh->entry;
-    register char **av = argv;
-    __asm__ volatile("li $3, 0x64\n li $4, 0\n syscall\n li $3, 0x64\n li $4, 2\n syscall\n li $4, 1\n move $5, %1\n jr %0\n nop\n" : : "r"(entry), "r"(av) : "$3", "$4", "$5");
+    register uint32_t entry __asm__("$16") = eh->entry; /* NÃO usar $2: o syscall devolve valor em $v0 */
+    register char **av __asm__("$17") = argv;
+    __asm__ volatile("li $3, 0x64\n li $4, 0\n syscall\n li $3, 0x64\n li $4, 2\n syscall\n li $4, 1\n move $5, $17\n jr $16\n nop\n" : : "r"(entry), "r"(av) : "$2", "$3", "$4", "$5", "memory");
 }
 
 /* Lê SYSTEM.CNF (via sceCdSearchFile, no diretório ISO9660 que o patch NÃO altera) e extrai o

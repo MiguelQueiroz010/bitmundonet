@@ -163,7 +163,7 @@ function startMD5Worker(file) {
 
     // Criar worker
     if (md5Worker) md5Worker.terminate();
-    md5Worker = new Worker('/scripts/md5_worker.js');
+    md5Worker = new Worker('/scripts/md5_worker.js', { type: 'module' });
 
     md5Worker.onmessage = (e) => {
         const { type, value, md5, message } = e.data;

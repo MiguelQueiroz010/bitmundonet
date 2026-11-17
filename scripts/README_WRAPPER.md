@@ -1,6 +1,6 @@
 # raiden_wrapper.elf — status e checklist
 
-**O `credits_wrapper.c` ainda NÃO foi compilado nem testado em PS2/PCSX2.** O lado JS/UI (marcadores, `<Credits>`, `<FailText>`, `<Media>`, bloqueio de filme) está coberto por testes automatizados; o lado PS2 não.
+**O `raiden_wrapper.elf` publicado foi compilado, mas o fluxo completo (créditos → jogo) ainda precisa ser conferido no PCSX2/PS2.** O lado JS/UI (marcadores, `<Credits>`, `<FailText>`, `<Media>`, bloqueio de filme) está coberto por testes automatizados; o lado PS2 não.
 
 Build: `export PS2SDK=/usr/local/ps2dev/ps2sdk && make -C scripts` e publique `scripts/raiden_wrapper.elf`.
 O site só habilita créditos se o .elf existir e tiver os marcadores `RAIDENBOOT/CREDIT/HASH1/MEDIA/FAIL`.
@@ -8,7 +8,7 @@ O site só habilita créditos se o .elf existir e tiver os marcadores `RAIDENBOO
 ## Antes de publicar, verificar
 1. Compila sem erros (nomes de struct/enum de `libcdvd`/`libpad`, macros GIF/GS dependem da versão do PS2SDK).
 2. `mips64r5900el-ps2-elf-strings raiden_wrapper.elf | grep RAIDEN` mostra os 6 marcadores (prova que não foram otimizados fora).
-3. `objdump -d` de `stub_run`: sem `jal`, cabe em 1024 bytes (`STUB_COPY_BYTES`), usa só desvios relativos.
+3. `objdump -d` de `stub_run`: o único `jal` é `EndTimer` (alvo absoluto, executado antes da cópia), cabe em 1024 bytes (`STUB_COPY_BYTES`), usa só desvios relativos; o `jr` final usa `$16` (nunca `$2`/`$v0`, que o syscall sobrescreve).
 4. Syscalls do stub (FlushCache 0x64) e endereços 0x01000000/0x01FD0000: confirmar no PCSX2; o jogo original não pode usar essas regiões.
 
 ## Testes no PCSX2 (ISO patcheada)
@@ -19,3 +19,11 @@ O site só habilita créditos se o .elf existir e tiver os marcadores `RAIDENBOO
 - Disco DVD vs CD (sceCdMmode).
 - **Filme .PSS: não suportado** (precisa demux MPEG-PS + libmpeg, vídeo mudo). `RAIDENCAPS` = 0 faz o criador recusar `movie`.
 - UDF: só o diretório ISO9660 é redirecionado; ISOs que dependem de UDF para achar o ELF não são suportadas.
+
+## Histórico: travamento ao iniciar o jogo (UnkOp em 0x0012c3ac / 0x001709f0)
+Sintoma no PCSX2: `Unrecognized op` em endereços de dados logo após os créditos, com `a0=0x0b`, `v1=0x001267a0`, `gp=0x00133bf0`.
+Causa: o crt0 do PS2SDK inicia o timer do sistema (handler INTC da causa 11 = `TimerHandler_callback`, que mora no wrapper).
+O stub sobrescrevia `0x100000+` com o ELF do jogo sem desligá-lo; a interrupção seguinte do T2 executava lixo.
+Além disso, `entry` ficava em `$v0`, que o syscall `FlushCache` sobrescreve.
+Correção: `stub_run` chama `EndTimer` antes de copiar os segmentos e mantém entry/argv em `$16/$17`.
+O `.elf` versionado foi corrigido direto no `stub_run` (sem PS2SDK disponível); `credits_wrapper.c` tem o mesmo comportamento — um rebuild com `make` gera um binário equivalente.

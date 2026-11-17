@@ -85,7 +85,7 @@ export async function runPost(u) {
         must(same(await extractFile(h, 'A.BIN'), dataBin), 'arquivo de dados difere');
     });
 
-    await test('pós-processamento: créditos + imagem → boot redirecionado ao wrapper, ELF original e mídia no LBA gravado', async () => {
+    await test('pós-processamento: créditos + imagem → BOOT2 aponta para o RAIDEN.ELF novo; ELF original intacto no nome/LBA de sempre; mídia no LBA gravado', async () => {
         const h = await mkIso();
         const before = await bytesOf(h);
         const xml = buildManifestXml({ gameName: 'T', credits: 'Abertura — BitMundo.net', media: await imgMedia() }, []);
@@ -93,7 +93,9 @@ export async function runPost(u) {
         must(notes.length === 0, 'sem avisos esperados: ' + notes);
         const after = await bytesOf(h);
         must(after.length > before.length && after.length % S === 0, `ISO deveria crescer em setores inteiros (${before.length} → ${after.length})`);
-        const wrapper = await extractFile(h, 'SLUS_213.73');
+        const wrapper = await extractFile(h, M.WRAPPER_NAME);
+        must(same(await extractFile(h, 'SLUS_213.73'), elf), 'o ELF original deve continuar acessível pelo nome original');
+        must(/BOOT2\s*=\s*cdrom0:\\RAIDEN\.ELF;1/.test(new TextDecoder().decode(await extractFile(h, 'SYSTEM.CNF'))), 'BOOT2 deve apontar para o wrapper');
         const marks = M.readWrapperMarkers(wrapper);
         must(marks.credits === 'Abertura — BitMundo.net', 'créditos no wrapper: ' + marks.credits);
         must(marks.boot.size === elf.length, 'tamanho do ELF original no marcador');
@@ -145,7 +147,7 @@ export async function runPost(u) {
         const xml = buildManifestXml({ gameName: 'T', media: { type: 'movie', payloadName: 'media.bin', size: pss.length, sha256: await hex(pss), width: 0, height: 0, durationSec: 0 } }, []);
         await applyPostProcess({ saveHandle: h, post: parsePostSections(xml), tmpDir: await mkTmp(pss) });
         const after = await bytesOf(h);
-        const marks = M.readWrapperMarkers(await extractFile(h, 'SLUS_213.73'));
+        const marks = M.readWrapperMarkers(await extractFile(h, M.WRAPPER_NAME));
         must(marks.media.type === 'movie' && marks.media.size === pss.length, 'marcador de vídeo');
         must(same(after.subarray(marks.media.lba * S, marks.media.lba * S + pss.length), pss), 'bytes do vídeo');
     });

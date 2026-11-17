@@ -18,7 +18,9 @@ O site só habilita créditos se o .elf existir e tiver os marcadores `RAIDENBOO
 - ISO sem `<FailText>` → mensagem padrão.
 - Disco DVD vs CD (sceCdMmode).
 - **Filme .PSS: não suportado** (precisa demux MPEG-PS + libmpeg, vídeo mudo). `RAIDENCAPS` = 0 faz o criador recusar `movie`.
-- UDF: só o diretório ISO9660 é redirecionado; ISOs que dependem de UDF para achar o ELF não são suportadas.
+- UDF: só o diretório ISO9660 recebe o `RAIDEN.ELF` (registro no fim da raiz) e o `SYSTEM.CNF` é reescrito; ISOs que dependem de UDF para achar o ELF não são suportadas.
+- O ELF original NÃO é redirecionado: continua com o nome e o LBA de sempre, então um jogo que releia o próprio ELF do disco enxerga o arquivo certo.
+- PCSX2: o serial do jogo vem do nome em BOOT2; com `RAIDEN.ELF` ele deixa de ser `SLUS-21419` (gamedb/patches por serial não se aplicam).
 
 ## Histórico: travamento ao iniciar o jogo (UnkOp em 0x0012c3ac / 0x001709f0)
 Sintoma no PCSX2: `Unrecognized op` em endereços de dados logo após os créditos, com `a0=0x0b`, `v1=0x001267a0`, `gp=0x00133bf0`.

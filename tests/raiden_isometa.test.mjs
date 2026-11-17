@@ -40,6 +40,13 @@ function makeIso({ withJoliet = false, withIoprp = false } = {}) {
   return { iso: new Uint8Array(iso), elf: new Uint8Array(elf), ioprp: new Uint8Array(ioprp) };
 }
 
+// Lê o diretório raiz da imagem (raiz em 18) → [{name, lba, size}]
+function rootOf(u8) {
+  const out = []; let pos = 18 * S;
+  while (u8[pos]) { const len = u8[pos], n = u8[pos + 32]; out.push({ name: Buffer.from(u8.subarray(pos + 33, pos + 33 + n)).toString('latin1').replace(/;1$/, ''), lba: Buffer.from(u8).readUInt32LE(pos + 2), size: Buffer.from(u8).readUInt32LE(pos + 10), len, dateOk: true }); pos += len; }
+  return out;
+}
+
 // 1) metadados (texto + numéricos)
 {
   const { iso } = makeIso({ withJoliet: true });
@@ -160,7 +167,25 @@ function makeIso({ withJoliet = false, withIoprp = false } = {}) {
   assert.equal(marks.credits, 'Traduzido por BitMundo.net — bitmundo.net');
   assert.equal(marks.media, null); // sem opts.media => marcador gravado como NONE
   assert.equal(res.media, null);
-  console.log('ok: wrapper de créditos sem mídia — ELF intocado, diretório redirecionado, media=NONE');
+  // ELF original continua com o mesmo nome/LBA/tamanho; o wrapper é um arquivo NOVO apontado pelo BOOT2
+  const root = rootOf(grown);
+  const orig = root.find((e) => e.name === 'SLUS_214.19');
+  assert.deepEqual([orig.lba, orig.size], [20, elf.length]);
+  const wr = root.find((e) => e.name === M.WRAPPER_NAME);
+  assert.deepEqual([wr.lba, wr.size], [res.wrapLba, res.wrapSize]);
+  assert.equal(res.bootFile, M.WRAPPER_NAME); assert.equal(res.origBootFile, 'SLUS_214.19');
+  const cnf = root.find((e) => e.name === 'SYSTEM.CNF');
+  const cnfTxt = Buffer.from(grown.subarray(cnf.lba * S, cnf.lba * S + cnf.size)).toString('latin1');
+  assert.equal(cnfTxt, 'BOOT2 = cdrom0:\\RAIDEN.ELF;1\r\nVER = 1.00\r\nVMODE = NTSC\r\n');
+  assert.ok(grown.subarray(cnf.lba * S + cnf.size, (cnf.lba + 1) * S).every((b) => b === 0));
+  // criar de novo sobre a ISO já com créditos é recusado (nome já existe)
+  await assert.rejects(M.buildCreditsWrapperPatches(M.bufferReader(grown), fakeTemplate, {}), /já tem um arquivo RAIDEN\.ELF/);
+  // raiz sem espaço sobrando → erro claro
+  const fake = Buffer.from(makeIso().iso); let pos = 18 * S; while (fake[pos]) pos += fake[pos];
+  while (pos + 100 + 255 <= 19 * S) { fake[pos] = 200; fake[pos + 32] = 1; fake[pos + 33] = 0x58; pos += 200; }   // registros de enchimento
+  while (pos + 40 <= 19 * S) { fake[pos] = 40; fake[pos + 32] = 1; fake[pos + 33] = 0x59; pos += 40; }           // sobra < 48 bytes
+  await assert.rejects(M.buildCreditsWrapperPatches(M.bufferReader(fake), fakeTemplate, {}), /não tem espaço/);
+  console.log('ok: wrapper de créditos sem mídia — ELF original intacto, RAIDEN.ELF novo na raiz, BOOT2 reescrito, media=NONE');
 }
 
 // 2c) wrapper de créditos — COM imagem anexada
@@ -231,12 +256,12 @@ function makeIso({ withJoliet = false, withIoprp = false } = {}) {
   assert.deepEqual(mediaBytes, pssData);
   // tipo inválido é rejeitado
   await assert.rejects(
-    M.buildCreditsWrapperPatches(r(), fakeTemplate, { media: { type: 'mp4', data: pssData } }),
+    M.buildCreditsWrapperPatches(M.bufferReader(makeIso().iso), fakeTemplate, { media: { type: 'mp4', data: pssData } }),
     /opts\.media\.type inválido/
   );
   // imagem sem width/height é rejeitada
   await assert.rejects(
-    M.buildCreditsWrapperPatches(r(), fakeTemplate, { media: { type: 'image', data: pssData } }),
+    M.buildCreditsWrapperPatches(M.bufferReader(makeIso().iso), fakeTemplate, { media: { type: 'image', data: pssData } }),
     /width\/height/
   );
   console.log('ok: wrapper de créditos com vídeo .PSS — anexado e referenciado corretamente');

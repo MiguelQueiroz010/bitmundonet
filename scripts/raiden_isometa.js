@@ -283,20 +283,18 @@ async function findBootFile(r, pvd) {
 }
 
 // ───────────── wrapper de créditos + mídia (imagem OU vídeo .PSS) + verificação ─────────────
-// Não move nem reescreve o ELF original: ele fica intacto onde está.
-// Anexa um ELF "wrapper" pré-compilado (feito uma vez com PS2SDK) no fim da ISO,
-// grava nele (via marcadores) o LBA/tamanho/hash do ELF original + os hashes de
-// verificação + o texto dos créditos + (opcional) uma mídia de abertura, e só altera
-// a ENTRADA DE DIRETÓRIO do ELF de boot para apontar para o wrapper. Em tempo de
-// boot, o wrapper mostra os créditos (texto + imagem, ou texto + vídeo .PSS), confere
-// os hashes e, se baterem, lê o ELF original direto do LBA gravado e salta para ele;
-// se não baterem, mostra um aviso.
+// O ELF original do jogo NÃO é movido, renomeado nem reescrito: continua na raiz, com o mesmo nome e no mesmo LBA
+// (o jogo pode reler o próprio ELF do disco; redirecionar a entrada dele para o wrapper quebrava o carregamento).
+// O wrapper é um ELF A MAIS: pré-compilado (feito uma vez com PS2SDK), anexado no fim da ISO, registrado como um
+// arquivo novo na raiz (WRAPPER_NAME) e apontado pelo BOOT2 do SYSTEM.CNF. Nele (via marcadores) vão o LBA/tamanho/
+// hash do ELF original, os hashes de verificação, o texto dos créditos e (opcional) uma mídia de abertura.
+// Em tempo de boot o wrapper mostra os créditos (texto + imagem, ou texto + vídeo .PSS), confere os hashes e, se
+// baterem, lê o ELF original direto do LBA gravado e salta para ele; se não baterem, mostra um aviso.
 //
-// A mídia (imagem ou .PSS) NÃO vira um arquivo na árvore ISO9660 — ela é anexada
-// como bytes crus logo depois do wrapper (sector-alinhada) e referenciada só por
-// LBA/tamanho, exatamente como o próprio ELF original é referenciado pelo wrapper.
-// Isso evita ter que recriar/realocar o diretório raiz (que exigiria deslocar o LBA
-// de todo arquivo que vem depois dele na imagem) só para registrar um arquivo novo.
+// Só mexe em: um registro novo no fim do diretório raiz (cabe sem realocar nada se sobrar espaço no setor), o tamanho
+// e o texto do SYSTEM.CNF, e o tamanho do volume. A mídia (imagem ou .PSS) NÃO vira arquivo na árvore: é anexada
+// como bytes crus logo depois do wrapper (setor-alinhada) e referenciada só por LBA/tamanho.
+export const WRAPPER_NAME = 'RAIDEN.ELF';
 const WB_MARK = 'RAIDENBOOT';   // + u32 origLba, u32 origSize, 32 bytes sha256(ELF original)
 const WC_MARK = 'RAIDENCREDIT'; // + 1 byte len, até 255 bytes de texto UTF-8 (ASCII recomendado), resto zerado
 const WH_MARK = 'RAIDENHASH1';  // + u16 count, N * (u32 lba, u32 size, 32 bytes sha256) — arquivos extras a verificar
@@ -326,11 +324,42 @@ function requireMarker(buf, marker, minBytesAfter) {
   return off;
 }
 
+// Registro ISO9660 de um arquivo (id "NOME;1"), copiando a data de gravação de um registro existente.
+function makeFileRecord(name, lba, size, date7) {
+  const id = new TextEncoder().encode(name + ';1');
+  const len = 33 + id.length + (id.length % 2 === 0 ? 1 : 0);
+  const b = new Uint8Array(len);
+  b[0] = len;
+  putBothEndianU32(b, 2, lba); putBothEndianU32(b, 10, size);
+  if (date7) b.set(date7.subarray(0, 7), 18);
+  putU16le(b, 28, 1); b[30] = 0; b[31] = 1;            // volume sequence number = 1 (both-endian)
+  b[32] = id.length; b.set(id, 33);
+  return b;
+}
+
+// Acha onde cabe um registro de `recLen` bytes no diretório raiz (fim da área usada de algum setor). Devolve o offset
+// absoluto na imagem. Não reordena nem realoca: se não sobrar espaço, avisa (o diretório teria de crescer).
+async function findRootSlot(r, pvd, recLen) {
+  const root = pvd.data.subarray(156, 190);
+  const dirLba = u32le(root, 2), dirSize = u32le(root, 10);
+  const dir = await r.read(dirLba * SECTOR, dirSize);
+  let slot = -1;
+  for (let sec = 0; sec * SECTOR < dir.length; sec++) {
+    let pos = sec * SECTOR; const end = Math.min(pos + SECTOR, dir.length);
+    while (pos < end && dir[pos] !== 0) pos += dir[pos];
+    if (pos + recLen <= end) slot = dirLba * SECTOR + pos;   // o último setor com espaço vence
+  }
+  if (slot < 0) throw new Error('O diretório raiz da ISO não tem espaço para o ELF de créditos (precisaria crescer).');
+  return slot;
+}
+
 // Monta (sem tocar na ISO ainda) a imagem/vídeo + o wrapper num único blob anexável,
 // e devolve os patches de diretório/PVD + o bloco a anexar no fim do arquivo.
 export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) {
   const { pvd } = await findDescriptors(r);
   const elf = await findBootFile(r, pvd);
+  const rootEntries = await scanRootDir(r, pvd);
+  if (rootEntries.some((e) => e.name === WRAPPER_NAME)) throw new Error(`A ISO já tem um arquivo ${WRAPPER_NAME} na raiz (créditos já aplicados?).`);
   const origBytes = await r.read(elf.lba * SECTOR, elf.size);
   const origHash = await sha256(origBytes);
 
@@ -430,14 +459,25 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
   const padded = new Uint8Array(wrapSectors * SECTOR);
   padded.set(wrapper);
 
-  // Redireciona a entrada de diretório do ELF de boot para o wrapper
+  // Registro novo do wrapper na raiz + BOOT2 do SYSTEM.CNF apontando para ele. O registro do ELF original não é tocado.
+  const cnf = rootEntries.find((e) => e.name === 'SYSTEM.CNF');
+  const cnfOld = await r.read(cnf.lba * SECTOR, cnf.size);
+  const cnfText = ascii(cnfOld, 0, cnfOld.length);
+  const cnfNewText = cnfText.replace(/(BOOT2\s*=\s*cdrom0:[\\/]?)[^;\s\r\n]+/i, (_, pre) => pre + WRAPPER_NAME);
+  if (cnfNewText === cnfText) throw new Error('Não consegui reescrever a linha BOOT2 do SYSTEM.CNF.');
+  const cnfNew = Uint8Array.from(cnfNewText, (c) => c.charCodeAt(0) & 255);
+  const cnfRoom = Math.ceil(cnf.size / SECTOR) * SECTOR;
+  if (cnfNew.length > cnfRoom) throw new Error('O SYSTEM.CNF novo não cabe no setor do original.');
+  const cnfData = new Uint8Array(Math.max(cnfNew.length, cnf.size)); cnfData.set(cnfNew);   // zera o que sobrar do texto antigo
+  const date7 = await r.read(cnf.recOffset + 18, 7);
+  const rec = makeFileRecord(WRAPPER_NAME, wrapLba, wrapper.length, date7);
+  const slot = await findRootSlot(r, pvd, rec.length);
   const patches = [
-    { offset: elf.recOffset + 2, data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, wrapLba); return b; })() },
-    { offset: elf.recOffset + 10, data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, wrapper.length); return b; })() },
-    { offset: VOL_SPACE_OFF, data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, nextLba); return b; })() }, // dentro do PVD
+    { offset: slot, data: rec },
+    { offset: cnf.lba * SECTOR, data: cnfData },
+    { offset: cnf.recOffset + 10, data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, cnfNew.length); return b; })() },
+    { offset: PVD_OFF + VOL_SPACE_OFF, data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, nextLba); return b; })() },
   ];
-  // offset do campo de Volume Space Size é relativo ao PVD inteiro
-  patches[2].offset += PVD_OFF;
 
   const appends = [{ offset: wrapLba * SECTOR, data: padded }];
   if (mediaBlock) appends.push({ offset: mediaBlock.lba * SECTOR, data: mediaBlock.padded });
@@ -448,7 +488,8 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
     append: appends[0], // retrocompatibilidade com quem só esperava um único "append" (sem mídia)
     wrapLba, wrapSize: wrapper.length,
     media: mediaBlock ? { lba: mediaBlock.lba, size: opts.media.data.length } : null,
-    bootFile: elf.name,
+    bootFile: WRAPPER_NAME,      // o que o BOOT2 aponta agora
+    origBootFile: elf.name,      // ELF do jogo, intacto
   };
 }
 

@@ -84,7 +84,7 @@ Só o descritor ISO9660 (e o Joliet, se existir) é editado; o descritor UDF nã
 
 **`<Credits>` / `<Media>`** — tela mostrada antes do jogo iniciar. Exigem o wrapper `scripts/raiden_wrapper.elf`
 (compilado **uma vez** a partir de `scripts/credits_wrapper.c` com o PS2SDK). O aplicador anexa o wrapper e a mídia
-ao fim da ISO e redireciona **só a entrada de diretório** do ELF de boot para o wrapper; o ELF original fica intacto.
+ao fim da ISO, registra-o como `RAIDEN.ELF` na raiz e aponta o `BOOT2` do `SYSTEM.CNF` para ele; o ELF original do jogo fica intacto (mesmo nome, mesmo LBA).
 Se o `.elf` não existir no site, a opção é desabilitada no criador e, ao aplicar, os créditos são ignorados com um aviso
 (os metadados continuam sendo aplicados).
 

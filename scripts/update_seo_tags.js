@@ -661,9 +661,3 @@ export function updateAllSeoTags() {
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   updateAllSeoTags();
 }
-L files meta tags verified and updated successfully.');
-}
-
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-    updateAllSeoTags();
-}

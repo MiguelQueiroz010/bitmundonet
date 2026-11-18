@@ -1,7 +1,18 @@
+# Robots.txt - Bit.Raiden (https://bitraiden.org)
 User-agent: *
 Allow: /
+Disallow: /admin_login.html
+Disallow: /admin_dashboard.html
+Disallow: /tool_view.html
+Disallow: /archive/
 
-# Google AdSense
+# Google Search Bots & AdSense
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
 User-agent: Mediapartners-Google
 Allow: /
 

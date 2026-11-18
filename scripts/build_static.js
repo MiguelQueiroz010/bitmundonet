@@ -138,7 +138,7 @@ function buildProjectHtml(project, allProjects, templateHtml) {
     const descParsed = parseArticleTags(descRaw);
     const plainDesc = stripHtml(descParsed || subtitle || `${title} para ${platform}`).slice(0, 160);
 
-    const pageTitle = `${title} (${platform}) PT-BR - Bit.Raiden`;
+    const pageTitle = `${title} (${platform}) PT-BR - RomHacking do Raiden`;
     const canonicalUrl = `${BASE_URL}/projetos/${id}.html`;
 
     // 1. Pre-render Video or Head
@@ -435,12 +435,12 @@ function buildProjectHtml(project, allProjects, templateHtml) {
                 "genre": ["RomHacking", "Tradução de Jogos", "Action"],
                 "author": {
                     "@type": "Person",
-                    "name": "Bit.Raiden",
+                    "name": "Raiden",
                     "url": BASE_URL
                 },
                 "publisher": {
                     "@type": "Organization",
-                    "name": "Bit.Raiden",
+                    "name": "RomHacking do Raiden",
                     "url": BASE_URL,
                     "logo": {
                         "@type": "ImageObject",
@@ -454,7 +454,7 @@ function buildProjectHtml(project, allProjects, templateHtml) {
                     {
                         "@type": "ListItem",
                         "position": 1,
-                        "name": "Início",
+                        "name": "RomHacking do Raiden",
                         "item": BASE_URL
                     },
                     {
@@ -479,7 +479,7 @@ function buildProjectHtml(project, allProjects, templateHtml) {
                         "name": `Como funciona a tradução de ${title} para ${platform}?`,
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": `A tradução de ${title} é um projeto desenvolvido por Bit.Raiden para ${platform}, com textos em português do Brasil e patch disponível para aplicação direta na ISO do jogo.`
+                            "text": `A tradução de ${title} é um projeto desenvolvido por Raiden para ${platform}, com textos em português do Brasil e patch disponível para aplicação direta na ISO do jogo no RomHacking do Raiden.`
                         }
                     },
                     {
@@ -487,7 +487,7 @@ function buildProjectHtml(project, allProjects, templateHtml) {
                         "name": `Onde baixar o patch de tradução de ${title}?`,
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": `Você pode fazer o download do patch oficial de tradução diretamente na seção de Downloads desta página no Bit.Raiden.`
+                            "text": `Você pode fazer o download do patch oficial de tradução diretamente na seção de Downloads desta página no RomHacking do Raiden.`
                         }
                     }
                 ]
@@ -504,15 +504,15 @@ function buildProjectHtml(project, allProjects, templateHtml) {
     // Replace Meta Tags & Inject SEO
     const seoTags = `
     <meta name="description" id="meta-desc" content="${escapeHtml(plainDesc)}" />
-    <meta name="keywords" id="meta-key" content="${escapeHtml(title)}, tradução, ${escapeHtml(platform)}, romhacking, patch pt-br, bitraiden" />
+    <meta name="keywords" id="meta-key" content="${escapeHtml(title)}, tradução, ${escapeHtml(platform)}, romhacking, patch pt-br, romhacking do raiden, bitraiden" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="author" content="Bit.Raiden" />
+    <meta name="author" content="Raiden" />
     <link rel="canonical" href="${canonicalUrl}" />
     <meta name="theme-color" content="#020814" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article" />
-    <meta property="og:site_name" content="Bit.Raiden" />
+    <meta property="og:site_name" content="RomHacking do Raiden" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:title" content="${escapeHtml(pageTitle)}" />
@@ -729,7 +729,7 @@ function generateSitemap(projects, articles) {
             changefreq: 'weekly',
             image: {
                 loc: imgUrl,
-                title: `${title} (${platform}) PT-BR`,
+                title: `${title} (${platform}) PT-BR - RomHacking do Raiden`,
                 caption: caption
             }
         };

@@ -69,6 +69,295 @@ function putBothEndianU16(u8, o, v) { putU16le(u8, o, v); putU16be(u8, o + 2, v)
 function putBothEndianU32(u8, o, v) { putU32le(u8, o, v); putU32be(u8, o + 4, v); }
 const eqBytes = (a, b) => { if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a[i] ^ b[i]; return d === 0; };
 
+// ───────────── UDF 1.02 helpers (ECMA-167 / OSTA) ─────────────
+const UDF_CRC_TABLE = new Uint16Array([
+  0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
+  0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
+  0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
+  0x9339, 0x8318, 0xB37B, 0xA35A, 0xD3BD, 0xC39C, 0xF3FF, 0xE3DE,
+  0x2462, 0x3443, 0x0420, 0x1401, 0x64E6, 0x74C7, 0x44A4, 0x5485,
+  0xA56A, 0xB54B, 0x8528, 0x9509, 0xE5EE, 0xF5CF, 0xC5AC, 0xD58D,
+  0x3653, 0x2672, 0x1611, 0x0630, 0x76D7, 0x66F6, 0x5695, 0x46B4,
+  0xB75B, 0xA77A, 0x9719, 0x8738, 0xF7DF, 0xE7FE, 0xD79D, 0xC7BC,
+  0x48C4, 0x58E5, 0x6886, 0x78A7, 0x0840, 0x1861, 0x2802, 0x3823,
+  0xC9CC, 0xD9ED, 0xE98E, 0xF9AF, 0x8948, 0x9969, 0xA90A, 0xB92B,
+  0x5AF5, 0x4AD4, 0x7AB7, 0x6A96, 0x1A71, 0x0A50, 0x3A33, 0x2A12,
+  0xDBFD, 0xCBDC, 0xFBBF, 0xEB9E, 0x9B79, 0x8B58, 0xBB3B, 0xAB1A,
+  0x6CA6, 0x7C87, 0x4CE4, 0x5CC5, 0x2C22, 0x3C03, 0x0C60, 0x1C41,
+  0xEDAE, 0xFD8F, 0xCDEC, 0xDDCD, 0xAD2A, 0xBD0B, 0x8D68, 0x9D49,
+  0x7E97, 0x6EB6, 0x5ED5, 0x4EF4, 0x3E13, 0x2E32, 0x1E51, 0x0E70,
+  0xFF9F, 0xEFBE, 0xDFDD, 0xCFFC, 0xBF1B, 0xAF3A, 0x9F59, 0x8F78,
+  0x9188, 0x81A9, 0xB1CA, 0xA1EB, 0xD10C, 0xC12D, 0xF14E, 0xE16F,
+  0x1080, 0x00A1, 0x30C2, 0x20E3, 0x5004, 0x4025, 0x7046, 0x6067,
+  0x83B9, 0x9398, 0xA3FB, 0xB3DA, 0xC33D, 0xD31C, 0xE37F, 0xF35E,
+  0x02B1, 0x1290, 0x22F3, 0x32D2, 0x4235, 0x5214, 0x6277, 0x7256,
+  0xB5EA, 0xA5CB, 0x95A8, 0x8589, 0xF56E, 0xE54F, 0xD52C, 0xC50D,
+  0x34E2, 0x24C3, 0x14A0, 0x0481, 0x7466, 0x6447, 0x5424, 0x4405,
+  0xA7DB, 0xB7FA, 0x8799, 0x97B8, 0xE75F, 0xF77E, 0xC71D, 0xD73C,
+  0x26D3, 0x36F2, 0x0691, 0x16B0, 0x6657, 0x7676, 0x4615, 0x5634,
+  0xD94C, 0xC96D, 0xF90E, 0xE92F, 0x99C8, 0x89E9, 0xB98A, 0xA9AB,
+  0x5844, 0x4865, 0x7806, 0x6827, 0x18C0, 0x08E1, 0x3882, 0x28A3,
+  0xCB7D, 0xDB5C, 0xEB3F, 0xFB1E, 0x8BF9, 0x9BD8, 0xABBB, 0xBB9A,
+  0x4A75, 0x5A54, 0x6A37, 0x7A16, 0x0AF1, 0x1AD0, 0x2AB3, 0x3A92,
+  0xFD2E, 0xED0F, 0xDD6C, 0xCD4D, 0xBDAA, 0xAD8B, 0x9DE8, 0x8DC9,
+  0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
+  0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
+  0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0,
+]);
+
+function udfCrc(buf, len) {
+  let crc = 0;
+  for (let i = 0; i < len; i++) crc = UDF_CRC_TABLE[((crc >> 8) ^ buf[i]) & 0xff] ^ (crc << 8);
+  return crc & 0xffff;
+}
+
+function udfTagChecksum(buf) {
+  let sum = 0;
+  for (let i = 0; i < 16; i++) {
+    if (i === 4) continue;
+    sum = (sum + buf[i]) & 0xff;
+  }
+  return sum;
+}
+
+function makeUdfTagBuf(tagId, lba, crcLen, crc) {
+  const b = new Uint8Array(16);
+  putU16le(b, 0, tagId);
+  putU16le(b, 2, 2); // UDF 1.02
+  putU16le(b, 8, crc);
+  putU16le(b, 10, crcLen);
+  putU32le(b, 12, lba);
+  b[4] = udfTagChecksum(b);
+  return b;
+}
+
+function updateUdfSectorTag(sector, descriptorLen = 512) {
+  const crcLen = descriptorLen - 16;
+  const crc = crcLen > 0 ? udfCrc(sector.subarray(16, descriptorLen), crcLen) : 0;
+  putU16le(sector, 8, crc);
+  putU16le(sector, 10, crcLen);
+  sector[4] = udfTagChecksum(sector.subarray(0, 16));
+}
+
+function decodeUdfName(u8) {
+  if (!u8 || u8.length === 0) return '';
+  const comp = u8[0];
+  let s = '';
+  if (comp === 8) {
+    for (let i = 1; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+  } else if (comp === 16) {
+    for (let i = 1; i + 1 < u8.length; i += 2) s += String.fromCharCode((u8[i] << 8) | u8[i + 1]);
+  }
+  return s;
+}
+
+function makeUdfAvdpSector(lba, mainVdsLba = 32, reserveVdsLba = 48) {
+  const s = new Uint8Array(2048);
+  putU32le(s, 16, 0x8000);
+  putU32le(s, 20, mainVdsLba);
+  putU32le(s, 24, 0x8000);
+  putU32le(s, 28, reserveVdsLba);
+  const tag = makeUdfTagBuf(2, lba, 496, udfCrc(s.subarray(16, 512), 496));
+  s.set(tag, 0);
+  return s;
+}
+
+function makeUdfFileEntrySector(lba, isDir, dataSize, dataLba) {
+  const s = new Uint8Array(2048);
+  putU16le(s, 20, 4); // Strategy Type = 4
+  putU16le(s, 24, 1); // Max Entry Number = 1
+  s[27] = isDir ? 4 : 5; // File Type: 4=Dir, 5=File
+  putU32le(s, 36, 0xffffffff);
+  putU32le(s, 40, 0xffffffff);
+  putU32le(s, 44, 0x14a5);
+  putU16le(s, 48, 1);
+  putU32le(s, 56, dataSize);
+  putU32le(s, 64, Math.ceil(dataSize / 2048));
+  putU32le(s, 108, 1);
+  const impl = new TextEncoder().encode('DVD-ROM GENERATOR');
+  s.set(impl, 129);
+  putU32le(s, 168, 0x84); // EA Size = 132
+  putU32le(s, 172, 8);    // Alloc Desc Size = 8
+
+  // EA space (132 bytes) at offset 176..307
+  putU32le(s, 192, 0x18);
+  putU32le(s, 196, 0x84);
+  const eaCrc = udfCrc(s.subarray(192, 200), 8);
+  const eaTag = makeUdfTagBuf(0x106, lba, 8, eaCrc);
+  s.set(eaTag, 176);
+
+  putU32le(s, 200, 0x800);
+  s[204] = 1;
+  putU32le(s, 208, 0x34);
+  putU32le(s, 212, 4);
+  const freeEa = new TextEncoder().encode('*UDF FreeEASpace');
+  s.set(freeEa, 217);
+  s.set([2, 1], 240);
+  putU16le(s, 248, 0x561);
+
+  putU32le(s, 252, 0x800);
+  s[256] = 1;
+  putU32le(s, 260, 0x38);
+  putU32le(s, 264, 8);
+  const cgms = new TextEncoder().encode('*UDF DVD CGMS Info');
+  s.set(cgms, 269);
+  s.set([2, 1], 292);
+  putU16le(s, 300, 0x549);
+
+  // Alloc desc (short_ad) at offset 308
+  putU32le(s, 308, dataSize);
+  putU32le(s, 312, dataLba);
+
+  const crc = udfCrc(s.subarray(16, 316), 300);
+  const tag = makeUdfTagBuf(261, lba, 300, crc);
+  s.set(tag, 0);
+  return s;
+}
+
+function makeUdfFidBuf(lba, isDir, isParent, name, targetFeLogicalLba) {
+  const nameBytes = new TextEncoder().encode(name);
+  const nameUnicode = isParent ? new Uint8Array(0) : new Uint8Array(1 + nameBytes.length);
+  if (!isParent) {
+    nameUnicode[0] = 8; // CS0 (8-bit)
+    nameUnicode.set(nameBytes, 1);
+  }
+  const nameLen = nameUnicode.length;
+  const fidLen = (38 + nameLen + 3) & ~3;
+  const buf = new Uint8Array(fidLen);
+  putU16le(buf, 16, 1);
+  let flags = 0;
+  if (isDir) flags |= 0x02;
+  if (isParent) flags |= 0x08;
+  buf[18] = flags;
+  buf[19] = nameLen;
+  putU32le(buf, 20, 0x13c);
+  putU32le(buf, 24, targetFeLogicalLba);
+  putU16le(buf, 28, 0);
+  if (nameLen > 0) buf.set(nameUnicode, 38);
+  const payloadLen = fidLen - 16;
+  const crc = udfCrc(buf.subarray(16, fidLen), payloadLen);
+  const tag = makeUdfTagBuf(257, lba, payloadLen, crc);
+  buf.set(tag, 0);
+  return buf;
+}
+
+export async function readUdfInfo(r) {
+  if (r.size < 257 * SECTOR) return { hasUdf: false };
+  const avdpSec = await r.read(256 * SECTOR, SECTOR);
+  const tagId = u16le(avdpSec, 0);
+  if (tagId !== 2 || udfTagChecksum(avdpSec.subarray(0, 16)) !== avdpSec[4]) {
+    const pvdSec = await r.read(32 * SECTOR, SECTOR);
+    if (u16le(pvdSec, 0) !== 1 || udfTagChecksum(pvdSec.subarray(0, 16)) !== pvdSec[4]) {
+      return { hasUdf: false };
+    }
+  }
+
+  const mainVdsLba = u32le(avdpSec, 20) || 32;
+  const reserveVdsLba = u32le(avdpSec, 28) || 48;
+
+  let pdLba = null, lvdLba = null, pvdLba = null, iuvdLba = null;
+  let partitionLba = 0, partitionLength = 0, lviLba = 64;
+
+  for (let i = 0; i < 16; i++) {
+    const lba = mainVdsLba + i;
+    const sec = await r.read(lba * SECTOR, SECTOR);
+    const id = u16le(sec, 0);
+    if (id === 1 && !pvdLba) pvdLba = lba;
+    if (id === 4 && !iuvdLba) iuvdLba = lba;
+    if (id === 5 && !pdLba) {
+      pdLba = lba;
+      partitionLba = u32le(sec, 188);
+      partitionLength = u32le(sec, 192);
+    }
+    if (id === 6 && !lvdLba) {
+      lvdLba = lba;
+      lviLba = u32le(sec, 436) || 64;
+    }
+    if (id === 8) break;
+  }
+
+  if (!pdLba || partitionLba === 0) return { hasUdf: false };
+
+  let reservePdLba = null, reserveLvdLba = null, reservePvdLba = null, reserveIuvdLba = null;
+  for (let i = 0; i < 16; i++) {
+    const lba = reserveVdsLba + i;
+    const sec = await r.read(lba * SECTOR, SECTOR);
+    const id = u16le(sec, 0);
+    if (id === 1 && !reservePvdLba) reservePvdLba = lba;
+    if (id === 4 && !reserveIuvdLba) reserveIuvdLba = lba;
+    if (id === 5 && !reservePdLba) reservePdLba = lba;
+    if (id === 6 && !reserveLvdLba) reserveLvdLba = lba;
+    if (id === 8) break;
+  }
+
+  let fileCount = 0, dirCount = 0;
+  if (lviLba && lviLba * SECTOR < r.size) {
+    const lviSec = await r.read(lviLba * SECTOR, SECTOR);
+    if (u16le(lviSec, 0) === 9) {
+      fileCount = u32le(lviSec, 120);
+      dirCount = u32le(lviSec, 124);
+    }
+  }
+
+  const fsdSec = await r.read(partitionLba * SECTOR, SECTOR);
+  if (u16le(fsdSec, 0) !== 256) return { hasUdf: false };
+  const rootFeLogicalLba = u32le(fsdSec, 404);
+
+  const rootFeSec = await r.read((partitionLba + rootFeLogicalLba) * SECTOR, SECTOR);
+  if (u16le(rootFeSec, 0) !== 261) return { hasUdf: false };
+  const rootInfoSize = u32le(rootFeSec, 56);
+  const eaLen = u32le(rootFeSec, 168);
+  const rootFidTotalBytes = u32le(rootFeSec, 176 + eaLen);
+  const rootFidLogicalLba = u32le(rootFeSec, 180 + eaLen);
+  const rootFidSectors = Math.max(1, Math.ceil(rootFidTotalBytes / SECTOR));
+
+  let cnfFeLogicalLba = null;
+  let lastFidSectorLba = partitionLba + rootFidLogicalLba;
+  let lastFidEnd = 0;
+  let rootFidLogicalForNewEntry = rootFidLogicalLba;
+
+  for (let s = 0; s < rootFidSectors; s++) {
+    const secLba = partitionLba + rootFidLogicalLba + s;
+    const secData = await r.read(secLba * SECTOR, SECTOR);
+    let pos = 0;
+    while (pos + 38 <= SECTOR) {
+      const fidTagId = u16le(secData, pos);
+      if (fidTagId !== 257) break;
+      const nameLen = secData[pos + 19];
+      const fidLen = (38 + nameLen + 3) & ~3;
+      if (pos + fidLen > SECTOR) break;
+      const name = decodeUdfName(secData.subarray(pos + 38, pos + 38 + nameLen)).toUpperCase();
+      const targetFe = u32le(secData, pos + 24);
+      if (name === 'SYSTEM.CNF') {
+        cnfFeLogicalLba = targetFe;
+      }
+      pos += fidLen;
+    }
+    if (pos <= SECTOR) {
+      lastFidSectorLba = secLba;
+      lastFidEnd = pos;
+      rootFidLogicalForNewEntry = rootFidLogicalLba + s;
+    }
+  }
+
+  return {
+    hasUdf: true,
+    mainVdsLba, reserveVdsLba,
+    pvdLba, iuvdLba, pdLba, lvdLba,
+    reservePvdLba, reserveIuvdLba, reservePdLba, reserveLvdLba,
+    lviLba, partitionLba, partitionLength,
+    fileCount, dirCount,
+    rootFeLogicalLba,
+    rootInfoSize,
+    rootFidLogicalLba: rootFidLogicalForNewEntry,
+    rootFidTotalBytes,
+    rootFidSectors,
+    lastFidSectorLba,
+    lastFidEnd,
+    cnfFeLogicalLba,
+  };
+}
+
 async function findDescriptors(r) {
   const out = { pvd: null, joliet: null };
   for (let i = 0; i < 32; i++) {
@@ -127,6 +416,8 @@ function encodeDate(v) {
 // ───────────── leitura ─────────────
 export async function readIsoInfo(r) {
   const { pvd, joliet } = await findDescriptors(r);
+  let udf = { hasUdf: false };
+  try { udf = await readUdfInfo(r); } catch (_) {}
   const fields = {};
   for (const [k, f] of Object.entries(FIELDS)) fields[k] = decodeStr(pvd.data.subarray(f.off, f.off + f.len), false);
   const numbers = {};
@@ -138,7 +429,8 @@ export async function readIsoInfo(r) {
   const dates = {};
   for (const [k, o] of Object.entries(DATES)) dates[k] = parseDate(pvd.data, o);
   return {
-    fields, numbers, info, dates, hasJoliet: !!joliet,
+    fields, numbers, info, dates, hasJoliet: !!joliet, hasUdf: udf.hasUdf,
+    udf: udf.hasUdf ? udf : null,
     lock: parseLockRecord(pvd.data.subarray(APP_USE.off, APP_USE.off + APP_USE.len)),
   };
 }
@@ -200,6 +492,53 @@ export async function buildMetaPatches(r, changes, opts = {}) {
     patches.push({ offset: PVD_OFF + o, data: d });
     if (touchJoliet) patches.push({ offset: joliet.lba * SECTOR + o, data: d });
   }
+
+  // Sincroniza metadados com descritores UDF 1.02 quando presentes
+  if (changes.volumeId !== undefined) {
+    try {
+      const udf = await readUdfInfo(r);
+      if (udf.hasUdf) {
+        const v = changes.volumeId;
+        // PVD (LBA 32 e Reserve)
+        for (const lba of [udf.pvdLba, udf.reservePvdLba].filter(Boolean)) {
+          const sec = new Uint8Array(await r.read(lba * SECTOR, SECTOR));
+          sec[24] = 8; // CS0 (8-bit)
+          for (let i = 0; i < 30; i++) sec[25 + i] = i < v.length ? v.charCodeAt(i) & 0xff : 0;
+          sec[55] = Math.min(v.length, 30) + 1;
+          updateUdfSectorTag(sec, 512);
+          patches.push({ offset: lba * SECTOR, data: sec });
+        }
+        // IUVD (LBA 33 e Reserve)
+        for (const lba of [udf.iuvdLba, udf.reserveIuvdLba].filter(Boolean)) {
+          const sec = new Uint8Array(await r.read(lba * SECTOR, SECTOR));
+          sec[116] = 8;
+          for (let i = 0; i < 126; i++) sec[117 + i] = i < v.length ? v.charCodeAt(i) & 0xff : 0;
+          sec[243] = Math.min(v.length, 126) + 1;
+          updateUdfSectorTag(sec, 512);
+          patches.push({ offset: lba * SECTOR, data: sec });
+        }
+        // LVD (LBA 35 e Reserve)
+        for (const lba of [udf.lvdLba, udf.reserveLvdLba].filter(Boolean)) {
+          const sec = new Uint8Array(await r.read(lba * SECTOR, SECTOR));
+          sec[84] = 8;
+          for (let i = 0; i < 126; i++) sec[85 + i] = i < v.length ? v.charCodeAt(i) & 0xff : 0;
+          sec[211] = Math.min(v.length, 126) + 1;
+          updateUdfSectorTag(sec, 512);
+          patches.push({ offset: lba * SECTOR, data: sec });
+        }
+        // FSD (partitionLba)
+        if (udf.partitionLba) {
+          const sec = new Uint8Array(await r.read(udf.partitionLba * SECTOR, SECTOR));
+          sec[112] = 8;
+          for (let i = 0; i < 126; i++) sec[113 + i] = i < v.length ? v.charCodeAt(i) & 0xff : 0;
+          sec[239] = Math.min(v.length, 126) + 1;
+          updateUdfSectorTag(sec, 512);
+          patches.push({ offset: udf.partitionLba * SECTOR, data: sec });
+        }
+      }
+    } catch (_) {}
+  }
+
   return { patches, warnings };
 }
 
@@ -476,11 +815,86 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
     { offset: slot, data: rec },
     { offset: cnf.lba * SECTOR, data: cnfData },
     { offset: cnf.recOffset + 10, data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, cnfNew.length); return b; })() },
-    { offset: PVD_OFF + VOL_SPACE_OFF, data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, nextLba); return b; })() },
   ];
 
   const appends = [{ offset: wrapLba * SECTOR, data: padded }];
   if (mediaBlock) appends.push({ offset: mediaBlock.lba * SECTOR, data: mediaBlock.padded });
+
+  let finalTotalSectors = nextLba;
+
+  // Sincronização UDF 1.02 completa (segurança e integridade equivalentes ao ISO9660)
+  const udf = await readUdfInfo(r);
+  if (udf.hasUdf) {
+    // 1. Aloca File Entry (FE) para RAIDEN.ELF em UDF
+    const raidenFeLba = nextLba++;
+    const raidenFeLogicalLba = raidenFeLba - udf.partitionLba;
+    const raidenFeSector = makeUdfFileEntrySector(raidenFeLogicalLba, false, wrapper.length, wrapLba - udf.partitionLba);
+    appends.push({ offset: raidenFeLba * SECTOR, data: raidenFeSector });
+
+    // 2. Insere FID para RAIDEN.ELF no diretório raiz do UDF
+    const raidenFid = makeUdfFidBuf(udf.rootFidLogicalLba, false, false, WRAPPER_NAME, raidenFeLogicalLba);
+    if (udf.lastFidEnd + raidenFid.length <= SECTOR) {
+      patches.push({ offset: udf.lastFidSectorLba * SECTOR + udf.lastFidEnd, data: raidenFid });
+      const neededSize = udf.lastFidEnd + raidenFid.length;
+      if (neededSize > udf.rootInfoSize) {
+        const rootFeSec = new Uint8Array(await r.read((udf.partitionLba + udf.rootFeLogicalLba) * SECTOR, SECTOR));
+        putU32le(rootFeSec, 56, neededSize);
+        putU32le(rootFeSec, 60, 0);
+        updateUdfSectorTag(rootFeSec, 316);
+        patches.push({ offset: (udf.partitionLba + udf.rootFeLogicalLba) * SECTOR, data: rootFeSec.subarray(0, 316) });
+      }
+    }
+
+    // 3. Atualiza File Entry do SYSTEM.CNF em UDF
+    if (udf.cnfFeLogicalLba !== null) {
+      const cnfFeSec = new Uint8Array(await r.read((udf.partitionLba + udf.cnfFeLogicalLba) * SECTOR, SECTOR));
+      if (u16le(cnfFeSec, 0) === 261) {
+        putU32le(cnfFeSec, 56, cnfNew.length);
+        putU32le(cnfFeSec, 60, 0);
+        putU32le(cnfFeSec, 64, Math.ceil(cnfNew.length / SECTOR));
+        putU32le(cnfFeSec, 68, 0);
+        const cnfEaLen = u32le(cnfFeSec, 168);
+        putU32le(cnfFeSec, 176 + cnfEaLen, cnfNew.length);
+        updateUdfSectorTag(cnfFeSec, 316);
+        patches.push({ offset: (udf.partitionLba + udf.cnfFeLogicalLba) * SECTOR, data: cnfFeSec.subarray(0, 316) });
+      }
+    }
+
+    // 4. Calcula novo total de setores (alinhamento ECC PS2 de 16 setores + 256 setores para AVDP de backup)
+    finalTotalSectors = ((nextLba + 256 + 15) & ~15);
+    const newPartLength = Math.max(0, finalTotalSectors - udf.partitionLba);
+
+    // 5. Atualiza Partition Descriptors (Main e Reserve)
+    for (const lba of [udf.pdLba, udf.reservePdLba].filter(Boolean)) {
+      const sec = new Uint8Array(await r.read(lba * SECTOR, SECTOR));
+      putU32le(sec, 192, newPartLength);
+      updateUdfSectorTag(sec, 512);
+      patches.push({ offset: lba * SECTOR, data: sec });
+    }
+
+    // 6. Atualiza Logical Volume Integrity (LVI)
+    if (udf.lviLba && udf.lviLba * SECTOR < r.size) {
+      const lviSec = new Uint8Array(await r.read(udf.lviLba * SECTOR, SECTOR));
+      if (u16le(lviSec, 0) === 9) {
+        putU32le(lviSec, 84, newPartLength);
+        putU32le(lviSec, 120, udf.fileCount + 1);
+        updateUdfSectorTag(lviSec, 136);
+        patches.push({ offset: udf.lviLba * SECTOR, data: lviSec });
+      }
+    }
+
+    // 7. Backup AVDPs nos setores finais
+    const backupAvdp1 = makeUdfAvdpSector(finalTotalSectors - 256, udf.mainVdsLba, udf.reserveVdsLba);
+    const backupAvdp2 = makeUdfAvdpSector(finalTotalSectors - 1, udf.mainVdsLba, udf.reserveVdsLba);
+    appends.push({ offset: (finalTotalSectors - 256) * SECTOR, data: backupAvdp1 });
+    appends.push({ offset: (finalTotalSectors - 1) * SECTOR, data: backupAvdp2 });
+  }
+
+  // 8. Atualiza ISO9660 PVD Volume Space Size
+  patches.push({
+    offset: PVD_OFF + VOL_SPACE_OFF,
+    data: (() => { const b = new Uint8Array(8); putBothEndianU32(b, 0, finalTotalSectors); return b; })(),
+  });
 
   return {
     patches,

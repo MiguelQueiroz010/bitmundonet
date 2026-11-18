@@ -146,14 +146,15 @@ function makeUdfTag(tagId, lba, payloadCrcLen, payloadCrc) {
     return buf;
 }
 
-function makeUdfDescriptorSector(tagId, lba, payloadBytes) {
+function makeUdfDescriptorSector(tagId, lba, payloadBytes, descriptorLen = 512) {
     const sector = new Uint8Array(2048);
     const payloadLen = payloadBytes ? payloadBytes.length : 0;
     if (payloadLen > 0) {
         sector.set(payloadBytes, 16);
     }
-    const crc = payloadLen > 0 ? UDFUtils.computeCrc(payloadBytes, payloadLen) : 0;
-    const tag = makeUdfTag(tagId, lba, payloadLen, crc);
+    const crcLen = descriptorLen !== null ? (descriptorLen - 16) : payloadLen;
+    const crc = crcLen > 0 ? UDFUtils.computeCrc(payloadBytes, crcLen) : 0;
+    const tag = makeUdfTag(tagId, lba, crcLen, crc);
     sector.set(tag, 0);
     return sector;
 }
@@ -396,7 +397,7 @@ function makeUdfLvi(lba, totalSectors, partitionLba, fileCount, dirCount, date =
     dv.setUint16(114, 258, true);            // MinUDFWriteRev (0x0102)
     dv.setUint16(116, 258, true);            // MaxUDFWriteRev (0x0102)
 
-    return makeUdfDescriptorSector(9, lba, payload);
+    return makeUdfDescriptorSector(9, lba, payload, 136);
 }
 
 function makeUdfAvdp(lba, mainVdsLba = 32, reserveVdsLba = 48) {
@@ -556,7 +557,7 @@ function makeUdfFileEntry(lba, isDir, dataSize, dataLba, date = new Date(), tzMi
     dv.setUint32(292, dataSize, true); // Extent Length
     dv.setUint32(296, dataLba, true);  // Extent Position LBA
 
-    return makeUdfDescriptorSector(261, lba, payload);
+    return makeUdfDescriptorSector(261, lba, payload, 316);
 }
 
 function makeUdfFid(lba, isDir, isParent, name, targetFeLogicalLba) {
@@ -759,14 +760,27 @@ export class ISO9660 {
         for (const d of allDirs) {
             d.udfFidLogicalLba = fidCurrentLogicalLba;
 
-            let fidLen = makeUdfFid(0, true, true, "", 0).length; // parent ..
-            for (const sub of d.subdirs) {
-                fidLen += makeUdfFid(0, true, false, sub.name, 0).length;
+            // Simular empacotamento setor a setor (sem FID cruzando a fronteira de 2048 bytes)
+            let secOff = 0;
+            let secCount = 1;
+            const entries = [
+                { isParent: true, name: "" },
+                ...d.subdirs.map(sub => ({ isParent: false, name: sub.name })),
+                ...d.files.map(f => ({ isParent: false, name: f.name }))
+            ];
+            for (const e of entries) {
+                const nUnicode = e.isParent ? new Uint8Array(0) : UDFUtils.getCompressedUnicode(e.name);
+                const nLen = nUnicode.length;
+                const fLen = ((38 + nLen + 3) & ~3);
+                if (secOff + fLen > SECTOR_SIZE) {
+                    secCount++;
+                    secOff = 0;
+                }
+                secOff += fLen;
             }
-            for (const f of d.files) {
-                fidLen += makeUdfFid(0, false, false, f.name, 0).length;
-            }
-            fidCurrentLogicalLba += Math.ceil(fidLen / SECTOR_SIZE);
+            d.udfFidSectors = secCount;
+            d.udfFidTotalSize = secCount * SECTOR_SIZE;
+            fidCurrentLogicalLba += secCount;
         }
 
         const feStartLogicalLba = partitionLba + 2 + (fidCurrentLogicalLba - 2);
@@ -811,6 +825,24 @@ export class ISO9660 {
         }
         writtenLba = 16;
 
+        // Extrair Volume Label da ISO original se não fornecido
+        let resolvedVolumeLabel = volumeLabel;
+        if (sourceIsoFile && sourceIsoFile.size >= 17 * SECTOR_SIZE && !options.volumeLabel) {
+            try {
+                const pvdBuf = await sourceIsoFile.slice(16 * SECTOR_SIZE, 17 * SECTOR_SIZE).arrayBuffer();
+                const pvdDv = new DataView(pvdBuf);
+                if (pvdDv.getUint8(0) === 1 && String.fromCharCode(...new Uint8Array(pvdBuf, 1, 5)) === "CD001") {
+                    let extracted = "";
+                    for (let i = 0; i < 32; i++) {
+                        const c = pvdDv.getUint8(40 + i);
+                        if (c === 0 || c === 0x20) break;
+                        extracted += String.fromCharCode(c);
+                    }
+                    if (extracted.length > 0) resolvedVolumeLabel = extracted;
+                }
+            } catch (_) {}
+        }
+
         // 2. ISO9660 PVD (LBA 16)
         const pvdSector = new Uint8Array(SECTOR_SIZE);
         pvdSector[0] = 1;
@@ -826,7 +858,7 @@ export class ISO9660 {
         }
 
         setPadStr(8, 32, "PLAYSTATION");
-        setPadStr(40, 32, volumeLabel);
+        setPadStr(40, 32, resolvedVolumeLabel);
 
         pvdSector.set(IOextent.toLEBE(totalSectors, 32), 80);
         pvdSector.set(IOextent.toLEBE(1, 16), 120);
@@ -1104,28 +1136,39 @@ export class ISO9660 {
 
         // PartitionLBA + 2: UDF FIDs (Logical LBA 2.. inside partition)
         for (const d of allDirs) {
-            const fidsList = [
-                makeUdfFid(d.udfFidLogicalLba, true, true, "", d.parent ? d.parent.udfFeLogicalLba : rootDir.udfFeLogicalLba)
+            const sectors = [];
+            let curSec = new Uint8Array(SECTOR_SIZE);
+            let secOff = 0;
+            let curLba = d.udfFidLogicalLba;
+
+            const entries = [
+                { isDir: true, isParent: true, name: "", targetFe: d.parent ? d.parent.udfFeLogicalLba : rootDir.udfFeLogicalLba },
+                ...d.subdirs.map(sub => ({ isDir: true, isParent: false, name: sub.name, targetFe: sub.udfFeLogicalLba })),
+                ...d.files.map(f => ({ isDir: false, isParent: false, name: f.name, targetFe: f.udfFeLogicalLba }))
             ];
-            for (const sub of d.subdirs) {
-                fidsList.push(makeUdfFid(d.udfFidLogicalLba, true, false, sub.name, sub.udfFeLogicalLba));
-            }
-            for (const f of d.files) {
-                fidsList.push(makeUdfFid(d.udfFidLogicalLba, false, false, f.name, f.udfFeLogicalLba));
-            }
 
-            let totalFidBytes = 0;
-            for (const fid of fidsList) totalFidBytes += fid.length;
-            d.udfFidTotalSize = totalFidBytes; // SAVE EXACT UDF FIDs LENGTH
+            for (const e of entries) {
+                const nameUnicode = e.isParent ? new Uint8Array(0) : UDFUtils.getCompressedUnicode(e.name);
+                const nameLen = nameUnicode.length;
+                const fidLen = ((38 + nameLen + 3) & ~3);
 
-            const fidBuf = new Uint8Array(Math.ceil(totalFidBytes / SECTOR_SIZE) * SECTOR_SIZE);
-            let fidOff = 0;
-            for (const fid of fidsList) {
-                fidBuf.set(fid, fidOff);
-                fidOff += fid.length;
+                if (secOff + fidLen > SECTOR_SIZE) {
+                    sectors.push(curSec);
+                    curSec = new Uint8Array(SECTOR_SIZE);
+                    curLba++;
+                    secOff = 0;
+                }
+
+                const fid = makeUdfFid(curLba, e.isDir, e.isParent, e.name, e.targetFe);
+                curSec.set(fid, secOff);
+                secOff += fid.length;
             }
-            await writer.write(fidBuf);
-            writtenLba += Math.ceil(totalFidBytes / SECTOR_SIZE);
+            sectors.push(curSec);
+
+            for (const s of sectors) {
+                await writer.write(s);
+            }
+            writtenLba += sectors.length;
         }
 
         // UDF File Entries (FE) (Logical LBAs inside partition)

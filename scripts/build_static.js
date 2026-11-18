@@ -13,6 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseArticleTags, renderTopics } from './utils.js';
+import { updateAllSeoTags } from './update_seo_tags.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -116,13 +117,21 @@ function stripHtml(html) {
 // 3. GENERATE INDIVIDUAL PROJECT PAGES
 // ==========================================
 
+function toAbsoluteUrl(url) {
+    if (!url) return `${BASE_URL}/bitmundo_logo.png`;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `${BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 function buildProjectHtml(project, allProjects, templateHtml) {
     const id = project.id;
     const title = project.title || 'Projeto';
     const subtitle = project.subtitle || '';
     const platform = project.platform || 'PlayStation 2';
-    const cover = project.cover || project.thumbnail || 'https://bitraiden.org/bitmundo_logo.png';
-    const thumbnail = project.thumbnail || cover;
+    const rawCover = project.cover || project.thumbnail || '/bitmundo_logo.png';
+    const cover = toAbsoluteUrl(rawCover);
+    const rawThumb = project.thumbnail || project.cover || '/bitmundo_logo.png';
+    const thumbnail = toAbsoluteUrl(rawThumb);
     const globalProgress = (project.progress && project.progress.global) || '0%';
     const percentInt = parseInt(globalProgress, 10) || 0;
     const descRaw = project.description || '';
@@ -496,24 +505,31 @@ function buildProjectHtml(project, allProjects, templateHtml) {
     const seoTags = `
     <meta name="description" id="meta-desc" content="${escapeHtml(plainDesc)}" />
     <meta name="keywords" id="meta-key" content="${escapeHtml(title)}, tradução, ${escapeHtml(platform)}, romhacking, patch pt-br, bitraiden" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="author" content="Bit.Raiden" />
     <link rel="canonical" href="${canonicalUrl}" />
+    <meta name="theme-color" content="#020814" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Bit.Raiden" />
+    <meta property="og:locale" content="pt_BR" />
     <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:title" content="${escapeHtml(pageTitle)}" />
     <meta property="og:description" content="${escapeHtml(plainDesc)}" />
     <meta property="og:image" content="${escapeHtml(cover)}" />
+    <meta property="og:image:secure_url" content="${escapeHtml(cover)}" />
+    <meta property="og:image:alt" content="Capa do projeto ${escapeHtml(title)}" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@BitRaiden" />
+    <meta name="twitter:creator" content="@BitRaiden" />
     <meta name="twitter:url" content="${canonicalUrl}" />
     <meta name="twitter:title" content="${escapeHtml(pageTitle)}" />
     <meta name="twitter:description" content="${escapeHtml(plainDesc)}" />
     <meta name="twitter:image" content="${escapeHtml(cover)}" />
+    <meta name="twitter:image:alt" content="Capa do projeto ${escapeHtml(title)}" />
 
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
@@ -670,17 +686,29 @@ function updateHomepage() {
 // 6. GENERATE SITEMAP & UPDATE ROBOTS.TXT
 // ==========================================
 
+function escapeXml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
 function generateSitemap(projects, articles) {
     const today = new Date().toISOString().split('T')[0];
 
     const corePages = [
         { loc: `${BASE_URL}/`, priority: '1.0', changefreq: 'daily' },
         { loc: `${BASE_URL}/projetos.html`, priority: '0.9', changefreq: 'daily' },
-        { loc: `${BASE_URL}/tools.html`, priority: '0.8', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/raiden_patcher.html`, priority: '0.8', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/raiden_patcher.html`, priority: '0.9', changefreq: 'weekly' },
         { loc: `${BASE_URL}/hog_extractor.html`, priority: '0.8', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/tools/Fully/AFS_STATION.html`, priority: '0.8', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/tools/Fully/TTxT-standalone.html`, priority: '0.8', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/tools.html`, priority: '0.8', changefreq: 'weekly' },
         { loc: `${BASE_URL}/library.html`, priority: '0.7', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/about.html`, priority: '0.5', changefreq: 'monthly' },
+        { loc: `${BASE_URL}/about.html`, priority: '0.6', changefreq: 'monthly' },
         { loc: `${BASE_URL}/privacidade.html`, priority: '0.3', changefreq: 'monthly' }
     ];
 
@@ -689,11 +717,21 @@ function generateSitemap(projects, articles) {
         if (p._updateTime) {
             lastmod = p._updateTime.split('T')[0];
         }
+        const imgUrl = toAbsoluteUrl(p.cover || p.thumbnail);
+        const title = p.title || 'Projeto';
+        const platform = p.platform || 'PS2';
+        const caption = p.subtitle || p.title || '';
+
         return {
             loc: `${BASE_URL}/projetos/${p.id}.html`,
             lastmod,
             priority: '0.9',
-            changefreq: 'weekly'
+            changefreq: 'weekly',
+            image: {
+                loc: imgUrl,
+                title: `${title} (${platform}) PT-BR`,
+                caption: caption
+            }
         };
     });
 
@@ -702,25 +740,48 @@ function generateSitemap(projects, articles) {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${allUrls.map(u => `  <url>
-    <loc>${u.loc}</loc>
-    <lastmod>${u.lastmod || today}</lastmod>
-    <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-  </url>`).join('\n')}
+${allUrls.map(u => {
+    let imgBlock = '';
+    if (u.image) {
+        imgBlock = `\n    <image:image>\n      <image:loc>${escapeXml(u.image.loc)}</image:loc>\n      <image:title>${escapeXml(u.image.title)}</image:title>\n      <image:caption>${escapeXml(u.image.caption)}</image:caption>\n    </image:image>`;
+    }
+    return `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod || today}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>${imgBlock}\n  </url>`;
+}).join('\n')}
 </urlset>`;
 
     fs.writeFileSync(path.join(ROOT_DIR, 'sitemap.xml'), xml, 'utf-8');
-    console.log(`[SSG] Generated sitemap.xml with ${allUrls.length} indexed URLs.`);
+    console.log(`[SSG] Generated sitemap.xml with ${allUrls.length} indexed URLs and rich Google Image metadata.`);
 
     // Update robots.txt
     const robotsPath = path.join(ROOT_DIR, 'robots.txt');
-    if (fs.existsSync(robotsPath)) {
-        let robots = fs.readFileSync(robotsPath, 'utf-8');
-        robots = robots.replace(/Sitemap:\s*https?:\/\/[^\s]+/gi, `Sitemap: ${BASE_URL}/sitemap.xml`);
-        fs.writeFileSync(robotsPath, robots, 'utf-8');
-        console.log(`[SSG] Updated robots.txt pointing to ${BASE_URL}/sitemap.xml.`);
-    }
+    const robotsContent = `# Robots.txt - Bit.Raiden (https://bitraiden.org)
+User-agent: *
+Allow: /
+Disallow: /admin_login.html
+Disallow: /admin_dashboard.html
+Disallow: /tool_view.html
+Disallow: /archive/
+
+# Google Search Bots & AdSense
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+Sitemap: ${BASE_URL}/sitemap.xml
+`;
+    fs.writeFileSync(robotsPath, robotsContent, 'utf-8');
+    console.log(`[SSG] Updated robots.txt pointing to ${BASE_URL}/sitemap.xml.`);
 }
 
 // ==========================================
@@ -807,6 +868,9 @@ async function main() {
 
     // Fix remaining domains
     fixDomainReferences();
+
+    // Verify & update static meta tags and schemas across all standalone tools and pages
+    updateAllSeoTags();
 
     console.log('==============================================');
     console.log(' SSG & SEO Build Complete!                    ');

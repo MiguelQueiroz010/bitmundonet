@@ -14,19 +14,31 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://bitraiden.org/tools.html</loc>
-    <lastmod>2026-11-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://bitraiden.org/raiden_patcher.html</loc>
     <lastmod>2026-11-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://bitraiden.org/hog_extractor.html</loc>
+    <lastmod>2026-11-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bitraiden.org/tools/Fully/AFS_STATION.html</loc>
+    <lastmod>2026-11-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bitraiden.org/tools/Fully/TTxT-standalone.html</loc>
+    <lastmod>2026-11-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bitraiden.org/tools.html</loc>
     <lastmod>2026-11-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -41,7 +53,7 @@
     <loc>https://bitraiden.org/about.html</loc>
     <lastmod>2026-11-18</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://bitraiden.org/privacidade.html</loc>
@@ -54,59 +66,109 @@
     <lastmod>2026-02-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/psx/alundra2/media/capa.jpg</image:loc>
+      <image:title>Alundra 2 (PlayStation) PT-BR</image:title>
+      <image:caption>Uma Nova Lenda Começa</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/genji.html</loc>
     <lastmod>2026-03-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/ps2/genji/media/poster.jpg</image:loc>
+      <image:title>Genji: Alvorecer dos Samurais (PlayStation 2) PT-BR</image:title>
+      <image:caption>Dawn of The Samurai - Tradução PT-BR</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/ironman.html</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://i.postimg.cc/Jn6v3R8M/capa-br.jpg</image:loc>
+      <image:title>Iron Man (PlayStation 2) PT-BR</image:title>
+      <image:caption>Homem de Ferro</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/ninja3br.html</loc>
     <lastmod>2026-02-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/ps2/ninja3br/media/Capa.jpg</image:loc>
+      <image:title>Naruto: Ultimate Ninja 3 (PlayStation 2) PT-BR</image:title>
+      <image:caption>Em Breve - Tradução PT-BR</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/ninja5br.html</loc>
     <lastmod>2026-07-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/ps2/ninja5br/media/poster.png</image:loc>
+      <image:title>Naruto Shippuden: Ultimate Ninja 5+ (PlayStation 2) PT-BR</image:title>
+      <image:caption>Versão Brasileira (Rev9)</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/ninja5plus.html</loc>
     <lastmod>2026-02-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/ps2/ninja5+/media/poster.jpg</image:loc>
+      <image:title>Naruto Shippuden: Ultimate Ninja 5+ Mod (PlayStation 2) PT-BR</image:title>
+      <image:caption>NTSC 60Hz &amp; Fixes</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/projetounbr.html</loc>
     <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://i.postimg.cc/VspkV934/UNBRproject-icon-removebg-preview.png</image:loc>
+      <image:title>Série Ultimate Ninja (PlayStation 2) PT-BR</image:title>
+      <image:caption>Todos Ultimate Ninja</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/sbbfbb.html</loc>
     <lastmod>2026-02-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/ps2/sbbfbb/media/Capa.jpg</image:loc>
+      <image:title>SpongeBob: Batalha pela Fenda do Biquíni (PlayStation 2) PT-BR</image:title>
+      <image:caption>Tradução Completa</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/sbcfkk.html</loc>
     <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/ps2/sbcfkk/media/capa.jpg</image:loc>
+      <image:title>SpongeBob: Criatura do Siri Cascudo (PlayStation 2) PT-BR</image:title>
+      <image:caption>Em Breve - Tradução em Progresso</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://bitraiden.org/projetos/ssx3.html</loc>
     <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://bitraiden.org/projects/ps2/ssx3/media/capa.png</image:loc>
+      <image:title>SSX 3 (PlayStation 2) PT-BR</image:title>
+      <image:caption>Em Breve - Tradução em Progresso</image:caption>
+    </image:image>
   </url>
 </urlset>

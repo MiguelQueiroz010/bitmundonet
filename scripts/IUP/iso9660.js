@@ -763,6 +763,12 @@ export class ISO9660 {
             // Simular empacotamento setor a setor (sem FID cruzando a fronteira de 2048 bytes)
             let secOff = 0;
             let secCount = 1;
+            let totalBytes = 0; // soma EXATA dos FIDs — é o que vai em InfoSize/AllocDesc.length do File Entry
+                                 // do diretório (nunca o número de setores reservados: um reader UDF usa esse
+                                 // valor pra saber onde o diretório REALMENTE termina dentro do último setor, e
+                                 // se ele disser "2048" quando só os primeiros ~280 bytes são FIDs de verdade, o
+                                 // resto (padding de zeros) pode ser lido como mais estrutura — foi exatamente
+                                 // isso que fez o UltraISO do usuário mostrar os arquivos "dentro de uma pasta").
             const entries = [
                 { isParent: true, name: "" },
                 ...d.subdirs.map(sub => ({ isParent: false, name: sub.name })),
@@ -777,9 +783,10 @@ export class ISO9660 {
                     secOff = 0;
                 }
                 secOff += fLen;
+                totalBytes += fLen;
             }
             d.udfFidSectors = secCount;
-            d.udfFidTotalSize = secCount * SECTOR_SIZE;
+            d.udfFidTotalSize = totalBytes;
             fidCurrentLogicalLba += secCount;
         }
 
@@ -996,10 +1003,10 @@ export class ISO9660 {
         }
 
         // 5. Main VDS (LBA 32..37)
-        await writer.write(makeUdfPvd(32, volumeLabel, baseDate, baseTz, customVolSetUnique));
-        await writer.write(makeUdfIuvd(33, volumeLabel));
+        await writer.write(makeUdfPvd(32, resolvedVolumeLabel, baseDate, baseTz, customVolSetUnique));
+        await writer.write(makeUdfIuvd(33, resolvedVolumeLabel));
         await writer.write(makeUdfPd(34, partitionLba, totalSectors));
-        await writer.write(makeUdfLv(35, volumeLabel));
+        await writer.write(makeUdfLv(35, resolvedVolumeLabel));
         await writer.write(makeUdfUsd(36));
         await writer.write(makeUdfTd(37));
         writtenLba = 38;
@@ -1011,10 +1018,10 @@ export class ISO9660 {
         }
 
         // 6. Reserve VDS (LBA 48..53)
-        await writer.write(makeUdfPvd(48, volumeLabel, baseDate, baseTz, customVolSetUnique));
-        await writer.write(makeUdfIuvd(49, volumeLabel));
+        await writer.write(makeUdfPvd(48, resolvedVolumeLabel, baseDate, baseTz, customVolSetUnique));
+        await writer.write(makeUdfIuvd(49, resolvedVolumeLabel));
         await writer.write(makeUdfPd(50, partitionLba, totalSectors));
-        await writer.write(makeUdfLv(51, volumeLabel));
+        await writer.write(makeUdfLv(51, resolvedVolumeLabel));
         await writer.write(makeUdfUsd(52));
         await writer.write(makeUdfTd(53));
         writtenLba = 54;
@@ -1127,7 +1134,7 @@ export class ISO9660 {
 
         // 11. UDF Partition Area (LBA PartitionLBA)
         // PartitionLBA: FSD (Logical LBA 0 inside partition)
-        await writer.write(makeUdfFsd(0, rootDir.udfFeLogicalLba, volumeLabel, baseDate, baseTz));
+        await writer.write(makeUdfFsd(0, rootDir.udfFeLogicalLba, resolvedVolumeLabel, baseDate, baseTz));
         writtenLba++;
 
         // PartitionLBA + 1: TD (Logical LBA 1 inside partition)

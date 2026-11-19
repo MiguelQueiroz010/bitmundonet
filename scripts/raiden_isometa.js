@@ -840,6 +840,12 @@ export async function buildCreditsWrapperPatches(r, wrapperTemplate, opts = {}) 
         const rootFeSec = new Uint8Array(await r.read((udf.partitionLba + udf.rootFeLogicalLba) * SECTOR, SECTOR));
         putU32le(rootFeSec, 56, neededSize);
         putU32le(rootFeSec, 60, 0);
+        // O Allocation Descriptor (short_ad) do diretório também precisa cobrir o FID novo — se só o
+        // InfoSize crescer, o descritor de alocação continua dizendo que o extent tem o tamanho antigo,
+        // e um leitor UDF que confia nele (em vez de assumir que o resto está logo depois) não vê o
+        // arquivo novo: a ISO9660 mostraria RAIDEN.ELF mas o UDF, não — os dois precisam concordar.
+        const eaLen = u32le(rootFeSec, 168);
+        putU32le(rootFeSec, 176 + eaLen, neededSize);
         updateUdfSectorTag(rootFeSec, 316);
         patches.push({ offset: (udf.partitionLba + udf.rootFeLogicalLba) * SECTOR, data: rootFeSec.subarray(0, 316) });
       }

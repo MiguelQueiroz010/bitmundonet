@@ -113,6 +113,15 @@ function stripHtml(html) {
     return html.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
 }
 
+function truncateClean(text, maxLen = 158) {
+    if (!text) return '';
+    const clean = text.trim();
+    if (clean.length <= maxLen) return clean;
+    const cut = clean.slice(0, maxLen);
+    const lastSpace = cut.lastIndexOf(' ');
+    return (lastSpace > maxLen * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[.,;:!?-]+$/, '') + '...';
+}
+
 // ==========================================
 // 3. GENERATE INDIVIDUAL PROJECT PAGES
 // ==========================================
@@ -136,7 +145,7 @@ function buildProjectHtml(project, allProjects, templateHtml) {
     const percentInt = parseInt(globalProgress, 10) || 0;
     const descRaw = project.description || '';
     const descParsed = parseArticleTags(descRaw);
-    const plainDesc = stripHtml(descParsed || subtitle || `${title} para ${platform}`).slice(0, 160);
+    const plainDesc = truncateClean(stripHtml(descParsed || subtitle || `${title} para ${platform}`), 158);
 
     const pageTitle = `${title} (${platform}) PT-BR - RomHacking do Raiden`;
     const canonicalUrl = `${BASE_URL}/projetos/${id}.html`;
@@ -204,7 +213,7 @@ function buildProjectHtml(project, allProjects, templateHtml) {
         const slides = galleryItems.map((item, idx) => `
             <div class="mySlides fade ${idx === 0 ? 'first' : ''}">
                 <a class="spotlight" href="${escapeHtml(item.src)}" data-description="${escapeHtml(item.caption || '')}">
-                    <img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.caption || title)}">
+                    <img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.caption || title)}" loading="${idx === 0 ? 'eager' : 'lazy'}" decoding="async">
                 </a>
             </div>
         `).join('');
@@ -666,10 +675,34 @@ function updateProjetosCatalog(projects) {
 }
 
 // ==========================================
-// 5. UPDATE HOMEPAGE (index.html) SEO
+// 5. UPDATE HOMEPAGE (index.html), TOOLS & LIBRARY SSG
 // ==========================================
 
-function updateHomepage() {
+function parseArticleDateMs(a) {
+    if (a.sortDate) {
+        const t = new Date(a.sortDate).getTime();
+        if (!isNaN(t)) return t;
+    }
+    const d = a.date;
+    if (!d) return 0;
+    const parts = d.includes('/') ? d.split('/') : d.split('-');
+    if (parts.length === 3) {
+        if (parts[0].length === 4) return new Date(d).getTime() || 0;
+        return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+    }
+    return new Date(d).getTime() || 0;
+}
+
+function formatArticleDate(date) {
+    if (!date) return '';
+    if (date.includes('-') && date.length >= 10) {
+        const d = new Date(date);
+        if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR');
+    }
+    return date;
+}
+
+function updateHomepage(articles = []) {
     const filePath = path.join(ROOT_DIR, 'index.html');
     if (!fs.existsSync(filePath)) return;
     let html = fs.readFileSync(filePath, 'utf-8');
@@ -678,8 +711,161 @@ function updateHomepage() {
     html = html.replace(/https:\/\/bitmundo\.net\//g, `${BASE_URL}/`);
     html = html.replace(/https:\/\/i\.postimg\.cc\/fyRzwH4X\/bitmundo-logo\.png/g, `${BASE_URL}/bitmundo_logo.png`);
 
+    // Pre-render published articles (selected === true) for SEO & AdSense content density
+    const published = articles
+        .filter(a => a.selected === true && a.id !== 'site_config_main')
+        .sort((a, b) => parseArticleDateMs(b) - parseArticleDateMs(a))
+        .slice(0, 10);
+
+    if (published.length > 0) {
+        const articlesMarkup = published.map(a => {
+            const title = escapeHtml(a.title || '');
+            const image = a.image ? escapeHtml(a.image) : '';
+            const author = escapeHtml(a.author || 'Bit.Raiden');
+            const date = escapeHtml(formatArticleDate(a.date || ''));
+            const align = escapeHtml(a.align || 'left');
+            const imageStyle = escapeHtml(a.imageStyle || '');
+            const articleId = escapeHtml(a.id || '');
+            const contentHtml = (a.topics && Array.isArray(a.topics))
+                ? renderTopics(a.topics)
+                : parseArticleTags(a.content || '');
+
+            return `
+                        <article class="article glass-panel" style="text-align: ${align};">
+                            <div class="article-wrapper">
+                                <div class="article-header">
+                                    ${image ? `<img class="article-title-img" src="${image}" alt="${title}" loading="lazy" decoding="async" style="${imageStyle}">` : ''}
+                                    <h3 class="article-title">${title}</h3>
+                                </div>
+                                <div class="article-content">
+                                    ${contentHtml}
+                                </div>
+                                <div id="reactions-container-${articleId}"></div>
+                                <div class="article-footer">
+                                    <div class="article-meta">
+                                        <span>Postado por: <strong class="meta-author">${author}</strong></span>
+                                        <span class="meta-date">Publicado em: <strong>${date}</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>`;
+        }).join('\n');
+
+        const contRegex = /<div id="cont">[\s\S]*?<\/div>\s*(?=<\/div>\s*<div id="load-more-container")/i;
+        if (contRegex.test(html)) {
+            html = html.replace(contRegex, `<div id="cont">\n<!-- SSG:ARTICLES_START -->\n${articlesMarkup}\n<!-- SSG:ARTICLES_END -->\n                        </div>\n                    `);
+        }
+        console.log(`[SSG] Updated index.html with ${published.length} pre-rendered articles.`);
+    } else {
+        console.log(`[SSG] Updated index.html with canonical domain and SEO tags.`);
+    }
+
     fs.writeFileSync(filePath, html, 'utf-8');
-    console.log(`[SSG] Updated index.html with canonical domain and SEO tags.`);
+}
+
+function updateToolsPage(tools = []) {
+    const filePath = path.join(ROOT_DIR, 'tools.html');
+    if (!fs.existsSync(filePath) || tools.length === 0) return;
+    let html = fs.readFileSync(filePath, 'utf-8');
+
+    const sorted = [...tools].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    const groups = {};
+    sorted.forEach(t => {
+        const letter = (t.name || ' ').charAt(0).toUpperCase();
+        if (!groups[letter]) groups[letter] = [];
+        groups[letter].push(t);
+    });
+
+    const listMarkup = Object.keys(groups).sort().map(key => {
+        const itemsHtml = groups[key].map(tool => {
+            const name = escapeHtml(tool.name || '');
+            const icon = escapeHtml(tool.icon || '/media/placeholder.png');
+            const desc = parseArticleTags(tool.description || '');
+            const type = escapeHtml(tool.type || '');
+            const target = escapeHtml(tool.target || '');
+            const credit = escapeHtml(tool.credit || tool.credits || '');
+            const url = escapeHtml(tool.url || '#');
+            const version = escapeHtml(tool.version || '');
+            return `
+                        <div class="toolItem">
+                            <a style="cursor: pointer;" onclick="toggleFolder(this)">
+                                <picture class="hide_folder_wrapper">
+                                    <img class="folder-arrow" src="/elements/light_down_arrow.png" alt="" style="width: 20px; height: 20px; transition: transform 0.3s; filter: brightness(0) invert(1);" />
+                                </picture>
+                                <img src="${icon}" alt="${name}" loading="lazy" decoding="async" style="width: 48px; height: 48px; object-fit: contain;" />
+                                <h2>${name}</h2>
+                            </a>
+                            <div class="info-panel" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
+                                <div style="font-size: 0.95rem; line-height: 1.6;">
+                                    ${desc}
+                                </div>
+                                <p style="margin-top: 1rem;">
+                                    <strong>Tipo:</strong> ${type}<br>
+                                    <strong>Alvo:</strong> <span style="color:var(--highlight)">${target}</span><br>
+                                    <strong>Créditos:</strong> <span style="color:#4ade80">${credit}</span>
+                                </p>
+                                <div id="link" style="margin-top: 1.5rem;">
+                                    <a href="${url}" target="_blank" rel="noopener noreferrer">${tool.isOnline ? 'Rodar Online' : `Download (${version})`}</a>
+                                </div>
+                            </div>
+                        </div>`;
+        }).join('');
+        return `                    <li><h3>${escapeHtml(key)}</h3>${itemsHtml}\n                    </li>`;
+    }).join('\n');
+
+    const ulRegex = /<ul id="alphabet-list">[\s\S]*?<\/ul>/i;
+    if (ulRegex.test(html)) {
+        html = html.replace(ulRegex, `<ul id="alphabet-list">\n<!-- SSG:TOOLS_START -->\n${listMarkup}\n<!-- SSG:TOOLS_END -->\n                </ul>`);
+        fs.writeFileSync(filePath, html, 'utf-8');
+        console.log(`[SSG] Updated tools.html with ${sorted.length} pre-rendered tools.`);
+    }
+}
+
+function updateLibraryPage(libraryItems = []) {
+    const filePath = path.join(ROOT_DIR, 'library.html');
+    if (!fs.existsSync(filePath) || libraryItems.length === 0) return;
+    let html = fs.readFileSync(filePath, 'utf-8');
+
+    const active = libraryItems
+        .filter(g => g.active !== false && g.active !== 'false')
+        .sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+
+    const groups = {};
+    active.forEach(g => {
+        const letter = (g.title || ' ').charAt(0).toUpperCase();
+        if (!groups[letter]) groups[letter] = [];
+        groups[letter].push(g);
+    });
+
+    const cardsMarkup = Object.keys(groups).sort().map(key => {
+        const cards = groups[key].map(game => {
+            const title = escapeHtml(game.title || '');
+            const cover = escapeHtml(game.cover || '/media/placeholder.png');
+            const platform = escapeHtml(game.platform || '');
+            const year = escapeHtml(game.release_year || game.year || '');
+            const genre = escapeHtml(game.genre || '');
+            return `
+            <div class="game-card">
+                <img src="${cover}" class="game-cover" alt="${title}" loading="lazy" decoding="async">
+                <div class="game-body">
+                    <div class="game-meta">
+                        <span class="platform-tag">${platform}</span>
+                        <span>${year}</span>
+                    </div>
+                    <h2 class="game-title">${title}</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">${genre}</p>
+                </div>
+            </div>`;
+        }).join('');
+        return `            <h2 class="category-header">${escapeHtml(key)}</h2>${cards}`;
+    }).join('\n');
+
+    const libRegex = /<div id="library-container" class="library-grid">[\s\S]*?<\/div>\s*(?=<!-- Modal for details -->)/i;
+    if (libRegex.test(html)) {
+        html = html.replace(libRegex, `<div id="library-container" class="library-grid">\n<!-- SSG:LIBRARY_START -->\n${cardsMarkup}\n<!-- SSG:LIBRARY_END -->\n        </div>\n\n        `);
+        fs.writeFileSync(filePath, html, 'utf-8');
+        console.log(`[SSG] Updated library.html with ${active.length} pre-rendered games.`);
+    }
 }
 
 // ==========================================
@@ -709,7 +895,8 @@ function generateSitemap(projects, articles) {
         { loc: `${BASE_URL}/tools.html`, priority: '0.8', changefreq: 'weekly' },
         { loc: `${BASE_URL}/library.html`, priority: '0.7', changefreq: 'weekly' },
         { loc: `${BASE_URL}/about.html`, priority: '0.6', changefreq: 'monthly' },
-        { loc: `${BASE_URL}/privacidade.html`, priority: '0.3', changefreq: 'monthly' }
+        { loc: `${BASE_URL}/termos.html`, priority: '0.4', changefreq: 'monthly' },
+        { loc: `${BASE_URL}/privacidade.html`, priority: '0.4', changefreq: 'monthly' }
     ];
 
     const projectUrls = projects.map(p => {
@@ -815,13 +1002,15 @@ async function main() {
     console.log(' Target Domain: ' + BASE_URL);
     console.log('==============================================');
 
-    console.log('[SSG] Fetching projects and articles from Firestore...');
-    const [projects, articles] = await Promise.all([
+    console.log('[SSG] Fetching projects, articles, tools and library from Firestore...');
+    const [projects, articles, tools, library] = await Promise.all([
         fetchCollection('projects'),
-        fetchCollection('articles')
+        fetchCollection('articles'),
+        fetchCollection('tools'),
+        fetchCollection('library')
     ]);
 
-    console.log(`[SSG] Fetched ${projects.length} projects and ${articles.length} articles.`);
+    console.log(`[SSG] Fetched ${projects.length} projects, ${articles.length} articles, ${tools.length} tools, ${library.length} library items.`);
 
     if (projects.length === 0) {
         console.error('[SSG] Aborting: No projects fetched from Firestore.');
@@ -860,8 +1049,10 @@ async function main() {
     // Update Catalog (projetos.html)
     updateProjetosCatalog(projects);
 
-    // Update Homepage (index.html)
-    updateHomepage();
+    // Update Homepage (index.html), Tools & Library with pre-rendered content
+    updateHomepage(articles);
+    updateToolsPage(tools);
+    updateLibraryPage(library);
 
     // Generate Sitemap & Update robots.txt
     generateSitemap(projects, articles);

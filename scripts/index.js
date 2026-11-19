@@ -31,10 +31,14 @@ export async function loadArticlesFromFirestore(isLoadMore = false) {
   const loadMoreBtn = document.getElementById("load-more-container");
   if (!container) return;
 
+  const hasPrerendered = !isLoadMore && container.querySelector('.article') !== null;
+
   try {
-    // If not load more, clear container and reset lastVisible
+    // If not load more, keep pre-rendered articles visible until Firestore responds (prevents CLS and flash of "Carregando...")
     if (!isLoadMore) {
-      container.innerHTML = `<div style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">Carregando publicações...</div>`;
+      if (!hasPrerendered) {
+        container.innerHTML = `<div style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">Carregando publicações...</div>`;
+      }
       lastVisibleDoc = null;
     }
 
@@ -62,12 +66,12 @@ export async function loadArticlesFromFirestore(isLoadMore = false) {
 
     const querySnapshot = await getDocs(q);
 
-    if (!isLoadMore) container.innerHTML = ""; // Clear loader after fetch
-
     if (querySnapshot.empty && !isLoadMore) {
       console.log("Modern query empty, using legacy fallback.");
       return loadArticlesLegacyFallback();
     }
+
+    if (!isLoadMore) container.innerHTML = ""; // Replace pre-rendered / loader with live hydrated articles
 
     // Save last visible doc for next pagination
     lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
@@ -83,10 +87,10 @@ export async function loadArticlesFromFirestore(isLoadMore = false) {
 
   } catch (error) {
     console.error("Erro ao carregar artigos do Firestore:", error);
-    if (error.message.includes("index")) {
+    if (error.message && error.message.includes("index")) {
       // Fallback for missing index during migration
       loadArticlesLegacyFallback();
-    } else {
+    } else if (!hasPrerendered) {
       container.innerHTML = "<p>Erro ao carregar publicações.</p>";
     }
   }

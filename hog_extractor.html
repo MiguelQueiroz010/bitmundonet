@@ -184,6 +184,9 @@
             100% { opacity: 1; }
         }
     </style>
+    <meta name="google-adsense-account" content="ca-pub-6401015076542561" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
 </head>
 
 <body>
@@ -226,11 +229,45 @@
             </div>
 
         </section>
+
+        <!-- Guia Técnico & Documentação (SEO + Valor para Modders) -->
+        <section class="glass-panel" style="max-width: 860px; margin: 0 auto 3.5rem auto; padding: 2.2rem; text-align: left;">
+            <h2 class="section-title" style="margin-bottom: 1rem;">Sobre o HOG Extractor Online</h2>
+            <p style="color: var(--text-muted); line-height: 1.75; margin-bottom: 1.2rem;">
+                O <strong>HOG Extractor</strong> é uma ferramenta web gratuita desenvolvida pelo <strong>RomHacking do Raiden</strong> para inspecionar e extrair arquivos de contêineres <code>.HOG</code> presentes em jogos da série <em>Dragon Ball Z</em> para PlayStation 2 (como a linha Budokai / Sagas e títulos relacionados que utilizam empacotamento HOG).
+            </p>
+            <p style="color: var(--text-muted); line-height: 1.75; margin-bottom: 1.5rem;">
+                <em>In English: Extract <code>.HOG</code> archive containers from PlayStation 2 Dragon Ball Z games directly in your web browser with zero server uploads. Ideal for PS2 romhackers, translators, and texture/model modders.</em>
+            </p>
+
+            <h3 style="color: var(--highlight, #f1a32e); margin-top: 1.5rem; margin-bottom: 0.75rem;">Como funciona a extração?</h3>
+            <ol style="color: var(--text-muted); line-height: 1.8; padding-left: 1.4rem; margin-bottom: 1.5rem;">
+                <li>Clique no botão <strong>Selecionar HOG</strong> e escolha o arquivo <code>.hog</code> extraído da sua cópia do jogo.</li>
+                <li>O navegador lê a tabela de entradas do cabeçalho binário (offsets, tamanhos e nomes internos dos recursos) localmente.</li>
+                <li>Selecione a pasta de destino quando solicitado pela <strong>File System Access API</strong> (recomendado Google Chrome, Edge ou Opera no desktop).</li>
+                <li>Os arquivos extraídos ficam prontos para edição de texturas, tradução de scripts ou análise de engenharia reversa.</li>
+            </ol>
+
+            <h3 style="color: var(--highlight, #f1a32e); margin-top: 1.5rem; margin-bottom: 0.75rem;">Privacidade e Segurança</h3>
+            <p style="color: var(--text-muted); line-height: 1.75; margin-bottom: 0;">
+                Todo o processamento ocorre <strong>100% na máquina do usuário</strong> via JavaScript moderno, sem envio de arquivos para a nuvem e sem necessidade de instalar executáveis suspeitos. Confira também nossas outras ferramentas online como o <a href="/raiden_patcher.html" style="color: #60a5fa;">Raiden Web Patcher</a> e a <a href="/tools/Fully/AFS_STATION.html" style="color: #60a5fa;">AFS Audio Station</a>.
+            </p>
+        </section>
     </main>
 
     <!-- Footer (Componente Reutilizado) -->
     <footer>
-        <div w3-include-html="/footer.html"></div>
+        <div w3-include-html="/footer.html">
+            <p>
+                <span class="footer-copyright">&copy; <b>RomHacking do Raiden (Bit.Raiden)</b> 2026. Todos os direitos reservados.</span>
+                <span class="footer-sep">|</span>
+                <a href="/about.html" class="footer-link">Sobre &amp; Contato</a>
+                <span class="footer-sep">|</span>
+                <a href="/termos.html" class="footer-link">Termos de Uso</a>
+                <span class="footer-sep">|</span>
+                <a href="/privacidade.html" class="footer-link">Política de Privacidade</a>
+            </p>
+        </div>
         <script>w3IncludeHTML();</script>
     </footer>
 

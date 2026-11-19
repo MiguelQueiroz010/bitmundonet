@@ -86,17 +86,17 @@ function renderProjectCard(p) {
         status === 'Em Progresso' ? 'status-wip' : 'status-mod';
 
     return `
-        <div class="project-card" onclick="if(window.AJAXRouter){window.AJAXRouter.navigate('/project_view.html?id=${id}')}else{location.href='/project_view.html?id=${id}'}">
+        <a href="/projetos/${id}.html" class="project-card" style="text-decoration: none; color: inherit;">
             <span class="project-status ${statusClass}">${status}</span>
-            <img src="${thumbnail}" alt="${title}" class="project-image">
+            <img src="${thumbnail}" alt="${title}" class="project-image" loading="lazy" decoding="async">
             <div class="project-overlay">
-                <img src="${logo}" alt="Logo" class="project-logo">
+                <img src="${logo}" alt="Logo" class="project-logo" loading="lazy" decoding="async">
                 <div class="project-card-info">
                     <h2 class="project-title">${title}</h2>
                     <p>${subtitle}</p>
                 </div>
             </div>
-        </div>
+        </a>
     `;
 
 }

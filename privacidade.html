@@ -20,80 +20,120 @@
     <meta property="og:description" content="Política de privacidade e proteção de dados do portal RomHacking do Raiden. Informações sobre segurança, navegação e Google AdSense." />
     <meta property="og:image" content="https://bitraiden.org/bitmundo_logo.png" />
 
-    <link rel="stylesheet" href="/index.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png" />
+    <link rel="stylesheet" href="/css/style.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #fff;
-            background-color: #121212;
-            margin: 0;
-            padding: 0;
+        .legal-container {
+            max-width: 860px;
+            margin: 2.5rem auto 4rem auto;
+            padding: 2.5rem;
         }
-        .container {
-            max-width: 800px;
-            margin: 2em auto;
-            padding: 2em;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        h1 {
-            color: rgb(241, 163, 46);
+        .legal-container h1 {
+            color: var(--highlight, #f1a32e);
             text-align: center;
-            border-bottom: 2px solid rgb(241, 163, 46);
-            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(241, 163, 46, 0.45);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
         }
-        h2 {
-            color: rgb(241, 163, 46);
-            margin-top: 1.5em;
+        .legal-container h2 {
+            color: var(--highlight, #f1a32e);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.35rem;
         }
-        p {
-            margin-bottom: 1em;
+        .legal-container p,
+        .legal-container li {
+            color: var(--text-muted, #d1d5db);
+            line-height: 1.75;
+            margin-bottom: 0.9rem;
         }
-        ul {
-            margin-bottom: 1em;
+        .legal-container ul {
+            padding-left: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+        .legal-container a {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+        .legal-meta {
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 2rem;
         }
     </style>
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script type="module" src="/scripts/navbar_auth.js"></script>
+    <script type="text/javascript" src="/scripts/router.js"></script>
+    <meta name="google-adsense-account" content="ca-pub-6401015076542561" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
 </head>
 <body>
     <div w3-include-html="/navbar.html"></div>
     <script>w3IncludeHTML();</script>
 
-    <div class="container">
-        <h1>Política de Privacidade</h1>
-        <p>A sua privacidade é importante para nós. É política do BitMundo respeitar a sua privacidade em relação a qualquer informação sua que possamos coletar no site BitMundo, e outros sites que possuímos e operamos.</p>
-        
-        <h2>Coleta de Informações</h2>
-        <p>Solicitamos informações pessoais apenas quando realmente precisamos delas para lhe fornecer um serviço. Fazemo-lo por meios justos e legais, com o seu conhecimento e consentimento. Também informamos por que estamos coletando e como será usado.</p>
-        
-        <h2>Uso de Cookies</h2>
-        <p>O BitMundo utiliza cookies para melhorar a experiência do usuário. Cookies são pequenos arquivos de texto armazenados no seu dispositivo que nos ajudam a entender como você interage com o nosso site. Você pode optar por desativar os cookies nas configurações do seu navegador, mas isso pode afetar a funcionalidade de certas partes do site.</p>
-        
-        <h2>Segurança de Dados</h2>
-        <p>Apenas retemos as informações coletadas pelo tempo necessário para fornecer o serviço solicitado. Quando armazenamos dados, protegemo-los dentro de meios comercialmente aceitáveis ​​para evitar perdas e roubos, bem como acesso, divulgação, cópia, uso ou modificação não autorizados.</p>
-        
-        <h2>Links para Sites de Terceiros</h2>
-        <p>Nosso site pode ter links para sites externos que não são operados por nós. Esteja ciente de que não temos controle sobre o conteúdo e práticas desses sites e não podemos aceitar responsabilidade por suas respectivas políticas de privacidade.</p>
-        
-        <h2>Seu Consentimento</h2>
-        <p>O uso continuado de nosso site será considerado como aceitação de nossas práticas em torno de privacidade e informações pessoais. Se você tiver alguma dúvida sobre como lidamos com dados do usuário e informações pessoais, entre em contato conosco.</p>
-        
-        <h2>Compromisso do Usuário</h2>
-        <p>O usuário se compromete a fazer uso adequado dos conteúdos e da informação que o BitMundo oferece no site e com caráter enunciativo, mas não limitativo:</p>
-        <ul>
-            <li>A) Não se envolver em atividades que sejam ilegais ou contrárias à boa fé e à ordem pública;</li>
-            <li>B) Não divulgar conteúdo ou propaganda de natureza racista, xenofóbica, ou sobre cassinos, casas de apostas, jogos de sorte e azar, qualquer tipo de pornografia ilegal, de apologia ao terrorismo ou contra os direitos humanos;</li>
-            <li>C) Não causar danos aos sistemas físicos (hardware) e lógicos (software) do BitMundo, de seus fornecedores ou terceiros.</li>
-        </ul>
-        
-        <p>Esta política é efetiva a partir de Fevereiro/2026.</p>
-    </div>
+    <main class="container">
+        <article class="glass-panel legal-container">
+            <h1>Política de Privacidade</h1>
+            <p class="legal-meta">Portal <strong>RomHacking do Raiden (Bit.Raiden — bitraiden.org)</strong> • Atualizada em Novembro de 2026</p>
+
+            <p>A sua privacidade é prioridade para nós. Esta Política de Privacidade descreve como o portal <strong>RomHacking do Raiden</strong> (também conhecido como <strong>Bit.Raiden</strong> / <strong>BitMundo</strong>, acessível em <strong>https://bitraiden.org</strong>) coleta, utiliza e protege informações durante a sua navegação.</p>
+
+            <h2>1. Coleta e Uso de Informações</h2>
+            <p>Você pode navegar pela maior parte do site sem fornecer dados pessoais. Coletamos informações apenas quando estritamente necessário para oferecer funcionalidades interativas, como:</p>
+            <ul>
+                <li><strong>Comentários e Reações:</strong> nome/apelido exibido, texto do comentário e identificadores técnicos gerenciados via Google Firebase quando você opta por comentar ou fazer login.</li>
+                <li><strong>Dados Técnicos de Navegação:</strong> endereço IP, tipo de navegador, páginas visitadas e tempo de permanência, usados para estatísticas agregadas, segurança e prevenção contra spam.</li>
+                <li><strong>Ferramentas Web Locais (Raiden Web Patcher, HOG Extractor, AFS Audio Station, TTxT):</strong> todos os arquivos de jogos, patches, áudios ou scripts abertos nessas ferramentas são processados <strong>100% localmente no seu navegador</strong>. Nenhum arquivo seu é enviado ou armazenado em nossos servidores.</li>
+            </ul>
+
+            <h2>2. Google AdSense e Cookies de Publicidade</h2>
+            <p>O portal <strong>bitraiden.org</strong> utiliza o serviço de publicidade <strong>Google AdSense</strong> para exibir anúncios que ajudam a manter os projetos e ferramentas gratuitos.</p>
+            <ul>
+                <li>Fornecedores de terceiros, incluindo o <strong>Google</strong>, usam cookies (como o cookie <em>DoubleClick / DART</em>) para exibir anúncios com base nas visitas anteriores do usuário a este site ou a outros sites na Internet.</li>
+                <li>O uso de cookies de publicidade permite que o Google e seus parceiros veiculem anúncios relevantes com base na sua navegação.</li>
+                <li>Você pode <strong>desativar a publicidade personalizada</strong> a qualquer momento acessando as <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Configurações de Anúncios do Google</a> ou o portal <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">www.aboutads.info</a>.</li>
+                <li>Para mais detalhes sobre como o Google utiliza dados quando você usa sites parceiros, consulte a página oficial <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">Como o Google usa informações de sites ou apps que utilizam nossos serviços</a>.</li>
+            </ul>
+
+            <h2>3. Gerenciamento de Cookies</h2>
+            <p>Cookies são pequenos arquivos de texto armazenados no seu navegador para lembrar preferências (como modo de exibição em grade/lista) e viabilizar recursos de autenticação e anúncios. Você pode bloquear ou apagar cookies diretamente nas configurações do seu navegador, ciente de que isso pode desativar algumas preferências salvas.</p>
+
+            <h2>4. Serviços e Links de Terceiros</h2>
+            <p>Nosso site integra widgets e links externos operados por terceiros — incluindo <strong>Google Firebase</strong>, <strong>YouTube</strong>, <strong>SoundCloud</strong>, <strong>LivePix</strong>, <strong>GitHub</strong> e <strong>Discord</strong>. Cada serviço possui sua própria política de privacidade e não temos controle sobre o tratamento de dados realizado fora do domínio <code>bitraiden.org</code>.</p>
+
+            <h2>5. Seus Direitos (LGPD — Lei nº 13.709/2018)</h2>
+            <p>Em conformidade com a Lei Geral de Proteção de Dados (LGPD), você tem direito a solicitar confirmação da existência de tratamento, acesso, correção ou exclusão de quaisquer dados pessoais vinculados à sua conta ou comentários neste portal.</p>
+
+            <h2>6. Compromisso do Usuário</h2>
+            <p>Ao utilizar o portal <strong>RomHacking do Raiden</strong>, o usuário compromete-se a:</p>
+            <ul>
+                <li>Não praticar atividades ilegais ou contrárias à boa-fé e à ordem pública nos espaços de comentários;</li>
+                <li>Não publicar conteúdo ofensivo, discriminatório, spam ou links para material ilegal ou protegido por direitos autorais;</li>
+                <li>Não tentar violar a segurança, integridade ou disponibilidade do site e de seus serviços integrados.</li>
+            </ul>
+
+            <h2>7. Contato</h2>
+            <p>Se você tiver dúvidas sobre esta Política de Privacidade, desejar solicitar a remoção de dados/comentários ou tratar de assuntos relacionados a direitos autorais, entre em contato pelos canais oficiais na página <a href="/about.html">Sobre o Raiden</a>, pelo nosso <a href="https://github.com/MiguelQueiroz010" target="_blank" rel="noopener noreferrer">GitHub</a> ou na comunidade oficial do <a href="https://discord.gg/5TgrcyFJEb" target="_blank" rel="noopener noreferrer">Discord</a>. Consulte também nossos <a href="/termos.html">Termos de Uso e Aviso Legal</a>.</p>
+        </article>
+    </main>
 
     <footer>
-        <div w3-include-html="/footer.html"></div>
+        <div w3-include-html="/footer.html">
+            <p>
+                <span class="footer-copyright">&copy; <b>RomHacking do Raiden (Bit.Raiden)</b> 2026. Todos os direitos reservados.</span>
+                <span class="footer-sep">|</span>
+                <a href="/about.html" class="footer-link">Sobre &amp; Contato</a>
+                <span class="footer-sep">|</span>
+                <a href="/termos.html" class="footer-link">Termos de Uso</a>
+                <span class="footer-sep">|</span>
+                <a href="/privacidade.html" class="footer-link">Política de Privacidade</a>
+            </p>
+        </div>
         <script>w3IncludeHTML();</script>
     </footer>
 </body>

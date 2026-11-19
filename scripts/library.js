@@ -11,9 +11,11 @@ async function loadLibrary() {
     const container = document.getElementById("library-container");
     if (!container) return;
 
+    const hasPrerendered = container.querySelector('.game-card') !== null;
+
     if (gamesData.length > 0) {
         renderLibrary();
-    } else {
+    } else if (!hasPrerendered) {
         container.innerHTML = `<div class="text-center" style="grid-column: 1/-1; padding: 2rem; color: rgba(255,255,255,0.5);">Carregando biblioteca...</div>`;
     }
 
@@ -25,7 +27,7 @@ async function loadLibrary() {
         renderLibrary();
     } catch (err) {
         console.error("Erro ao carregar biblioteca do Firestore:", err);
-        if (container && gamesData.length === 0) {
+        if (container && gamesData.length === 0 && !hasPrerendered) {
             container.innerHTML = "<p style='text-align:center;'>Erro ao carregar a biblioteca.</p>";
         }
     }

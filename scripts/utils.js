@@ -32,8 +32,8 @@ export function parseArticleTags(text) {
     const discordPattern = /(https?:\/\/(?:discord\.gg|discord\.com\/invite)\/([a-zA-Z0-9_-]+))/gi;
     html = html.replace(discordPattern, (match, url, code) => {
         const cardId = `discord-card-${Math.random().toString(36).substr(2, 9)}`;
-        // Note: updateDiscordBanner must be globally available if used
-        if (typeof window.updateDiscordBanner === 'function') setTimeout(() => window.updateDiscordBanner(code, cardId), 100);
+        // Note: updateDiscordBanner must be globally available if used (browser-only guard for SSG)
+        if (typeof window !== 'undefined' && typeof window.updateDiscordBanner === 'function') setTimeout(() => window.updateDiscordBanner(code, cardId), 100);
         return `
             <div id="${cardId}" class="discord-invite-card glass-panel" style="margin: 1.5rem 0; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(88, 101, 242, 0.4); background: rgba(88, 101, 242, 0.1); border-radius: var(--radius-md); flex-wrap: wrap; position: relative; overflow: hidden; transition: all 0.3s ease;">
                 <div class="discord-banner-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; opacity: 0.2;"></div>
@@ -53,11 +53,11 @@ export function parseArticleTags(text) {
     // 3. Image Tags Support
     // Style 1: (image style="..." = "url")caption(/image)
     html = html.replace(/\(image style="([^"]+)"\s*=\s*"([^"]+)"\)(.*?)\(\/image\)/gi,
-        '\n\n<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Image" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"><p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); font-style: italic; margin-top: 0.5rem; text-align: center;">$3</p></div>\n\n');
+        '\n\n<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Imagem do artigo" loading="lazy" decoding="async" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"><p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); font-style: italic; margin-top: 0.5rem; text-align: center;">$3</p></div>\n\n');
 
     // Style 2: (image style="...")url(/image)
     html = html.replace(/\(image style="([^"]+)"\)([^)]*)\(\/image\)/gi,
-        '\n\n<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Image" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"></div>\n\n');
+        '\n\n<div style="$1; margin: 1.5rem 0;"><img class="resp" src="$2" alt="Imagem do artigo" loading="lazy" decoding="async" style="max-width: 100%; height: auto; border-radius: var(--radius-md);"></div>\n\n');
 
     // 4. Flexible Formatting Tags (Independent Open/Close)
     // Support toggle style: (color="red")Text(color="blue")More Text(/color)

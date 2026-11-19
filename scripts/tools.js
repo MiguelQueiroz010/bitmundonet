@@ -9,6 +9,8 @@ async function loadTools() {
     const container = document.getElementById("alphabet-list");
     if (!container) return;
 
+    const hasPrerendered = container.querySelector('.toolItem') !== null;
+
     if (toolArray.length > 0) {
         renderTools();
     }
@@ -20,7 +22,7 @@ async function loadTools() {
         renderTools();
     } catch (error) {
         console.error("Error loading tools from Firestore:", error);
-        if (container && toolArray.length === 0) {
+        if (container && toolArray.length === 0 && !hasPrerendered) {
             container.innerHTML = "<li><p style='padding: 1rem;'>Erro ao carregar ferramentas.</p></li>";
         }
     }
@@ -68,21 +70,21 @@ function renderTools() {
             toolItem.innerHTML = `
                 <a style="cursor: pointer;" onclick="toggleFolder(this)">
                     <picture class="hide_folder_wrapper">
-                        <img class="folder-arrow" src="../../elements/light_down_arrow.png" style="width: 20px; height: 20px; transition: transform 0.3s; filter: brightness(0) invert(1);" />
+                        <img class="folder-arrow" src="/elements/light_down_arrow.png" alt="" style="width: 20px; height: 20px; transition: transform 0.3s; filter: brightness(0) invert(1);" />
                     </picture>
-                    <img src="${tool.icon || '/media/placeholder.png'}" style="width: 48px; height: 48px; object-fit: contain;" />
+                    <img src="${tool.icon || '/media/placeholder.png'}" alt="${tool.name || ''}" loading="lazy" decoding="async" style="width: 48px; height: 48px; object-fit: contain;" />
                     <h2>${tool.name}</h2>
                 </a>
                 <div class="info-panel" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
                     <div style="font-size: 0.95rem; line-height: 1.6;">
                         ${parseArticleTags(tool.description || '')}
-                        ${tool.extra ? `<p><a target="_blank" href="${tool.extra}">${tool.extra}</a></p>` : ''}
+                        ${tool.extra ? `<p><a target="_blank" rel="noopener noreferrer" href="${tool.extra}">${tool.extra}</a></p>` : ''}
                     </div>
-                        <br><br>
+                    <p style="margin-top: 1rem;">
                         <strong>Tipo:</strong> ${tool.type || ''}
-                        <br><br>
+                        <br>
                         <strong>Alvo:</strong> <span style="color:var(--highlight)">${tool.target || ''}</span>
-                        <br><br>
+                        <br>
                         <strong>Créditos:</strong> <span style="color:#4ade80">${tool.credit || tool.credits || ''}</span>
                     </p>
                     <div id="link" style="margin-top: 1.5rem;">

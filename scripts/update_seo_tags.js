@@ -497,43 +497,54 @@ export function updateAllSeoTags() {
     <meta property="og:description" content="Política de privacidade e proteção de dados do portal RomHacking do Raiden. Informações sobre segurança, navegação e Google AdSense." />
     <meta property="og:image" content="https://bitraiden.org/bitmundo_logo.png" />
 
-    <link rel="stylesheet" href="/index.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png" />
+    <link rel="stylesheet" href="/css/style.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #fff;
-            background-color: #121212;
-            margin: 0;
-            padding: 0;
+        .legal-container {
+            max-width: 860px;
+            margin: 2.5rem auto 4rem auto;
+            padding: 2.5rem;
         }
-        .container {
-            max-width: 800px;
-            margin: 2em auto;
-            padding: 2em;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        h1 {
-            color: rgb(241, 163, 46);
+        .legal-container h1 {
+            color: var(--highlight, #f1a32e);
             text-align: center;
-            border-bottom: 2px solid rgb(241, 163, 46);
-            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(241, 163, 46, 0.45);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
         }
-        h2 {
-            color: rgb(241, 163, 46);
-            margin-top: 1.5em;
+        .legal-container h2 {
+            color: var(--highlight, #f1a32e);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.35rem;
         }
-        p {
-            margin-bottom: 1em;
+        .legal-container p,
+        .legal-container li {
+            color: var(--text-muted, #d1d5db);
+            line-height: 1.75;
+            margin-bottom: 0.9rem;
         }
-        ul {
-            margin-bottom: 1em;
+        .legal-container ul {
+            padding-left: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+        .legal-container a {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+        .legal-meta {
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 2rem;
         }
     </style>
     <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <script type="text/javascript" src="/scripts/navbar.js"></script>
+    <script type="module" src="/scripts/navbar_auth.js"></script>
+    <script type="text/javascript" src="/scripts/router.js"></script>
 </head>`);
   });
 
@@ -652,6 +663,61 @@ export function updateAllSeoTags() {
     updateFile(f, html => {
       if (html.includes('noindex')) return html;
       return html.replace(/<head>/i, `<head>\n    <meta name="robots" content="noindex, nofollow" />`);
+    });
+  });
+
+  // 11. Ensure AdSense meta, script, preconnect, and static footer fallback across all public pages
+  const ADSENSE_CLIENT = 'ca-pub-6401015076542561';
+  const ADSENSE_META = `<meta name="google-adsense-account" content="${ADSENSE_CLIENT}" />`;
+  const ADSENSE_SCRIPT = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}" crossorigin="anonymous"></script>`;
+  const FOOTER_FALLBACK = `<div w3-include-html="/footer.html">
+            <p>
+                <span class="footer-copyright">&copy; <b>RomHacking do Raiden (Bit.Raiden)</b> 2026. Todos os direitos reservados.</span>
+                <span class="footer-sep">|</span>
+                <a href="/about.html" class="footer-link">Sobre &amp; Contato</a>
+                <span class="footer-sep">|</span>
+                <a href="/termos.html" class="footer-link">Termos de Uso &amp; Aviso Legal</a>
+                <span class="footer-sep">|</span>
+                <a href="/privacidade.html" class="footer-link">Política de Privacidade</a>
+            </p>
+        </div>`;
+
+  const publicPages = [
+    'index.html',
+    'projetos.html',
+    'raiden_patcher.html',
+    'hog_extractor.html',
+    'tools.html',
+    'library.html',
+    'about.html',
+    'privacidade.html',
+    'termos.html',
+    'tools/Fully/AFS_STATION.html',
+    'tools/Fully/TTxT-standalone.html'
+  ];
+
+  publicPages.forEach(f => {
+    updateFile(f, html => {
+      let out = html;
+      if (!out.includes('google-adsense-account')) {
+        out = out.replace(/<\/head>/i, `    ${ADSENSE_META}\n</head>`);
+      }
+      if (!out.includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js')) {
+        out = out.replace(/<\/head>/i, `    ${ADSENSE_SCRIPT}\n</head>`);
+      }
+      if (!out.includes('rel="preconnect" href="https://pagead2.googlesyndication.com"')) {
+        out = out.replace(/<\/head>/i, `    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />\n</head>`);
+      }
+      if (out.includes('<div w3-include-html="/footer.html"></div>')) {
+        out = out.replace('<div w3-include-html="/footer.html"></div>', FOOTER_FALLBACK);
+      }
+      // Remove duplicate w3data.js in body if already loaded in head
+      const w3Matches = out.match(/<script[^>]*w3data\.js[^>]*><\/script>/gi);
+      if (w3Matches && w3Matches.length > 1) {
+        let seen = 0;
+        out = out.replace(/\s*<script[^>]*w3data\.js[^>]*><\/script>/gi, m => (++seen === 1 ? m : ''));
+      }
+      return out;
     });
   });
 

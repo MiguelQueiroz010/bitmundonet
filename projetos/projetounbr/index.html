@@ -126,6 +126,9 @@
 }
     </script>
     
+    <meta name="google-adsense-account" content="ca-pub-6401015076542561" />
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
 
     <!-- Shared Assets -->
     <link rel="stylesheet" href="/css/style.css" />
@@ -144,6 +147,7 @@
     <script type="module" src="/scripts/projects_loader.js"></script>
     <script type="text/javascript" src="/scripts/gallery.js"></script>
     <script type="text/javascript" src="/scripts/spotlight.bundle.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561" crossorigin="anonymous"></script>
 
 
     <style>
@@ -330,31 +334,31 @@
                         
             <div class="mySlides fade first">
                 <a class="spotlight" href="https://i.postimg.cc/DZNM7zTD/logo.png" data-description="Logo UN1">
-                    <img src="https://i.postimg.cc/DZNM7zTD/logo.png" alt="Logo UN1">
+                    <img src="https://i.postimg.cc/DZNM7zTD/logo.png" alt="Logo UN1" loading="eager" decoding="async">
                 </a>
             </div>
         
             <div class="mySlides fade ">
                 <a class="spotlight" href="https://i.postimg.cc/fWGMKz95/logo_nun2.png" data-description="Logo UN2">
-                    <img src="https://i.postimg.cc/fWGMKz95/logo_nun2.png" alt="Logo UN2">
+                    <img src="https://i.postimg.cc/fWGMKz95/logo_nun2.png" alt="Logo UN2" loading="lazy" decoding="async">
                 </a>
             </div>
         
             <div class="mySlides fade ">
                 <a class="spotlight" href="https://i.postimg.cc/qv00P1Q2/Icon.png" data-description="Logo UN3">
-                    <img src="https://i.postimg.cc/qv00P1Q2/Icon.png" alt="Logo UN3">
+                    <img src="https://i.postimg.cc/qv00P1Q2/Icon.png" alt="Logo UN3" loading="lazy" decoding="async">
                 </a>
             </div>
         
             <div class="mySlides fade ">
                 <a class="spotlight" href="https://i.postimg.cc/VNkw653p/un4_logo.png" data-description="Logo UN4">
-                    <img src="https://i.postimg.cc/VNkw653p/un4_logo.png" alt="Logo UN4">
+                    <img src="https://i.postimg.cc/VNkw653p/un4_logo.png" alt="Logo UN4" loading="lazy" decoding="async">
                 </a>
             </div>
         
             <div class="mySlides fade ">
                 <a class="spotlight" href="https://i.postimg.cc/g0tW6mpZ/iconv9.png" data-description="Logo UN5">
-                    <img src="https://i.postimg.cc/g0tW6mpZ/iconv9.png" alt="Logo UN5">
+                    <img src="https://i.postimg.cc/g0tW6mpZ/iconv9.png" alt="Logo UN5" loading="lazy" decoding="async">
                 </a>
             </div>
         
@@ -827,11 +831,20 @@
 
 
     <footer>
-        <div w3-include-html="/footer.html"></div>
+        <div w3-include-html="/footer.html">
+            <p>
+                <span class="footer-copyright">&copy; <b>RomHacking do Raiden (Bit.Raiden)</b> 2026. Todos os direitos reservados.</span>
+                <span class="footer-sep">|</span>
+                <a href="/about.html" class="footer-link">Sobre &amp; Contato</a>
+                <span class="footer-sep">|</span>
+                <a href="/termos.html" class="footer-link">Termos de Uso</a>
+                <span class="footer-sep">|</span>
+                <a href="/privacidade.html" class="footer-link">Política de Privacidade</a>
+            </p>
+        </div>
         <script>w3IncludeHTML();</script>
     </footer>
 
-    <script type="text/javascript" src="/scripts/navbar.js"></script>
     <script type="module" src="/scripts/comments_loader.js"></script>
     <script type="module" src="/scripts/navbar_auth.js"></script>
 </body>

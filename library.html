@@ -475,11 +475,13 @@
             border-radius: 10px;
         }
     </style>
+    <meta name="google-adsense-account" content="ca-pub-6401015076542561" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6401015076542561" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
 </head>
 <body>
     <!-- Navbar -->
     <div w3-include-html="/navbar.html"></div>
-    <script src="https://www.w3schools.com/lib/w3data.js"></script>
     <script>w3IncludeHTML();</script>
 
     <main class="container">
@@ -495,8 +497,32 @@
         </div>
 
         <div id="library-container" class="library-grid">
-            <!-- Games Loaded Dynamically -->
-            <div class="text-center" style="grid-column: 1/-1;">Carregando biblioteca...</div>
+<!-- SSG:LIBRARY_START -->
+            <h2 class="category-header">A</h2>
+            <div class="game-card">
+                <img src="/projects/psx/alundra2/media/icon.png" class="game-cover" alt="Alundra 2: A Jewel of Venture" loading="lazy" decoding="async">
+                <div class="game-body">
+                    <div class="game-meta">
+                        <span class="platform-tag">PlayStation 1</span>
+                        <span>1999</span>
+                    </div>
+                    <h2 class="game-title">Alundra 2: A Jewel of Venture</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Action-Adventure / RPG</p>
+                </div>
+            </div>
+            <h2 class="category-header">S</h2>
+            <div class="game-card">
+                <img src="/projects/ps2/sbbfbb/media/Icon.png" class="game-cover" alt="SpongeBob SquarePants: Battle for Bikini Botton" loading="lazy" decoding="async">
+                <div class="game-body">
+                    <div class="game-meta">
+                        <span class="platform-tag">PlayStation 2</span>
+                        <span>2003</span>
+                    </div>
+                    <h2 class="game-title">SpongeBob SquarePants: Battle for Bikini Botton</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Plataforma 3D</p>
+                </div>
+            </div>
+<!-- SSG:LIBRARY_END -->
         </div>
 
         <!-- Modal for details -->
@@ -513,7 +539,17 @@
 
     <!-- Footer -->
     <footer>
-        <div w3-include-html="/footer.html"></div>
+        <div w3-include-html="/footer.html">
+            <p>
+                <span class="footer-copyright">&copy; <b>RomHacking do Raiden (Bit.Raiden)</b> 2026. Todos os direitos reservados.</span>
+                <span class="footer-sep">|</span>
+                <a href="/about.html" class="footer-link">Sobre &amp; Contato</a>
+                <span class="footer-sep">|</span>
+                <a href="/termos.html" class="footer-link">Termos de Uso &amp; Aviso Legal</a>
+                <span class="footer-sep">|</span>
+                <a href="/privacidade.html" class="footer-link">Política de Privacidade</a>
+            </p>
+        </div>
         <script>w3IncludeHTML();</script>
     </footer>
 

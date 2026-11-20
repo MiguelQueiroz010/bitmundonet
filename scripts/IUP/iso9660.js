@@ -676,8 +676,14 @@ export class ISO9660 {
             for await (const entry of handle.values()) {
                 entries.push(entry);
             }
-            // Ordenar alfabeticamente
-            entries.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
+            // NÃO reordenar por nome: `handle.values()` (seja a ISO original via MontarPastaVirtual, seja uma
+            // pasta de trabalho normal) já entrega os arquivos na ordem em que foram catalogados — para uma ISO
+            // original isso É a ordem física do disco (iso_vfs.js preserva essa ordem; um arquivo trocado pelo
+            // overlay do patch fica na MESMA posição, só o conteúdo muda; um arquivo novo do patch entra no fim).
+            // Resortar alfabeticamente aqui jogava tudo isso fora: todo arquivo migrava de LBA a cada patch,
+            // mesmo o que não mudou nada — e em jogos com checagem de hash sobre a posição/estrutura dos
+            // arquivos (ex.: hash.inf de alguns títulos de PS2) isso invalida o disco, além de tornar a saída
+            // de qualquer algoritmo delta não-determinística (dois patches do mesmo jogo não batem o mesmo MD5).
 
             // 1. Processar primeiro os arquivos do diretório atual (garante SYSTEM.CNF e executável no início do stream)
             for (const entry of entries) {

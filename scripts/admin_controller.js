@@ -5,6 +5,7 @@ import { getFirebaseConfig, saveLocalFirebaseConfig } from "./firebase-manager.j
 import { saveLocalEmailJSConfig, clearLocalEmailJSConfig } from "./emailjs-manager.js";
 import { parseArticleTags, sanitizeString } from "./utils.js";
 import { openArticleStudio, upgradeTextarea, upgradeAllTopicTextareas, getTopicRawContent, isLegacyFormat, normalizeToStrictHtml } from "./rich_editor.js?v=2.1";
+import { getGeminiApiKey, saveGeminiApiKey, generateVideoPostWithAI, generateLibraryGameWithAI, generateProjectContentWithAI, generateToolContentWithAI, runUniversalAdminAssistant } from "./ai_assistant.js";
 
 // Inject Emoji CSS
 if (!document.getElementById('emoji-picker-css')) {
@@ -1154,7 +1155,10 @@ window.editProject = async (id) => {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Descrição (HTML Sugerido)</label>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <label style="margin: 0;">Descrição (HTML Sugerido)</label>
+                            <button type="button" class="save-btn" style="padding: 0.25rem 0.6rem; font-size: 0.7rem; background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff;" onclick="fillProjectWithAI()">✨ Gerar com IA</button>
+                        </div>
                         <textarea id="edit-desc" style="height: 100px; font-family: monospace;">${p.description || ''}</textarea>
                     </div>
                 </div>
@@ -1404,6 +1408,7 @@ window.loadArticles = () => {
                             <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4);">${a.date} | ${a.category}</div>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
+                            <button class="save-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24;" onclick="openSocialShareModal('${doc.id}')" title="Compartilhar no Facebook e Reddit">📢</button>
                             <button class="save-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="previewArticle('${doc.id}')">👁️</button>
                             <button class="save-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="editArticle('${doc.id}')">✏️</button>
                         </div>
@@ -2075,7 +2080,8 @@ window.editLibrary = async (id) => {
                 <!-- HEADER (Sticky) -->
                 <div style="padding: 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: #1a1a1a; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;">
                     <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.4rem;">🎮 Editando: ${g.title}</h3>
-                    <div style="display: flex; gap: 1rem;">
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button type="button" class="save-btn" style="background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff;" onclick="fillLibraryWithAI()">✨ Preencher Jogo com IA</button>
                         <button class="save-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="saveLibraryChanges('${id}')">💾 Salvar</button>
                         <button class="save-btn" style="background: rgba(255, 255, 255, 0.49); color: white;" onclick="closeAdminLibraryEditor()">✕ Fechar</button>
                     </div>
@@ -2189,6 +2195,28 @@ window.editLibrary = async (id) => {
                                     </div>
                                     <div class="form-group"><label>Código</label><input type="text" class="cheat-code" value="${item.code || ''}" oninput="updateLibraryPreview()" placeholder="ABCD1234"></div>
                                     <div class="form-group"><label>Descrição</label><input type="text" class="cheat-description" value="${item.description || ''}" oninput="updateLibraryPreview()" placeholder="Vidas infinitas"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Links Externos Section -->
+                    <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-bottom: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: var(--admin-primary); margin: 0; font-size: 1rem;">🔗 Links Externos / Recursos</h4>
+                            <button class="save-btn" style="padding: 0.4rem 0.8rem; font-size: 0.7rem; background: #10b981; color: #000;" onclick="addLinkRow()">+ Adicionar Link</button>
+                        </div>
+                        <div id="links-list">
+                            ${(g.links || []).map((item, idx) => `
+                                <div class="link-row" style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.05);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <strong style="color: #999; font-size: 0.7rem;">Link ${idx + 1}</strong>
+                                        <button onclick="this.parentElement.parentElement.remove(); updateLibraryPreview();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 1.2rem;">&times;</button>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 0.5rem;">
+                                        <div class="form-group"><label>Rótulo</label><input type="text" class="link-label" value="${item.label || ''}" oninput="updateLibraryPreview()" placeholder="Wiki / Patch / Trailer"></div>
+                                        <div class="form-group"><label>URL</label><input type="text" class="link-url" value="${item.url || ''}" oninput="updateLibraryPreview()" placeholder="https://..."></div>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -2701,7 +2729,13 @@ window.editTool = async (id) => {
                     <label for="tool-online" style="margin:0; cursor:pointer;" title="Muda o botão de Download para Rodar Online nas ferramentas">É uma Ferramenta Online?</label>
                 </div>
             </div>
-            <div class="form-group"><label>Descrição</label><textarea id="tool-desc" style="height: 100px;">${t.description || ''}</textarea></div>
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label style="margin: 0;">Descrição</label>
+                    <button type="button" class="save-btn" style="padding: 0.25rem 0.6rem; font-size: 0.7rem; background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff;" onclick="fillToolWithAI('tool-name','tool-type','tool-target','tool-desc')">✨ Gerar com IA</button>
+                </div>
+                <textarea id="tool-desc" style="height: 100px;">${t.description || ''}</textarea>
+            </div>
             <div class="form-group"><label>Extras (Links Adicionais)</label><input type="text" id="tool-extra" value="${t.extra || ''}"></div>
 
             <div style="display: flex; gap: 1rem; margin-top: 1rem;">
@@ -3019,6 +3053,7 @@ window.switchSection = (id, btn) => {
     if (id === 'projects') loadProjects();
     if (id === 'articles') loadArticles();
     if (id === 'library') loadLibrary();
+    if (id === 'videos') loadVideosAdmin();
     if (id === 'tools') {
         loadTools();
         loadNavbarToolsAdmin();
@@ -3480,6 +3515,7 @@ window.saveLibraryChanges = async (id) => {
         media: [],
         ost: [],
         cheats: [],
+        links: [],
         updatedAt: new Date().toISOString(),
         sortDate: new Date().toISOString()
     };
@@ -3488,7 +3524,7 @@ window.saveLibraryChanges = async (id) => {
     document.querySelectorAll('.media-row').forEach(row => {
         const src = row.querySelector('.media-src').value;
         const caption = row.querySelector('.media-caption').value;
-        if (src) data.media.push({ src, caption });
+        if (src) data.media.push({ src, url: src, caption, type: caption });
     });
 
     // Harvest OST
@@ -3504,6 +3540,13 @@ window.saveLibraryChanges = async (id) => {
         const code = row.querySelector('.cheat-code').value;
         const description = row.querySelector('.cheat-description').value;
         if (code) data.cheats.push({ code, description });
+    });
+
+    // Harvest Links
+    document.querySelectorAll('.link-row').forEach(row => {
+        const label = row.querySelector('.link-label')?.value || '';
+        const url = row.querySelector('.link-url')?.value || '';
+        if (url) data.links.push({ label: label || url, url });
     });
 
     try {
@@ -3662,5 +3705,525 @@ window.verifyAdminStatus = async () => {
     } catch (error) {
         console.error("Erro de permissão:", error);
         showNotification("Erro: Você não tem permissão de administrador.", "error");
+    }
+};
+
+
+// ==========================================
+// BIBLIOTECA: NOVO JOGO + LINKS + IA (GEMINI)
+// ==========================================
+
+window.addLinkRow = (label = '', url = '') => {
+    const list = document.getElementById('links-list');
+    if (!list) return;
+    const idx = list.querySelectorAll('.link-row').length + 1;
+    const div = document.createElement('div');
+    div.className = 'link-row';
+    div.style.cssText = 'background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.05);';
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <strong style="color: #999; font-size: 0.7rem;">Link ${idx}</strong>
+            <button onclick="this.parentElement.parentElement.remove(); updateLibraryPreview();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 1.2rem;">&times;</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 0.5rem;">
+            <div class="form-group"><label>Rótulo</label><input type="text" class="link-label" value="${label}" oninput="updateLibraryPreview()" placeholder="Wiki / Patch / Trailer"></div>
+            <div class="form-group"><label>URL</label><input type="text" class="link-url" value="${url}" oninput="updateLibraryPreview()" placeholder="https://..."></div>
+        </div>`;
+    list.appendChild(div);
+};
+
+window.addNewLibrary = () => {
+    const html = `
+        <div class="modal-header">
+            <h3 style="margin: 0; color: var(--admin-primary); font-size: 1.4rem;">🎮 Novo Jogo na Biblioteca</h3>
+            <button class="save-btn" style="background: #4b5563; color: #fff;" onclick="closeAdminModal()">✕ Fechar</button>
+        </div>
+        <div class="responsive-grid">
+            <div class="form-group"><label>ID Único (slug)</label><input type="text" id="new-lib-id" placeholder="ex: dbz-budokai-tenkaichi-3"></div>
+            <div class="form-group"><label>Título do Jogo</label><input type="text" id="new-lib-title" placeholder="ex: Dragon Ball Z: Budokai Tenkaichi 3"></div>
+            <div class="form-group"><label>Plataforma</label><input type="text" id="new-lib-platform" value="PlayStation 2"></div>
+            <div class="form-group"><label>Capa (URL)</label><input type="text" id="new-lib-cover" placeholder="/media/..."></div>
+        </div>
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+            <button type="button" class="save-btn" style="flex: 1; background: #3b82f6; color: #fff;" onclick="saveNewLibrary(false)">➕ Criar e Editar</button>
+            <button type="button" class="save-btn" style="flex: 1; background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff;" onclick="saveNewLibrary(true)">✨ Criar e Preencher com IA</button>
+        </div>`;
+    window.showModal(html);
+};
+
+window.saveNewLibrary = async (autoAi = false) => {
+    const id = (document.getElementById('new-lib-id')?.value || '').trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+    const title = (document.getElementById('new-lib-title')?.value || '').trim();
+    const platform = (document.getElementById('new-lib-platform')?.value || 'PlayStation 2').trim();
+    const cover = (document.getElementById('new-lib-cover')?.value || '/media/placeholder.png').trim();
+    if (!id || !title) return alert('ID e Título são obrigatórios!');
+
+    await setDoc(doc(db, 'library', id), {
+        title, platform, cover, active: true, order: 0,
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    window.closeAdminModal();
+    await window.editLibrary(id);
+    if (autoAi) await window.fillLibraryWithAI();
+};
+
+window.fillLibraryWithAI = async () => {
+    const title = (document.getElementById('lib-title')?.value || '').trim();
+    const platform = (document.getElementById('lib-platform')?.value || 'PlayStation 2').trim();
+    if (!title) return showNotification('Informe o Título do jogo primeiro!', 'error');
+
+    showNotification('✨ Consultando Gemini AI para preencher a ficha do jogo...', 'info');
+    try {
+        const ai = await generateLibraryGameWithAI(title, platform);
+        const setVal = (elId, val) => { const el = document.getElementById(elId); if (el && val && !el.value.trim()) el.value = val; };
+        setVal('lib-genre', ai.genre);
+        setVal('lib-year', ai.release_year);
+        setVal('lib-pub', ai.publisher);
+        setVal('lib-dev', ai.developer);
+        setVal('lib-region', ai.region);
+        setVal('lib-summary', ai.summary);
+        setVal('lib-lore', ai.lore);
+        setVal('lib-impact', ai.impact);
+        setVal('lib-details-dev', ai.dev_details);
+        setVal('lib-dev-legacy', ai.dev_legacy);
+        setVal('lib-tips', ai.guide_tips);
+
+        if (Array.isArray(ai.links)) {
+            ai.links.forEach(l => { if (l?.url) window.addLinkRow(l.label || 'Referência', l.url); });
+        }
+        if (typeof updateLibraryPreview === 'function') updateLibraryPreview();
+        showNotification('✅ Ficha preenchida pela IA! Revise e clique em Salvar.', 'success');
+    } catch (e) {
+        showNotification('❌ IA: ' + e.message, 'error');
+    }
+};
+
+window.fillProjectWithAI = async () => {
+    const title = (document.getElementById('edit-title')?.value || '').trim();
+    const platform = (document.getElementById('edit-platform')?.value || 'PlayStation 2').trim();
+    const status = (document.getElementById('edit-status')?.value || 'Em Progresso').trim();
+    if (!title) return showNotification('Informe o título do projeto.', 'error');
+
+    showNotification('✨ Gerando descrição do projeto com Gemini...', 'info');
+    try {
+        const ai = await generateProjectContentWithAI(title, platform, status);
+        const subEl = document.getElementById('edit-subtitle');
+        const descEl = document.getElementById('edit-desc');
+        if (subEl && ai.subtitle && !subEl.value.trim()) subEl.value = ai.subtitle;
+        if (descEl && ai.description) descEl.value = ai.description;
+        showNotification('✅ Descrição gerada pela IA!', 'success');
+    } catch (e) {
+        showNotification('❌ IA: ' + e.message, 'error');
+    }
+};
+
+window.fillToolWithAI = async (nameId, typeId, targetId, descId) => {
+    const name = (document.getElementById(nameId)?.value || '').trim();
+    const type = (document.getElementById(typeId)?.value || '').trim();
+    const target = (document.getElementById(targetId)?.value || '').trim();
+    if (!name) return showNotification('Informe o nome da ferramenta.', 'error');
+
+    showNotification('✨ Gerando descrição da ferramenta com Gemini...', 'info');
+    try {
+        const ai = await generateToolContentWithAI(name, type, target);
+        const descEl = document.getElementById(descId);
+        if (descEl && ai.description) descEl.value = ai.description;
+        showNotification('✅ Descrição gerada!', 'success');
+    } catch (e) {
+        showNotification('❌ IA: ' + e.message, 'error');
+    }
+};
+
+// ==========================================
+// VÍDEOS, REPOST AUTOMÁTICO (GH ACTIONS) & ASSISTENTE IA
+// ==========================================
+
+let cachedVideosMap = {};
+
+function decodeXmlEntities(str) {
+    return (str || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+}
+
+async function fetchYoutubeRssClient(channelId) {
+    if (!channelId) return [];
+    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`;
+    try {
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+        if (res.ok) {
+            const json = await res.json();
+            if (json.status === 'ok' && Array.isArray(json.items)) {
+                return json.items.map(item => {
+                    const vidMatch = (item.link || '').match(/[?&]v=([^&]+)/) || (item.guid || '').match(/yt:video:(.+)/);
+                    const videoId = vidMatch ? vidMatch[1] : '';
+                    return {
+                        videoId,
+                        title: decodeXmlEntities(item.title || ''),
+                        url: item.link || `https://www.youtube.com/watch?v=${videoId}`,
+                        thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+                        publishedAt: item.pubDate || '',
+                        description: decodeXmlEntities(item.description || '')
+                    };
+                }).filter(v => v.videoId);
+            }
+        }
+    } catch (e) {
+        console.warn('Falha ao buscar RSS via rss2json:', e.message);
+    }
+    return [];
+}
+
+window.loadVideosAdmin = async () => {
+    const listEl = document.getElementById('videos-repost-list');
+    const keyInput = document.getElementById('gemini-api-key-input');
+    if (keyInput) keyInput.value = getGeminiApiKey();
+
+    let settings = {};
+    try {
+        const cfgSnap = await getDoc(doc(db, 'admin_config', 'repost_settings'));
+        if (cfgSnap.exists()) settings = cfgSnap.data();
+    } catch (e) {
+        console.warn('Erro ao ler repost_settings:', e);
+    }
+
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+    setVal('repost-yt-channel', settings.youtubeChannelId);
+    setVal('repost-ig-template', settings.igCaptionTemplate || '{title}\n\nVeja mais em: https://bitraiden.org\n{hashtags}');
+    setVal('repost-ig-hashtags', settings.igHashtags || '#romhacking #ps2 #traducao #bitraiden #games');
+    setVal('repost-fb-page-id', settings.fbPageId || '');
+    setVal('repost-reddit-sub', settings.redditSubreddit || '');
+    setChk('repost-auto-site', settings.autoCreatePost);
+    setChk('repost-auto-ig', settings.autoPostIg);
+    setChk('repost-auto-fb', settings.autoPostFb);
+    setChk('repost-auto-reddit', settings.autoPostReddit);
+    setChk('repost-use-ai', settings.useAiSummary !== false);
+
+    if (!listEl) return;
+    listEl.innerHTML = '<p style="color: rgba(255,255,255,0.5);">Buscando histórico no Firestore e feed do YouTube...</p>';
+
+    const repostedMap = {};
+    try {
+        const snap = await getDocs(collection(db, 'reposted_videos'));
+        snap.forEach(d => { repostedMap[d.id] = { videoId: d.id, ...d.data() }; });
+    } catch (e) {
+        console.warn('Erro ao ler reposted_videos:', e);
+    }
+
+    const rssVideos = await fetchYoutubeRssClient(settings.youtubeChannelId);
+    const mergedMap = { ...repostedMap };
+    rssVideos.forEach(v => {
+        mergedMap[v.videoId] = { ...(mergedMap[v.videoId] || {}), ...v };
+    });
+
+    cachedVideosMap = mergedMap;
+    const videos = Object.values(mergedMap).sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+
+    if (videos.length === 0) {
+        listEl.innerHTML = '<p style="color: rgba(255,255,255,0.5);">Nenhum vídeo encontrado ainda. Configure seu <strong>YouTube Channel ID</strong> acima e clique em Salvar.</p>';
+        return;
+    }
+
+    listEl.innerHTML = videos.map(v => {
+        const siteBadge = v.sitePosted
+            ? `<span style="background: rgba(16,185,129,0.2); color: #34d399; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">Site: Postado ✅</span>`
+            : `<span style="background: rgba(255,255,255,0.08); color: #9ca3af; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">Site: Pendente</span>`;
+        const igBadge = v.igPosted
+            ? `<span style="background: rgba(236,72,153,0.2); color: #f472b6; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">IG: Publicado ✅</span>`
+            : (v.igError
+                ? `<span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;" title="${v.igError}">IG: Erro ⚠️</span>`
+                : `<span style="background: rgba(255,255,255,0.08); color: #9ca3af; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">IG: Pendente</span>`);
+        const fbBadge = v.fbPosted
+            ? `<span style="background: rgba(59,130,246,0.2); color: #60a5fa; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">FB: Publicado ✅</span>`
+            : (v.fbError
+                ? `<span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;" title="${v.fbError}">FB: Erro ⚠️</span>`
+                : `<span style="background: rgba(255,255,255,0.08); color: #9ca3af; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">FB: Pendente</span>`);
+        const redditBadge = v.redditPosted
+            ? `<span style="background: rgba(249,115,22,0.2); color: #fb923c; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">Reddit: Publicado ✅</span>`
+            : (v.redditError
+                ? `<span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;" title="${v.redditError}">Reddit: Erro ⚠️</span>`
+                : `<span style="background: rgba(255,255,255,0.08); color: #9ca3af; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">Reddit: Pendente</span>`);
+
+        return `
+            <div style="display: flex; gap: 1rem; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1rem; margin-bottom: 0.9rem; flex-wrap: wrap;">
+                <img src="${v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`}" style="width: 140px; height: 80px; object-fit: cover; border-radius: 6px; flex-shrink: 0;">
+                <div style="flex: 1; min-width: 220px;">
+                    <div style="font-weight: 700; color: #fff; margin-bottom: 0.35rem;">${v.title || v.videoId}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem;">
+                        ${v.publishedAt ? new Date(v.publishedAt).toLocaleString('pt-BR') : ''} • ID: <code>${v.videoId}</code>
+                    </div>
+                    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">${siteBadge} ${igBadge} ${fbBadge} ${redditBadge} ${v.aiGenerated ? '<span style="background: rgba(168,85,247,0.2); color: #c084fc; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem;">✨ IA</span>' : ''}</div>
+                </div>
+                <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                    <button type="button" class="save-btn" style="padding: 0.45rem 0.75rem; font-size: 0.75rem; background: rgba(255,255,255,0.1); color: #fff;" onclick="showVideoDetailsModal('${v.videoId}')">🔍 Detalhes</button>
+                    <button type="button" class="save-btn" style="padding: 0.45rem 0.75rem; font-size: 0.75rem; background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff;" onclick="generateAiPostFromVideo('${v.videoId}')">✨ Post Site (IA)</button>
+                    <button type="button" class="save-btn" style="padding: 0.45rem 0.75rem; font-size: 0.75rem; background: linear-gradient(135deg, #f59e0b, #ec4899); color: #fff;" onclick="triggerRepostWorkflow('${v.videoId}', false, true, true, true)">🚀 Repostar Tudo</button>
+                </div>
+            </div>`;
+    }).join('');
+};
+
+window.saveRepostSettings = async () => {
+    const geminiKey = document.getElementById('gemini-api-key-input')?.value || '';
+    saveGeminiApiKey(geminiKey);
+
+    const data = {
+        youtubeChannelId: (document.getElementById('repost-yt-channel')?.value || '').trim(),
+        igCaptionTemplate: document.getElementById('repost-ig-template')?.value || '',
+        igHashtags: (document.getElementById('repost-ig-hashtags')?.value || '').trim(),
+        fbPageId: (document.getElementById('repost-fb-page-id')?.value || '').trim(),
+        redditSubreddit: (document.getElementById('repost-reddit-sub')?.value || '').trim(),
+        autoCreatePost: !!document.getElementById('repost-auto-site')?.checked,
+        autoPostIg: !!document.getElementById('repost-auto-ig')?.checked,
+        autoPostFb: !!document.getElementById('repost-auto-fb')?.checked,
+        autoPostReddit: !!document.getElementById('repost-auto-reddit')?.checked,
+        useAiSummary: !!document.getElementById('repost-use-ai')?.checked,
+        updatedAt: new Date().toISOString()
+    };
+
+    try {
+        await setDoc(doc(db, 'admin_config', 'repost_settings'), data, { merge: true });
+        showNotification('✅ Configurações de Repost & Redes salvas!', 'success');
+        loadVideosAdmin();
+    } catch (e) {
+        showNotification('❌ Erro ao salvar: ' + e.message, 'error');
+    }
+};
+
+window.triggerRepostWorkflow = async (videoId = '', forcePost = true, forceIg = false, forceFb = false, forceReddit = false) => {
+    let token = localStorage.getItem('gh_pat_token') || prompt('Insira seu GitHub Personal Access Token (PAT) com permissão workflow:');
+    if (!token) return;
+    token = token.trim();
+    localStorage.setItem('gh_pat_token', token);
+
+    const useAi = !!document.getElementById('repost-use-ai')?.checked;
+    showNotification('🚀 Disparando automação no GitHub Actions...', 'info');
+    try {
+        const res = await fetch('https://api.github.com/repos/MiguelQueiroz010/bitmundonet/actions/workflows/repost-videos.yml/dispatches', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                ref: 'master',
+                inputs: {
+                    action: 'repost_videos',
+                    video_id: videoId || '',
+                    force_post: String(!!forcePost),
+                    force_ig: String(!!forceIg),
+                    force_fb: String(!!forceFb),
+                    force_reddit: String(!!forceReddit),
+                    use_ai: String(useAi)
+                }
+            })
+        });
+        if (res.ok) {
+            showNotification('✅ Workflow iniciado no GitHub Actions!', 'success');
+        } else {
+            if (res.status === 401 || res.status === 403) localStorage.removeItem('gh_pat_token');
+            const err = await res.json().catch(() => ({}));
+            showNotification('❌ Erro GitHub API: ' + (err.message || `HTTP ${res.status}`), 'error');
+        }
+    } catch (e) {
+        showNotification('❌ Erro de rede: ' + e.message, 'error');
+    }
+};
+
+window.showVideoDetailsModal = (videoId) => {
+    const v = cachedVideosMap[videoId];
+    if (!v) return;
+    const html = `
+        <div class="modal-header">
+            <h3 style="margin: 0; color: var(--admin-primary);">🎬 Detalhes do Vídeo</h3>
+            <button class="save-btn" style="background: #4b5563; color: #fff;" onclick="closeAdminModal()">✕ Fechar</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <img src="${v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`}" style="width: 100%; max-height: 260px; object-fit: cover; border-radius: 8px;">
+            <h4 style="margin: 0; color: #fff;">${v.title || v.videoId}</h4>
+            <p style="font-size: 0.85rem; color: #9ca3af; margin: 0; line-height: 1.8;">
+                <strong>YouTube:</strong> <a href="${v.url}" target="_blank" style="color: #60a5fa;">${v.url}</a><br>
+                <strong>Site Postado:</strong> ${v.sitePosted ? `Sim (ID: <code>${v.sitePostId}</code>)` : 'Não'}<br>
+                <strong>Instagram Reels:</strong> ${v.igPosted ? `Publicado (Media ID: <code>${v.igMediaId}</code>)` : (v.igError ? `Erro: ${v.igError}` : 'Pendente')}<br>
+                <strong>Facebook Página:</strong> ${v.fbPosted ? `Publicado (ID: <code>${v.fbPostId}</code>)` : (v.fbError ? `Erro: ${v.fbError}` : 'Pendente')}<br>
+                <strong>Reddit:</strong> ${v.redditPosted ? `Publicado (<a href="${v.redditPostUrl}" target="_blank" style="color: #fb923c;">Link</a>)` : (v.redditError ? `Erro: ${v.redditError}` : 'Pendente')}
+            </p>
+            <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 8px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; font-size: 0.82rem; color: #d1d5db;">${v.description || 'Sem descrição.'}</div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button class="save-btn" style="flex: 1; background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff;" onclick="closeAdminModal(); generateAiPostFromVideo('${v.videoId}')">✨ Gerar Post no Site com IA</button>
+                <button class="save-btn" style="flex: 1; background: linear-gradient(135deg, #f59e0b, #ec4899); color: #fff;" onclick="closeAdminModal(); triggerRepostWorkflow('${v.videoId}', false, true, true, true)">🚀 Repostar em Todas as Redes</button>
+            </div>
+        </div>`;
+    window.showModal(html);
+};
+
+window.generateAiPostFromVideo = async (videoId) => {
+    const v = cachedVideosMap[videoId];
+    if (!v) return;
+    showNotification('✨ Gerando artigo com resumo do Gemini...', 'info');
+    try {
+        const ai = await generateVideoPostWithAI(v);
+        const embedHtml = `<div class="video-container" style="margin: 1.5rem 0;"><div class="video-wrapper"><iframe src="https://www.youtube.com/embed/${v.videoId}" frameborder="0" allowfullscreen></iframe></div></div>`;
+        const fullContent = `${embedHtml}\n${ai.html}\n<p><strong>Assista no YouTube:</strong> <a href="${v.url}" target="_blank" rel="noopener noreferrer">${v.url}</a></p>`;
+
+        openArticleStudio({
+            article: {
+                title: ai.title || v.title,
+                author: 'Bit.Raiden',
+                category: ai.category || 'VÍDEO',
+                date: new Date(v.publishedAt || Date.now()).toLocaleDateString('pt-BR'),
+                image: v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`,
+                content: fullContent,
+                selected: true
+            },
+            onSave: async (data) => {
+                const newId = `yt-${v.videoId}-${sanitizeString(data.title).slice(0, 24)}`;
+                await saveArticleData(newId, { ...data, youtubeVideoId: v.videoId, aiGenerated: true });
+                await setDoc(doc(db, 'reposted_videos', v.videoId), {
+                    videoId: v.videoId, title: v.title, url: v.url, thumbnail: v.thumbnail,
+                    sitePosted: true, sitePostId: newId, aiGenerated: true, updatedAt: new Date().toISOString()
+                }, { merge: true });
+                loadVideosAdmin();
+            }
+        });
+    } catch (e) {
+        showNotification('❌ IA: ' + e.message, 'error');
+    }
+};
+
+window.runAdminAiAssistant = async () => {
+    const area = document.getElementById('ai-target-area')?.value || 'Postagens';
+    const prompt = (document.getElementById('ai-prompt-input')?.value || '').trim();
+    const outEl = document.getElementById('ai-assistant-output');
+    const btn = document.getElementById('btn-run-ai-assistant');
+    if (!prompt) return showNotification('Digite sua solicitação para a IA.', 'error');
+
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando...'; }
+    if (outEl) { outEl.style.display = 'block'; outEl.textContent = 'Consultando banco de dados e Gemini AI...'; }
+
+    try {
+        const [projSnap, artSnap, libSnap, toolSnap] = await Promise.all([
+            getDocs(collection(db, 'projects')),
+            getDocs(collection(db, 'articles')),
+            getDocs(collection(db, 'library')),
+            getDocs(collection(db, 'tools'))
+        ]);
+        const summary = {
+            projetos: projSnap.docs.map(d => ({ id: d.id, title: d.data().title, platform: d.data().platform })),
+            postagens_recentes: artSnap.docs.slice(0, 15).map(d => ({ id: d.id, title: d.data().title, category: d.data().category })),
+            biblioteca: libSnap.docs.map(d => ({ id: d.id, title: d.data().title, platform: d.data().platform })),
+            ferramentas: toolSnap.docs.map(d => ({ id: d.id, name: d.data().name, target: d.data().target }))
+        };
+        const reply = await runUniversalAdminAssistant(prompt, area, summary);
+        if (outEl) outEl.textContent = reply;
+    } catch (e) {
+        if (outEl) outEl.textContent = '❌ Erro: ' + e.message;
+        showNotification('❌ IA: ' + e.message, 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '✨ Perguntar / Gerar'; }
+    }
+};
+
+window.openSocialShareModal = async (articleId) => {
+    showNotification('Carregando dados da postagem...', 'info');
+    try {
+        const snap = await getDoc(doc(db, 'articles', articleId));
+        if (!snap.exists()) return showNotification('Postagem não encontrada.', 'error');
+        const art = snap.data();
+        const artUrl = `https://bitraiden.org/#${articleId}`;
+        const shares = art.socialShares || {};
+
+        const cleanSummary = (art.content || '')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 240);
+
+        const html = `
+            <div class="modal-header">
+                <h3 style="margin: 0; color: var(--admin-primary);">📢 Compartilhar Artigo nas Redes</h3>
+                <button class="save-btn" style="background: #4b5563; color: #fff;" onclick="closeAdminModal()">✕ Fechar</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem;">
+                    <h4 style="margin: 0 0 0.5rem; color: #fff;">${art.title}</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: #9ca3af;">
+                        <strong>Link do Post:</strong> <a href="${artUrl}" target="_blank" style="color: #60a5fa;">${artUrl}</a><br>
+                        <strong>Data:</strong> ${art.date || ''} | <strong>Categoria:</strong> ${art.category || ''}
+                    </p>
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280; line-height: 1.5;">${cleanSummary}...</div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.9rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                    <strong style="color: #fff; font-size: 0.82rem;">Selecione os destinos:</strong>
+                    <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0; font-size: 0.85rem; color: #e5e7eb;">
+                        <input type="checkbox" id="share-target-fb" style="width: 18px; height: 18px;" checked>
+                        <span>📘 Página do Facebook (Bit.Raiden) ${shares.fbPosted ? '✅ (Já postado)' : ''}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0; font-size: 0.85rem; color: #e5e7eb;">
+                        <input type="checkbox" id="share-target-reddit" style="width: 18px; height: 18px;" checked>
+                        <span>🤖 Reddit (${shares.redditPosted ? '✅ Já postado: ' + shares.redditPostUrl : 'Subreddit padrão'})</span>
+                    </label>
+                </div>
+
+                ${shares.lastSharedAt ? `<div style="font-size: 0.72rem; color: #9ca3af;">Último compartilhamento registrado: ${new Date(shares.lastSharedAt).toLocaleString('pt-BR')}</div>` : ''}
+
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" class="save-btn" style="flex: 1; background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff; font-size: 0.85rem;" onclick="triggerArticleShareWorkflow('${articleId}')">
+                        🚀 Publicar nas Redes Selecionadas
+                    </button>
+                </div>
+            </div>`;
+        window.showModal(html);
+    } catch (e) {
+        showNotification('Erro: ' + e.message, 'error');
+    }
+};
+
+window.triggerArticleShareWorkflow = async (articleId) => {
+    const postFb = !!document.getElementById('share-target-fb')?.checked;
+    const postReddit = !!document.getElementById('share-target-reddit')?.checked;
+
+    if (!postFb && !postReddit) {
+        return alert('Selecione pelo menos um destino (Facebook ou Reddit).');
+    }
+
+    let token = localStorage.getItem('gh_pat_token') || prompt('Insira seu GitHub Personal Access Token (PAT):');
+    if (!token) return;
+    token = token.trim();
+    localStorage.setItem('gh_pat_token', token);
+
+    closeAdminModal();
+    showNotification('🚀 Disparando publicação nas redes via GitHub Actions...', 'info');
+
+    try {
+        const res = await fetch('https://api.github.com/repos/MiguelQueiroz010/bitmundonet/actions/workflows/repost-videos.yml/dispatches', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                ref: 'master',
+                inputs: {
+                    action: 'share_article',
+                    article_id: articleId,
+                    force_fb: String(postFb),
+                    force_reddit: String(postReddit)
+                }
+            })
+        });
+
+        if (res.ok) {
+            showNotification('✅ Post enviado para fila de publicação nas redes!', 'success');
+        } else {
+            if (res.status === 401 || res.status === 403) localStorage.removeItem('gh_pat_token');
+            const err = await res.json().catch(() => ({}));
+            showNotification('❌ Erro GitHub Actions: ' + (err.message || `HTTP ${res.status}`), 'error');
+        }
+    } catch (e) {
+        showNotification('❌ Erro de rede: ' + e.message, 'error');
     }
 };

@@ -82,6 +82,10 @@ const modalText    = document.getElementById('modal-md5-text');
 const modalCancel  = document.getElementById('modal-cancel-btn');
 const modalProceed = document.getElementById('modal-proceed-btn');
 
+// "Aplicar só o patch" — pula o wrapper de créditos/mídia mesmo que o .rpt traga essas seções
+const chkSkipCredits     = document.getElementById('chk-skip-credits');
+const wrapSkipCredits    = document.getElementById('wrap-skip-credits');
+
 // Debug
 const chkDebugMode       = document.getElementById('chk-debug-mode');
 const debugSection       = document.getElementById('debug-section');
@@ -467,6 +471,14 @@ function renderPatchSummary() {
             </div>`;
     }
 
+    // O wrapper de créditos/mídia (RAIDEN.ELF) só existe se o patch trouxer <Credits>/<FailText>/<Media>;
+    // <IsoMeta> sozinho é só texto no PVD e não entra nessa opção. Some/reseta quando o patch não tem isso.
+    if (wrapSkipCredits) {
+        const hasWrapper = !!(po && (po.credits !== null || po.failText !== null || po.media));
+        wrapSkipCredits.style.display = hasWrapper ? '' : 'none';
+        if (!hasWrapper && chkSkipCredits) chkSkipCredits.checked = false;
+    }
+
     // MD5 alvo sempre exibido se disponível
     if (patchMeta.targetMd5) {
         html += `
@@ -578,6 +590,7 @@ btnApplyPatch.addEventListener('click', async () => {
         try {
             await executeStreamingPatch(isoFile, patchFile, writableStream, workDirHandle, {
                 keepTemp: !!(chkDebugMode && chkDebugMode.checked),
+                skipCredits: !!(chkSkipCredits && chkSkipCredits.checked),
                 saveHandle,
             });
             success = true;
@@ -748,7 +761,7 @@ if (btnApplyDebug) {
 // ALGORITMO DE STREAMING E PATCHING
 // ═══════════════════════════════════════════════════════
 
-async function executeStreamingPatch(origIsoFile, patchFile, writableStream, workDirHandle, { keepTemp = false, saveHandle = null } = {}) {
+async function executeStreamingPatch(origIsoFile, patchFile, writableStream, workDirHandle, { keepTemp = false, saveHandle = null, skipCredits = false } = {}) {
     // Subpasta exclusiva desta execução (evita misturar sobras de execuções anteriores e nunca apaga dados do usuário).
     const tmpName = `raiden_tmp_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     const tmpDir  = await workDirHandle.getDirectoryHandle(tmpName, { create: true });
@@ -774,6 +787,13 @@ async function executeStreamingPatch(origIsoFile, patchFile, writableStream, wor
         const { xml, entries } = await extractPatchPayload(patchDecHandle, tmpDir);
         const { ops } = parseManifestXml(xml);
         const post = parsePostSections(xml);   // valida <IsoMeta>/<Credits>/<Media> ANTES de gravar qualquer coisa
+        if (skipCredits) {
+            // "Aplicar só o patch": nada de RAIDEN.ELF, tela de créditos ou mídia — só o delta/substituição dos
+            // arquivos do jogo. <IsoMeta> continua valendo (é só texto no PVD, não adiciona nem move arquivo).
+            post.credits = null;
+            post.failText = null;
+            post.media = null;
+        }
         console.log(`[RPT] ${entries.length} arquivo(s) no patch, ${ops.length} operação(ões).`);
 
         // Cache antigo (service worker) pode servir um iso9660.js sem o gancho beforeBuild: nesse caso os deltas seriam

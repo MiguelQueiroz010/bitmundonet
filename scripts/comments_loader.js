@@ -172,7 +172,17 @@ window.getInitialsElement = (name) => {
 // Helper for string injection (non-DOM)
 function getInitialsString(name) {
     const initials = (name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    return `<div class="user-avatar-placeholder">${initials}</div>`;
+    return `<div class="user-avatar-placeholder">${escHtml(initials)}</div>`;
+}
+
+// Comentário/nome/foto vêm do usuário (não confiável) e são inseridos via innerHTML; sem isso,
+// um comentário como "<img src=x onerror=...>" executaria para todo mundo que visse a página.
+// Escapa também aspas simples porque alguns desses valores também aparecem dentro de atributos
+// onclick="...('${valor}')" — o navegador decodifica &#39; antes do JS ver o atributo.
+function escHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /**
@@ -387,9 +397,9 @@ function loadComments(db, projectId, container) {
                     ${comment.pinned ? 'Desafixar' : 'Fixar'}
                 </button>` : '';
 
-            const authorName = (comment.user === "null" || !comment.user || comment.user === "Usuário") ? "Usuário" : comment.user;
+            const authorName = escHtml((comment.user === "null" || !comment.user || comment.user === "Usuário") ? "Usuário" : comment.user);
             const avatar = comment.userPhoto ?
-                `<img src="${comment.userPhoto}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${authorName}')">` :
+                `<img src="${escHtml(comment.userPhoto)}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${authorName}')">` :
                 getInitialsString(authorName);
 
             const pinnedBadge = comment.pinned ? `<span class="pinned-badge">📌 Fixado</span>` : '';
@@ -404,22 +414,23 @@ function loadComments(db, projectId, container) {
                 const replyDeleteBtn = replyIsOwner ?
                     `<button class="delete-comment-btn" onclick="window.deleteMyComment('${reply.id}')" title="Excluir minha resposta">✕</button>` : '';
 
+                const replyAuthorName = escHtml((reply.user === "null" || !reply.user || reply.user === "Usuário") ? "Usuário" : reply.user);
                 const replyAvatar = reply.userPhoto ?
-                    `<img src="${reply.userPhoto}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${reply.user}')">` :
-                    getInitialsString(reply.user);
+                    `<img src="${escHtml(reply.userPhoto)}" class="comment-avatar-small" referrerPolicy="no-referrer" onerror="this.outerHTML=getInitialsString('${replyAuthorName}')">` :
+                    getInitialsString(replyAuthorName);
 
                 return `
                     <div class="reply-card">
                         <div class="comment-header">
                             <div class="comment-header-main">
                                 ${replyAvatar}
-                                <span class="comment-author">${(reply.user === "null" || !reply.user || reply.user === "Usuário") ? "Usuário" : reply.user}</span>
+                                <span class="comment-author">${replyAuthorName}</span>
                                 <span class="comment-date">${replyDate}</span>
                             </div>
                             ${replyDeleteBtn}
                         </div>
                         <div class="comment-body">
-                            ${reply.text}
+                            ${escHtml(reply.text)}
                         </div>
                     </div>
                 `;
@@ -449,7 +460,7 @@ function loadComments(db, projectId, container) {
                         ${deleteBtn}
                     </div>
                     <div class="comment-body">
-                        ${comment.text}
+                        ${escHtml(comment.text)}
                     </div>
                     <div class="comment-actions">
                         ${replyBtn}

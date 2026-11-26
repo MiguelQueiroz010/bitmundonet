@@ -3,10 +3,10 @@
  * Executado via GitHub Actions (.github/workflows/repost-videos.yml)
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const admin = require('firebase-admin');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import admin from 'firebase-admin';
 
 const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
 if (!serviceAccountRaw) {

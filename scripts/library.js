@@ -4,6 +4,19 @@ import { parseArticleTags } from "./utils.js";
 
 var gamesData = [];
 var currentLibraryView = 'name';
+var currentSearchTerm = '';
+
+function toEmbedVideoUrl(url) {
+    if (!url) return '';
+    const u = url.trim();
+    const yt = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (yt && yt[1]) return `https://www.youtube.com/embed/${yt[1]}`;
+    return u;
+}
+
+function isDirectAudioUrl(url) {
+    return /\.(mp3|ogg|wav|m4a|flac)(\?.*)?$/i.test((url || '').trim());
+}
 
 // parseArticleTags removed - now imported from utils.js
 
@@ -38,24 +51,38 @@ function renderLibrary() {
     if (!container) return;
     container.innerHTML = "";
 
-    gamesData.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    const term = currentSearchTerm.trim().toLowerCase();
+    const filtered = term
+        ? gamesData.filter(g =>
+            (g.title || "").toLowerCase().includes(term) ||
+            (g.platform || "").toLowerCase().includes(term) ||
+            (g.genre || "").toLowerCase().includes(term)
+        )
+        : [...gamesData];
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center" style="grid-column: 1/-1; padding: 2rem; color: rgba(255,255,255,0.5);">Nenhum jogo encontrado para "${currentSearchTerm}".</div>`;
+        return;
+    }
+
+    filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
     let groups = {};
 
     if (currentLibraryView === 'name') {
-        gamesData.forEach(game => {
+        filtered.forEach(game => {
             const letter = (game.title || " ").charAt(0).toUpperCase();
             if (!groups[letter]) groups[letter] = [];
             groups[letter].push(game);
         });
     } else if (currentLibraryView === 'platform') {
-        gamesData.forEach(game => {
+        filtered.forEach(game => {
             const plat = game.platform || "Outros";
             if (!groups[plat]) groups[plat] = [];
             groups[plat].push(game);
         });
     } else if (currentLibraryView === 'genre') {
-        gamesData.forEach(game => {
+        filtered.forEach(game => {
             const genre = (game.genre || "Geral").split('/')[0].trim();
             if (!groups[genre]) groups[genre] = [];
             groups[genre].push(game);
@@ -152,7 +179,7 @@ function openModal(id) {
                     ${game.video_url || game.video ? `
                     <div class="wiki-section">
                         <h2>Trailer / GamePlay</h2>
-                        <iframe width="100%" height="400" src="${game.video_url || game.video}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
+                        <iframe width="100%" height="400" src="${toEmbedVideoUrl(game.video_url || game.video)}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
                     </div>` : ''}
                 </div>
 
@@ -184,8 +211,8 @@ function openModal(id) {
                         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                             ${(game.media || game.gallery || []).length > 0 ? (game.media || game.gallery).map(m => `
                                 <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
-                                    <img src="${m.url}" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 0.5rem; border-radius: 4px;">
-                                    <p style="font-size: 0.8rem; color: var(--highlight);">${m.type}</p>
+                                    <img src="${m.src || m.url || '/media/placeholder.png'}" loading="lazy" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 0.5rem; border-radius: 4px;">
+                                    <p style="font-size: 0.8rem; color: var(--highlight);">${m.caption || m.type || ''}</p>
                                 </div>
                             `).join('') : '<p>Dados de mídia não cadastrados.</p>'}
                         </div>
@@ -197,12 +224,14 @@ function openModal(id) {
                         <h2>Trilha Sonora (OST)</h2>
                         <div style="display: flex; flex-direction: column; gap: 1rem;">
                             ${(game.ost || []).length > 0 ? game.ost.map(t => `
-                                <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
-                                    <span style="font-weight: 600;">${t.title}</span>
+                                <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                                    <span style="font-weight: 600;">${t.title || 'Faixa'} ${t.duration ? `<small style="color: var(--text-muted);">(${t.duration})</small>` : ''}</span>
+                                    ${isDirectAudioUrl(t.url) ? `
                                     <audio controls style="height: 30px;">
                                         <source src="${t.url}" type="audio/mpeg">
                                         Seu navegador não suporta áudio.
-                                    </audio>
+                                    </audio>` : `
+                                    <a href="${t.url}" target="_blank" rel="noopener noreferrer" style="background: var(--primary); color: #fff; padding: 0.45rem 0.9rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem;">▶ Ouvir Faixa</a>`}
                                 </div>
                             `).join('') : '<p>Dados de trilha sonora não cadastrados.</p>'}
                         </div>
@@ -225,7 +254,11 @@ function openModal(id) {
                     <div class="wiki-section">
                         <h2>Detonado e Dicas</h2>
                         <p>${parseArticleTags(game.guide_tips || game.tips)}</p>
-                        ${game.guide_url ? `<a href="${game.guide_url}" target="_blank" class="view-btn" style="display: inline-block; margin-top: 1rem; text-decoration: none; background: var(--primary); color: #fff; padding: 0.8rem 1.5rem; border-radius: 5px;">Acessar Guia Externo</a>` : ''}
+                        ${game.guide_url ? `<a href="${game.guide_url}" target="_blank" rel="noopener noreferrer" class="view-btn" style="display: inline-block; margin-top: 1rem; text-decoration: none; background: var(--primary); color: #fff; padding: 0.8rem 1.5rem; border-radius: 5px;">Acessar Guia Externo</a>` : ''}
+                        ${(game.links || []).length > 0 ? `
+                        <div style="margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                            ${game.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.35); color: #93c5fd; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem;">🔗 ${l.label || l.url}</a>`).join('')}
+                        </div>` : ''}
                     </div>
                     
                     <div class="wiki-section">
@@ -266,6 +299,11 @@ function openModal(id) {
 }
 
 // Global scope hooks
+window.filterLibrary = (val) => {
+    currentSearchTerm = val || '';
+    renderLibrary();
+};
+
 window.switchLibraryView = (mode, btn) => {
     currentLibraryView = mode;
     document.querySelectorAll('.lib-view-btn').forEach(b => b.classList.remove('active'));

@@ -1,0 +1,101 @@
+name: Repost Videos (YouTube -> Site, Instagram, Facebook & Reddit)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # Verifica vídeos novos a cada 30 minutos
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Ação a executar (repost_videos ou share_article)'
+        required: false
+        default: 'repost_videos'
+      article_id:
+        description: 'ID do artigo no Firestore (se action=share_article)'
+        required: false
+        default: ''
+      video_id:
+        description: 'ID específico do vídeo do YouTube (opcional)'
+        required: false
+        default: ''
+      force_post:
+        description: 'Forçar criação de postagem no site (true/false)'
+        required: false
+        default: 'false'
+      force_ig:
+        description: 'Forçar repostagem no Instagram Reels (true/false)'
+        required: false
+        default: 'false'
+      force_fb:
+        description: 'Forçar postagem na Página do Facebook (true/false)'
+        required: false
+        default: 'false'
+      force_reddit:
+        description: 'Forçar postagem no Reddit (true/false)'
+        required: false
+        default: 'false'
+      use_ai:
+        description: 'Usar Gemini AI para resumir e formatar o post (true/false)'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  repost-videos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install firebase-admin
+
+      - name: Install yt-dlp & ffmpeg (for Instagram Reels MP4)
+        if: ${{ github.event.inputs.force_ig == 'true' || vars.ENABLE_IG_REPOST == 'true' }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg python3-pip
+          python3 -m pip install -U yt-dlp
+
+      - name: Run Repost Script
+        id: repost
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          REDDIT_SUBREDDIT: ${{ secrets.REDDIT_SUBREDDIT }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          INPUT_ACTION: ${{ github.event.inputs.action }}
+          INPUT_ARTICLE_ID: ${{ github.event.inputs.article_id }}
+          INPUT_VIDEO_ID: ${{ github.event.inputs.video_id }}
+          INPUT_FORCE_POST: ${{ github.event.inputs.force_post }}
+          INPUT_FORCE_IG: ${{ github.event.inputs.force_ig }}
+          INPUT_FORCE_FB: ${{ github.event.inputs.force_fb }}
+          INPUT_FORCE_REDDIT: ${{ github.event.inputs.force_reddit }}
+          INPUT_USE_AI: ${{ github.event.inputs.use_ai }}
+        run: node tools/repost_videos.js
+
+      - name: Trigger Site Rebuild if New Post Created
+        if: ${{ steps.repost.outputs.site_updated == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/workflows/deploy.yml/dispatches" \
+            -d '{"ref":"master"}'

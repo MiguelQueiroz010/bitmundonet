@@ -496,6 +496,10 @@
             <button class="lib-view-btn" onclick="switchLibraryView('genre', this)">Por Gênero</button>
         </div>
 
+        <div id="library-search-box" style="max-width: 520px; margin: -1.5rem auto 2rem auto;">
+            <input type="search" id="library-search" oninput="filterLibrary(this.value)" placeholder="Buscar jogo, plataforma ou gênero..." style="width: 100%; padding: 0.85rem 1.2rem; border-radius: 99px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #fff; font-size: 0.95rem; outline: none;">
+        </div>
+
         <div id="library-container" class="library-grid">
 <!-- SSG:LIBRARY_START -->
             <h2 class="category-header">A</h2>

@@ -471,6 +471,7 @@
         </div>
         <h2>BitMundo Central</h2>
         <button class="nav-btn active" onclick="switchSection('profile', this); toggleSidebar()">Meu Perfil</button>
+        <button class="nav-btn" onclick="switchSection('videos', this); toggleSidebar()">🎬 Vídeos &amp; Repost (IA)</button>
         <button class="nav-btn" onclick="switchSection('projects', this); toggleSidebar()">Projetos (DB)</button>
         <button class="nav-btn" onclick="switchSection('articles', this); toggleSidebar()">Postagens (DB)</button>
         <button class="nav-btn" onclick="switchSection('library', this); toggleSidebar()">Biblioteca (DB)</button>
@@ -677,7 +678,7 @@
                             <button id="btn-del-library" class="save-btn" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 0.3rem 0.8rem; font-size: 0.7rem; display: none;" onclick="deleteSelected('library')">🗑️ Excluir Selecionados</button>
                         </div>
                         <div id="library-list">Carregando...</div>
-                        <button class="save-btn" style="background: #3b82f6; margin-top: 1rem;" onclick="alert('Logo disponível!')">ADICIONAR NOVO JOGO</button>
+                        <button class="save-btn" style="background: #3b82f6; margin-top: 1rem;" onclick="addNewLibrary()">ADICIONAR NOVO JOGO</button>
                     </div>
                     <div>
                         <h4 style="color: var(--admin-primary); margin-bottom: 1rem;">👁️ Prévia de Conteúdo</h4>
@@ -723,6 +724,133 @@
                 <h3>Gerenciar Ferramentas do Catálogo (Firestore)</h3>
                 <div id="tools-list">Carregando...</div>
                 <button class="save-btn" style="background: #3b82f6; margin-top: 1rem;" onclick="addNewTool()">ADICIONAR NOVA FERRAMENTA</button>
+            </div>
+        </section>
+
+        <!-- Videos & Repost + AI Assistant Section -->
+        <section id="videos" class="dash-section">
+            <div class="card" style="border-color: rgba(241, 163, 46, 0.35);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--admin-primary);">🎬 Repost Automático (YouTube → Site, Instagram, Facebook &amp; Reddit)</h3>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0.4rem 0 0;">
+                            Integrado ao GitHub Actions (<code>.github/workflows/repost-videos.yml</code>) rodando a cada 30 min ou sob demanda.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button type="button" class="save-btn" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);" onclick="triggerRepostWorkflow('', true, false, false, false)">🔄 Sincronizar Site (Actions)</button>
+                        <button type="button" class="save-btn" style="background: linear-gradient(135deg, #f59e0b, #ec4899); color: #fff;" onclick="triggerRepostWorkflow('', true, true, true, true)">🚀 Rodar Tudo Agora (Todas Redes)</button>
+                    </div>
+                </div>
+
+                <div class="responsive-grid">
+                    <div>
+                        <div class="form-group">
+                            <label>YouTube Channel ID (começa com UC...)</label>
+                            <input type="text" id="repost-yt-channel" placeholder="Ex: UCxxxxxxxxxxxxxxxxxxxxxx">
+                            <small style="color: rgba(255,255,255,0.45); font-size: 0.72rem;">Usado no feed RSS público gratuito (sem gastar cota de API).</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Template da Legenda no Instagram / Redes</label>
+                            <textarea id="repost-ig-template" style="height: 80px; font-family: monospace; font-size: 0.8rem;" placeholder="{title}&#10;&#10;Veja mais em: https://bitraiden.org&#10;{hashtags}"></textarea>
+                            <small style="color: rgba(255,255,255,0.45); font-size: 0.72rem;">Variáveis: <code>{title}</code>, <code>{description}</code>, <code>{url}</code>, <code>{hashtags}</code></small>
+                        </div>
+                        <div class="form-group">
+                            <label>Hashtags Padrão</label>
+                            <input type="text" id="repost-ig-hashtags" placeholder="#romhacking #ps2 #traducao #bitraiden #games">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div class="form-group">
+                                <label>Facebook Page ID</label>
+                                <input type="text" id="repost-fb-page-id" placeholder="Ex: 1029384756...">
+                                <small style="color: rgba(255,255,255,0.45); font-size: 0.7rem;">ID da Página Bit.Raiden</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Subreddit Padrão (Reddit)</label>
+                                <input type="text" id="repost-reddit-sub" placeholder="u_bit_raiden ou romhacking">
+                                <small style="color: rgba(255,255,255,0.45); font-size: 0.7rem;">Perfil (u_user) ou r/comunidade</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <label>Chave da API Gemini (Google AI Studio — Plano Gratuito)</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." style="flex: 1;">
+                                <button type="button" class="save-btn" style="padding: 0 1rem; background: rgba(255,255,255,0.1); color: #fff;" onclick="const el=document.getElementById('gemini-api-key-input'); el.type = el.type==='password'?'text':'password';">👁️</button>
+                            </div>
+                            <small style="color: rgba(255,255,255,0.5); font-size: 0.72rem; display: block; margin-top: 0.4rem;">
+                                💡 Chave gratuita no <strong>Google AI Studio</strong> (<code>gemini-3.8-flash</code> tem cota gratuita sem cobrança). Salva localmente no navegador.
+                            </small>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.9rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.65rem;">
+                            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="repost-auto-site" style="width: 18px; height: 18px;">
+                                <span>🌐 Criar Postagem automática no Site (Firestore + Rebuild)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="repost-auto-ig" style="width: 18px; height: 18px;">
+                                <span>📸 Repostar automaticamente no Instagram Reels</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="repost-auto-fb" style="width: 18px; height: 18px;">
+                                <span>📘 Postar automaticamente na Página do Facebook</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="repost-auto-reddit" style="width: 18px; height: 18px;">
+                                <span>🤖 Postar automaticamente no Reddit</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="repost-use-ai" style="width: 18px; height: 18px;" checked>
+                                <span>✨ Gerar resumo/artigo com IA (Gemini) ao postar vídeo</span>
+                            </label>
+                        </div>
+
+                        <button type="button" class="save-btn" style="width: 100%;" onclick="saveRepostSettings()">💾 Salvar Configurações de Repost &amp; IA</button>
+                    </div>
+                </div>
+
+                <details style="margin-top: 1.5rem; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem;">
+                    <summary style="cursor: pointer; color: #60a5fa; font-weight: 600; font-size: 0.85rem;">🔑 Secrets necessários no GitHub Actions (Settings → Secrets → Actions)</summary>
+                    <ul style="font-size: 0.8rem; color: rgba(255,255,255,0.75); line-height: 1.7; margin-top: 0.75rem; margin-bottom: 0;">
+                        <li><code>FIREBASE_SERVICE_ACCOUNT_KEY</code> — Credencial do Firebase Admin</li>
+                        <li><code>GEMINI_API_KEY</code> — Chave gratuita do Google AI Studio para o cron</li>
+                        <li><code>IG_USER_ID</code> e <code>IG_ACCESS_TOKEN</code> — ID e Token SUAT do Instagram Profissional</li>
+                        <li><code>FB_PAGE_ID</code> — ID da Página do Facebook (ex: <code>Bit.Raiden</code>). <em>(FB_PAGE_TOKEN opcional, usa o IG_ACCESS_TOKEN se tiver permissão)</em></li>
+                        <li><code>REDDIT_CLIENT_ID</code>, <code>REDDIT_CLIENT_SECRET</code>, <code>REDDIT_USERNAME</code>, <code>REDDIT_PASSWORD</code>, <code>REDDIT_SUBREDDIT</code> — Credenciais do App Script criado em <code>reddit.com/prefs/apps</code></li>
+                        <li>Variável opcional (Repository Variables): <code>ENABLE_IG_REPOST=true</code> para instalar <code>yt-dlp</code> também nas execuções agendadas</li>
+                    </ul>
+                </details>
+            </div>
+
+            <!-- Lista de Vídeos -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0;">📺 Vídeos Lançados &amp; Status de Repostagem</h3>
+                    <button type="button" class="save-btn" style="padding: 0.5rem 1rem; font-size: 0.8rem; background: rgba(255,255,255,0.1); color: #fff;" onclick="loadVideosAdmin()">↻ Atualizar Lista</button>
+                </div>
+                <div id="videos-repost-list">Carregando vídeos...</div>
+            </div>
+
+            <!-- Assistente IA Universal do Admin -->
+            <div class="card" style="border-color: rgba(16, 185, 129, 0.35);">
+                <h3 style="margin-top: 0; color: #34d399;">🤖 Assistente IA do Portal (Projetos, Postagens, Ferramentas e Biblioteca)</h3>
+                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.65); margin-bottom: 1rem;">
+                    A IA consulta o resumo atual do seu banco de dados para evitar duplicatas e criar textos, fichas técnicas, ideias ou guias alinhados com o site.
+                </p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <select id="ai-target-area" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 0.8rem; color: #fff; min-width: 200px;">
+                        <option value="Postagens">Postagens / Artigos</option>
+                        <option value="Biblioteca">Biblioteca (Jogos / Mídias / Links)</option>
+                        <option value="Projetos">Projetos de Tradução</option>
+                        <option value="Ferramentas">Ferramentas</option>
+                    </select>
+                    <input type="text" id="ai-prompt-input" placeholder="Ex: Gere uma ficha completa para Dragon Ball Z Budokai Tenkaichi 3 na Biblioteca..." style="flex: 1; min-width: 260px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 0.8rem; color: #fff;">
+                    <button type="button" class="save-btn" id="btn-run-ai-assistant" style="background: #10b981; color: #000;" onclick="runAdminAiAssistant()">✨ Perguntar / Gerar</button>
+                </div>
+                <div id="ai-assistant-output" style="display: none; background: rgba(0,0,0,0.45); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 1.25rem; white-space: pre-wrap; font-size: 0.88rem; line-height: 1.65; max-height: 420px; overflow-y: auto;"></div>
             </div>
         </section>
     </main>

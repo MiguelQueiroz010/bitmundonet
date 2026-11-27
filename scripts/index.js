@@ -1,6 +1,6 @@
 import { dbPromise } from './db-context.js';
 import { collection, query, where, getDocs, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-import { parseArticleTags, renderTopics } from "./utils.js";
+import { parseArticleTags, renderTopics, articlePath } from "./utils.js";
 
 window.onload = loadpb;
 
@@ -169,7 +169,7 @@ function renderArticle(a, container) {
     <div class="article-wrapper">
         <div class="article-header">
             ${image ? `<img id="titlemage" class="article-title-img" src="${image}" alt="${title}" style="${imageStyle}">` : ''}
-            <h2 class="article-title">${title}</h2>
+            <h2 class="article-title"><a href="${articlePath(a)}" style="color: inherit; text-decoration: none;">${title}</a></h2>
         </div>
         <div class="article-content">
             ${contentHtml}

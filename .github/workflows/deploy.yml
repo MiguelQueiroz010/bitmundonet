@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # needed so sitemap <lastmod> can use real git dates
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -51,6 +53,14 @@ jobs:
 
       - name: Build Static Site & SEO (SSG)
         run: node scripts/build_static.js
+        env:
+          # Optional: override the IDs in seo.config.json (empty = use the file)
+          GA4_MEASUREMENT_ID: ${{ secrets.GA4_MEASUREMENT_ID }}
+          GOOGLE_ADS_ID: ${{ secrets.GOOGLE_ADS_ID }}
+          GOOGLE_ADS_DOWNLOAD_LABEL: ${{ secrets.GOOGLE_ADS_DOWNLOAD_LABEL }}
+          GOOGLE_SITE_VERIFICATION: ${{ secrets.GOOGLE_SITE_VERIFICATION }}
+          BING_SITE_VERIFICATION: ${{ secrets.BING_SITE_VERIFICATION }}
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
 
       - name: Prepare Workspace (Ensure ignored files are published)
         run: rm -f .gitignore
@@ -61,3 +71,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
           publish_branch: gh-pages # Branch onde o site processado será hospedado
+
+      - name: Notify IndexNow (Bing/Yandex) about new or changed pages
+        if: github.event_name != 'pull_request'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          sleep 90 # let GitHub Pages publish the key file first
+          node scripts/indexnow.js 2 || true

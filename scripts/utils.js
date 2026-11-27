@@ -140,3 +140,42 @@ export function sanitizeString(str) {
         return str;
     }
 }
+
+/**
+ * URL slug helpers (shared by the browser and the Node SSG).
+ * A Firestore `slug` field, when present, freezes the permalink; otherwise the
+ * slug is derived from the title plus a short id suffix (unique + stable id part).
+ */
+export function slugify(str) {
+    return String(str || '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/&/g, ' e ')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 70)
+        .replace(/-+$/g, '');
+}
+
+export function articleSlug(a) {
+    if (!a) return '';
+    if (a.slug) return slugify(a.slug);
+    const shortId = String(a.id || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 6);
+    const base = slugify(a.title) || 'post';
+    return shortId ? `${base}-${shortId}` : base;
+}
+
+export function articlePath(a) {
+    return `/posts/${articleSlug(a)}.html`;
+}
+
+export function toolSlug(t) {
+    if (!t) return '';
+    if (t.slug) return slugify(t.slug);
+    return slugify(t.name) || slugify(t.id) || 'ferramenta';
+}
+
+export function toolPath(t) {
+    return `/ferramentas/${toolSlug(t)}.html`;
+}

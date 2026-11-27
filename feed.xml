@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RomHacking do Raiden - Novidades</title>
+    <link>https://bitraiden.org/</link>
+    <atom:link href="https://bitraiden.org/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Atualizações de projetos de tradução, tutoriais e ferramentas de RomHacking.</description>
+    <language>pt-BR</language>
+    <lastBuildDate>Fri, 27 Nov 2026 22:47:53 GMT</lastBuildDate>
+    <item>
+      <title>BOMBA! DIRGE OF CERBERUS RECEBE TRADUÇÃO!</title>
+      <link>https://bitraiden.org/posts/bomba-dirge-of-cerberus-recebe-traducao-bombad.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/bomba-dirge-of-cerberus-recebe-traducao-bombad.html</guid>
+      <pubDate>Wed, 11 Nov 2026 12:00:00 GMT</pubDate>
+      <author>Raiden</author>
+      <description>Uma grande novidade para os fãs de Final Fantasy VII e dos clássicos do PlayStation 2! Dirge of Cerberus: Final Fantasy VII , o jogo protagonizado por Vincent Valentine, está recebendo um projeto de tradução para português brasileiro! Lançado originalmente para PlayStation 2, o título expande o...</description>
+    </item>
+    <item>
+      <title>FERRAMENTAS NOVAS NO SITE!</title>
+      <link>https://bitraiden.org/posts/ferramentas-novas-no-site-ferram.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/ferramentas-novas-no-site-ferram.html</guid>
+      <pubDate>Tue, 06 Oct 2026 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>Estação de Modding AFS Audio Studio Uma ferramenta completa para edição de áudios ADX/AHX CRIWARE com suporte a edição de áudio, corte, importação, reprodução e sub-nível de pastas. O que essa ferramenta possibilita? É uma estação completa que suporta edição do áudio diretamente, dos AFS (com ou...</description>
+    </item>
+    <item>
+      <title>NOVIDADES!</title>
+      <link>https://bitraiden.org/posts/novidades-novida.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/novidades-novida.html</guid>
+      <pubDate>Wed, 26 Aug 2026 12:00:00 GMT</pubDate>
+      <author>BitMundo</author>
+      <description>DEV PCSX2 PRO — PCSX2 Developer Edition Uma versão personalizada do PCSX2 1.7.2084 desenvolvida com foco em debugging, desenvolvimento, engenharia reversa e modding de jogos de PlayStation 2 . O que é o DEV PCSX2 PRO? O DEV PCSX2 PRO é uma edição modificada do PCSX2 criada para oferecer ferramentas...</description>
+    </item>
+    <item>
+      <title>PROJETO ULTIMATE NINJA BR | DEVNEWS</title>
+      <link>https://bitraiden.org/posts/projeto-ultimate-ninja-br-devnews-projet.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/projeto-ultimate-ninja-br-devnews-projet.html</guid>
+      <pubDate>Wed, 29 Jul 2026 12:00:00 GMT</pubDate>
+      <author>BitMundo</author>
+      <description>✨ Galera, muitas ideias para o Ultimate Ninja 5++ surgiram, senta que lá vem história! Com uma *Ferramenta Misteriosa* concedida pelo ZMath3usMSF, consegui ter uma visão melhor do código e seguir com organização de nomes de funções que o jogo já tem e também funções próprias do PS2SDK em si (como...</description>
+    </item>
+    <item>
+      <title>UNIVERSO GAMER</title>
+      <link>https://bitraiden.org/posts/universo-gamer-univer.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/universo-gamer-univer.html</guid>
+      <pubDate>Tue, 28 Jul 2026 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>🎮 Shigeru Miyamoto, criador de Super Mario, Zelda e Pikmin, compartilhou uma visão poderosa sobre desenvolvimento de jogos: tentar agradar a todos resulta em algo genérico. Para ele, as experiências mais marcantes nascem de ideias pessoais e da busca genuína pelo que torna algo divertido — antes...</description>
+    </item>
+    <item>
+      <title>PROJETO ULTIMATE NINJA BR | NEWS</title>
+      <link>https://bitraiden.org/posts/projeto-ultimate-ninja-br-news-projet.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/projeto-ultimate-ninja-br-news-projet.html</guid>
+      <pubDate>Wed, 11 Feb 2026 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>Atualizações sobre o Projeto Ultimate Ninja BR -------------------------------------------- O sistema tão dificilmente implementado de legendas em vozes, entrou com sucesso no Ultimate Ninja 1. Tive um certo trabalho para pensar em funções de trigger e ID de disparo para a legenda funcionar e isso...</description>
+    </item>
+    <item>
+      <title>LINKS DE MOD/TRADUÇÕES</title>
+      <link>https://bitraiden.org/posts/links-de-mod-traducoes-manute.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/links-de-mod-traducoes-manute.html</guid>
+      <pubDate>Sun, 08 Feb 2026 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>Todos os links agora restaurados e funcionando! O Site passou por muitas mudanças e temos muitas novidades: *Novo Visual *Novo Domínio .org *Novo Sistema de Postagens *Sistema de Comentários e Emojis *Sistema de Reações a Postagens e Projetos Alguns recursos só podem ser usados com autenticação de...</description>
+    </item>
+    <item>
+      <title>Série Ultimate Ninja Completa: Projeto de Tradução💥💥💥</title>
+      <link>https://bitraiden.org/posts/serie-ultimate-ninja-completa-projeto-de-traducao-unbr.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/serie-ultimate-ninja-completa-projeto-de-traducao-unbr.html</guid>
+      <pubDate>Wed, 07 May 2025 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>✨ Estamos preparando um lançamento completo! ✨ Ultimate Ninja 1 - Tradutor: Bit.Raiden Ultimate Ninja 2 - Tradutor: NarutoClassics Ultimate Ninja 3 - Tradutor: Andyson Ultimate Ninja 4 - Tradutor: Bit.Raiden Todos vão ter legendas nos Ultimates (Jutsus Supremos)! 🐱‍🏍 Entre no nosso servidor do...</description>
+    </item>
+    <item>
+      <title>💥 Ultimate Ninja 3 - Tradução quase lá...</title>
+      <link>https://bitraiden.org/posts/ultimate-ninja-3-traducao-quase-la-un3.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/ultimate-ninja-3-traducao-quase-la-un3.html</guid>
+      <pubDate>Sun, 27 Apr 2025 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>Naruto Ultimate Ninja 3+ BR (PS2) 📝 ✨ Estamos preparando um lançamento muito especial! ✨ Um projeto muito esperado e cuidadosamente trabalhado na tradução pelo nosso querido Andyson , com algumas modificações minhas e o suporte de novas ferramentas para tornar tudo ainda melhor. Agora também...</description>
+    </item>
+    <item>
+      <title>✔ Novas ferramentas, nova cara...</title>
+      <link>https://bitraiden.org/posts/novas-ferramentas-nova-cara-newdes.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/novas-ferramentas-nova-cara-newdes.html</guid>
+      <pubDate>Tue, 18 Mar 2025 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>SCEI-VAG PACK TOOL Por ver a necessidade da Narutimatte Modding em adicionar áudios de personagens com mais liberdade, zMath3usMSF, fundador me contatou falando da demanda no algoritmo. *Refiz todo o código, refatorei os leitores e criei um algoritmo de recompilação que não existia; *Organizei...</description>
+    </item>
+    <item>
+      <title>🎮 Live de Revisão, Tradução e Correção</title>
+      <link>https://bitraiden.org/posts/live-de-revisao-traducao-e-correcao-live.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/live-de-revisao-traducao-e-correcao-live.html</guid>
+      <pubDate>Sat, 22 Feb 2025 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>Bob Esponja: Creature from the Krusty Krab (PS2)! 📝 Fala, galera! Hoje temos uma live especial onde vamos revisar, corrigir e aprimorar a tradução do jogo Bob Esponja: Creature from the Krusty Krab para PlayStation 2! 🧽🍔 Esse projeto incrível está sendo trabalhado por: 🖊 Tradutor: Bit.Raiden 🛠...</description>
+    </item>
+    <item>
+      <title>Por detrás das Legendas nos Jutsus Supremos</title>
+      <link>https://bitraiden.org/posts/por-detras-das-legendas-nos-jutsus-supremos-legend.html</link>
+      <guid isPermaLink="true">https://bitraiden.org/posts/por-detras-das-legendas-nos-jutsus-supremos-legend.html</guid>
+      <pubDate>Mon, 10 Feb 2025 12:00:00 GMT</pubDate>
+      <author>Bit.Raiden</author>
+      <description>As legendas nos Jutsus Supremos foi uma ideia que surgiu ao me lembrar de jogar o jogo Naruto Shippuden Ultimate Ninja Storm 4 , que tem as legendas em cada Jutsu, a partir daí virou uma corrida passo a passo para alcançar esse sonho. 1º Passo: Encontrar a função de escrita de texto na tela. {...</description>
+    </item>
+  </channel>
+</rss>

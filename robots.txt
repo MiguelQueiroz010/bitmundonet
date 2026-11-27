@@ -4,9 +4,12 @@ Allow: /
 Disallow: /admin_login.html
 Disallow: /admin_dashboard.html
 Disallow: /tool_view.html
+Disallow: /project_view.html
+Disallow: /navbar.html
+Disallow: /footer.html
 Disallow: /archive/
 
-# Google Search Bots & AdSense
+# Google Search Bots & AdSense / Google Ads landing page checks
 User-agent: Googlebot
 Allow: /
 

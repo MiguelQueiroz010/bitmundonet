@@ -12,8 +12,10 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { parseArticleTags, renderTopics } from './utils.js';
+import { parseArticleTags, renderTopics, articlePath } from './utils.js';
 import { updateAllSeoTags } from './update_seo_tags.js';
+import { loadSeoConfig, injectGlobalHeadEverywhere, gitLastMod, toIsoDate } from './seo_lib.js';
+import { buildPosts, buildFeed, buildToolPages, build404 } from './build_pages.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,19 +65,31 @@ function unmarshalDoc(doc) {
 }
 
 async function fetchCollection(colName) {
+    // Offline/CI-test mode: SSG_FIXTURE_DIR=/path with <collection>.json arrays.
+    if (process.env.SSG_FIXTURE_DIR) {
+        const fx = path.join(process.env.SSG_FIXTURE_DIR, `${colName}.json`);
+        return fs.existsSync(fx) ? JSON.parse(fs.readFileSync(fx, 'utf-8')) : [];
+    }
+    const docs = [];
+    let pageToken = '';
     try {
-        const url = `${FIRESTORE_BASE}/${colName}?pageSize=100`;
-        const resp = await fetch(url);
-        if (!resp.ok) {
-            console.warn(`[SSG] Failed to fetch collection ${colName}: ${resp.status}`);
-            return [];
+        // Follow nextPageToken so collections larger than one page are fully indexed.
+        for (let page = 0; page < 50; page++) {
+            const url = `${FIRESTORE_BASE}/${colName}?pageSize=100${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''}`;
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                console.warn(`[SSG] Failed to fetch collection ${colName}: ${resp.status}`);
+                return docs;
+            }
+            const data = await resp.json();
+            if (data.documents) docs.push(...data.documents.map(unmarshalDoc));
+            if (!data.nextPageToken) break;
+            pageToken = data.nextPageToken;
         }
-        const data = await resp.json();
-        if (!data.documents) return [];
-        return data.documents.map(unmarshalDoc);
+        return docs;
     } catch (e) {
         console.error(`[SSG] Error fetching ${colName}:`, e.message);
-        return [];
+        return docs;
     }
 }
 
@@ -430,15 +444,21 @@ function buildProjectHtml(project, allProjects, templateHtml) {
     `;
 
     // 8. Schema.org JSON-LD (Rich Snippets for Google)
+    const createdIso = toIsoDate(project._createTime);
+    const modifiedIso = toIsoDate(project._updateTime) || createdIso;
+    const ytId = embedUrl ? ((embedUrl.match(/youtube\.com\/embed\/([A-Za-z0-9_-]{11})/) || [])[1] || '') : '';
     const jsonLd = {
         "@context": "https://schema.org",
         "@graph": [
             {
                 "@type": "VideoGame",
                 "@id": `${canonicalUrl}#game`,
+                "url": canonicalUrl,
                 "name": title,
                 "description": plainDesc,
                 "image": cover,
+                ...(createdIso ? { "datePublished": createdIso } : {}),
+                ...(modifiedIso ? { "dateModified": modifiedIso } : {}),
                 "gamePlatform": platform,
                 "inLanguage": "pt-BR",
                 "genre": ["RomHacking", "Tradução de Jogos", "Action"],
@@ -480,6 +500,16 @@ function buildProjectHtml(project, allProjects, templateHtml) {
                     }
                 ]
             },
+            ...(ytId ? [{
+                "@type": "VideoObject",
+                "@id": `${canonicalUrl}#video`,
+                "name": `${title} - Trailer / Demonstração PT-BR`,
+                "description": plainDesc,
+                "thumbnailUrl": [`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`],
+                "embedUrl": `https://www.youtube.com/embed/${ytId}`,
+                "uploadDate": createdIso || undefined,
+                "inLanguage": "pt-BR"
+            }] : []),
             {
                 "@type": "FAQPage",
                 "mainEntity": [
@@ -529,6 +559,7 @@ function buildProjectHtml(project, allProjects, templateHtml) {
     <meta property="og:image" content="${escapeHtml(cover)}" />
     <meta property="og:image:secure_url" content="${escapeHtml(cover)}" />
     <meta property="og:image:alt" content="Capa do projeto ${escapeHtml(title)}" />
+${createdIso ? `    <meta property="article:published_time" content="${createdIso}" />\n` : ''}${modifiedIso ? `    <meta property="article:modified_time" content="${modifiedIso}" />\n` : ''}    <link rel="alternate" hreflang="pt-BR" href="${canonicalUrl}" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -735,7 +766,7 @@ function updateHomepage(articles = []) {
                             <div class="article-wrapper">
                                 <div class="article-header">
                                     ${image ? `<img class="article-title-img" src="${image}" alt="${title}" loading="lazy" decoding="async" style="${imageStyle}">` : ''}
-                                    <h3 class="article-title">${title}</h3>
+                                    <h3 class="article-title"><a href="${articlePath(a)}" style="color: inherit; text-decoration: none;">${title}</a></h3>
                                 </div>
                                 <div class="article-content">
                                     ${contentHtml}
@@ -763,7 +794,7 @@ function updateHomepage(articles = []) {
     fs.writeFileSync(filePath, html, 'utf-8');
 }
 
-function updateToolsPage(tools = []) {
+function updateToolsPage(tools = [], toolPaths = new Map()) {
     const filePath = path.join(ROOT_DIR, 'tools.html');
     if (!fs.existsSync(filePath) || tools.length === 0) return;
     let html = fs.readFileSync(filePath, 'utf-8');
@@ -807,6 +838,7 @@ function updateToolsPage(tools = []) {
                                 <div id="link" style="margin-top: 1.5rem;">
                                     <a href="${url}" target="_blank" rel="noopener noreferrer">${tool.isOnline ? 'Rodar Online' : `Download (${version})`}</a>
                                 </div>
+                                ${toolPaths.get(tool.id) ? `<p style="margin-top: 1rem;"><a href="${toolPaths.get(tool.id)}">Detalhes e como usar ${name}</a></p>` : ''}
                             </div>
                         </div>`;
         }).join('');
@@ -882,28 +914,27 @@ function escapeXml(str) {
         .replace(/'/g, '&apos;');
 }
 
-function generateSitemap(projects, articles) {
+function generateSitemap(projects, extraEntries, cfg) {
     const today = new Date().toISOString().split('T')[0];
 
+    // lastmod = date of the last commit touching the page (Google ignores a lastmod
+    // that always says "today", so only real changes should move it).
     const corePages = [
-        { loc: `${BASE_URL}/`, priority: '1.0', changefreq: 'daily' },
-        { loc: `${BASE_URL}/projetos.html`, priority: '0.9', changefreq: 'daily' },
-        { loc: `${BASE_URL}/raiden_patcher.html`, priority: '0.9', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/hog_extractor.html`, priority: '0.8', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/tools/Fully/AFS_STATION.html`, priority: '0.8', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/tools/Fully/TTxT-standalone.html`, priority: '0.8', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/tools.html`, priority: '0.8', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/library.html`, priority: '0.7', changefreq: 'weekly' },
-        { loc: `${BASE_URL}/about.html`, priority: '0.6', changefreq: 'monthly' },
-        { loc: `${BASE_URL}/termos.html`, priority: '0.4', changefreq: 'monthly' },
-        { loc: `${BASE_URL}/privacidade.html`, priority: '0.4', changefreq: 'monthly' }
-    ];
+        { loc: `${BASE_URL}/`, file: 'index.html', priority: '1.0', changefreq: 'daily', lastmod: today },
+        { loc: `${BASE_URL}/projetos.html`, file: 'projetos.html', priority: '0.9', changefreq: 'daily', lastmod: today },
+        { loc: `${BASE_URL}/raiden_patcher.html`, file: 'raiden_patcher.html', priority: '0.9', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/hog_extractor.html`, file: 'hog_extractor.html', priority: '0.8', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/tools/Fully/AFS_STATION.html`, file: 'tools/Fully/AFS_STATION.html', priority: '0.8', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/tools/Fully/TTxT-standalone.html`, file: 'tools/Fully/TTxT-standalone.html', priority: '0.8', changefreq: 'weekly' },
+        { loc: `${BASE_URL}/tools.html`, file: 'tools.html', priority: '0.8', changefreq: 'weekly', lastmod: today },
+        { loc: `${BASE_URL}/library.html`, file: 'library.html', priority: '0.7', changefreq: 'weekly', lastmod: today },
+        { loc: `${BASE_URL}/about.html`, file: 'about.html', priority: '0.6', changefreq: 'monthly' },
+        { loc: `${BASE_URL}/termos.html`, file: 'termos.html', priority: '0.4', changefreq: 'monthly' },
+        { loc: `${BASE_URL}/privacidade.html`, file: 'privacidade.html', priority: '0.4', changefreq: 'monthly' }
+    ].map(p => ({ ...p, lastmod: p.lastmod || gitLastMod(p.file) }));
 
     const projectUrls = projects.map(p => {
-        let lastmod = today;
-        if (p._updateTime) {
-            lastmod = p._updateTime.split('T')[0];
-        }
+        const lastmod = p._updateTime ? p._updateTime.split('T')[0] : today;
         const imgUrl = toAbsoluteUrl(p.cover || p.thumbnail);
         const title = p.title || 'Projeto';
         const platform = p.platform || 'PS2';
@@ -917,12 +948,12 @@ function generateSitemap(projects, articles) {
             image: {
                 loc: imgUrl,
                 title: `${title} (${platform}) PT-BR - RomHacking do Raiden`,
-                caption: caption
+                caption
             }
         };
     });
 
-    const allUrls = [...corePages, ...projectUrls];
+    const allUrls = [...corePages, ...projectUrls, ...(extraEntries || [])];
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -932,24 +963,28 @@ ${allUrls.map(u => {
     if (u.image) {
         imgBlock = `\n    <image:image>\n      <image:loc>${escapeXml(u.image.loc)}</image:loc>\n      <image:title>${escapeXml(u.image.title)}</image:title>\n      <image:caption>${escapeXml(u.image.caption)}</image:caption>\n    </image:image>`;
     }
-    return `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod || today}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>${imgBlock}\n  </url>`;
+    const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : '';
+    return `  <url>\n    <loc>${escapeXml(u.loc)}</loc>${lastmod}\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>${imgBlock}\n  </url>`;
 }).join('\n')}
-</urlset>`;
+</urlset>
+`;
 
     fs.writeFileSync(path.join(ROOT_DIR, 'sitemap.xml'), xml, 'utf-8');
-    console.log(`[SSG] Generated sitemap.xml with ${allUrls.length} indexed URLs and rich Google Image metadata.`);
+    console.log(`[SSG] Generated sitemap.xml with ${allUrls.length} indexed URLs (${projectUrls.length} projects, ${(extraEntries || []).length} posts/tools).`);
 
-    // Update robots.txt
-    const robotsPath = path.join(ROOT_DIR, 'robots.txt');
-    const robotsContent = `# Robots.txt - Bit.Raiden (https://bitraiden.org)
+    // robots.txt - fragments and the redirect-only template are not pages worth crawling.
+    const robotsContent = `# Robots.txt - Bit.Raiden (${BASE_URL})
 User-agent: *
 Allow: /
 Disallow: /admin_login.html
 Disallow: /admin_dashboard.html
 Disallow: /tool_view.html
+Disallow: /project_view.html
+Disallow: /navbar.html
+Disallow: /footer.html
 Disallow: /archive/
 
-# Google Search Bots & AdSense
+# Google Search Bots & AdSense / Google Ads landing page checks
 User-agent: Googlebot
 Allow: /
 
@@ -967,7 +1002,7 @@ Allow: /
 
 Sitemap: ${BASE_URL}/sitemap.xml
 `;
-    fs.writeFileSync(robotsPath, robotsContent, 'utf-8');
+    fs.writeFileSync(path.join(ROOT_DIR, 'robots.txt'), robotsContent, 'utf-8');
     console.log(`[SSG] Updated robots.txt pointing to ${BASE_URL}/sitemap.xml.`);
 }
 
@@ -1049,19 +1084,36 @@ async function main() {
     // Update Catalog (projetos.html)
     updateProjetosCatalog(projects);
 
+    const cfg = loadSeoConfig();
+
+    // Individually indexable pages for articles and tools (+ RSS and 404)
+    const { posts, entries: postEntries } = buildPosts(articles, cfg);
+    buildFeed(posts, cfg);
+    const { entries: toolEntries, pathById: toolPaths } = buildToolPages(tools, cfg);
+    build404(cfg);
+
     // Update Homepage (index.html), Tools & Library with pre-rendered content
     updateHomepage(articles);
-    updateToolsPage(tools);
+    updateToolsPage(tools, toolPaths);
     updateLibraryPage(library);
 
     // Generate Sitemap & Update robots.txt
-    generateSitemap(projects, articles);
+    generateSitemap(projects, [...postEntries, ...toolEntries], cfg);
 
     // Fix remaining domains
     fixDomainReferences();
 
     // Verify & update static meta tags and schemas across all standalone tools and pages
     updateAllSeoTags();
+
+    // Search Console / Bing verification, RSS discovery, Google tag + consent, runtime script
+    injectGlobalHeadEverywhere(cfg);
+
+    // IndexNow ownership key file (Bing/Yandex instant indexing), only when configured
+    if (cfg.indexNowKey) {
+        fs.writeFileSync(path.join(ROOT_DIR, `${cfg.indexNowKey}.txt`), cfg.indexNowKey, 'utf-8');
+        console.log('[SSG] Wrote IndexNow key file.');
+    }
 
     console.log('==============================================');
     console.log(' SSG & SEO Build Complete!                    ');
